@@ -84,7 +84,7 @@ export class TodoService {
 
   // ====== 业务逻辑编排 ======
 
-  async listWithRepeat(filter: TodoFilterDto): Promise<TodoDto[]> {
+  async listMixRepeat(filter: TodoFilterDto): Promise<TodoDto[]> {
     const todoDtoList = await this.findByFilter(filter);
 
     const todoRepeatDtoList = await this.todoRepeatService.generateTodoByRepeat(filter);
@@ -92,7 +92,7 @@ export class TodoService {
     return [...todoDtoList, ...todoRepeatDtoList];
   }
 
-  async detailWithRepeat(id: string): Promise<TodoDto> {
+  async findMixRepeat(id: string): Promise<TodoDto> {
     try {
       const entity = await this.todoRepository.find(id);
       if (entity) {

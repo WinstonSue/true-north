@@ -26,10 +26,10 @@ export default class TodoController {
     return request<ResponsePageVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/page`, params);
   }
 
-  static async listWithRepeat(params: TodoVO.TodoFilterVo) {
-    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/list-with-repeat`, params);
+  static async listMixRepeat(params: TodoVO.TodoFilterVo) {
+    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/list-mixed-repeat`, params);
   }
-  
+
   static async doneWithRepeatBatch(body: TodoVO.TodoFilterVo) {
     return request<any>({ method: 'put' })(`/todo/done-with-repeat/batch`, body);
   }
@@ -43,10 +43,10 @@ export default class TodoController {
   }
 
   static async updateWithRepeat(id: string, body: TodoVO.UpdateTodoVo) {
-    return request<TodoVO.TodoVo>({ method: "put" })(`/todo/update-with-repeat/${id}`, body);
+    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update-with-repeat/${id}`, body);
   }
 
-  static async detailWithRepeat(id: string, body: any) {
-    return request<TodoVO.TodoVo>({ method: "get" })(`/todo/detail-with-repeat/${id}`, body);
+  static async findMixRepeat(id: string, body: any) {
+    return request<TodoVO.TodoVo>({ method: 'get' })(`/todo/find-mix-repeat/${id}`, body);
   }
 }

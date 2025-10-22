@@ -115,20 +115,19 @@ export class TodoController {
     return await this.todoService.restoreWithRepeat(id);
   }
 
-  @Get('/list-with-repeat', { description: '列表查询待办及其重复信息' })
-  async listWithRepeat(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
+  @Get('/list-mixed-repeat', { description: '列表查询待办及其重复信息' })
+  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
     const filter = new TodoFilterDto();
     if (query) filter.importListVo(query);
-    const list = await this.todoService.listWithRepeat(filter);
+    const list = await this.todoService.listMixRepeat(filter);
 
     return {
       list: list.map((todo) => todo.exportVo()),
     };
   }
 
-  @Get('/detail-with-repeat/:id', { description: '查询待办及其重复信息' })
-  async detailWithRepeat(@Param('id') id: string, @Query() query?: { source?: string }): Promise<TodoVO.TodoVo> {
-    console.log('=============query',query);
+  @Get('/find-mix-repeat/:id', { description: '查询待办及其重复信息' })
+  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string }): Promise<TodoVO.TodoVo> {
     const source = query?.source;
     if (source === TodoSource.IS_REPEAT) {
       return (await this.todoRepeatService.findWithRelations(id)).exportVo();

@@ -37,9 +37,9 @@ export class TodoController {
     return this.controller.page(query);
   }
 
-  @Get('/list-with-repeat')
-  async listWithRepeat(@Query() query?: TodoVO.TodoFilterVo) {
-    return this.controller.listWithRepeat(query);
+  @Get('/list-mixed-repeat')
+  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo) {
+    return this.controller.listMixRepeat(query);
   }
 
   @Put('/done-with-repeat/batch')
@@ -62,8 +62,8 @@ export class TodoController {
     return this.controller.updateWithRepeat(id, body);
   }
 
-  @Get("/detail-with-repeat/:id")
-  async detailWithRepeat(@Param("id") id: string, @Body() body: any) {
-    return this.controller.detailWithRepeat(id, body);
+  @Get("/find-mix-repeat/:id")
+  async findMixRepeat(@Param("id") id: string, @Body() body: any) {
+    return this.controller.findMixRepeat(id, body);
   }
 }
