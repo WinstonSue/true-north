@@ -116,6 +116,22 @@ export default function LifeToolkitApp() {
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
             <Router />
+            {process.env.NODE_ENV === 'development' && (
+              <div
+                style={{
+                  position: 'fixed',
+                  bottom: 0,
+                  right: 0,
+                  backgroundColor: 'rgba(255, 0, 0, 0.7)',
+                  color: 'white',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  zIndex: 9999,
+                }}
+              >
+                测试环境
+              </div>
+            )}
           </GlobalContext.Provider>
         </Provider>
       </ConfigProvider>

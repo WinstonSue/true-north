@@ -8,7 +8,6 @@ export default function TriggerStatusCheckbox(props: {
     status: TaskVo['status'];
     id: string;
   };
-  type: 'todo' | 'sub-todo';
   onChange: () => Promise<void>;
 }) {
   const { todo } = props;

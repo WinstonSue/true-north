@@ -1,16 +1,13 @@
-import { Checkbox } from '@arco-design/web-react';
+import { Checkbox, DatePicker, Radio } from '@arco-design/web-react';
 import styles from './style.module.less';
 import { TodoService } from '../../service';
 import { TodoVo } from '@life-toolkit/vo';
-import { TodoSource } from '@life-toolkit/enum';
+import { openModal } from '@/hooks/OpenModal';
+import dayjs from 'dayjs';
+import ConformDoneTime from './ConformDoneTime';
 
-export default function TriggerStatusCheckbox(props: {
-  todo: {
-    status: TodoVo['status'];
-    source: TodoVo['source'];
-    id: string;
-  };
-  type: 'todo' | 'sub-todo';
+export default function TriggerTodoStatus(props: {
+  todo: TodoVo;
   onChange: () => Promise<void>;
 }) {
   const { todo } = props;
@@ -29,6 +26,17 @@ export default function TriggerStatusCheckbox(props: {
         onChange={async () => {
           if (todo.status !== 'todo') {
             await restore();
+            return;
+          }
+          if (new Date(todo.planDate) < new Date()) {
+            openModal({
+              title: '确认完成时间',
+              content: (
+                <ConformDoneTime todo={todo} onChangeDoneTime={(time) => {}} />
+              ),
+              onCancel: async () => {},
+              onOk: async () => {},
+            });
             return;
           }
           await TodoService.doneBatchTodo({

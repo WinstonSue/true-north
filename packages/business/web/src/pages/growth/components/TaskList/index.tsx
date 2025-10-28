@@ -20,7 +20,6 @@ function TaskList(props: {
           TriggerCheckbox={
             <TriggerStatusCheckbox
               todo={task}
-              type="todo"
               onChange={props.refreshTaskList}
             />
           }

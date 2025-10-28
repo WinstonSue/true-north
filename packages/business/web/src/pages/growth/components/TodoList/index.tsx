@@ -1,7 +1,7 @@
 'use client';
 
 import { TodoVo, TodoWithoutRelationsVo } from '@life-toolkit/vo';
-import TriggerStatusCheckbox from './TriggerStatusCheckbox';
+import TriggerTodoStatus from './TriggerTodoStatus';
 import TodoItem from './TodoItem';
 
 function TodoList(props: {
@@ -18,9 +18,8 @@ function TodoList(props: {
           onClickTodo={props.onClickTodo}
           refreshTodoList={props.refreshTodoList}
           TriggerCheckbox={
-            <TriggerStatusCheckbox
+            <TriggerTodoStatus
               todo={todo}
-              type="todo"
               onChange={props.refreshTodoList}
             />
           }
