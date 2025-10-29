@@ -118,3 +118,4 @@ if (require.main === module) {
 }
 
 export { syncOne, syncAllOnce, watchAndSync };
+export { checkControllerStatus, checkPendingSyncFiles, getPendingSyncFiles } from './checker';
