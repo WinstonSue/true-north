@@ -7,12 +7,12 @@ import { todoService, todoRepeatService } from './todo.service';
 export class TodoController {
   private readonly controller = new _TodoController(todoService, todoRepeatService);
 
-  @Post('/create')
+  @Post('/create', { description: '创建待办' })
   async create(@Body() body: TodoVO.CreateTodoVo) {
     return this.controller.create(body);
   }
 
-  @Delete('/delete/:id')
+  @Delete('/delete/:id', { description: '删除待办' })
   async delete(@Param('id') id: string) {
     return this.controller.delete(id);
   }
@@ -62,8 +62,8 @@ export class TodoController {
     return this.controller.updateWithRepeat(id, body);
   }
 
-  @Get("/find-mix-repeat/:id")
-  async findMixRepeat(@Param("id") id: string, @Body() body: any) {
-    return this.controller.findMixRepeat(id, body);
+  @Get('/find-mix-repeat/:id', { description: '查询待办及其重复信息' })
+  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string }) {
+    return this.controller.findMixRepeat(id, query);
   }
 }

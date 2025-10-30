@@ -7,6 +7,9 @@
   "scripts": {
     "watch:controllers": "tsx ./src/watch-controllers/index.ts",
     "sync:controllers": "tsx ./src/watch-controllers/index.ts --once",
+    "sync:controllers:enhanced": "tsx ./src/watch-controllers/enhanced-sync-cli.ts sync",
+    "check:controllers": "tsx ./src/watch-controllers/enhanced-sync-cli.ts check",
+    "sync:controllers:content": "tsx ./src/watch-controllers/enhanced-sync-cli.ts sync --verbose",
     "watch:dto": "tsx ./src/watch-dto/index.ts",
     "sync:dto": "tsx ./src/watch-dto/index.ts --once && cd ../../ && npx prettier --write **/*.{js,jsx,ts,tsx,json,css,scss,less,html,md} --ignore-path .gitignore",
     "dev": "vite",
