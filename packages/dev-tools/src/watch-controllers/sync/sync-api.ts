@@ -105,7 +105,7 @@ function getDefaultQueryType(methodName: string, entityCap: string): string {
 
 // 基于实际方法信息生成 API 方法名
 function generateApiMethodName(sourceMethodName: string, entityName: string, verb: string, path: string): string {
-  // 直接沿用服务端 Controller 的方法名
+  // 直接沿用来源代码 Controller 的方法名
   return sourceMethodName;
 }
 

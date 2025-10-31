@@ -18,6 +18,7 @@ interface MethodChange {
   sourceMethod: {
     name: string
     signature: string
+    returnType: string
     parameters: Array<{
       name: string
       type: string
@@ -33,6 +34,7 @@ interface MethodChange {
   targetMethod?: {
     name: string
     signature: string
+    returnType: string
     parameters: Array<{
       name: string
       type: string
@@ -60,7 +62,6 @@ interface ControllerSyncStatus {
     signatureChanges: number
     parameterChanges: number
     decoratorChanges: number
-    bodyChanges: number
   }
 }
 
@@ -78,6 +79,17 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
   onSync
 }) => {
   if (!controller) return null
+  
+  // 确保 changes 数组和 summary 对象存在
+  const changes = controller.changes || []
+  const summary = controller.summary || {
+    totalMethods: 0,
+    changedMethods: 0,
+    addedMethods: 0,
+    signatureChanges: 0,
+    parameterChanges: 0,
+    decoratorChanges: 0
+  }
 
   const getChangeTypeIcon = (changeType: string) => {
     switch (changeType) {
@@ -181,13 +193,13 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
               <Text strong>装饰器对比:</Text>
               <div style={{ marginTop: 8 }}>
                 <div style={{ marginBottom: 8 }}>
-                  <Text type="success">服务端: </Text>
+                  <Text type="success">来源代码: </Text>
                   <Text code>
                     {sourceMethod.decorators.map(d => `@${d.name}(${d.args})`).join(' ')}
                   </Text>
                 </div>
                 <div>
-                  <Text type="warning">桌面端: </Text>
+                  <Text type="warning">目标代码: </Text>
                   <Text code>
                     {targetMethod?.decorators.map(d => `@${d.name}(${d.args})`).join(' ') || 'N/A'}
                   </Text>
@@ -202,7 +214,7 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
               <Text strong>参数对比:</Text>
               <div style={{ marginTop: 8 }}>
                 <div style={{ marginBottom: 8 }}>
-                  <Text type="success">服务端: </Text>
+                  <Text type="success">来源代码: </Text>
                   <Text code>
                     ({sourceMethod.parameters.map(p => 
                       p.decorator ? `@${p.decorator} ${p.name}: ${p.type}` : `${p.name}: ${p.type}`
@@ -210,7 +222,7 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
                   </Text>
                 </div>
                 <div>
-                  <Text type="warning">桌面端: </Text>
+                  <Text type="warning">目标代码: </Text>
                   <Text code>
                     ({targetMethod?.parameters.map(p => 
                       p.decorator ? `@${p.decorator} ${p.name}: ${p.type}` : `${p.name}: ${p.type}`
@@ -226,19 +238,61 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
             <Text strong>方法签名:</Text>
             <div style={{ marginTop: 8 }}>
               <div style={{ marginBottom: 8 }}>
-                <Text type="success">服务端: </Text>
+                <Text type="success">来源代码: </Text>
                 <Text code style={{ fontSize: '12px' }}>
                   {sourceMethod.signature}
                 </Text>
               </div>
               {targetMethod && (
                 <div>
-                  <Text type="warning">桌面端: </Text>
+                  <Text type="warning">目标代码: </Text>
                   <Text code style={{ fontSize: '12px' }}>
                     {targetMethod.signature}
                   </Text>
                 </div>
               )}
+            </div>
+            
+            {/* 返回类型对比 */}
+            <div style={{ marginTop: 16 }}>
+              <Text strong>返回类型:</Text>
+              <div style={{ marginTop: 8 }}>
+                <div style={{ marginBottom: 8 }}>
+                  <Text type="success">来源代码: </Text>
+                  <Text code>{sourceMethod.returnType || 'void'}</Text>
+                </div>
+                {targetMethod && (
+                  <div>
+                    <Text type="warning">目标代码: </Text>
+                    <Text code>{targetMethod.returnType || 'void'}</Text>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* 方法体对比 */}
+            <div style={{ marginTop: 16 }}>
+              <Text strong>方法体:</Text>
+              <div style={{ marginTop: 8 }}>
+                <div style={{ marginBottom: 8 }}>
+                  <Text type="success">来源代码: </Text>
+                  <div style={{ backgroundColor: '#f6ffed', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
+                    <Text code style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>
+                      {sourceMethod.body}
+                    </Text>
+                  </div>
+                </div>
+                {targetMethod && (
+                  <div>
+                    <Text type="warning">目标代码: </Text>
+                    <div style={{ backgroundColor: '#fff7e6', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
+                      <Text code style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>
+                        {targetMethod.body}
+                      </Text>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -289,12 +343,11 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
           <Text strong>同步摘要:</Text>
           <div style={{ marginTop: 8 }}>
             <Space wrap>
-              <Tag>总方法数: {controller.summary.totalMethods}</Tag>
-              <Tag color="orange">变更方法: {controller.summary.changedMethods}</Tag>
-              <Tag color="blue">新增方法: {controller.summary.addedMethods}</Tag>
-              <Tag color="purple">参数变更: {controller.summary.parameterChanges}</Tag>
-              <Tag color="gold">装饰器变更: {controller.summary.decoratorChanges}</Tag>
-              <Tag color="green">方法体变更: {controller.summary.bodyChanges}</Tag>
+              <Tag>总方法数: {summary.totalMethods}</Tag>
+              <Tag color="orange">变更方法: {summary.changedMethods}</Tag>
+              <Tag color="blue">新增方法: {summary.addedMethods}</Tag>
+              <Tag color="purple">参数变更: {summary.parameterChanges}</Tag>
+              <Tag color="gold">装饰器变更: {summary.decoratorChanges}</Tag>
             </Space>
           </div>
         </div>
@@ -304,7 +357,7 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
           <Text strong>方法变更详情:</Text>
           <Table
             columns={columns}
-            dataSource={controller.changes.filter(change => change.changeType !== 'no_change')}
+            dataSource={changes}
             rowKey="methodName"
             size="small"
             pagination={false}
@@ -316,7 +369,7 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({
           />
         </div>
 
-        {controller.changes.length === 0 && (
+        {changes.length === 0 && (
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <CheckCircleOutlined style={{ fontSize: 48, color: '#52c41a' }} />
             <div style={{ marginTop: 16 }}>

@@ -20,7 +20,7 @@ export async function findControllerPairs(projectRoot: string): Promise<Controll
     const sourceControllers = await findControllerFiles(sourceDir);
     const targetControllers = await findControllerFiles(targetDir);
     
-    // 匹配服务端和桌面端控制器
+    // 匹配来源代码和目标代码控制器
     for (const sourceController of sourceControllers) {
       const className = extractClassName(sourceController.path);
       const relativePath = getRelativePath(sourceController.path, sourceDir);

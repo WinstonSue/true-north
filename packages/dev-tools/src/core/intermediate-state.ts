@@ -36,6 +36,8 @@ export interface MethodDefinition {
   parameters: ParameterDefinition[];
   /** 返回类型 */
   returnType: string;
+  /** 方法体文本 */
+  bodyText: string;
   /** 方法体（仅用于比对，不用于生成） */
   bodyHash: string;
   /** 装饰器选项 */

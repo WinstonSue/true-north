@@ -1,6 +1,6 @@
 /**
  * 简化的代码生成器
- * 专注于桌面端控制器的代码同步
+ * 专注于目标代码控制器的代码同步
  */
 
 import { IntermediateState, SyncAction, MethodDefinition, ConstructorDefinition } from './intermediate-state';
@@ -26,7 +26,7 @@ export class CodeGenerator {
           updatedCode = this.removeMethod(updatedCode, action.methodName!, targetState);
           break;
         case 'update_imports':
-          // 桌面端保持现有导入，不做修改
+          // 目标代码保持现有导入，不做修改
           break;
       }
     }
@@ -112,7 +112,7 @@ export class CodeGenerator {
   }
 
   /**
-   * 生成桌面端方法代码
+   * 生成目标代码方法代码
    */
   private generateDesktopMethod(method: MethodDefinition): string {
     const lines: string[] = [];
@@ -143,7 +143,9 @@ export class CodeGenerator {
       return `${decoratorStr} ${name}${optionalStr}: ${type}`;
     }).join(', ');
 
-    lines.push(`  async ${method.name}(${params}) {`);
+    // 处理返回类型，避免双重 Promise
+    const returnType = method.returnType.startsWith('Promise<') ? method.returnType : `Promise<${method.returnType}>`;
+    lines.push(`  async ${method.name}(${params}): ${returnType} {`);
 
     // 生成方法体 - 简单的代理调用
     const callParams = method.parameters.map(p => p.name).join(', ');

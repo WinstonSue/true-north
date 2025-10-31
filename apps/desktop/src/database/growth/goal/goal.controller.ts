@@ -1,64 +1,63 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron-ipc-restful';
-import type { Goal as GoalVO } from '@life-toolkit/vo';
+import type { Goal as GoalVO , ResponseListVo, ResponsePageVo, ResponseTreeVo} from '@life-toolkit/vo';
 import { GoalController as _GoalController } from '@life-toolkit/business-server';
 import { goalService } from './goal.service';
 
 @Controller('/goal')
 export class GoalController {
-  private readonly controller = new _GoalController(goalService);
-
+      private readonly controller = new _GoalController(goalService);
   @Post('/create')
-  async create(@Body() body: GoalVO.CreateGoalVo) {
+  async create(@Body() body: GoalVO.CreateGoalVo): Promise<GoalVO.GoalVo> {
     return this.controller.create(body);
   }
 
   @Delete('/delete/:id')
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id') id: string): Promise<void> {
     return this.controller.delete(id);
   }
 
   @Put('/update/:id')
-  async update(@Param('id') id: string, @Body() body: GoalVO.UpdateGoalVo) {
-    return this.controller.update(id, body);
+  async update(@Param('id') id: string, @Body() updateGoalVo: GoalVO.UpdateGoalVo): Promise<GoalVO.GoalVo> {
+    return this.controller.update(id, updateGoalVo);
   }
 
   @Get('/find/:id')
-  async find(@Param('id') id: string) {
+  async find(@Param('id') id: string): Promise<GoalVO.GoalVo> {
     return this.controller.find(id);
   }
 
   @Get('/find-with-relations/:id')
-  async findWithRelations(@Param('id') id: string) {
+  async findWithRelations(@Param('id') id: string): Promise<GoalVO.GoalVo> {
     return this.controller.findWithRelations(id);
   }
 
   @Get('/find-by-filter')
-  async findByFilter(@Body() body: GoalVO.GoalFilterVo) {
-    return this.controller.findByFilter(body);
+  async findByFilter(@Query() goalListFiltersVo?: GoalVO.GoalFilterVo): Promise<ResponseListVo<GoalVO.GoalWithoutRelationsVo>> {
+    return this.controller.findByFilter(goalListFiltersVo);
   }
 
   @Get('/page')
-  async page(@Body() body: GoalVO.GoalPageFilterVo) {
-    return this.controller.page(body);
+  async page(@Query() goalPageFiltersVo?: GoalVO.GoalPageFilterVo): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
+    return this.controller.page(goalPageFiltersVo);
   }
 
   @Get('/get-tree')
-  async getTree(@Body() body: GoalVO.GoalFilterVo) {
-    return this.controller.getTree(body);
+  async getTree(@Query() goalListFiltersVo?: GoalVO.GoalFilterVo): Promise<ResponseTreeVo<GoalVO.GoalVo>> {
+    return this.controller.getTree(goalListFiltersVo);
   }
 
   @Get('/find-roots')
-  async findRoots() {
+  async findRoots(): Promise<GoalVO.GoalVo[]> {
     return this.controller.findRoots();
   }
 
   @Put('/abandon/:id')
-  async abandon(@Param('id') id: string) {
+  async abandon(@Param('id') id: string): Promise<boolean> {
     return this.controller.abandon(id);
   }
 
   @Put('/restore/:id')
-  async restore(@Param('id') id: string) {
+  async restore(@Param('id') id: string): Promise<boolean> {
     return this.controller.restore(id);
   }
 }

@@ -33,7 +33,7 @@ export function enhancedSyncController(
   sourceContent: string,
   className: string
 ): EnhancedSyncResult {
-  // 1. 获取服务端方法列表
+  // 1. 获取来源代码方法列表
   const sourceMethodDecorators = getServerMethodDecorators(sourceContent, className);
   const sourceMethods = Array.from(sourceMethodDecorators.keys());
   

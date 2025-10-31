@@ -72,7 +72,7 @@ const syncOperations: SyncOperation[] = [
   {
     id: 'sync-controllers',
     name: '同步 Controllers',
-    description: '同步业务控制器代码，生成 API 接口和桌面端控制器',
+    description: '同步业务控制器代码，生成 API 接口和目标代码控制器',
     command: 'sync:controllers',
     type: 'sync'
   },
@@ -172,7 +172,7 @@ const DevToolsPage: React.FC = () => {
   const checkControllerStatus = async () => {
     setStatusLoading(true)
     try {
-      const response = await fetch('/api/check/controllers')
+      const response = await fetch('/api/v2/check/controllers')
       const result = await response.json()
       
       if (result.success) {
@@ -209,12 +209,12 @@ const DevToolsPage: React.FC = () => {
 
   const syncController = async (className: string) => {
     try {
-      const response = await fetch('/api/sync/controller-methods', {
+      const response = await fetch('/api/v2/sync/controller', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ className }),
+        body: JSON.stringify({ name: className }),
       })
       
       const result = await response.json()
@@ -427,131 +427,6 @@ const DevToolsPage: React.FC = () => {
     )
   }
 
-  const renderStatusTable = () => {
-    if (!syncStatus) return null
-
-    const columns = [
-      {
-        title: 'Controller',
-        dataIndex: 'relativePath',
-        key: 'relativePath',
-        render: (path: string, record: ControllerStatus) => (
-          <div>
-            <div style={{ fontWeight: 'bold' }}>{record.className || '未知类'}</div>
-            <div style={{ fontSize: '12px', color: '#666' }}>{path}</div>
-          </div>
-        ),
-      },
-      {
-        title: 'Desktop',
-        key: 'desktop',
-        render: (record: ControllerStatus) => (
-          <Space direction="vertical" size="small">
-            <div>
-              {record.desktop.exists ? (
-                <Tag color="green" icon={<CheckCircleOutlined />}>存在</Tag>
-              ) : (
-                <Tag color="red" icon={<ExclamationCircleOutlined />}>不存在</Tag>
-              )}
-              {record.desktop.needsSync && (
-                <Tag color="orange">需要同步</Tag>
-              )}
-            </div>
-            {record.desktop.issues.length > 0 && (
-              <div style={{ fontSize: '12px', color: '#ff4d4f' }}>
-                {record.desktop.issues.join(', ')}
-              </div>
-            )}
-          </Space>
-        ),
-      },
-      {
-        title: 'API',
-        key: 'api',
-        render: (record: ControllerStatus) => (
-          <Space direction="vertical" size="small">
-            <div>
-              {record.api.exists ? (
-                <Tag color="green" icon={<CheckCircleOutlined />}>存在</Tag>
-              ) : (
-                <Tag color="red" icon={<ExclamationCircleOutlined />}>不存在</Tag>
-              )}
-              {record.api.needsSync && (
-                <Tag color="orange">需要同步</Tag>
-              )}
-            </div>
-            {record.api.issues.length > 0 && (
-              <div style={{ fontSize: '12px', color: '#ff4d4f' }}>
-                {record.api.issues.join(', ')}
-              </div>
-            )}
-          </Space>
-        ),
-      },
-      {
-        title: '服务类型',
-        dataIndex: 'serviceTypes',
-        key: 'serviceTypes',
-        render: (types: string[]) => (
-          <div>
-            {types.map(type => (
-              <Tag key={type} color="blue" style={{ marginBottom: 4 }}>
-                {type}
-              </Tag>
-            ))}
-          </div>
-        ),
-      },
-    ]
-
-    return (
-      <div style={{ marginTop: 24 }}>
-        <Card
-          title={
-            <Space>
-              <span>Controllers 状态检查</span>
-              <Button
-                size="small"
-                icon={<ReloadOutlined />}
-                loading={statusLoading}
-                onClick={checkControllerStatus}
-              >
-                刷新
-              </Button>
-            </Space>
-          }
-          extra={
-            <Space>
-              <span>总计: {syncStatus.totalControllers}</span>
-              <span>需要同步: {syncStatus.needsSyncCount}</span>
-              <span style={{ fontSize: '12px', color: '#666' }}>
-                最后检查: {new Date(syncStatus.lastChecked).toLocaleString()}
-              </span>
-            </Space>
-          }
-        >
-          {syncStatus.needsSyncCount > 0 && (
-            <Alert
-              message={`发现 ${syncStatus.needsSyncCount} 个控制器需要同步`}
-              type="warning"
-              showIcon
-              style={{ marginBottom: 16 }}
-            />
-          )}
-          
-          <Table
-            columns={columns}
-            dataSource={syncStatus.controllers}
-            rowKey="serverPath"
-            size="small"
-            pagination={{ pageSize: 10 }}
-            loading={statusLoading}
-          />
-        </Card>
-      </div>
-    )
-  }
-
   const tabItems = [
     {
       key: 'operations',
@@ -569,11 +444,6 @@ const DevToolsPage: React.FC = () => {
             .map(renderOperationCard)}
         </div>
       )
-    },
-    {
-      key: 'controller-status',
-      label: '控制器状态',
-      children: renderStatusTable()
     },
     {
       key: 'method-details',

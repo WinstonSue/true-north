@@ -1,6 +1,6 @@
 /**
  * 目标代码 AST 解析器
- * 专门解析桌面端控制器代码
+ * 专门解析目标代码控制器代码
  */
 
 import { BaseASTParser } from './base-parser';
@@ -8,7 +8,7 @@ import { IntermediateState } from '../intermediate-state';
 
 export class TargetASTParser extends BaseASTParser {
   /**
-   * 解析桌面端目标代码为中间态
+   * 解析目标代码目标代码为中间态
    */
   parseToIntermediateState(code: string, filePath: string): IntermediateState {
     const { sourceFile, classDeclaration } = this.parseToAST(code, filePath);

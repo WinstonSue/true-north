@@ -5,11 +5,10 @@ import { habitService } from './habit.service';
 
 @Controller('/habit')
 export class HabitController {
-  private readonly controller = new _HabitController(habitService);
-
+    private readonly controller = new _HabitController(habitService);
   @Post('/create')
-  async create(@Body() body: HabitVO.CreateHabitVo) {
-    return this.controller.create(body);
+  async create(@Body() createHabitVo: HabitVO.CreateHabitVo) {
+    return this.controller.create(createHabitVo);
   }
 
   @Delete('/delete/:id')
@@ -18,8 +17,8 @@ export class HabitController {
   }
 
   @Put('/update/:id')
-  async update(@Param('id') id: string, @Body() body: HabitVO.UpdateHabitVo) {
-    return this.controller.update(id, body);
+  async update(@Param('id') id: string, @Body() updateHabitVo: HabitVO.UpdateHabitVo) {
+    return this.controller.update(id, updateHabitVo);
   }
 
   @Get('/find/:id')
@@ -28,13 +27,13 @@ export class HabitController {
   }
 
   @Get('/find-by-filter')
-  async findByFilter(@Body() body: HabitVO.HabitFilterVo) {
-    return this.controller.findByFilter(body);
+  async findByFilter(@Query() habitListFiltersVo?: HabitVO.HabitFilterVo) {
+    return this.controller.findByFilter(habitListFiltersVo);
   }
 
   @Get('/page')
-  async page(@Body() body: HabitVO.HabitPageFilterVo) {
-    return this.controller.page(body);
+  async page(@Query() habitPageFiltersVo?: HabitVO.HabitPageFilterVo) {
+    return this.controller.page(habitPageFiltersVo);
   }
 
   @Put('/abandon/:id')

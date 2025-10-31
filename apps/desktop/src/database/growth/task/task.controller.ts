@@ -5,11 +5,10 @@ import { taskService } from './task.service';
 
 @Controller('/task')
 export class TaskController {
-  private readonly controller = new _TaskController(taskService);
-
+    private readonly controller = new _TaskController(taskService);
   @Post('/create')
-  async create(@Body() body: TaskVO.CreateTaskVo) {
-    return this.controller.create(body);
+  async create(@Body() createTaskVo: TaskVO.CreateTaskVo) {
+    return this.controller.create(createTaskVo);
   }
 
   @Delete('/delete/:id')
@@ -28,13 +27,13 @@ export class TaskController {
   }
 
   @Get('/find-by-filter')
-  async findByFilter(@Body() body: TaskVO.TaskFilterVo) {
-    return this.controller.findByFilter(body);
+  async findByFilter(@Query() taskListFiltersVo?: TaskVO.TaskFilterVo) {
+    return this.controller.findByFilter(taskListFiltersVo);
   }
 
   @Get('/page')
-  async page(@Body() body: TaskVO.TaskPageFilterVo) {
-    return this.controller.page(body);
+  async page(@Query() taskPageFiltersVo?: TaskVO.TaskPageFilterVo) {
+    return this.controller.page(taskPageFiltersVo);
   }
 
   @Get('/task-with-relations/:id')

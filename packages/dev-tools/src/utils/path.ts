@@ -2,14 +2,14 @@ import path from 'path';
 import { ROOT, SOURCE_BASE, TARGET_BASE } from '../constants';
 
 /**
- * 获取相对于服务端基础路径的相对路径
+ * 获取相对于来源代码基础路径的相对路径
  */
 export function getRelServerPath(absolutePath: string): string {
   return path.relative(SOURCE_BASE, absolutePath);
 }
 
 /**
- * 从服务端控制器路径获取桌面端控制器路径
+ * 从来源代码控制器路径获取目标代码控制器路径
  */
 export function getDesktopControllerPathFromServer(sourceControllerPath: string): string {
   const relativePath = getRelServerPath(sourceControllerPath);
@@ -17,7 +17,7 @@ export function getDesktopControllerPathFromServer(sourceControllerPath: string)
 }
 
 /**
- * 从服务端 DTO 路径获取 VO 路径
+ * 从来源代码 DTO 路径获取 VO 路径
  */
 export function getVoPathFromDto(dtoFilePath: string): string {
   // 从 packages/business/server/src/growth/goal/dto/goal-model.dto.ts
@@ -39,7 +39,7 @@ export function getVoPathFromDto(dtoFilePath: string): string {
 }
 
 /**
- * 从服务端控制器路径获取 API 控制器路径
+ * 从来源代码控制器路径获取 API 控制器路径
  */
 export function getApiControllerPathFromServer(sourceControllerPath: string): string {
   // 从 packages/business/server/src/growth/task/task.controller.ts

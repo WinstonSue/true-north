@@ -1,6 +1,6 @@
 /**
  * 源码 AST 解析器
- * 专门解析服务端控制器源码
+ * 专门解析来源代码控制器源码
  */
 
 import { BaseASTParser } from './base-parser';
@@ -8,9 +8,10 @@ import { IntermediateState } from '../intermediate-state';
 
 export class SourceASTParser extends BaseASTParser {
   /**
-   * 解析服务端源码为中间态
+   * 解析来源代码源码为中间态
    */
   parseToIntermediateState(code: string, filePath: string): IntermediateState {
+    console.log('SourceASTParser.parseToIntermediateState', code);
     const { sourceFile, classDeclaration } = this.parseToAST(code, filePath);
     
     const metadata = this.parseControllerMetadata(classDeclaration, filePath, 'source');

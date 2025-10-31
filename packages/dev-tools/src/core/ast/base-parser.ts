@@ -105,7 +105,8 @@ export abstract class BaseASTParser {
     const { path, decoratorOptions } = this.parseHttpDecorator(httpDecorator);
     const parameters = this.parseParameters(method.getParameters());
     const returnType = this.parseReturnType(method);
-    const bodyHash = this.generateBodyHash(method.getBodyText() || '');
+    const bodyText = method.getBodyText() || '';
+    const bodyHash = this.generateBodyHash(bodyText);
     const sourceLocation = this.getSourceLocation(method);
 
     return {
@@ -114,6 +115,7 @@ export abstract class BaseASTParser {
       path: path || `/${name}`,
       parameters,
       returnType,
+      bodyText,
       bodyHash,
       decoratorOptions,
       sourceLocation,

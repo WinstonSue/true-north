@@ -20,7 +20,7 @@ export function genMethodWrapper(
   decoratorInfo: MethodDecoratorInfo,
   options: { includeDescription?: boolean } = {}
 ): string {
-  const { name, verb, path: p, paramStyle, description, paramTypes, returnType } = decoratorInfo;
+  const { name, verb, path: p, description, fullSignature } = decoratorInfo;
   const { includeDescription = false } = options;
   const indent = '  ';
   const lines: string[] = [];
@@ -32,33 +32,72 @@ export function genMethodWrapper(
     lines.push(`${indent}@${verb}("${p}")`);
   }
 
-  switch (paramStyle) {
-    case 'none':
-      lines.push(`${indent}async ${name}() {`);
-      lines.push(`${indent}  return this.controller.${name}();`);
+  // 从 fullSignature 中提取方法签名（去掉装饰器部分）
+  if (fullSignature) {
+    // fullSignature 包含完整的方法定义，需要提取方法签名部分
+    // 使用多行模式的正则表达式来匹配方法签名
+    const methodMatch = fullSignature.match(/async\s+(\w+)\s*\(([^)]*(?:\([^)]*\)[^)]*)*)\)\s*:\s*([^{]+)/s);
+    if (methodMatch) {
+      const [, methodName, params, returnType] = methodMatch;
+      
+      // 提取参数名（去掉装饰器和类型）
+      const paramNames: string[] = [];
+      if (params.trim()) {
+        // 更精确地解析参数，处理嵌套的泛型类型和装饰器
+        const paramList = params.split(',').map(p => p.trim());
+        paramList.forEach(param => {
+          // 匹配参数名：@Decorator() paramName: Type 或 paramName: Type
+          // 支持复杂的类型如 ResponseListVo<TodoVO.TodoWithoutRelationsVo>
+          const nameMatch = param.match(/(?:@\w+(?:\([^)]*\))?\s+)?(\w+)(?:\?)?:/);
+          if (nameMatch) {
+            paramNames.push(nameMatch[1]);
+          }
+        });
+      }
+
+      // 重新构建方法签名
+      const methodSignature = `async ${methodName}(${params}): ${returnType.trim()}`;
+      
+      lines.push(`${indent}${methodSignature} {`);
+      lines.push(`${indent}  return this.controller.${name}(${paramNames.join(', ')});`);
       lines.push(`${indent}}`);
-      break;
-    case 'id':
-      lines.push(`${indent}async ${name}(@Param("id") id: ${paramTypes?.idType || 'string'}) {`);
-      lines.push(`${indent}  return this.controller.${name}(id);`);
-      lines.push(`${indent}}`);
-      break;
-    case 'id+body':
-      lines.push(`${indent}async ${name}(@Param("id") id: string, @Body() body: ${paramTypes?.bodyType || 'any'}) {`);
-      lines.push(`${indent}  return this.controller.${name}(id, body);`);
-      lines.push(`${indent}}`);
-      break;
-    case 'query':
-      lines.push(`${indent}async ${name}(@Query() query?: ${paramTypes?.queryType || 'any'}) {`);
-      lines.push(`${indent}  return this.controller.${name}(query);`);
-      lines.push(`${indent}}`);
-      break;
-    case 'body':
-      lines.push(`${indent}async ${name}(@Body() body: ${paramTypes?.bodyType || 'any'}) {`);
-      lines.push(`${indent}  return this.controller.${name}(body);`);
-      lines.push(`${indent}}`);
-      break;
+    } else {
+      // 尝试匹配没有返回类型的方法
+      const simpleMethodMatch = fullSignature.match(/async\s+(\w+)\s*\(([^)]*(?:\([^)]*\)[^)]*)*)\)/s);
+      if (simpleMethodMatch) {
+        const [, methodName, params] = simpleMethodMatch;
+        
+        // 提取参数名
+        const paramNames: string[] = [];
+        if (params.trim()) {
+          const paramList = params.split(',').map(p => p.trim());
+          paramList.forEach(param => {
+            const nameMatch = param.match(/(?:@\w+(?:\([^)]*\))?\s+)?(\w+)(?:\?)?:/);
+            if (nameMatch) {
+              paramNames.push(nameMatch[1]);
+            }
+          });
+        }
+
+        const methodSignature = `async ${methodName}(${params})`;
+        
+        lines.push(`${indent}${methodSignature} {`);
+        lines.push(`${indent}  return this.controller.${name}(${paramNames.join(', ')});`);
+        lines.push(`${indent}}`);
+      } else {
+        // 回退到原来的逻辑
+        lines.push(`${indent}async ${name}() {`);
+        lines.push(`${indent}  return this.controller.${name}();`);
+        lines.push(`${indent}}`);
+      }
+    }
+  } else {
+    // 回退到原来的逻辑
+    lines.push(`${indent}async ${name}() {`);
+    lines.push(`${indent}  return this.controller.${name}();`);
+    lines.push(`${indent}}`);
   }
+  
   return lines.join('\n');
 }
 

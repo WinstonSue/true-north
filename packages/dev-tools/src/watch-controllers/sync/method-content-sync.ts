@@ -428,7 +428,7 @@ function addNewMethod(
 }
 
 /**
- * 根据服务端方法信息生成桌面端方法内容
+ * 根据来源代码方法信息生成目标代码方法内容
  */
 function generateDesktopMethodContent(sourceMethod: MethodContentInfo): string {
   // 转换装饰器
@@ -444,7 +444,7 @@ function generateDesktopMethodContent(sourceMethod: MethodContentInfo): string {
 }
 
 /**
- * 转换服务端方法签名为桌面端签名
+ * 转换来源代码方法签名为目标代码签名
  */
 function convertServerSignatureToDesktop(signature: string, parameters: ParameterInfo[]): string {
   // 提取方法名
@@ -453,7 +453,7 @@ function convertServerSignatureToDesktop(signature: string, parameters: Paramete
   
   const methodName = methodNameMatch[1];
   
-  // 构建桌面端参数
+  // 构建目标代码参数
   const targetParams = parameters.map(param => {
     if (param.decorator) {
       // 对于装饰器参数，需要正确处理参数名映射
@@ -473,7 +473,7 @@ function convertServerSignatureToDesktop(signature: string, parameters: Paramete
 }
 
 /**
- * 生成桌面端方法体
+ * 生成目标代码方法体
  */
 function generateDesktopMethodBody(sourceMethod: MethodContentInfo): string {
   const methodName = sourceMethod.name;

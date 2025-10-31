@@ -3,8 +3,8 @@
  * 支持将 TypeScript 代码解析为中间态
  * 
  * @deprecated 请使用新的 AST 解析器架构：
- * - SourceASTParser: 解析服务端源码
- * - TargetASTParser: 解析桌面端目标代码
+ * - SourceASTParser: 解析来源代码源码
+ * - TargetASTParser: 解析目标代码目标代码
  */
 
 import { IntermediateState } from './intermediate-state';
