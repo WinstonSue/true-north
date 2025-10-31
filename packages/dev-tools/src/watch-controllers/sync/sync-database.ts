@@ -63,15 +63,15 @@ export function genMethodWrapper(
 }
 
 export function removeExtraGeneratedMethods(
-  desktopContent: string,
+  targetContent: string,
   className: string,
-  serverMethodSet: Set<string>
+  sourceMethodSet: Set<string>
 ): string {
-  const range = getClassBodyRange(desktopContent, className);
-  if (!range) return desktopContent;
-  let body = desktopContent.slice(range.start, range.end);
-  const head = desktopContent.slice(0, range.start);
-  const tail = desktopContent.slice(range.end + 1);
+  const range = getClassBodyRange(targetContent, className);
+  if (!range) return targetContent;
+  let body = targetContent.slice(range.start, range.end);
+  const head = targetContent.slice(0, range.start);
+  const tail = targetContent.slice(range.end);
 
   const nameSet = collectAllMethodNames(body);
   try {
@@ -80,7 +80,7 @@ export function removeExtraGeneratedMethods(
 
   for (const name of nameSet) {
     if (name === 'constructor') continue;
-    if (!serverMethodSet.has(name)) {
+    if (!sourceMethodSet.has(name)) {
       const occ = getMethodOccurrences(body, name);
       if (occ.length) {
         try {
@@ -97,7 +97,7 @@ export function removeExtraGeneratedMethods(
 
   for (const name of nameSet) {
     if (name === 'constructor') continue;
-    if (!serverMethodSet.has(name)) continue;
+    if (!sourceMethodSet.has(name)) continue;
     const occ = getMethodOccurrences(body, name);
     if (occ.length > 1) {
       try {
@@ -112,22 +112,22 @@ export function removeExtraGeneratedMethods(
     }
   }
 
-  return head + body + '}' + tail;
+  return head + body + tail;
 }
 
-export function syncMissingMethods(desktopContent: string, className: string, serverContent: string): string {
+export function syncMissingMethods(targetContent: string, className: string, sourceContent: string): string {
   // 使用AST解析器获取server方法装饰器信息
-  const serverMethodDecorators = getServerMethodDecorators(serverContent, className);
-  const serverMethods = Array.from(serverMethodDecorators.keys());
+  const sourceMethodDecorators = getServerMethodDecorators(sourceContent, className);
+  const sourceMethods = Array.from(sourceMethodDecorators.keys());
   try {
-    log('Server methods parsed for', className, serverMethods);
+    log('Server methods parsed for', className, sourceMethods);
   } catch {}
 
   // 使用AST解析器进行精确的方法级比对和清理
-  let next = removeExtraGeneratedMethodsAST(desktopContent, className, new Set(serverMethods));
+  let next = removeExtraGeneratedMethodsAST(targetContent, className, new Set(sourceMethods));
 
   const existing = parseDesktopMethodNames(next, className);
-  const missing = serverMethods.filter((n) => !existing.has(n));
+  const missing = sourceMethods.filter((n) => !existing.has(n));
   if (missing.length === 0) return next;
 
   const range = getClassBodyRange(next, className);
@@ -137,7 +137,7 @@ export function syncMissingMethods(desktopContent: string, className: string, se
 
   const newMethods = missing
     .map((name) => {
-      const decoratorInfo = serverMethodDecorators.get(name);
+      const decoratorInfo = sourceMethodDecorators.get(name);
       if (!decoratorInfo) return null;
       return genMethodWrapper(decoratorInfo);
     })
@@ -151,15 +151,15 @@ export function syncMissingMethods(desktopContent: string, className: string, se
 
 // 使用AST解析器的方法清理函数
 function removeExtraGeneratedMethodsAST(
-  desktopContent: string,
+  targetContent: string,
   className: string,
-  serverMethodSet: Set<string>
+  sourceMethodSet: Set<string>
 ): string {
-  const range = getClassBodyRange(desktopContent, className);
-  if (!range) return desktopContent;
-  let body = desktopContent.slice(range.start, range.end);
-  const head = desktopContent.slice(0, range.start);
-  const tail = desktopContent.slice(range.end + 1);
+  const range = getClassBodyRange(targetContent, className);
+  if (!range) return targetContent;
+  let body = targetContent.slice(range.start, range.end);
+  const head = targetContent.slice(0, range.start);
+  const tail = targetContent.slice(range.end);
 
   // 使用传统方法获取desktop文件中的所有方法名（因为AST解析器主要针对server文件）
   const nameSet = collectAllMethodNames(body);
@@ -170,7 +170,7 @@ function removeExtraGeneratedMethodsAST(
   // 删除不在server中的方法
   for (const name of nameSet) {
     if (name === 'constructor') continue;
-    if (!serverMethodSet.has(name)) {
+    if (!sourceMethodSet.has(name)) {
       const occ = getMethodOccurrences(body, name);
       if (occ.length) {
         try {
@@ -188,7 +188,7 @@ function removeExtraGeneratedMethodsAST(
   // 删除重复方法
   for (const name of nameSet) {
     if (name === 'constructor') continue;
-    if (!serverMethodSet.has(name)) continue;
+    if (!sourceMethodSet.has(name)) continue;
     const occ = getMethodOccurrences(body, name);
     if (occ.length > 1) {
       try {
@@ -203,5 +203,5 @@ function removeExtraGeneratedMethodsAST(
     }
   }
 
-  return head + body + '}' + tail;
+  return head + body + tail;
 }

@@ -7,19 +7,19 @@ import { todoService, todoRepeatService } from './todo.service';
 export class TodoController {
   private readonly controller = new _TodoController(todoService, todoRepeatService);
 
-  @Post('/create', { description: '创建待办' })
-  async create(@Body() body: TodoVO.CreateTodoVo) {
-    return this.controller.create(body);
+  @Post('/create')
+  async create(@Body() createTodoVo: TodoVO.CreateTodoVo) {
+    return this.controller.create(createTodoVo);
   }
 
-  @Delete('/delete/:id', { description: '删除待办' })
+  @Delete('/delete/:id')
   async delete(@Param('id') id: string) {
     return this.controller.delete(id);
   }
 
   @Put('/update/:id')
-  async update(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo) {
-    return this.controller.update(id, body);
+  async update(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo) {
+    return this.controller.update(id, updateVo);
   }
 
   @Get('/find/:id')
@@ -37,14 +37,14 @@ export class TodoController {
     return this.controller.page(query);
   }
 
-  @Get('/list-mixed-repeat')
-  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo) {
-    return this.controller.listMixRepeat(query);
+  @Put('/update-with-repeat/:id')
+  async updateWithRepeat(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo) {
+    return this.controller.updateWithRepeat(id, updateVo);
   }
 
   @Put('/done-with-repeat/batch')
-  async doneWithRepeatBatch(@Body() body: TodoVO.TodoFilterVo) {
-    return this.controller.doneWithRepeatBatch(body);
+  async doneWithRepeatBatch(@Query() query: TodoVO.TodoFilterVo, @Body() body: any) {
+    return this.controller.doneWithRepeatBatch(query, body);
   }
 
   @Put('/abandon-with-repeat/:id')
@@ -57,12 +57,12 @@ export class TodoController {
     return this.controller.restoreWithRepeat(id);
   }
 
-  @Put('/update-with-repeat/:id')
-  async updateWithRepeat(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo) {
-    return this.controller.updateWithRepeat(id, body);
+  @Get('/list-mixed-repeat')
+  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo) {
+    return this.controller.listMixRepeat(query);
   }
 
-  @Get('/find-mix-repeat/:id', { description: '查询待办及其重复信息' })
+  @Get('/find-mix-repeat/:id')
   async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string }) {
     return this.controller.findMixRepeat(id, query);
   }

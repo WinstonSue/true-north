@@ -29,33 +29,33 @@ export interface EnhancedSyncResult {
  * 增强的控制器同步 - 支持方法内容级别的比对和同步
  */
 export function enhancedSyncController(
-  desktopContent: string,
-  serverContent: string,
+  targetContent: string,
+  sourceContent: string,
   className: string
 ): EnhancedSyncResult {
   // 1. 获取服务端方法列表
-  const serverMethodDecorators = getServerMethodDecorators(serverContent, className);
-  const serverMethods = Array.from(serverMethodDecorators.keys());
+  const sourceMethodDecorators = getServerMethodDecorators(sourceContent, className);
+  const sourceMethods = Array.from(sourceMethodDecorators.keys());
   
   // 2. 先执行传统的方法级同步（添加缺失的方法）
-  let syncedContent = syncMissingMethods(desktopContent, className, serverContent);
+  let syncedContent = syncMissingMethods(targetContent, className, sourceContent);
   
   // 3. 检测方法内容级别的变更
   const methodChanges = detectMethodContentChanges(
-    serverContent,
+    sourceContent,
     syncedContent,
     className,
-    serverMethods
+    sourceMethods
   );
   
   // 4. 同步方法内容变更
   const finalContent = syncMethodContentChanges(syncedContent, className, methodChanges);
   
   // 5. 生成同步摘要
-  const summary = generateSyncSummary(methodChanges, serverMethods.length);
+  const summary = generateSyncSummary(methodChanges, sourceMethods.length);
   
   return {
-    hasChanges: methodChanges.length > 0 || syncedContent !== desktopContent,
+    hasChanges: methodChanges.length > 0 || syncedContent !== targetContent,
     methodChanges,
     newContent: finalContent,
     summary
@@ -95,7 +95,7 @@ function generateSyncSummary(changes: MethodChange[], totalMethods: number) {
           break;
       }
       
-      if (!change.desktopMethod) {
+      if (!change.targetMethod) {
         summary.addedMethods++;
       }
     }
@@ -108,18 +108,18 @@ function generateSyncSummary(changes: MethodChange[], totalMethods: number) {
  * 检查控制器是否需要同步
  */
 export function checkControllerNeedsSync(
-  desktopContent: string,
-  serverContent: string,
+  targetContent: string,
+  sourceContent: string,
   className: string
 ): boolean {
-  const serverMethodDecorators = getServerMethodDecorators(serverContent, className);
-  const serverMethods = Array.from(serverMethodDecorators.keys());
+  const sourceMethodDecorators = getServerMethodDecorators(sourceContent, className);
+  const sourceMethods = Array.from(sourceMethodDecorators.keys());
   
   const methodChanges = detectMethodContentChanges(
-    serverContent,
-    desktopContent,
+    sourceContent,
+    targetContent,
     className,
-    serverMethods
+    sourceMethods
   );
   
   return methodChanges.some(change => change.changeType !== MethodChangeType.NO_CHANGE);
@@ -141,24 +141,24 @@ export function getDetailedChangeReport(changes: MethodChange[]): string {
     report.push(`  ${changeIcon} ${change.methodName}: ${change.details}`);
     
     if (change.changeType === MethodChangeType.PARAMETERS_CHANGED) {
-      const serverParams = change.serverMethod.parameters.map(p => 
+      const sourceParams = change.sourceMethod.parameters.map(p => 
         p.decorator ? `@${p.decorator} ${p.name}: ${p.type}` : `${p.name}: ${p.type}`
       ).join(', ');
       
-      const desktopParams = change.desktopMethod?.parameters.map(p => 
+      const targetParams = change.targetMethod?.parameters.map(p => 
         p.decorator ? `@${p.decorator} ${p.name}: ${p.type}` : `${p.name}: ${p.type}`
       ).join(', ') || 'N/A';
       
-      report.push(`    Server:  (${serverParams})`);
-      report.push(`    Desktop: (${desktopParams})`);
+      report.push(`    Server:  (${sourceParams})`);
+      report.push(`    Desktop: (${targetParams})`);
     }
     
     if (change.changeType === MethodChangeType.DECORATORS_CHANGED) {
-      const serverDecorators = change.serverMethod.decorators.map(d => `@${d.name}(${d.args})`).join(' ');
-      const desktopDecorators = change.desktopMethod?.decorators.map(d => `@${d.name}(${d.args})`).join(' ') || 'N/A';
+      const serverDecorators = change.sourceMethod.decorators.map(d => `@${d.name}(${d.args})`).join(' ');
+      const targetDecorators = change.targetMethod?.decorators.map(d => `@${d.name}(${d.args})`).join(' ') || 'N/A';
       
       report.push(`    Server:  ${serverDecorators}`);
-      report.push(`    Desktop: ${desktopDecorators}`);
+      report.push(`    Desktop: ${targetDecorators}`);
     }
   }
   
@@ -197,18 +197,18 @@ export interface ControllerSyncStatus {
 export function batchCheckControllerSync(
   controllers: Array<{
     className: string;
-    desktopPath: string;
-    serverPath: string;
-    desktopContent: string;
-    serverContent: string;
+    targetPath: string;
+    sourcePath: string;
+    targetContent: string;
+    sourceContent: string;
   }>
 ): ControllerSyncStatus[] {
   return controllers.map(controller => {
     const changes = detectMethodContentChanges(
-      controller.serverContent,
-      controller.desktopContent,
+      controller.sourceContent,
+      controller.targetContent,
       controller.className,
-      Array.from(getServerMethodDecorators(controller.serverContent, controller.className).keys())
+      Array.from(getServerMethodDecorators(controller.sourceContent, controller.className).keys())
     );
     
     const needsSync = changes.some(change => change.changeType !== MethodChangeType.NO_CHANGE);
@@ -216,7 +216,7 @@ export function batchCheckControllerSync(
     
     return {
       className: controller.className,
-      filePath: controller.desktopPath,
+      filePath: controller.targetPath,
       needsSync,
       changes,
       summary

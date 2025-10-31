@@ -38,8 +38,8 @@ export enum MethodChangeType {
 export interface MethodChange {
   methodName: string;
   changeType: MethodChangeType;
-  serverMethod: MethodContentInfo;
-  desktopMethod?: MethodContentInfo;
+  sourceMethod: MethodContentInfo;
+  targetMethod?: MethodContentInfo;
   details: string;
 }
 
@@ -236,25 +236,25 @@ function generateMethodHash(signature: string, parameters: ParameterInfo[], deco
  * 比对两个方法的内容差异
  */
 export function compareMethodContent(
-  serverMethod: MethodContentInfo,
-  desktopMethod: MethodContentInfo | null
+  sourceMethod: MethodContentInfo,
+  targetMethod: MethodContentInfo | null
 ): MethodChange {
-  if (!desktopMethod) {
+  if (!targetMethod) {
     return {
-      methodName: serverMethod.name,
+      methodName: sourceMethod.name,
       changeType: MethodChangeType.BODY_CHANGED,
-      serverMethod,
+      sourceMethod,
       details: 'Method not found in desktop controller'
     };
   }
   
   // 快速哈希比对
-  if (serverMethod.hash === desktopMethod.hash) {
+  if (sourceMethod.hash === targetMethod.hash) {
     return {
-      methodName: serverMethod.name,
+      methodName: sourceMethod.name,
       changeType: MethodChangeType.NO_CHANGE,
-      serverMethod,
-      desktopMethod,
+      sourceMethod,
+      targetMethod,
       details: 'No changes detected'
     };
   }
@@ -263,17 +263,17 @@ export function compareMethodContent(
   const changes: string[] = [];
   
   // 比对装饰器
-  if (!compareDecorators(serverMethod.decorators, desktopMethod.decorators)) {
+  if (!compareDecorators(sourceMethod.decorators, targetMethod.decorators)) {
     changes.push('decorators changed');
   }
   
   // 比对参数
-  if (!compareParameters(serverMethod.parameters, desktopMethod.parameters)) {
+  if (!compareParameters(sourceMethod.parameters, targetMethod.parameters)) {
     changes.push('parameters changed');
   }
   
   // 比对方法体
-  if (serverMethod.body !== desktopMethod.body) {
+  if (sourceMethod.body !== targetMethod.body) {
     changes.push('method body changed');
   }
   
@@ -285,10 +285,10 @@ export function compareMethodContent(
   }
   
   return {
-    methodName: serverMethod.name,
+    methodName: sourceMethod.name,
     changeType,
-    serverMethod,
-    desktopMethod,
+    sourceMethod,
+    targetMethod,
     details: changes.join(', ')
   };
 }
@@ -336,19 +336,19 @@ function compareParameters(server: ParameterInfo[], desktop: ParameterInfo[]): b
  * 检测所有方法的内容变更
  */
 export function detectMethodContentChanges(
-  serverContent: string,
-  desktopContent: string,
+  sourceContent: string,
+  targetContent: string,
   className: string,
-  serverMethods: string[]
+  sourceMethods: string[]
 ): MethodChange[] {
   const changes: MethodChange[] = [];
   
-  for (const methodName of serverMethods) {
-    const serverMethod = parseMethodContent(serverContent, className, methodName);
-    if (!serverMethod) continue;
+  for (const methodName of sourceMethods) {
+    const sourceMethod = parseMethodContent(sourceContent, className, methodName);
+    if (!sourceMethod) continue;
     
-    const desktopMethod = parseMethodContent(desktopContent, className, methodName);
-    const change = compareMethodContent(serverMethod, desktopMethod);
+    const targetMethod = parseMethodContent(targetContent, className, methodName);
+    const change = compareMethodContent(sourceMethod, targetMethod);
     
     if (change.changeType !== MethodChangeType.NO_CHANGE) {
       changes.push(change);
@@ -362,11 +362,11 @@ export function detectMethodContentChanges(
  * 同步方法内容变更
  */
 export function syncMethodContentChanges(
-  desktopContent: string,
+  targetContent: string,
   className: string,
   changes: MethodChange[]
 ): string {
-  let result = desktopContent;
+  let result = targetContent;
   
   // 按方法名分组，处理每个需要更新的方法
   for (const change of changes) {
@@ -382,27 +382,27 @@ export function syncMethodContentChanges(
  * 同步单个方法的内容
  */
 function syncSingleMethodContent(
-  desktopContent: string,
+  targetContent: string,
   className: string,
   change: MethodChange
 ): string {
-  const range = getClassBodyRange(desktopContent, className);
-  if (!range) return desktopContent;
+  const range = getClassBodyRange(targetContent, className);
+  if (!range) return targetContent;
   
-  const body = desktopContent.slice(range.start, range.end);
+  const body = targetContent.slice(range.start, range.end);
   const occurrences = getMethodOccurrences(body, change.methodName);
   
   if (occurrences.length === 0) {
     // 方法不存在，添加新方法
-    return addNewMethod(desktopContent, className, change.serverMethod);
+    return addNewMethod(targetContent, className, change.sourceMethod);
   }
   
   // 替换现有方法
   const methodOccurrence = occurrences[0];
-  const before = desktopContent.slice(0, range.start + methodOccurrence.start);
-  const after = desktopContent.slice(range.start + methodOccurrence.end);
+  const before = targetContent.slice(0, range.start + methodOccurrence.start);
+  const after = targetContent.slice(range.start + methodOccurrence.end);
   
-  const newMethodContent = generateDesktopMethodContent(change.serverMethod);
+  const newMethodContent = generateDesktopMethodContent(change.sourceMethod);
   
   return before + newMethodContent + after;
 }
@@ -411,17 +411,17 @@ function syncSingleMethodContent(
  * 添加新方法
  */
 function addNewMethod(
-  desktopContent: string,
+  targetContent: string,
   className: string,
-  serverMethod: MethodContentInfo
+  sourceMethod: MethodContentInfo
 ): string {
-  const range = getClassBodyRange(desktopContent, className);
-  if (!range) return desktopContent;
+  const range = getClassBodyRange(targetContent, className);
+  if (!range) return targetContent;
   
-  const before = desktopContent.slice(0, range.end);
-  const after = desktopContent.slice(range.end);
+  const before = targetContent.slice(0, range.end);
+  const after = targetContent.slice(range.end);
   
-  const newMethodContent = generateDesktopMethodContent(serverMethod);
+  const newMethodContent = generateDesktopMethodContent(sourceMethod);
   const insertion = '\n' + newMethodContent + '\n';
   
   return before + insertion + '}' + after;
@@ -430,15 +430,15 @@ function addNewMethod(
 /**
  * 根据服务端方法信息生成桌面端方法内容
  */
-function generateDesktopMethodContent(serverMethod: MethodContentInfo): string {
+function generateDesktopMethodContent(sourceMethod: MethodContentInfo): string {
   // 转换装饰器
-  const decorators = serverMethod.decorators.map(d => `  @${d.name}(${d.args})`).join('\n');
+  const decorators = sourceMethod.decorators.map(d => `  @${d.name}(${d.args})`).join('\n');
   
   // 转换方法签名
-  const desktopSignature = convertServerSignatureToDesktop(serverMethod.signature, serverMethod.parameters);
+  const desktopSignature = convertServerSignatureToDesktop(sourceMethod.signature, sourceMethod.parameters);
   
   // 生成方法体
-  const methodBody = generateDesktopMethodBody(serverMethod);
+  const methodBody = generateDesktopMethodBody(sourceMethod);
   
   return `${decorators}\n  ${desktopSignature} {\n${methodBody}\n  }`;
 }
@@ -454,7 +454,7 @@ function convertServerSignatureToDesktop(signature: string, parameters: Paramete
   const methodName = methodNameMatch[1];
   
   // 构建桌面端参数
-  const desktopParams = parameters.map(param => {
+  const targetParams = parameters.map(param => {
     if (param.decorator) {
       // 对于装饰器参数，需要正确处理参数名映射
       let decoratorArg = param.decoratorArgs || `"${param.name}"`;
@@ -469,15 +469,15 @@ function convertServerSignatureToDesktop(signature: string, parameters: Paramete
     return `${param.name}: ${param.type}`;
   }).join(', ');
   
-  return `async ${methodName}(${desktopParams})`;
+  return `async ${methodName}(${targetParams})`;
 }
 
 /**
  * 生成桌面端方法体
  */
-function generateDesktopMethodBody(serverMethod: MethodContentInfo): string {
-  const methodName = serverMethod.name;
-  const parameters = serverMethod.parameters;
+function generateDesktopMethodBody(sourceMethod: MethodContentInfo): string {
+  const methodName = sourceMethod.name;
+  const parameters = sourceMethod.parameters;
   
   // 构建调用参数
   const callArgs: string[] = [];

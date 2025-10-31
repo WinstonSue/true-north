@@ -18,7 +18,7 @@ import { parseDtoClasses } from './parsers/dto-parser';
 import { generateVoContent } from './core/vo-generator';
 // 使用本地定义的函数，避免导入冲突
 
-const SERVER_DTO_BASE = path.join(ROOT, 'packages/business/server/src');
+const SOURCE_DTO_BASE = path.join(ROOT, 'packages/business/server/src');
 const VO_BASE = path.join(ROOT, 'packages/business/vo');
 
 const logLocal = createLogger('dto-vo');
@@ -100,7 +100,7 @@ function updateVoIndex(voFilePath: string, exportNames: string[]) {
 }
 
 function syncOne(dtoFilePath: string) {
-  const rel = path.relative(SERVER_DTO_BASE, dtoFilePath);
+  const rel = path.relative(SOURCE_DTO_BASE, dtoFilePath);
   if (!rel.includes('/dto/') || !rel.endsWith('.dto.ts')) return;
 
   const dtoContent = readFileSafe(dtoFilePath);
@@ -150,7 +150,7 @@ function syncOne(dtoFilePath: string) {
 }
 
 function syncAllOnce() {
-  const dtoPaths = fg.sync(path.join(SERVER_DTO_BASE, '**/dto/*.dto.ts').replace(/\\/g, '/'));
+  const dtoPaths = fg.sync(path.join(SOURCE_DTO_BASE, '**/dto/*.dto.ts').replace(/\\/g, '/'));
   logLocal(`Found ${dtoPaths.length} DTO files`);
 
   for (const p of dtoPaths) {
@@ -159,7 +159,7 @@ function syncAllOnce() {
 }
 
 function watchAndSync() {
-  const dtoGlob = path.join(SERVER_DTO_BASE, '**/dto/*.dto.ts');
+  const dtoGlob = path.join(SOURCE_DTO_BASE, '**/dto/*.dto.ts');
   logLocal('Watching:', dtoGlob);
 
   const watcher = chokidar.watch(dtoGlob, {

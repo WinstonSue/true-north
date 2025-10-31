@@ -3,8 +3,8 @@ import { join, basename } from 'path';
 
 export interface ControllerPair {
   className: string;
-  serverPath: string;
-  desktopPath: string;
+  sourcePath: string;
+  targetPath: string;
 }
 
 /**
@@ -13,26 +13,26 @@ export interface ControllerPair {
 export async function findControllerPairs(projectRoot: string): Promise<ControllerPair[]> {
   const pairs: ControllerPair[] = [];
   
-  const serverDir = join(projectRoot, 'packages/business/server/src');
-  const desktopDir = join(projectRoot, 'apps/desktop/src/database');
+  const sourceDir = join(projectRoot, 'packages/business/server/src');
+  const targetDir = join(projectRoot, 'apps/desktop/src/database');
   
   try {
-    const serverControllers = await findControllerFiles(serverDir);
-    const desktopControllers = await findControllerFiles(desktopDir);
+    const sourceControllers = await findControllerFiles(sourceDir);
+    const targetControllers = await findControllerFiles(targetDir);
     
     // 匹配服务端和桌面端控制器
-    for (const serverController of serverControllers) {
-      const className = extractClassName(serverController.path);
-      const relativePath = getRelativePath(serverController.path, serverDir);
-      const expectedDesktopPath = join(desktopDir, relativePath);
+    for (const sourceController of sourceControllers) {
+      const className = extractClassName(sourceController.path);
+      const relativePath = getRelativePath(sourceController.path, sourceDir);
+      const expectedDesktopPath = join(targetDir, relativePath);
       
-      const desktopController = desktopControllers.find(dc => dc.path === expectedDesktopPath);
+      const targetController = targetControllers.find(dc => dc.path === expectedDesktopPath);
       
-      if (desktopController) {
+      if (targetController) {
         pairs.push({
           className,
-          serverPath: serverController.path,
-          desktopPath: desktopController.path
+          sourcePath: sourceController.path,
+          targetPath: targetController.path
         });
       }
     }

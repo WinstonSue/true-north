@@ -30,16 +30,16 @@ class EnhancedSyncCLI {
     }
 
     console.log(`📁 Found controller pair:`);
-    console.log(`   Server: ${pair.serverPath}`);
-    console.log(`   Desktop: ${pair.desktopPath}`);
+    console.log(`   Server: ${pair.sourcePath}`);
+    console.log(`   Desktop: ${pair.targetPath}`);
 
     try {
-      const serverContent = readFileSync(pair.serverPath, 'utf-8');
-      const desktopContent = readFileSync(pair.desktopPath, 'utf-8');
+      const sourceContent = readFileSync(pair.sourcePath, 'utf-8');
+      const targetContent = readFileSync(pair.targetPath, 'utf-8');
 
       console.log(`\n🔄 Analyzing ${pair.className}...`);
       
-      const result = enhancedSyncController(desktopContent, serverContent, pair.className);
+      const result = enhancedSyncController(targetContent, sourceContent, pair.className);
       
       if (!result.hasChanges) {
         console.log(`✅ ${pair.className} is already up to date`);
@@ -64,7 +64,7 @@ class EnhancedSyncCLI {
         return;
       }
 
-      writeFileSync(pair.desktopPath, result.newContent, 'utf-8');
+      writeFileSync(pair.targetPath, result.newContent, 'utf-8');
       console.log(`\n✅ Successfully synced ${pair.className}`);
 
     } catch (error) {
@@ -90,10 +90,10 @@ class EnhancedSyncCLI {
     // 准备批量检查数据
     const controllers = pairs.map(pair => ({
       className: pair.className,
-      desktopPath: pair.desktopPath,
-      serverPath: pair.serverPath,
-      desktopContent: readFileSync(pair.desktopPath, 'utf-8'),
-      serverContent: readFileSync(pair.serverPath, 'utf-8')
+      targetPath: pair.targetPath,
+      sourcePath: pair.sourcePath,
+      targetContent: readFileSync(pair.targetPath, 'utf-8'),
+      sourceContent: readFileSync(pair.sourcePath, 'utf-8')
     }));
 
     // 批量检查同步状态
@@ -134,12 +134,12 @@ class EnhancedSyncCLI {
 
       try {
         const result = enhancedSyncController(
-          controller.desktopContent,
-          controller.serverContent,
+          controller.targetContent,
+          controller.sourceContent,
           controller.className
         );
 
-        writeFileSync(controller.desktopPath, result.newContent, 'utf-8');
+        writeFileSync(controller.targetPath, result.newContent, 'utf-8');
         syncedCount++;
         console.log(`   ✅ Synced ${controller.className}`);
       } catch (error) {
@@ -174,10 +174,10 @@ class EnhancedSyncCLI {
 
     const controllers = targetPairs.map(pair => ({
       className: pair.className,
-      desktopPath: pair.desktopPath,
-      serverPath: pair.serverPath,
-      desktopContent: readFileSync(pair.desktopPath, 'utf-8'),
-      serverContent: readFileSync(pair.serverPath, 'utf-8')
+      targetPath: pair.targetPath,
+      sourcePath: pair.sourcePath,
+      targetContent: readFileSync(pair.targetPath, 'utf-8'),
+      sourceContent: readFileSync(pair.sourcePath, 'utf-8')
     }));
 
     const statuses = batchCheckControllerSync(controllers);

@@ -29,8 +29,8 @@ export interface SyncResult {
  * 支持传统方法级同步和新的内容级同步
  */
 export function syncControllerWithOptions(
-  desktopPath: string,
-  serverPath: string,
+  targetPath: string,
+  sourcePath: string,
   className: string,
   options: SyncOptions = {}
 ): SyncResult {
@@ -43,12 +43,12 @@ export function syncControllerWithOptions(
 
   try {
     // 读取文件内容
-    const desktopContent = readFileSync(desktopPath, 'utf-8');
-    const serverContent = readFileSync(serverPath, 'utf-8');
+    const targetContent = readFileSync(targetPath, 'utf-8');
+    const sourceContent = readFileSync(sourcePath, 'utf-8');
 
     if (enableContentSync && !forceSync) {
       // 使用增强的内容级同步
-      const result = enhancedSyncController(desktopContent, serverContent, className);
+      const result = enhancedSyncController(targetContent, sourceContent, className);
       
       if (!result.hasChanges) {
         return {
@@ -71,7 +71,7 @@ export function syncControllerWithOptions(
       }
 
       if (!dryRun) {
-        writeFileSync(desktopPath, result.newContent, 'utf-8');
+        writeFileSync(targetPath, result.newContent, 'utf-8');
         log('Enhanced sync completed for', className);
       }
 
@@ -84,9 +84,9 @@ export function syncControllerWithOptions(
 
     } else {
       // 使用传统的方法级同步
-      const syncedContent = syncMissingMethods(desktopContent, className, serverContent);
+      const syncedContent = syncMissingMethods(targetContent, className, sourceContent);
       
-      const hasChanges = syncedContent !== desktopContent;
+      const hasChanges = syncedContent !== targetContent;
       
       if (!hasChanges) {
         return {
@@ -97,7 +97,7 @@ export function syncControllerWithOptions(
       }
 
       if (!dryRun) {
-        writeFileSync(desktopPath, syncedContent, 'utf-8');
+        writeFileSync(targetPath, syncedContent, 'utf-8');
         log('Traditional sync completed for', className);
       }
 
@@ -124,8 +124,8 @@ export function syncControllerWithOptions(
 export function batchSyncControllers(
   controllerPairs: Array<{
     className: string;
-    desktopPath: string;
-    serverPath: string;
+    targetPath: string;
+    sourcePath: string;
   }>,
   options: SyncOptions = {}
 ): Array<SyncResult & { className: string }> {
@@ -133,8 +133,8 @@ export function batchSyncControllers(
 
   for (const pair of controllerPairs) {
     const result = syncControllerWithOptions(
-      pair.desktopPath,
-      pair.serverPath,
+      pair.targetPath,
+      pair.sourcePath,
       pair.className,
       options
     );
@@ -163,17 +163,17 @@ export function batchSyncControllers(
  * 检查控制器是否需要同步（不执行同步）
  */
 export function checkControllerNeedsSync(
-  desktopPath: string,
-  serverPath: string,
+  targetPath: string,
+  sourcePath: string,
   className: string,
   enableContentSync: boolean = true
 ): { needsSync: boolean; reason: string } {
   try {
-    const desktopContent = readFileSync(desktopPath, 'utf-8');
-    const serverContent = readFileSync(serverPath, 'utf-8');
+    const targetContent = readFileSync(targetPath, 'utf-8');
+    const sourceContent = readFileSync(sourcePath, 'utf-8');
 
     if (enableContentSync) {
-      const result = enhancedSyncController(desktopContent, serverContent, className);
+      const result = enhancedSyncController(targetContent, sourceContent, className);
       
       if (result.hasChanges) {
         const changedMethods = result.methodChanges.filter(c => c.changeType !== 'no_change');
@@ -183,9 +183,9 @@ export function checkControllerNeedsSync(
         };
       }
     } else {
-      const syncedContent = syncMissingMethods(desktopContent, className, serverContent);
+      const syncedContent = syncMissingMethods(targetContent, className, sourceContent);
       
-      if (syncedContent !== desktopContent) {
+      if (syncedContent !== targetContent) {
         return {
           needsSync: true,
           reason: 'Method-level changes detected'
@@ -211,11 +211,11 @@ export function checkControllerNeedsSync(
  * 保持与现有代码的兼容性
  */
 export function legacySyncController(
-  desktopPath: string,
-  serverPath: string,
+  targetPath: string,
+  sourcePath: string,
   className: string
 ): boolean {
-  const result = syncControllerWithOptions(desktopPath, serverPath, className, {
+  const result = syncControllerWithOptions(targetPath, sourcePath, className, {
     enableContentSync: false, // 使用传统同步
     dryRun: false,
     verbose: false

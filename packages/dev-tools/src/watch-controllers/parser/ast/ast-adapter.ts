@@ -24,13 +24,13 @@ function convertASTMethodInfo(astInfo: ASTMethodDecoratorInfo): MethodDecoratorI
 /**
  * 使用AST解析类名
  */
-export function parseClassName(serverContent: string): string | null {
+export function parseClassName(sourceContent: string): string | null {
   try {
-    return astParser.parseClassName(serverContent);
+    return astParser.parseClassName(sourceContent);
   } catch (error) {
     console.warn('AST解析类名失败，回退到正则表达式:', error);
     // 回退到原有的正则表达式解析
-    const m = serverContent.match(/export\s+class\s+(\w+)\s*\{/);
+    const m = sourceContent.match(/export\s+class\s+(\w+)\s*\{/);
     return m ? m[1] : null;
   }
 }
@@ -38,13 +38,13 @@ export function parseClassName(serverContent: string): string | null {
 /**
  * 使用AST解析构造函数服务类型
  */
-export function parseConstructorServiceTypes(serverContent: string): string[] {
+export function parseConstructorServiceTypes(sourceContent: string): string[] {
   try {
-    return astParser.parseConstructorServiceTypes(serverContent);
+    return astParser.parseConstructorServiceTypes(sourceContent);
   } catch (error) {
     console.warn('AST解析构造函数失败，回退到正则表达式:', error);
     // 回退到原有的正则表达式解析
-    const ctorMatch = serverContent.match(/constructor\s*\(([^)]*)\)\s*\{/);
+    const ctorMatch = sourceContent.match(/constructor\s*\(([^)]*)\)\s*\{/);
     if (!ctorMatch) return [];
     const params = ctorMatch[1];
     const types: string[] = [];
@@ -58,9 +58,9 @@ export function parseConstructorServiceTypes(serverContent: string): string[] {
 /**
  * 使用AST解析方法装饰器信息
  */
-export function parseMethodDecorators(serverContent: string, className: string): Map<string, MethodDecoratorInfo> {
+export function parseMethodDecorators(sourceContent: string, className: string): Map<string, MethodDecoratorInfo> {
   try {
-    const astMethodMap = astParser.parseMethodDecorators(serverContent, className);
+    const astMethodMap = astParser.parseMethodDecorators(sourceContent, className);
     const methodMap = new Map<string, MethodDecoratorInfo>();
 
     astMethodMap.forEach((astInfo, methodName) => {
@@ -72,16 +72,16 @@ export function parseMethodDecorators(serverContent: string, className: string):
     console.warn('AST解析方法装饰器失败，回退到正则表达式:', error);
     // 回退到原有的正则表达式解析器
     const { parseMethodDecorators: regexParseMethodDecorators } = require('../legacy/regex-parser');
-    return regexParseMethodDecorators(serverContent, className);
+    return regexParseMethodDecorators(sourceContent, className);
   }
 }
 
 /**
  * 使用AST解析服务器方法名
  */
-export function parseServerMethodNames(serverContent: string, className: string): string[] {
+export function parseServerMethodNames(sourceContent: string, className: string): string[] {
   try {
-    return astParser.parseMethodNames(serverContent, className);
+    return astParser.parseMethodNames(sourceContent, className);
   } catch (error) {
     console.warn('AST解析方法名失败，回退到正则表达式:', error);
     // 回退逻辑可以调用原有的实现
@@ -121,9 +121,9 @@ export function getClassBodyRange(content: string, className: string): { start: 
 /**
  * 解析控制器信息（包含@Controller装饰器）
  */
-export function parseControllerInfo(serverContent: string, className?: string): ASTControllerInfo | null {
+export function parseControllerInfo(sourceContent: string, className?: string): ASTControllerInfo | null {
   try {
-    return astParser.parseControllerInfo(serverContent, className);
+    return astParser.parseControllerInfo(sourceContent, className);
   } catch (error) {
     console.warn('AST解析控制器信息失败，回退到正则表达式:', error);
     return null;
@@ -133,8 +133,8 @@ export function parseControllerInfo(serverContent: string, className?: string): 
 /**
  * 获取服务器方法的装饰器信息 - AST版本
  */
-export function getServerMethodDecorators(serverContent: string, className: string): Map<string, MethodDecoratorInfo> {
-  return parseMethodDecorators(serverContent, className);
+export function getServerMethodDecorators(sourceContent: string, className: string): Map<string, MethodDecoratorInfo> {
+  return parseMethodDecorators(sourceContent, className);
 }
 
 /**

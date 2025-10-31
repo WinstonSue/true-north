@@ -32,6 +32,12 @@ export class TypeScriptASTParser {
 
   // 解析TypeScript文件内容，返回AST
   parseContent(content: string, filePath: string = 'temp.ts'): SourceFile {
+    // 每次解析都清理之前的文件，避免节点引用错误
+    const existingFile = this.project.getSourceFile(filePath);
+    if (existingFile) {
+      existingFile.delete();
+    }
+    
     return this.project.createSourceFile(filePath, content, {
       overwrite: true,
     });

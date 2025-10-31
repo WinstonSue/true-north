@@ -186,13 +186,13 @@ export function getClassBodyRange(content: string, className: string): { start: 
   return null;
 }
 
-export function parseClassName(serverContent: string): string | null {
-  const m = serverContent.match(/export\s+class\s+(\w+)\s*\{/);
+export function parseClassName(sourceContent: string): string | null {
+  const m = sourceContent.match(/export\s+class\s+(\w+)\s*\{/);
   return m ? m[1] : null;
 }
 
-export function parseConstructorServiceTypes(serverContent: string): string[] {
-  const ctorMatch = serverContent.match(/constructor\s*\(([^)]*)\)\s*\{/);
+export function parseConstructorServiceTypes(sourceContent: string): string[] {
+  const ctorMatch = sourceContent.match(/constructor\s*\(([^)]*)\)\s*\{/);
   if (!ctorMatch) return [];
   const params = ctorMatch[1];
   const types: string[] = [];
@@ -246,16 +246,16 @@ export function parseTopLevelMethodNames(body: string): string[] {
   return names;
 }
 
-export function parseServerMethodNames(serverContent: string, className: string): string[] {
-  const range = getClassBodyRange(serverContent, className);
+export function parseServerMethodNames(sourceContent: string, className: string): string[] {
+  const range = getClassBodyRange(sourceContent, className);
   if (!range) return [];
-  const body = serverContent.slice(range.start, range.end);
+  const body = sourceContent.slice(range.start, range.end);
   return parseTopLevelMethodNames(body);
 }
 
 // 获取服务器方法的装饰器信息
-export function getServerMethodDecorators(serverContent: string, className: string): Map<string, MethodDecoratorInfo> {
-  return parseMethodDecorators(serverContent, className);
+export function getServerMethodDecorators(sourceContent: string, className: string): Map<string, MethodDecoratorInfo> {
+  return parseMethodDecorators(sourceContent, className);
 }
 
 // 解析 API controller 中的现有方法
@@ -276,17 +276,17 @@ export function parseApiMethodNames(apiContent: string, className: string): Set<
   return methodNames;
 }
 
-export function parseDesktopMethodNames(desktopContent: string, className: string): Set<string> {
-  const range = getClassBodyRange(desktopContent, className);
+export function parseDesktopMethodNames(targetContent: string, className: string): Set<string> {
+  const range = getClassBodyRange(targetContent, className);
   if (!range) return new Set();
-  const body = desktopContent.slice(range.start, range.end);
+  const body = targetContent.slice(range.start, range.end);
   return new Set(parseTopLevelMethodNames(body));
 }
 
-export function parseMethodDecorators(serverContent: string, className: string): Map<string, MethodDecoratorInfo> {
-  const range = getClassBodyRange(serverContent, className);
+export function parseMethodDecorators(sourceContent: string, className: string): Map<string, MethodDecoratorInfo> {
+  const range = getClassBodyRange(sourceContent, className);
   if (!range) return new Map();
-  const body = serverContent.slice(range.start, range.end);
+  const body = sourceContent.slice(range.start, range.end);
 
   const methodMap = new Map<string, MethodDecoratorInfo>();
 

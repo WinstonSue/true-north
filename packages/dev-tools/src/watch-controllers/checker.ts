@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import fg from 'fast-glob';
-import { ROOT, SERVER_BASE } from '../constants';
+import { ROOT, SOURCE_BASE } from '../constants';
 import {
   readFileSafe,
   getRelServerPath,
@@ -14,7 +14,7 @@ import { syncApiMethods } from './sync/sync-api';
 import { typeToServiceConstName } from '../utils';
 
 export interface ControllerStatus {
-  serverPath: string;
+  sourcePath: string;
   relativePath: string;
   className: string | null;
   serviceTypes: string[];
@@ -42,48 +42,48 @@ export interface SyncStatus {
 /**
  * 检查单个 controller 的状态
  */
-export function checkControllerStatus(serverControllerPath: string): ControllerStatus | null {
-  const rel = getRelServerPath(serverControllerPath);
+export function checkControllerStatus(sourceControllerPath: string): ControllerStatus | null {
+  const rel = getRelServerPath(sourceControllerPath);
   if (!rel.endsWith('.controller.ts')) return null;
 
-  const serverContent = readFileSafe(serverControllerPath);
-  if (!serverContent) return null;
+  const sourceContent = readFileSafe(sourceControllerPath);
+  if (!sourceContent) return null;
 
-  const className = parseClassName(serverContent);
-  const serviceTypes = parseConstructorServiceTypes(serverContent);
+  const className = parseClassName(sourceContent);
+  const serviceTypes = parseConstructorServiceTypes(sourceContent);
   const serviceConstNames = serviceTypes.map(typeToServiceConstName);
 
   // 检查 Desktop Controller
-  const desktopPath = getDesktopControllerPathFromServer(serverControllerPath);
-  const desktopExists = fs.existsSync(desktopPath);
-  let desktopNeedsSync = false;
-  const desktopIssues: string[] = [];
+  const targetPath = getDesktopControllerPathFromServer(sourceControllerPath);
+  const targetExists = fs.existsSync(targetPath);
+  let targetNeedsSync = false;
+  const targetIssues: string[] = [];
 
-  if (desktopExists) {
-    const desktopContent = readFileSafe(desktopPath);
-    if (desktopContent) {
+  if (targetExists) {
+    const targetContent = readFileSafe(targetPath);
+    if (targetContent) {
       try {
-        let next = desktopContent;
+        let next = targetContent;
         next = ensureConstructorArgs(next, className || '', serviceConstNames);
-        next = syncMissingMethods(next, className || '', serverContent);
+        next = syncMissingMethods(next, className || '', sourceContent);
         
-        desktopNeedsSync = next !== desktopContent;
+        targetNeedsSync = next !== targetContent;
         
-        if (desktopNeedsSync) {
-          desktopIssues.push('需要同步构造函数参数或方法');
+        if (targetNeedsSync) {
+          targetIssues.push('需要同步构造函数参数或方法');
         }
       } catch (error) {
-        desktopIssues.push(`检查失败: ${error instanceof Error ? error.message : String(error)}`);
+        targetIssues.push(`检查失败: ${error instanceof Error ? error.message : String(error)}`);
       }
     } else {
-      desktopIssues.push('文件读取失败');
+      targetIssues.push('文件读取失败');
     }
   } else {
-    desktopIssues.push('文件不存在');
+    targetIssues.push('文件不存在');
   }
 
   // 检查 API Controller
-  const apiPath = getApiControllerPathFromServer(serverControllerPath);
+  const apiPath = getApiControllerPathFromServer(sourceControllerPath);
   const apiExists = fs.existsSync(apiPath);
   let apiNeedsSync = false;
   const apiIssues: string[] = [];
@@ -92,7 +92,7 @@ export function checkControllerStatus(serverControllerPath: string): ControllerS
     const apiContent = readFileSafe(apiPath);
     if (apiContent) {
       try {
-        const next = syncApiMethods(apiContent, className || '', serverContent, className || '');
+        const next = syncApiMethods(apiContent, className || '', sourceContent, className || '');
         
         apiNeedsSync = next !== apiContent;
         
@@ -110,15 +110,15 @@ export function checkControllerStatus(serverControllerPath: string): ControllerS
   }
 
   return {
-    serverPath: serverControllerPath,
+    sourcePath: sourceControllerPath,
     relativePath: rel,
     className,
     serviceTypes,
     desktop: {
-      exists: desktopExists,
-      path: desktopPath,
-      needsSync: desktopNeedsSync,
-      issues: desktopIssues,
+      exists: targetExists,
+      path: targetPath,
+      needsSync: targetNeedsSync,
+      issues: targetIssues,
     },
     api: {
       exists: apiExists,
@@ -133,10 +133,10 @@ export function checkControllerStatus(serverControllerPath: string): ControllerS
  * 检查所有待同步的 controller 文件
  */
 export function checkPendingSyncFiles(): SyncStatus {
-  const serverControllerPaths = fg.sync(path.join(SERVER_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
+  const sourceControllerPaths = fg.sync(path.join(SOURCE_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
   const controllers: ControllerStatus[] = [];
   
-  for (const p of serverControllerPaths) {
+  for (const p of sourceControllerPaths) {
     const status = checkControllerStatus(p);
     if (status) {
       controllers.push(status);

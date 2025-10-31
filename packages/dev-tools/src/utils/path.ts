@@ -1,19 +1,19 @@
 import path from 'path';
-import { ROOT, SERVER_BASE, DESKTOP_BASE } from '../constants';
+import { ROOT, SOURCE_BASE, TARGET_BASE } from '../constants';
 
 /**
  * 获取相对于服务端基础路径的相对路径
  */
 export function getRelServerPath(absolutePath: string): string {
-  return path.relative(SERVER_BASE, absolutePath);
+  return path.relative(SOURCE_BASE, absolutePath);
 }
 
 /**
  * 从服务端控制器路径获取桌面端控制器路径
  */
-export function getDesktopControllerPathFromServer(serverControllerPath: string): string {
-  const relativePath = getRelServerPath(serverControllerPath);
-  return path.join(DESKTOP_BASE, relativePath);
+export function getDesktopControllerPathFromServer(sourceControllerPath: string): string {
+  const relativePath = getRelServerPath(sourceControllerPath);
+  return path.join(TARGET_BASE, relativePath);
 }
 
 /**
@@ -22,7 +22,7 @@ export function getDesktopControllerPathFromServer(serverControllerPath: string)
 export function getVoPathFromDto(dtoFilePath: string): string {
   // 从 packages/business/server/src/growth/goal/dto/goal-model.dto.ts
   // 转换为 packages/business/vo/growth/goal/goal-model.vo.ts
-  const relativePath = path.relative(SERVER_BASE, dtoFilePath);
+  const relativePath = path.relative(SOURCE_BASE, dtoFilePath);
   const parts = relativePath.split(path.sep);
 
   // 移除 dto 目录层级
@@ -41,10 +41,10 @@ export function getVoPathFromDto(dtoFilePath: string): string {
 /**
  * 从服务端控制器路径获取 API 控制器路径
  */
-export function getApiControllerPathFromServer(serverControllerPath: string): string {
+export function getApiControllerPathFromServer(sourceControllerPath: string): string {
   // 从 packages/business/server/src/growth/task/task.controller.ts
   // 转换为 packages/business/api/controller/task/task.ts
-  const relativePath = path.relative(SERVER_BASE, serverControllerPath);
+  const relativePath = path.relative(SOURCE_BASE, sourceControllerPath);
   const parts = relativePath.split(path.sep);
 
   // 移除最后的 .controller.ts 并替换为 .ts

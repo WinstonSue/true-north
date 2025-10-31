@@ -104,9 +104,9 @@ function getDefaultQueryType(methodName: string, entityCap: string): string {
 }
 
 // 基于实际方法信息生成 API 方法名
-function generateApiMethodName(serverMethodName: string, entityName: string, verb: string, path: string): string {
+function generateApiMethodName(sourceMethodName: string, entityName: string, verb: string, path: string): string {
   // 直接沿用服务端 Controller 的方法名
-  return serverMethodName;
+  return sourceMethodName;
 }
 
 // 删除过时的API方法
@@ -150,35 +150,35 @@ function removeObsoleteApiMethods(
 export function syncApiMethods(
   apiContent: string,
   className: string,
-  serverContent: string,
-  serverClassName: string
+  sourceContent: string,
+  sourceClassName: string
 ): string {
   // 使用新的Controller信息解析
-  const controllerInfo = parseControllerInfo(serverContent, serverClassName);
+  const controllerInfo = parseControllerInfo(sourceContent, sourceClassName);
   if (!controllerInfo) {
     // 回退到原有方法
-    const serverMethodDecorators = getServerMethodDecorators(serverContent, serverClassName);
-    return syncApiMethodsLegacy(apiContent, className, serverMethodDecorators);
+    const sourceMethodDecorators = getServerMethodDecorators(sourceContent, sourceClassName);
+    return syncApiMethodsLegacy(apiContent, className, sourceMethodDecorators);
   }
 
-  const serverMethods = Array.from(controllerInfo.methods.keys());
+  const sourceMethods = Array.from(controllerInfo.methods.keys());
   const entityName = className.replace('Controller', '');
 
   // 获取现有的 API 方法
   const existing = parseApiMethodNames(apiContent, className);
 
-  // 生成期望的API方法映射 (serverMethod -> expectedApiMethodName)
+  // 生成期望的API方法映射 (sourceMethod -> expectedApiMethodName)
   const expectedApiMethods = new Map<string, string>();
-  serverMethods.forEach((serverMethod) => {
-    const decoratorInfo = controllerInfo.methods.get(serverMethod);
+  sourceMethods.forEach((sourceMethod) => {
+    const decoratorInfo = controllerInfo.methods.get(sourceMethod);
     if (decoratorInfo) {
       const expectedApiMethodName = generateApiMethodName(
-        serverMethod,
+        sourceMethod,
         entityName,
         decoratorInfo.verb,
         decoratorInfo.path
       );
-      expectedApiMethods.set(serverMethod, expectedApiMethodName);
+      expectedApiMethods.set(sourceMethod, expectedApiMethodName);
     }
   });
 
@@ -188,8 +188,8 @@ export function syncApiMethods(
   let cleanedContent = removeObsoleteApiMethods(apiContent, className, existing, expectedApiMethodNames);
 
   // 2. 添加新方法：找出缺失的方法并添加
-  const missing = serverMethods.filter((serverMethod) => {
-    const expectedApiMethodName = expectedApiMethods.get(serverMethod);
+  const missing = sourceMethods.filter((sourceMethod) => {
+    const expectedApiMethodName = expectedApiMethods.get(sourceMethod);
     return expectedApiMethodName && !existing.has(expectedApiMethodName);
   });
 
@@ -204,11 +204,11 @@ export function syncApiMethods(
 
   // 生成缺失的方法（使用Controller基础路径）
   const newMethods = missing
-    .map((serverMethod) => {
-      const decoratorInfo = controllerInfo.methods.get(serverMethod);
+    .map((sourceMethod) => {
+      const decoratorInfo = controllerInfo.methods.get(sourceMethod);
       if (!decoratorInfo) return null;
 
-      const expectedApiMethodName = expectedApiMethods.get(serverMethod);
+      const expectedApiMethodName = expectedApiMethods.get(sourceMethod);
       try {
         log('Adding API method:', className, expectedApiMethodName);
       } catch {}
@@ -229,15 +229,15 @@ export function syncApiMethods(
 function syncApiMethodsLegacy(
   apiContent: string,
   className: string,
-  serverMethodDecorators: Map<string, MethodDecoratorInfo>
+  sourceMethodDecorators: Map<string, MethodDecoratorInfo>
 ): string {
-  const serverMethods = Array.from(serverMethodDecorators.keys());
-  if (serverMethods.length === 0) return apiContent;
+  const sourceMethods = Array.from(sourceMethodDecorators.keys());
+  if (sourceMethods.length === 0) return apiContent;
 
   const entityName = className.replace('Controller', '');
   const existing = parseApiMethodNames(apiContent, className);
-  const missing = serverMethods.filter((serverMethod) => {
-    return !Array.from(existing).some((existingMethod: string) => existingMethod.includes(serverMethod));
+  const missing = sourceMethods.filter((sourceMethod) => {
+    return !Array.from(existing).some((existingMethod: string) => existingMethod.includes(sourceMethod));
   });
 
   if (missing.length === 0) return apiContent;
@@ -250,7 +250,7 @@ function syncApiMethodsLegacy(
 
   const missingMethods = missing
     .map((methodName) => {
-      const decoratorInfo = serverMethodDecorators.get(methodName);
+      const decoratorInfo = sourceMethodDecorators.get(methodName);
       return decoratorInfo ? genApiMethodWrapper(decoratorInfo, entityName) : '';
     })
     .filter(Boolean);

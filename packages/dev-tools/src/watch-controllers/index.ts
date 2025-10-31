@@ -12,7 +12,7 @@ import path from 'path';
 import fs from 'fs';
 import chokidar from 'chokidar';
 import fg from 'fast-glob';
-import { ROOT, SERVER_BASE } from '../constants';
+import { ROOT, SOURCE_BASE } from '../constants';
 import {
   createLogger,
   readFileSafe,
@@ -28,48 +28,48 @@ import { syncApiMethods } from './sync/sync-api';
 
 const logLocal = createLogger('watch-controllers');
 
-function syncOne(serverControllerPath: string) {
-  const rel = getRelServerPath(serverControllerPath);
+function syncOne(sourceControllerPath: string) {
+  const rel = getRelServerPath(sourceControllerPath);
   if (!rel.endsWith('.controller.ts')) return;
 
-  const serverContent = readFileSafe(serverControllerPath);
-  if (!serverContent) return;
+  const sourceContent = readFileSafe(sourceControllerPath);
+  if (!sourceContent) return;
 
-  const className = parseClassName(serverContent);
+  const className = parseClassName(sourceContent);
   if (!className) {
     logLocal('Skip (no class found):', rel);
     return;
   }
 
-  const serviceTypes = parseConstructorServiceTypes(serverContent);
+  const serviceTypes = parseConstructorServiceTypes(sourceContent);
   const serviceConstNames = serviceTypes.map(typeToServiceConstName);
 
   // 同步 Desktop Controller
-  const desktopPath = getDesktopControllerPathFromServer(serverControllerPath);
-  if (fs.existsSync(desktopPath)) {
-    const desktopContent = readFileSafe(desktopPath);
-    if (desktopContent) {
-      let next = desktopContent;
+  const targetPath = getDesktopControllerPathFromServer(sourceControllerPath);
+  if (fs.existsSync(targetPath)) {
+    const targetContent = readFileSafe(targetPath);
+    if (targetContent) {
+      let next = targetContent;
       // Always update constructor args, even when empty
       next = ensureConstructorArgs(next, className, serviceConstNames);
       // Append any missing methods at class end (no import changes)
-      next = syncMissingMethods(next, className, serverContent);
+      next = syncMissingMethods(next, className, sourceContent);
 
-      if (next !== desktopContent) {
-        const ok = writeFileIfChanged(desktopPath, next);
-        if (ok) logLocal('Synced desktop controller ->', path.relative(ROOT, desktopPath));
+      if (next !== targetContent) {
+        const ok = writeFileIfChanged(targetPath, next);
+        if (ok) logLocal('Synced desktop controller ->', path.relative(ROOT, targetPath));
       }
     }
   } else {
-    logLocal('Desktop controller not found:', path.relative(ROOT, desktopPath));
+    logLocal('Desktop controller not found:', path.relative(ROOT, targetPath));
   }
 
   // 同步 API Controller
-  const apiPath = getApiControllerPathFromServer(serverControllerPath);
+  const apiPath = getApiControllerPathFromServer(sourceControllerPath);
   if (fs.existsSync(apiPath)) {
     const apiContent = readFileSafe(apiPath);
     if (apiContent) {
-      const next = syncApiMethods(apiContent, className, serverContent, className);
+      const next = syncApiMethods(apiContent, className, sourceContent, className);
       if (next !== apiContent) {
         const ok = writeFileIfChanged(apiPath, next);
         if (ok) logLocal('Synced API controller ->', path.relative(ROOT, apiPath));
@@ -81,17 +81,17 @@ function syncOne(serverControllerPath: string) {
 }
 
 function syncAllOnce() {
-  const serverControllerPaths = fg.sync(path.join(SERVER_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
-  for (const p of serverControllerPaths) {
+  const sourceControllerPaths = fg.sync(path.join(SOURCE_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
+  for (const p of sourceControllerPaths) {
     syncOne(p);
   }
 }
 
 function watchAndSync() {
-  const serverControllerGlob = path.join(SERVER_BASE, '**/*.controller.ts');
-  logLocal('[dev-tools/watch-controllers] Watching:', serverControllerGlob);
+  const sourceControllerGlob = path.join(SOURCE_BASE, '**/*.controller.ts');
+  logLocal('[dev-tools/watch-controllers] Watching:', sourceControllerGlob);
 
-  const watcher = chokidar.watch(serverControllerGlob, {
+  const watcher = chokidar.watch(sourceControllerGlob, {
     ignoreInitial: false,
     persistent: true,
   });

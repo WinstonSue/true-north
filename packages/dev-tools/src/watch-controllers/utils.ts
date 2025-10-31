@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { DESKTOP_BASE, SERVER_BASE } from '../constants';
+import { TARGET_BASE, SOURCE_BASE } from '../constants';
 
 export function log(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -24,12 +24,12 @@ export function writeFileIfChanged(p: string, content: string): boolean {
 }
 
 export function getRelServerPath(abs: string) {
-  return path.relative(SERVER_BASE, abs);
+  return path.relative(SOURCE_BASE, abs);
 }
 
 export function getDesktopControllerPathFromServer(absServerPath: string) {
   const rel = getRelServerPath(absServerPath);
-  return path.join(DESKTOP_BASE, rel);
+  return path.join(TARGET_BASE, rel);
 }
 
 export function escapeRegExp(s: string): string {
