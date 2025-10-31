@@ -1,20 +1,15 @@
 import express from 'express';
 import path from 'path';
-import { spawn, ChildProcess } from 'child_process';
-import { enhancedSyncController } from '../watch-controllers/sync/enhanced-sync';
 import { findControllerPairs } from '../watch-controllers/utils/file-finder';
 import { createSyncEngine } from '../core/sync-engine';
 import { SOURCE_BASE, TARGET_BASE } from '../constants';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
 
 const app = express();
 const port = 3002;
 
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'dist')));
-
-// 存储运行中的监听任务
-const runningTasks = new Map<string, ChildProcess>();
 
 // 辅助函数：查找控制器对
 function findControllerPairsV2() {
@@ -56,147 +51,6 @@ function findControllerPairV2(name: string) {
   );
 }
 
-// 执行同步命令
-app.post('/api/execute', async (req, res) => {
-  const { command, type } = req.body;
-
-  try {
-    if (type === 'sync') {
-      // 同步操作：执行一次性命令
-      const child = spawn('pnpm', [command], {
-        cwd: process.cwd(),
-        stdio: 'pipe',
-      });
-
-      let output = '';
-      let error = '';
-
-      child.stdout?.on('data', (data) => {
-        output += data.toString();
-      });
-
-      child.stderr?.on('data', (data) => {
-        error += data.toString();
-      });
-
-      child.on('close', (code) => {
-        if (code === 0) {
-          res.json({ success: true, output });
-        } else {
-          res.json({ success: false, error: error || '命令执行失败' });
-        }
-      });
-    } else if (type === 'watch') {
-      // 监听操作：启动长期运行的进程
-      const taskId = req.body.taskId || `watch-${Date.now()}`;
-
-      // 如果任务已经在运行，先停止它
-      if (runningTasks.has(taskId)) {
-        runningTasks.get(taskId)?.kill();
-        runningTasks.delete(taskId);
-      }
-
-      const child = spawn('pnpm', [command], {
-        cwd: process.cwd(),
-        stdio: 'pipe',
-      });
-
-      runningTasks.set(taskId, child);
-
-      child.on('close', (code) => {
-        runningTasks.delete(taskId);
-        console.log(`监听任务 ${taskId} 已结束，退出码: ${code}`);
-      });
-
-      child.on('error', (error) => {
-        runningTasks.delete(taskId);
-        console.error(`监听任务 ${taskId} 出错:`, error);
-      });
-
-      res.json({ success: true, taskId });
-    }
-  } catch (error) {
-    res.json({ success: false, error: error instanceof Error ? error.message : String(error) });
-  }
-});
-
-// 停止监听任务
-app.post('/api/stop', (req, res) => {
-  const { taskId } = req.body;
-
-  if (runningTasks.has(taskId)) {
-    const child = runningTasks.get(taskId);
-    child?.kill();
-    runningTasks.delete(taskId);
-    res.json({ success: true });
-  } else {
-    res.json({ success: false, error: '任务未找到或已停止' });
-  }
-});
-
-// 获取运行中的任务列表
-app.get('/api/tasks', (req, res) => {
-  const tasks = Array.from(runningTasks.keys());
-  res.json({ tasks });
-});
-
-// 检查 Controllers 同步状态
-app.get('/api/check/controllers', async (req, res) => {
-  try {
-    const engine = createSyncEngine();
-    const status = await engine.checkAllControllers();
-
-    // 转换为兼容格式
-    const compatibleStatus = {
-      totalControllers: status.length,
-      needsSyncCount: status.filter((s) => s.needsSync).length,
-      controllers: status,
-      lastChecked: new Date().toISOString(),
-    };
-
-    res.json({ success: true, data: compatibleStatus });
-  } catch (error) {
-    res.json({ success: false, error: error instanceof Error ? error.message : String(error) });
-  }
-});
-
-// 检查单个 Controller 状态
-app.get('/api/check/controller', (req, res) => {
-  const { path: controllerPath } = req.query;
-
-  if (!controllerPath || typeof controllerPath !== 'string') {
-    res.json({ success: false, error: '缺少 path 参数' });
-    return;
-  }
-
-  try {
-    const status = checkControllerStatus(controllerPath);
-    if (status) {
-      res.json({ success: true, data: status });
-    } else {
-      res.json({ success: false, error: '无效的控制器文件' });
-    }
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
-// 获取待同步文件列表
-app.get('/api/check/pending-files', (req, res) => {
-  try {
-    const files = getPendingSyncFiles();
-    res.json({ success: true, data: files });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
 // 获取方法级别的详细差异
 app.get('/api/check/method-details', async (req, res) => {
   try {
@@ -223,49 +77,6 @@ app.get('/api/check/method-details', async (req, res) => {
         controllers: controllers,
         lastChecked: new Date().toISOString(),
       },
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
-// 同步单个控制器的方法
-app.post('/api/sync/controller-methods', async (req, res) => {
-  const { className, methodNames } = req.body;
-
-  if (!className) {
-    res.json({ success: false, error: '缺少 className 参数' });
-    return;
-  }
-
-  try {
-    // 这里可以调用增强同步功能来同步特定的方法
-    // 暂时使用传统的全量同步
-    const child = spawn('pnpm', ['sync:controllers:enhanced', className.toLowerCase()], {
-      cwd: process.cwd(),
-      stdio: 'pipe',
-    });
-
-    let output = '';
-    let error = '';
-
-    child.stdout?.on('data', (data) => {
-      output += data.toString();
-    });
-
-    child.stderr?.on('data', (data) => {
-      error += data.toString();
-    });
-
-    child.on('close', (code) => {
-      if (code === 0) {
-        res.json({ success: true, output, message: `${className} 同步完成` });
-      } else {
-        res.json({ success: false, error: error || '同步失败' });
-      }
     });
   } catch (error) {
     res.json({
