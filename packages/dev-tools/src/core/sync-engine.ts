@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
-import { UnifiedASTParser } from './ast-parser';
+import { SourceAdapter, TargetAdapter } from './adapters';
 import { DiffEngine } from './diff-engine';
 import { CodeGenerator } from './code-generator';
 import { IntermediateState, DiffResult, SyncAction, MethodDefinition, ParameterDefinition } from './intermediate-state';
@@ -105,12 +105,14 @@ export interface SyncResult {
 }
 
 export class SyncEngine {
-  private astParser: UnifiedASTParser;
+  private sourceAdapter: SourceAdapter;
+  private targetAdapter: TargetAdapter;
   private diffEngine: DiffEngine;
   private codeGenerator: CodeGenerator;
 
   constructor() {
-    this.astParser = new UnifiedASTParser();
+    this.sourceAdapter = new SourceAdapter();
+    this.targetAdapter = new TargetAdapter();
     this.diffEngine = new DiffEngine();
     this.codeGenerator = new CodeGenerator();
   }
@@ -131,8 +133,8 @@ export class SyncEngine {
       }
 
       // 2. 解析为中间态
-      const sourceState = this.astParser.parseToIntermediateState(sourceCode, sourcePath, 'source');
-      const targetState = this.astParser.parseToIntermediateState(targetCode, targetPath, 'target');
+      const sourceState = this.sourceAdapter.parseToIntermediateState(sourceCode, sourcePath);
+      const targetState = this.targetAdapter.parseToIntermediateState(targetCode, targetPath);
 
       if (options.verbose) {
         console.log(`🔍 解析结果:`);
@@ -286,11 +288,15 @@ export class SyncEngine {
   }
 
   /**
-   * 获取中间态信息（用于调试）
+   * 获取文件的中间态表示
    */
   async getIntermediateState(filePath: string, sourceType: 'source' | 'target'): Promise<IntermediateState> {
     const code = readFileSync(filePath, 'utf-8');
-    return this.astParser.parseToIntermediateState(code, filePath, sourceType);
+    if (sourceType === 'source') {
+      return this.sourceAdapter.parseToIntermediateState(code, filePath);
+    } else {
+      return this.targetAdapter.parseToIntermediateState(code, filePath);
+    }
   }
 
   /**
@@ -306,8 +312,8 @@ export class SyncEngine {
         const sourceCode = readFileSync(pair.sourcePath, 'utf-8');
         const targetCode = readFileSync(pair.targetPath, 'utf-8');
 
-        const sourceState = this.astParser.parseToIntermediateState(sourceCode, pair.sourcePath, 'source');
-        const targetState = this.astParser.parseToIntermediateState(targetCode, pair.targetPath, 'target');
+        const sourceState = this.sourceAdapter.parseToIntermediateState(sourceCode, pair.sourcePath);
+        const targetState = this.targetAdapter.parseToIntermediateState(targetCode, pair.targetPath);
 
         const diff = this.diffEngine.compare(sourceState, targetState);
         const methodChanges = this.generateMethodChanges(sourceState, targetState);
@@ -650,7 +656,7 @@ export class SyncEngine {
    * 清理资源
    */
   dispose(): void {
-    this.astParser.dispose();
+    // Adapters 不需要特殊的清理逻辑
   }
 }
 
