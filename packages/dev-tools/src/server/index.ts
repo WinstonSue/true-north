@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { findControllerPairs } from '../watch-controllers/utils/file-finder';
-import { createProxySyncEngine } from '../controller-proxy/sync-engine';
+import { createProxySyncEngine } from '../controller/proxy/sync-engine';
 import { SOURCE_BASE, TARGET_BASE } from '../constants';
 import { existsSync } from 'fs';
 

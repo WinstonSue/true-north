@@ -9,7 +9,7 @@ import { Command } from 'commander';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { createProxySyncEngine } from './sync-engine';
-import { ROOT, SOURCE_BASE, TARGET_BASE } from '../constants';
+import { ROOT, SOURCE_BASE, TARGET_BASE } from '../../constants';
 
 interface ControllerPair {
   className: string;
