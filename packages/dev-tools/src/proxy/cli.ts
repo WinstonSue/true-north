@@ -8,7 +8,7 @@
 import { Command } from 'commander';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { createSyncEngine } from './sync-engine';
+import { createProxySyncEngine } from './sync-engine';
 import { ROOT, SOURCE_BASE, TARGET_BASE } from '../constants';
 
 interface ControllerPair {
@@ -60,7 +60,7 @@ function findControllerPair(name: string): ControllerPair | null {
  * 同步命令
  */
 async function syncCommand(controllerName?: string, options: any = {}) {
-  const engine = createSyncEngine();
+  const engine = createProxySyncEngine();
   
   try {
     console.log('🚀 启动新架构同步引擎...\n');
@@ -133,7 +133,7 @@ async function syncCommand(controllerName?: string, options: any = {}) {
  * 检查命令
  */
 async function checkCommand(controllerName?: string, options: any = {}) {
-  const engine = createSyncEngine();
+  const engine = createProxySyncEngine();
   
   try {
     console.log('🔍 启动差异检查...\n');
@@ -189,7 +189,7 @@ async function checkCommand(controllerName?: string, options: any = {}) {
  * 调试命令 - 显示中间态
  */
 async function debugCommand(filePath: string, options: any = {}) {
-  const engine = createSyncEngine();
+  const engine = createProxySyncEngine();
   
   try {
     const sourceType = filePath.includes('/server/') ? 'source' : 'target';

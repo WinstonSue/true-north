@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { findControllerPairs } from '../watch-controllers/utils/file-finder';
-import { createSyncEngine } from '../core/sync-engine';
+import { createProxySyncEngine } from '../proxy/sync-engine';
 import { SOURCE_BASE, TARGET_BASE } from '../constants';
 import { existsSync } from 'fs';
 
@@ -66,7 +66,7 @@ app.get('/api/check/method-details', async (req, res) => {
     }
 
     // 使用新架构的同步引擎
-    const engine = createSyncEngine();
+    const engine = createProxySyncEngine();
 
     // 执行控制器状态检查（包含方法级别的详细信息）
     const controllers = await engine.checkAllControllers();
@@ -90,7 +90,7 @@ app.get('/api/check/method-details', async (req, res) => {
 
 // V2: 检查控制器差异（新架构）
 app.get('/api/v2/check/controllers', async (req, res) => {
-  const engine = createSyncEngine();
+  const engine = createProxySyncEngine();
 
   try {
     const pairs = findControllerPairsV2();
@@ -139,7 +139,7 @@ app.get('/api/v2/check/controllers', async (req, res) => {
 // V2: 检查单个控制器差异
 app.get('/api/v2/check/controller/:name', async (req, res) => {
   const { name } = req.params;
-  const engine = createSyncEngine();
+  const engine = createProxySyncEngine();
 
   try {
     const pair = findControllerPairV2(name);
@@ -185,7 +185,7 @@ app.get('/api/v2/check/controller/:name', async (req, res) => {
 // V2: 同步单个控制器
 app.post('/api/v2/sync/controller', async (req, res) => {
   const { name, dryRun = false } = req.body;
-  const engine = createSyncEngine();
+  const engine = createProxySyncEngine();
 
   try {
     if (!name) {
@@ -244,7 +244,7 @@ app.post('/api/v2/sync/controller', async (req, res) => {
 // V2: 批量同步控制器
 app.post('/api/v2/sync/controllers', async (req, res) => {
   const { controllers = [], dryRun = false } = req.body;
-  const engine = createSyncEngine();
+  const engine = createProxySyncEngine();
 
   try {
     let pairs;
