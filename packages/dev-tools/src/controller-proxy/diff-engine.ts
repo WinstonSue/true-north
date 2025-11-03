@@ -12,7 +12,7 @@ import {
   ParameterDefinition,
 } from '../core/intermediate-state';
 
-export class ProxyDiffEngine {
+export class ControllerProxyDiffEngine {
   /**
    * 比较两个中间态，生成差异报告
    */

@@ -5,8 +5,8 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { SourceAdapter, TargetAdapter } from '../core/adapters';
-import { ProxyDiffEngine } from './diff-engine';
-import { ProxyCodeGenerator } from './code-generator';
+import { ControllerProxyDiffEngine } from './diff-engine';
+import { ControllerProxyCodeGenerator } from './code-generator';
 import { IntermediateState, MethodDefinition, ParameterDefinition } from '../core/intermediate-state';
 import {
   MethodChangeType,
@@ -18,17 +18,17 @@ import {
   SyncResult,
 } from '../core/sync-engine';
 
-export class ProxySyncEngine {
+export class ControllerProxySyncEngine {
   private sourceAdapter: SourceAdapter;
   private targetAdapter: TargetAdapter;
-  private diffEngine: ProxyDiffEngine;
-  private codeGenerator: ProxyCodeGenerator;
+  private diffEngine: ControllerProxyDiffEngine;
+  private codeGenerator: ControllerProxyCodeGenerator;
 
   constructor() {
     this.sourceAdapter = new SourceAdapter();
     this.targetAdapter = new TargetAdapter();
-    this.diffEngine = new ProxyDiffEngine();
-    this.codeGenerator = new ProxyCodeGenerator();
+    this.diffEngine = new ControllerProxyDiffEngine();
+    this.codeGenerator = new ControllerProxyCodeGenerator();
   }
 
   /**
@@ -577,6 +577,6 @@ export class ProxySyncEngine {
 /**
  * 创建同步引擎实例
  */
-export function createProxySyncEngine(): ProxySyncEngine {
-  return new ProxySyncEngine();
+export function createProxySyncEngine(): ControllerProxySyncEngine {
+  return new ControllerProxySyncEngine();
 }
