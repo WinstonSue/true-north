@@ -5,11 +5,7 @@ import { todoService, todoRepeatService } from './todo.service';
 
 @Controller('/todo')
 export class TodoController {
-    private readonly controller = new _TodoController(todoService, todoRepeatService);
-  @Get('/find-mix-repeat/:id')
-  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string; }): Promise<TodoVO.TodoVo> {
-    return this.controller.findMixRepeat(id, query);
-  }
+  private readonly controller = new _TodoController(todoService, todoRepeatService);
 
   @Post('/create')
   async create(@Body() createTodoVo: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
@@ -64,5 +60,10 @@ export class TodoController {
   @Get('/list-mixed-repeat')
   async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
     return this.controller.listMixRepeat(query);
+  }
+
+  @Get('/find-mix-repeat/:id')
+  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string; }): Promise<TodoVO.TodoVo> {
+    return this.controller.findMixRepeat(id, query);
   }
 }

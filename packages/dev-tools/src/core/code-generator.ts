@@ -9,33 +9,67 @@ export class CodeGenerator {
   /**
    * 应用同步操作到目标代码
    */
-  applySyncActions(targetCode: string, actions: SyncAction[], targetState: IntermediateState): string {
+  applySyncActions(targetCode: string, actions: SyncAction[], targetState: IntermediateState, sourceState: IntermediateState): string {
     let updatedCode = targetCode;
 
-    // 按优先级处理同步操作
-    for (const action of actions) {
-      switch (action.type) {
-        case 'update_constructor':
-          updatedCode = this.updateConstructor(updatedCode, action.data as ConstructorDefinition, targetState);
-          break;
-        case 'add_method':
-        case 'update_method':
-          updatedCode = this.updateMethod(updatedCode, action.data as MethodDefinition, targetState);
-          break;
-        case 'remove_method':
-          updatedCode = this.removeMethod(updatedCode, action.methodName!, targetState);
-          break;
-        case 'update_imports':
-          // 目标代码保持现有导入，不做修改
-          break;
-      }
+    // 先处理构造函数更新
+    const constructorActions = actions.filter(a => a.type === 'update_constructor');
+    for (const action of constructorActions) {
+      updatedCode = this.updateConstructor(updatedCode, action.data as ConstructorDefinition, targetState);
     }
+
+    // 然后重新生成整个类体，保持源码方法顺序
+    updatedCode = this.regenerateClassBody(updatedCode, sourceState, targetState);
 
     return updatedCode;
   }
 
   /**
-   * 更新方法
+   * 重新生成类体，保持源码方法顺序
+   */
+  private regenerateClassBody(code: string, sourceState: IntermediateState, targetState: IntermediateState): string {
+    const classBodyRange = this.findClassBodyRange(code, targetState.metadata.className);
+    if (!classBodyRange) {
+      return code;
+    }
+
+    // 保留类定义之前的部分
+    const beforeClass = code.slice(0, classBodyRange.start);
+    const afterClass = code.slice(classBodyRange.end);
+
+    // 生成新的类体内容
+    const classBodyLines: string[] = [];
+
+    // 1. 保留构造函数实例化行
+    const existingBody = code.slice(classBodyRange.start, classBodyRange.end);
+    const instanceMatch = existingBody.match(/^\s*(private\s+readonly\s+controller\s*=\s*[^;]+;)/m);
+    if (instanceMatch) {
+      classBodyLines.push('  ' + instanceMatch[1]);
+      classBodyLines.push('');
+    }
+
+    // 2. 按源码顺序生成所有方法
+    const sourceMethodNames = Array.from(sourceState.methods.keys());
+    for (const methodName of sourceMethodNames) {
+      const sourceMethod = sourceState.methods.get(methodName);
+      if (sourceMethod) {
+        const methodCode = this.generateDesktopMethod(sourceMethod);
+        classBodyLines.push(methodCode);
+        classBodyLines.push('');
+      }
+    }
+
+    // 移除最后一个空行
+    if (classBodyLines[classBodyLines.length - 1] === '') {
+      classBodyLines.pop();
+    }
+
+    const newClassBody = classBodyLines.join('\n');
+    return beforeClass + '\n' + newClassBody + '\n' + afterClass;
+  }
+
+  /**
+   * 更新方法（已弃用，改用 regenerateClassBody）
    */
   private updateMethod(code: string, method: MethodDefinition, targetState: IntermediateState): string {
     // 先移除旧方法

@@ -187,9 +187,9 @@ export class DiffEngine {
       changes.push(`返回类型从 ${target.returnType} 改为 ${source.returnType}`);
     }
 
-    // 比较方法体（通过哈希）
-    if (source.bodyHash !== target.bodyHash) {
-      changes.push('方法体已修改');
+    // 智能比较方法体：检查 Target 是否已经是正确的代理调用
+    if (!this.isCorrectProxyCall(source, target)) {
+      changes.push('方法体需要更新为代理调用');
     }
 
     // 比较装饰器选项
@@ -198,6 +198,26 @@ export class DiffEngine {
     }
 
     return changes;
+  }
+
+  /**
+   * 检查 Target 方法是否已经是正确的代理调用
+   */
+  private isCorrectProxyCall(source: MethodDefinition, target: MethodDefinition): boolean {
+    // 检查 Target 方法体是否包含正确的代理调用模式
+    const expectedCall = `return this.controller.${source.name}(`;
+    
+    // 如果 Target 方法体包含期望的代理调用，认为是正确的
+    if (target.bodyText.includes(expectedCall)) {
+      // 进一步检查参数是否匹配
+      const sourceParamNames = source.parameters.map(p => p.name);
+      const expectedParams = sourceParamNames.join(', ');
+      const fullExpectedCall = `return this.controller.${source.name}(${expectedParams});`;
+      
+      return target.bodyText.includes(fullExpectedCall);
+    }
+    
+    return false;
   }
 
   /**

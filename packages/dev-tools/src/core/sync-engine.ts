@@ -163,7 +163,7 @@ export class SyncEngine {
 
       // 5. 应用同步操作
       if (!options.dryRun && diff.needsSync) {
-        const updatedCode = this.codeGenerator.applySyncActions(targetCode, actions, targetState);
+        const updatedCode = this.codeGenerator.applySyncActions(targetCode, actions, targetState, sourceState);
         writeFileSync(targetPath, updatedCode, 'utf-8');
 
         if (options.verbose) {
