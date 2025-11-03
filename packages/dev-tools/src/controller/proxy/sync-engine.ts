@@ -527,7 +527,7 @@ export class ControllerProxySyncEngine {
 
     // 这里需要导入 constants，但为了避免循环依赖，我们直接定义路径
     const SOURCE_BASE = path.join(process.cwd(), '../../packages/business/server/src');
-    const TARGET_BASE = path.join(process.cwd(), '../../apps/desktop/src/database');
+    const PROXY_TARGET_BASE = path.join(process.cwd(), '../../apps/desktop/src/database');
 
     const sourceControllerPaths = fg.sync(path.join(SOURCE_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
     const pairs: Array<{ className: string; sourcePath: string; targetPath: string }> = [];
@@ -538,7 +538,7 @@ export class ControllerProxySyncEngine {
       const className = this.extractClassNameFromPath(relativePath);
 
       // 构建目标路径
-      const targetPath = path.join(TARGET_BASE, relativePath);
+      const targetPath = path.join(PROXY_TARGET_BASE, relativePath);
 
       if (existsSync(targetPath)) {
         pairs.push({

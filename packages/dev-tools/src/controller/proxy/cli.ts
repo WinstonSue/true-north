@@ -9,7 +9,7 @@ import { Command } from 'commander';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { createProxySyncEngine } from './sync-engine';
-import { ROOT, SOURCE_BASE, TARGET_BASE } from '../../constants';
+import { ROOT, SOURCE_BASE, PROXY_TARGET_BASE } from '../../constants';
 
 interface ControllerPair {
   className: string;
@@ -34,7 +34,7 @@ function findControllerPairs(): ControllerPair[] {
   for (const controller of controllers) {
     const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
     const sourcePath = join(SOURCE_BASE, controller.path, `${controller.name}.controller.ts`);
-    const targetPath = join(TARGET_BASE, controller.path, `${controller.name}.controller.ts`);
+    const targetPath = join(PROXY_TARGET_BASE, controller.path, `${controller.name}.controller.ts`);
 
     if (existsSync(sourcePath) && existsSync(targetPath)) {
       pairs.push({

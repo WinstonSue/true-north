@@ -1,5 +1,5 @@
 import path from 'path';
-import { ROOT, SOURCE_BASE, TARGET_BASE } from '../constants';
+import { ROOT, SOURCE_BASE, PROXY_TARGET_BASE } from '../constants';
 
 /**
  * 获取相对于来源代码基础路径的相对路径
@@ -13,7 +13,7 @@ export function getRelServerPath(absolutePath: string): string {
  */
 export function getDesktopControllerPathFromServer(sourceControllerPath: string): string {
   const relativePath = getRelServerPath(sourceControllerPath);
-  return path.join(TARGET_BASE, relativePath);
+  return path.join(PROXY_TARGET_BASE, relativePath);
 }
 
 /**

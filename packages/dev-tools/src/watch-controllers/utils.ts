@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { TARGET_BASE, SOURCE_BASE } from '../constants';
+import { PROXY_TARGET_BASE, SOURCE_BASE } from '../constants';
 
 export function log(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -29,7 +29,7 @@ export function getRelServerPath(abs: string) {
 
 export function getDesktopControllerPathFromServer(absServerPath: string) {
   const rel = getRelServerPath(absServerPath);
-  return path.join(TARGET_BASE, rel);
+  return path.join(PROXY_TARGET_BASE, rel);
 }
 
 export function escapeRegExp(s: string): string {

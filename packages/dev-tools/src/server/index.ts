@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { findControllerPairs } from '../watch-controllers/utils/file-finder';
 import { createProxySyncEngine } from '../controller/proxy/sync-engine';
-import { SOURCE_BASE, TARGET_BASE } from '../constants';
+import { SOURCE_BASE, PROXY_TARGET_BASE } from '../constants';
 import { existsSync } from 'fs';
 
 const app = express();
@@ -26,7 +26,7 @@ function findControllerPairsV2() {
   for (const controller of controllers) {
     const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
     const sourcePath = path.join(SOURCE_BASE, controller.path, `${controller.name}.controller.ts`);
-    const targetPath = path.join(TARGET_BASE, controller.path, `${controller.name}.controller.ts`);
+    const targetPath = path.join(PROXY_TARGET_BASE, controller.path, `${controller.name}.controller.ts`);
 
     if (existsSync(sourcePath) && existsSync(targetPath)) {
       pairs.push({

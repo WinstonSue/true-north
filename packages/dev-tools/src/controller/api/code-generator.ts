@@ -5,7 +5,7 @@
 
 import { IntermediateState, SyncAction, MethodDefinition, ConstructorDefinition } from '../core/intermediate-state';
 
-export class ControllerProxyCodeGenerator {
+export class ControllerApiCodeGenerator {
   /**
    * 应用同步操作到目标代码
    */
