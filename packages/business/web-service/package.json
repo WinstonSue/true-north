@@ -1,0 +1,31 @@
+{
+  "name": "@life-toolkit/web-service",
+  "type": "module",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "require": "./index.ts"
+    }
+  },
+  "scripts": {
+    "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache",
+    "stylelint": "stylelint 'src/**/*.less' 'src/**/*.css' --fix --cache",
+    "lint": "npm run eslint && npm run stylelint"
+  },
+  "dependencies": {
+    "@life-toolkit/api": "workspace:*",
+    "@life-toolkit/vo": "workspace:*",
+    "@life-toolkit/enum": "workspace:*",
+    "@life-toolkit/share-types": "workspace:*"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix --cache"
+    ],
+    "*.{css, less}": [
+      "stylelint --fix"
+    ]
+  }
+}

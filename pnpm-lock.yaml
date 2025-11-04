@@ -590,6 +590,27 @@ importers:
         specifier: ^3.2.2
         version: 3.2.2(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
 
+  packages/business/web-service:
+    dependencies:
+      '@arco-design/color':
+        specifier: ^0.4.0
+        version: 0.4.0
+      '@arco-design/web-react':
+        specifier: ^2.66.0
+        version: 2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@arco-themes/react-francis':
+        specifier: ^0.0.1
+        version: 0.0.1(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      '@life-toolkit/api':
+        specifier: workspace:*
+        version: link:../api
+      '@life-toolkit/enum':
+        specifier: workspace:*
+        version: link:../enum
+      '@life-toolkit/share-types':
+        specifier: workspace:*
+        version: link:../../share/types
+
   packages/common-web/utils:
     dependencies:
       react:

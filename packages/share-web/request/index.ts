@@ -2,7 +2,7 @@ import { getElectronAPI, isElectronEnvironment } from './electron';
 import { get, post, put, remove } from './server';
 
 /**
- * 适配器装饰器 - 简化控制器方法的适配逻辑
+ * 适配器装饰器
  */
 export function request<T>({
   method,
