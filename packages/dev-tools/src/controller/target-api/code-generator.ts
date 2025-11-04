@@ -107,8 +107,12 @@ export class ControllerApiCodeGenerator {
     // 根据参数样式生成不同的方法签名和请求调用
     const httpMethod = method.verb.toLowerCase() === 'delete' ? 'remove' : method.verb.toLowerCase();
 
-    // 使用从server controller提取的返回类型
-    const genericType = method.returnType ? `<${method.returnType}>` : '';
+    // 使用从server controller提取的返回类型，移除Promise包装（因为API方法本身就是async）
+    let returnType = method.returnType || 'any';
+    if (returnType.startsWith('Promise<') && returnType.endsWith('>')) {
+      returnType = returnType.slice(8, -1); // 移除 Promise< 和 >
+    }
+    const genericType = `<${returnType}>`;
 
     // 根据方法参数生成对应的 API 方法参数
     const paramStyle = this.detectParameterStyle(method);
@@ -196,7 +200,7 @@ export class ControllerApiCodeGenerator {
       case 'update':
         return `${entityCap}VO.Update${entityCap}Vo`;
       case 'doneBatch':
-        return `${entityCap}VO.${entityCap}ListFiltersVo`;
+        return `${entityCap}VO.${entityCap}ListFilterVo`;
       default:
         return 'any';
     }
@@ -210,7 +214,7 @@ export class ControllerApiCodeGenerator {
       case 'page':
         return `${entityCap}VO.${entityCap}PageFilterVo`;
       case 'list':
-        return `${entityCap}VO.${entityCap}ListFiltersVo`;
+        return `${entityCap}VO.${entityCap}ListFilterVo`;
       default:
         return 'any';
     }
