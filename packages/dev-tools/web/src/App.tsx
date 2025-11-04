@@ -1,16 +1,12 @@
 import React from 'react'
-import { ConfigProvider, Layout, theme } from 'antd'
+import { ConfigProvider, Layout } from '@arco-design/web-react'
 import DevToolsPage from './components/DevToolsPage'
 
 const { Content } = Layout
 
 function App() {
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: theme.defaultAlgorithm,
-      }}
-    >
+    <ConfigProvider>
       <Layout style={{ minHeight: '100vh' }}>
         <Content style={{ padding: '24px' }}>
           <DevToolsPage />

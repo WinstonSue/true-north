@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Divider, Tabs } from 'antd';
+import React, { useState } from 'react';
+import { Typography, Divider, Tabs } from '@arco-design/web-react';
 import DesktopControllerTab from './DesktopControllerTab';
 import ApiControllerTab from './ApiControllerTab';
 
@@ -8,33 +8,26 @@ const { Title, Paragraph } = Typography;
 const DevToolsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('api-method-details');
 
-  const tabItems = [
-    {
-      key: 'method-details',
-      label: 'Desktop 控制器差异',
-      children: <DesktopControllerTab isActive={activeTab === 'method-details'} />,
-    },
-    {
-      key: 'api-method-details',
-      label: 'API 控制器差异',
-      children: <ApiControllerTab isActive={activeTab === 'api-method-details'} />,
-    },
-  ];
-
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <Title level={2}>Life Toolkit 开发工具</Title>
+      <Title heading={2}>Life Toolkit 开发工具</Title>
       <Paragraph>通过此页面可以查看控制器差异状态，并执行同步操作。</Paragraph>
 
       <Divider />
 
       <Tabs
-        activeKey={activeTab}
+        activeTab={activeTab}
         onChange={(key) => {
           setActiveTab(key);
         }}
-        items={tabItems}
-      />
+      >
+        <Tabs.TabPane key="method-details" title="Desktop 控制器差异">
+          <DesktopControllerTab isActive={activeTab === 'method-details'} />
+        </Tabs.TabPane>
+        <Tabs.TabPane key="api-method-details" title="API 控制器差异">
+          <ApiControllerTab isActive={activeTab === 'api-method-details'} />
+        </Tabs.TabPane>
+      </Tabs>
     </div>
   );
 };
