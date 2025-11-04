@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-import { findControllerPairs } from '../watch-controllers/utils/file-finder';
+// 移除已废弃的导入
 import { createProxySyncEngine } from '../watch-controller/target-proxy/sync-engine';
 import { createApiSyncEngine } from '../watch-controller/target-api/sync-engine';
 import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH } from '../constants';
@@ -12,8 +12,8 @@ const port = 3002;
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'dist')));
 
-// 辅助函数：查找控制器对
-function findControllerPairsV2() {
+// 辅助函数：查找 Desktop 控制器对
+function findDesktopControllerPairs() {
   const pairs = [];
 
   // 硬编码的控制器列表（后续可以改为自动发现）
@@ -73,9 +73,9 @@ function findApiControllerPairs() {
   return pairs;
 }
 
-// 辅助函数：查找单个控制器对
-function findControllerPairV2(name: string) {
-  const pairs = findControllerPairsV2();
+// 辅助函数：查找单个 Desktop 控制器对
+function findDesktopControllerPair(name: string) {
+  const pairs = findDesktopControllerPairs();
   return (
     pairs.find(
       (p) => p.name.toLowerCase() === name.toLowerCase() || p.className.toLowerCase().includes(name.toLowerCase())
@@ -96,11 +96,8 @@ function findApiControllerPair(name: string) {
 // 获取方法级别的详细差异
 app.get('/api/check/method-details', async (req, res) => {
   try {
-    // 获取项目根目录（从 dev-tools 目录向上两级）
-    const projectRoot = path.join(process.cwd(), '../..');
-
-    // 查找所有控制器对
-    const pairs = await findControllerPairs(projectRoot);
+    // 查找所有 Desktop 控制器对
+    const pairs = findDesktopControllerPairs();
 
     if (pairs.length === 0) {
       res.json({ success: true, data: [] });
@@ -128,14 +125,14 @@ app.get('/api/check/method-details', async (req, res) => {
   }
 });
 
-// ========== 新架构 V2 API 端点 ==========
+// ========== Desktop 控制器 API 端点 ==========
 
-// V2: 检查控制器差异（新架构）
-app.get('/api/v2/check/controllers', async (req, res) => {
+// 检查 Desktop 控制器差异
+app.get('/api/check/desktop-controllers', async (req, res) => {
   const engine = createProxySyncEngine();
 
   try {
-    const pairs = findControllerPairsV2();
+    const pairs = findDesktopControllerPairs();
     const results = await engine.syncControllers(
       pairs.map((p) => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
       { dryRun: true, verbose: false }
@@ -178,13 +175,13 @@ app.get('/api/v2/check/controllers', async (req, res) => {
   }
 });
 
-// V2: 检查单个控制器差异
-app.get('/api/v2/check/controller/:name', async (req, res) => {
+// 检查单个 Desktop 控制器差异
+app.get('/api/check/desktop-controller/:name', async (req, res) => {
   const { name } = req.params;
   const engine = createProxySyncEngine();
 
   try {
-    const pair = findControllerPairV2(name);
+    const pair = findDesktopControllerPair(name);
     if (!pair) {
       res.json({ success: false, error: `未找到控制器: ${name}` });
       return;
@@ -224,8 +221,8 @@ app.get('/api/v2/check/controller/:name', async (req, res) => {
   }
 });
 
-// V2: 同步单个控制器
-app.post('/api/v2/sync/controller', async (req, res) => {
+// 同步单个 Desktop 控制器
+app.post('/api/sync/desktop-controller', async (req, res) => {
   const { name, dryRun = false } = req.body;
   const engine = createProxySyncEngine();
 
@@ -235,7 +232,7 @@ app.post('/api/v2/sync/controller', async (req, res) => {
       return;
     }
 
-    const pair = findControllerPairV2(name);
+    const pair = findDesktopControllerPair(name);
     if (!pair) {
       res.json({ success: false, error: `未找到控制器: ${name}` });
       return;
@@ -283,8 +280,8 @@ app.post('/api/v2/sync/controller', async (req, res) => {
   }
 });
 
-// V2: 批量同步控制器
-app.post('/api/v2/sync/controllers', async (req, res) => {
+// 批量同步 Desktop 控制器
+app.post('/api/sync/desktop-controllers', async (req, res) => {
   const { controllers = [], dryRun = false } = req.body;
   const engine = createProxySyncEngine();
 
@@ -292,10 +289,10 @@ app.post('/api/v2/sync/controllers', async (req, res) => {
     let pairs;
     if (controllers.length === 0) {
       // 同步所有控制器
-      pairs = findControllerPairsV2();
+      pairs = findDesktopControllerPairs();
     } else {
       // 同步指定的控制器
-      pairs = controllers.map((name: string) => findControllerPairV2(name)).filter(Boolean);
+      pairs = controllers.map((name: string) => findDesktopControllerPair(name)).filter(Boolean);
     }
 
     if (pairs.length === 0) {
@@ -347,10 +344,10 @@ app.post('/api/v2/sync/controllers', async (req, res) => {
   }
 });
 
-// ========== API 控制器 V3 API 端点 ==========
+// ========== API 控制器 API 端点 ==========
 
-// V3: 检查 API 控制器差异
-app.get('/api/v3/check/api-controllers', async (req, res) => {
+// 检查 API 控制器差异
+app.get('/api/check/api-controllers', async (req, res) => {
   const engine = createApiSyncEngine();
 
   try {
@@ -397,8 +394,8 @@ app.get('/api/v3/check/api-controllers', async (req, res) => {
   }
 });
 
-// V3: 检查单个 API 控制器差异
-app.get('/api/v3/check/api-controller/:name', async (req, res) => {
+// 检查单个 API 控制器差异
+app.get('/api/check/api-controller/:name', async (req, res) => {
   const { name } = req.params;
   const engine = createApiSyncEngine();
 
@@ -443,8 +440,8 @@ app.get('/api/v3/check/api-controller/:name', async (req, res) => {
   }
 });
 
-// V3: 同步单个 API 控制器
-app.post('/api/v3/sync/api-controller', async (req, res) => {
+// 同步单个 API 控制器
+app.post('/api/sync/api-controller', async (req, res) => {
   const { name, dryRun = false } = req.body;
   const engine = createApiSyncEngine();
 
@@ -502,8 +499,8 @@ app.post('/api/v3/sync/api-controller', async (req, res) => {
   }
 });
 
-// V3: 批量同步 API 控制器
-app.post('/api/v3/sync/api-controllers', async (req, res) => {
+// 批量同步 API 控制器
+app.post('/api/sync/api-controllers', async (req, res) => {
   const { controllers = [], dryRun = false } = req.body;
   const engine = createApiSyncEngine();
 
@@ -566,8 +563,8 @@ app.post('/api/v3/sync/api-controllers', async (req, res) => {
   }
 });
 
-// V3: 获取 API 控制器方法级别详情
-app.get('/api/v3/check/api-method-details', async (req, res) => {
+// 获取 API 控制器方法级别详情
+app.get('/api/check/api-method-details', async (req, res) => {
   try {
     console.log('开始检查 API 控制器方法详情...');
     const engine = createApiSyncEngine();

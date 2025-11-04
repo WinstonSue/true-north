@@ -51,7 +51,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
   const checkApiMethodDetails = async () => {
     setApiMethodDetailsLoading(true);
     try {
-      const response = await fetch('/api/v3/check/api-method-details');
+      const response = await fetch('/api/check/api-method-details');
       const result = await response.json();
 
       if (result.success) {
@@ -68,7 +68,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
 
   const syncApiController = async (className: string) => {
     try {
-      const response = await fetch('/api/v3/sync/api-controller', {
+      const response = await fetch('/api/sync/api-controller', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

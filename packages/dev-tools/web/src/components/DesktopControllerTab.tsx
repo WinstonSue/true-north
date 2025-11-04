@@ -68,7 +68,7 @@ const DesktopControllerTab: React.FC<DesktopControllerTabProps> = ({ isActive = 
 
   const syncController = async (className: string) => {
     try {
-      const response = await fetch('/api/v2/sync/controller', {
+      const response = await fetch('/api/sync/desktop-controller', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
