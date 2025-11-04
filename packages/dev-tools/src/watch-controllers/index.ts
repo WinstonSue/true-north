@@ -12,7 +12,7 @@ import path from 'path';
 import fs from 'fs';
 import chokidar from 'chokidar';
 import fg from 'fast-glob';
-import { ROOT, SOURCE_BASE } from '../constants';
+import { ROOT, CONTROLLER_SOURCE_PATH } from '../constants';
 import {
   createLogger,
   readFileSafe,
@@ -81,14 +81,14 @@ function syncOne(sourceControllerPath: string) {
 }
 
 function syncAllOnce() {
-  const sourceControllerPaths = fg.sync(path.join(SOURCE_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
+  const sourceControllerPaths = fg.sync(path.join(CONTROLLER_SOURCE_PATH, '**/*.controller.ts').replace(/\\/g, '/'));
   for (const p of sourceControllerPaths) {
     syncOne(p);
   }
 }
 
 function watchAndSync() {
-  const sourceControllerGlob = path.join(SOURCE_BASE, '**/*.controller.ts');
+  const sourceControllerGlob = path.join(CONTROLLER_SOURCE_PATH, '**/*.controller.ts');
   logLocal('[dev-tools/watch-controllers] Watching:', sourceControllerGlob);
 
   const watcher = chokidar.watch(sourceControllerGlob, {

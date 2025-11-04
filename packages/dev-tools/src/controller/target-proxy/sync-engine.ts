@@ -526,19 +526,19 @@ export class ControllerProxySyncEngine {
     const { existsSync } = require('fs');
 
     // 这里需要导入 constants，但为了避免循环依赖，我们直接定义路径
-    const SOURCE_BASE = path.join(process.cwd(), '../../packages/business/server/src');
-    const PROXY_TARGET_BASE = path.join(process.cwd(), '../../apps/desktop/src/database');
+    const CONTROLLER_SOURCE_PATH = path.join(process.cwd(), '../../packages/business/server/src');
+    const CONTROLLER_PROXY_TARGET_PATH = path.join(process.cwd(), '../../apps/desktop/src/database');
 
-    const sourceControllerPaths = fg.sync(path.join(SOURCE_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
+    const sourceControllerPaths = fg.sync(path.join(CONTROLLER_SOURCE_PATH, '**/*.controller.ts').replace(/\\/g, '/'));
     const pairs: Array<{ className: string; sourcePath: string; targetPath: string }> = [];
 
     for (const sourcePath of sourceControllerPaths) {
       // 提取类名
-      const relativePath = path.relative(SOURCE_BASE, sourcePath);
+      const relativePath = path.relative(CONTROLLER_SOURCE_PATH, sourcePath);
       const className = this.extractClassNameFromPath(relativePath);
 
       // 构建目标路径
-      const targetPath = path.join(PROXY_TARGET_BASE, relativePath);
+      const targetPath = path.join(CONTROLLER_PROXY_TARGET_PATH, relativePath);
 
       if (existsSync(targetPath)) {
         pairs.push({

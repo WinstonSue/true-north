@@ -9,7 +9,7 @@ import { Command } from 'commander';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { createApiSyncEngine } from './sync-engine.js';
-import { SOURCE_BASE, API_TARGET_BASE } from '../../constants.js';
+import { CONTROLLER_SOURCE_PATH, CONTROLLER_API_TARGET_PATH } from '../../constants.js';
 
 interface ControllerPair {
   className: string;
@@ -33,8 +33,8 @@ function findControllerPairs(): ControllerPair[] {
 
   for (const controller of controllers) {
     const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
-    const sourcePath = join(SOURCE_BASE, controller.path, `${controller.name}.controller.ts`);
-    const targetPath = join(API_TARGET_BASE, controller.path, `${controller.name}.controller.ts`);
+    const sourcePath = join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
+    const targetPath = join(CONTROLLER_API_TARGET_PATH, controller.path, `${controller.name}.controller.ts`);
 
     if (existsSync(sourcePath) && existsSync(targetPath)) {
       pairs.push({

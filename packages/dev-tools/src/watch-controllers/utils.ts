@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { PROXY_TARGET_BASE, SOURCE_BASE } from '../constants';
+import { CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_SOURCE_PATH } from '../constants';
 
 export function log(...args: any[]) {
   // eslint-disable-next-line no-console
@@ -24,12 +24,12 @@ export function writeFileIfChanged(p: string, content: string): boolean {
 }
 
 export function getRelServerPath(abs: string) {
-  return path.relative(SOURCE_BASE, abs);
+  return path.relative(CONTROLLER_SOURCE_PATH, abs);
 }
 
 export function getDesktopControllerPathFromServer(absServerPath: string) {
   const rel = getRelServerPath(absServerPath);
-  return path.join(PROXY_TARGET_BASE, rel);
+  return path.join(CONTROLLER_PROXY_TARGET_PATH, rel);
 }
 
 export function escapeRegExp(s: string): string {

@@ -1,11 +1,11 @@
 import path from 'path';
-import { ROOT, SOURCE_BASE, PROXY_TARGET_BASE } from '../constants';
+import { ROOT, CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH } from '../constants';
 
 /**
  * 获取相对于来源代码基础路径的相对路径
  */
 export function getRelServerPath(absolutePath: string): string {
-  return path.relative(SOURCE_BASE, absolutePath);
+  return path.relative(CONTROLLER_SOURCE_PATH, absolutePath);
 }
 
 /**
@@ -13,7 +13,7 @@ export function getRelServerPath(absolutePath: string): string {
  */
 export function getDesktopControllerPathFromServer(sourceControllerPath: string): string {
   const relativePath = getRelServerPath(sourceControllerPath);
-  return path.join(PROXY_TARGET_BASE, relativePath);
+  return path.join(CONTROLLER_PROXY_TARGET_PATH, relativePath);
 }
 
 /**
@@ -22,7 +22,7 @@ export function getDesktopControllerPathFromServer(sourceControllerPath: string)
 export function getVoPathFromDto(dtoFilePath: string): string {
   // 从 packages/business/server/src/growth/goal/dto/goal-model.dto.ts
   // 转换为 packages/business/vo/growth/goal/goal-model.vo.ts
-  const relativePath = path.relative(SOURCE_BASE, dtoFilePath);
+  const relativePath = path.relative(CONTROLLER_SOURCE_PATH, dtoFilePath);
   const parts = relativePath.split(path.sep);
 
   // 移除 dto 目录层级
@@ -44,7 +44,7 @@ export function getVoPathFromDto(dtoFilePath: string): string {
 export function getApiControllerPathFromServer(sourceControllerPath: string): string {
   // 从 packages/business/server/src/growth/task/task.controller.ts
   // 转换为 packages/business/api/controller/task/task.ts
-  const relativePath = path.relative(SOURCE_BASE, sourceControllerPath);
+  const relativePath = path.relative(CONTROLLER_SOURCE_PATH, sourceControllerPath);
   const parts = relativePath.split(path.sep);
 
   // 移除最后的 .controller.ts 并替换为 .ts

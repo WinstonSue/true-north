@@ -507,7 +507,7 @@ export class ControllerApiSyncEngine {
     const { existsSync } = require('fs');
 
     // 导入路径常量
-    const { SOURCE_BASE, API_TARGET_BASE } = require('../../constants');
+    const { CONTROLLER_SOURCE_PATH, CONTROLLER_API_TARGET_PATH } = require('../../constants');
 
     // 硬编码的控制器列表（与服务器中保持一致）
     const controllers = [
@@ -521,9 +521,9 @@ export class ControllerApiSyncEngine {
 
     for (const controller of controllers) {
       const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
-      const sourcePath = path.join(SOURCE_BASE, controller.path, `${controller.name}.controller.ts`);
+      const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
       // API 控制器文件直接在 controller 目录下，不按模块分组
-      const targetPath = path.join(API_TARGET_BASE, `${controller.name}.ts`);
+      const targetPath = path.join(CONTROLLER_API_TARGET_PATH, `${controller.name}.ts`);
 
       if (existsSync(sourcePath) && existsSync(targetPath)) {
         pairs.push({

@@ -3,7 +3,7 @@ import path from 'path';
 import { findControllerPairs } from '../watch-controllers/utils/file-finder';
 import { createProxySyncEngine } from '../controller/target-proxy/sync-engine';
 import { createApiSyncEngine } from '../controller/target-api/sync-engine';
-import { SOURCE_BASE, PROXY_TARGET_BASE, API_TARGET_BASE } from '../constants';
+import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH } from '../constants';
 import { existsSync } from 'fs';
 
 const app = express();
@@ -26,8 +26,8 @@ function findControllerPairsV2() {
 
   for (const controller of controllers) {
     const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
-    const sourcePath = path.join(SOURCE_BASE, controller.path, `${controller.name}.controller.ts`);
-    const targetPath = path.join(PROXY_TARGET_BASE, controller.path, `${controller.name}.controller.ts`);
+    const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
+    const targetPath = path.join(CONTROLLER_PROXY_TARGET_PATH, controller.path, `${controller.name}.controller.ts`);
 
     if (existsSync(sourcePath) && existsSync(targetPath)) {
       pairs.push({
@@ -56,9 +56,9 @@ function findApiControllerPairs() {
 
   for (const controller of controllers) {
     const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
-    const sourcePath = path.join(SOURCE_BASE, controller.path, `${controller.name}.controller.ts`);
+    const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
     // API 控制器文件直接在 controller 目录下，不按模块分组
-    const targetPath = path.join(API_TARGET_BASE, `${controller.name}.ts`);
+    const targetPath = path.join(CONTROLLER_API_TARGET_PATH, `${controller.name}.ts`);
 
     if (existsSync(sourcePath) && existsSync(targetPath)) {
       pairs.push({

@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import fg from 'fast-glob';
-import { ROOT, SOURCE_BASE } from '../constants';
+import { ROOT, CONTROLLER_SOURCE_PATH } from '../constants';
 import {
   readFileSafe,
   getRelServerPath,
@@ -133,7 +133,7 @@ export function checkControllerStatus(sourceControllerPath: string): ControllerS
  * 检查所有待同步的 controller 文件
  */
 export function checkPendingSyncFiles(): SyncStatus {
-  const sourceControllerPaths = fg.sync(path.join(SOURCE_BASE, '**/*.controller.ts').replace(/\\/g, '/'));
+  const sourceControllerPaths = fg.sync(path.join(CONTROLLER_SOURCE_PATH, '**/*.controller.ts').replace(/\\/g, '/'));
   const controllers: ControllerStatus[] = [];
   
   for (const p of sourceControllerPaths) {
