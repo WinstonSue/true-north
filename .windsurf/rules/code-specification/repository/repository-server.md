@@ -31,7 +31,7 @@ import { Repository, FindOptionsWhere, Between, MoreThan, LessThan, Like, In } f
 import {
   CreateModuleDto,
   UpdateModuleDto,
-  ModulePageFiltersDto,
+  ModulePageFilterDto,
   ModuleListFilterDto,
   ModuleDto,
   Module,
@@ -101,7 +101,7 @@ export class ModuleRepository {
     return resourceList as ModuleDto[];
   }
 
-  async page(filter: ModulePageFiltersDto): Promise<{
+  async page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;
@@ -160,7 +160,7 @@ export class ModuleRepository {
     return (result.affected ?? 0) > 0;
   }
 
-  async deleteByFilter(filter: ModulePageFiltersDto): Promise<void> {
+  async deleteByFilter(filter: ModulePageFilterDto): Promise<void> {
     await this.moduleRepository.delete(this.buildWhere(filter));
   }
 
@@ -202,7 +202,7 @@ export class ModuleRepository {
   }
 
   // 查询条件构建器
-  private buildWhere(filter: ModulePageFiltersDto | ModuleListFilterDto): FindOptionsWhere<Module> {
+  private buildWhere(filter: ModulePageFilterDto | ModuleListFilterDto): FindOptionsWhere<Module> {
     const where: FindOptionsWhere<Module> = {};
 
     // 日期范围条件
@@ -309,7 +309,7 @@ async create(createDto: CreateModuleDto): Promise<ModuleDto> {
 
 ```typescript
 private buildWhere(
-  filter: ModulePageFiltersDto | ModuleListFilterDto
+  filter: ModulePageFilterDto | ModuleListFilterDto
 ): FindOptionsWhere<Module> {
   const where: FindOptionsWhere<Module> = {};
 
@@ -343,7 +343,7 @@ private buildWhere(
 ### 分页查询实现
 
 ```typescript
-async page(filter: ModulePageFiltersDto): Promise<{
+async page(filter: ModulePageFilterDto): Promise<{
   list: ModuleDto[];
   total: number;
   pageNum: number;
@@ -567,7 +567,7 @@ import { Repository, FindOptionsWhere, Between, MoreThan, LessThan, Like, In } f
 import {
   CreateModuleDto,
   UpdateModuleDto,
-  ModulePageFiltersDto,
+  ModulePageFilterDto,
   ModuleListFilterDto,
   ModuleDto,
   Module,
@@ -626,7 +626,7 @@ export class ModuleRepository {
     return resourceList as ModuleDto[];
   }
 
-  async page(filter: ModulePageFiltersDto): Promise<{
+  async page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;
@@ -685,7 +685,7 @@ export class ModuleRepository {
     return (result.affected ?? 0) > 0;
   }
 
-  async deleteByFilter(filter: ModulePageFiltersDto): Promise<void> {
+  async deleteByFilter(filter: ModulePageFilterDto): Promise<void> {
     await this.moduleRepository.delete(this.buildWhere(filter));
   }
 
@@ -726,7 +726,7 @@ export class ModuleRepository {
     await this.moduleRepository.softDelete({ relatedId: In(relatedIds) });
   }
 
-  private buildWhere(filter: ModulePageFiltersDto | ModuleListFilterDto): FindOptionsWhere<Module> {
+  private buildWhere(filter: ModulePageFilterDto | ModuleListFilterDto): FindOptionsWhere<Module> {
     const where: FindOptionsWhere<Module> = {};
 
     if (filter.planDateStart && filter.planDateEnd) {

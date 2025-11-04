@@ -1,13 +1,13 @@
 /**
- * 简化的代码生成器
- * 专注于目标代码控制器的代码同步
+ * API 控制器代码生成器
+ * 专门处理 API Controller 的代码生成和同步
  */
 
-import { IntermediateState, SyncAction, MethodDefinition, ConstructorDefinition } from '../core/intermediate-state';
+import { IntermediateState, SyncAction, MethodDefinition } from '../core/intermediate-state';
 
 export class ControllerApiCodeGenerator {
   /**
-   * 应用同步操作到目标代码
+   * 应用同步操作到 API 控制器代码
    */
   applySyncActions(
     targetCode: string,
@@ -17,148 +17,210 @@ export class ControllerApiCodeGenerator {
   ): string {
     let updatedCode = targetCode;
 
-    // 先处理构造函数更新
-    const constructorActions = actions.filter((a) => a.type === 'update_constructor');
-    for (const action of constructorActions) {
-      updatedCode = this.updateConstructor(updatedCode, action.data as ConstructorDefinition, targetState);
+    // 处理方法的增删改
+    for (const action of actions) {
+      switch (action.type) {
+        case 'add_method':
+          updatedCode = this.addMethod(updatedCode, action.data as MethodDefinition, targetState, sourceState);
+          break;
+        case 'remove_method':
+          if (action.methodName) {
+            updatedCode = this.removeMethod(updatedCode, action.methodName);
+          }
+          break;
+        case 'update_method':
+          if (action.methodName) {
+            updatedCode = this.updateMethod(updatedCode, action.methodName, action.data as MethodDefinition, targetState, sourceState);
+          }
+          break;
+      }
     }
-
-    // 然后重新生成整个类体，保持源码方法顺序
-    updatedCode = this.regenerateClassBody(updatedCode, sourceState, targetState);
 
     return updatedCode;
   }
 
   /**
-   * 重新生成类体，保持源码方法顺序
+   * 添加新的 API 方法
    */
-  private regenerateClassBody(code: string, sourceState: IntermediateState, targetState: IntermediateState): string {
+  private addMethod(code: string, method: MethodDefinition, targetState: IntermediateState, sourceState: IntermediateState): string {
     const classBodyRange = this.findClassBodyRange(code, targetState.metadata.className);
     if (!classBodyRange) {
       return code;
     }
 
-    // 保留类定义之前的部分
-    const beforeClass = code.slice(0, classBodyRange.start);
-    const afterClass = code.slice(classBodyRange.end);
+    // 修复：classBodyRange.end 是闭合大括号的位置，需要在它之前插入方法
+    const beforeClosingBrace = code.slice(0, classBodyRange.end);
+    const closingBraceAndAfter = code.slice(classBodyRange.end);
 
-    // 生成新的类体内容
-    const classBodyLines: string[] = [];
-
-    // 1. 保留构造函数实例化行
-    const existingBody = code.slice(classBodyRange.start, classBodyRange.end);
-    const instanceMatch = existingBody.match(/^\s*(private\s+readonly\s+controller\s*=\s*[^;]+;)/m);
-    if (instanceMatch) {
-      classBodyLines.push('  ' + instanceMatch[1]);
-      classBodyLines.push('');
-    }
-
-    // 2. 按源码顺序生成所有方法
-    const sourceMethodNames = Array.from(sourceState.methods.keys());
-    for (const methodName of sourceMethodNames) {
-      const sourceMethod = sourceState.methods.get(methodName);
-      if (sourceMethod) {
-        const methodCode = this.generateDesktopMethod(sourceMethod);
-        classBodyLines.push(methodCode);
-        classBodyLines.push('');
-      }
-    }
-
-    // 移除最后一个空行
-    if (classBodyLines[classBodyLines.length - 1] === '') {
-      classBodyLines.pop();
-    }
-
-    const newClassBody = classBodyLines.join('\n');
-    return beforeClass + '\n' + newClassBody + '\n' + afterClass;
+    // 生成 API 方法代码
+    const methodCode = this.generateApiMethod(method, sourceState);
+    
+    // 在类的闭合大括号之前添加新方法
+    return beforeClosingBrace + '\n' + methodCode + '\n' + closingBraceAndAfter;
   }
 
   /**
-   * 更新构造函数
+   * 移除 API 方法
    */
-  private updateConstructor(code: string, constructor: ConstructorDefinition, targetState: IntermediateState): string {
-    // 查找控制器实例化行
-    const instancePattern = /private\s+readonly\s+controller\s*=\s*new\s+[^;]+;/;
-    const match = code.match(instancePattern);
-
-    if (constructor.parameters.length > 0) {
-      const serviceNames = constructor.parameters.map((p) => p.name);
-      const newInstantiation = `  private readonly controller = new _${targetState.metadata.className}(${serviceNames.join(', ')});`;
-
-      if (match) {
-        // 更新现有的实例化行
-        return code.replace(instancePattern, newInstantiation);
-      } else {
-        // 在类开头添加实例化行
-        const classStart = code.indexOf('export class ' + targetState.metadata.className);
-        if (classStart === -1) return code;
-
-        const classBodyStart = code.indexOf('{', classStart) + 1;
-        const before = code.slice(0, classBodyStart);
-        const after = code.slice(classBodyStart);
-
-        // 检查是否已经有内容，如果有则添加换行
-        const hasContent = after.trim().length > 1; // 排除只有闭合大括号的情况
-        const spacing = hasContent ? '\n' : '';
-
-        return before + '\n' + newInstantiation + spacing + after;
-      }
+  private removeMethod(code: string, methodName: string): string {
+    const methodRange = this.findMethodRange(code, methodName);
+    if (!methodRange) {
+      return code;
     }
 
-    return code;
+    const before = code.slice(0, methodRange.start);
+    const after = code.slice(methodRange.end);
+    
+    return before + after;
   }
 
   /**
-   * 生成目标代码方法代码
+   * 更新 API 方法
    */
-  private generateDesktopMethod(method: MethodDefinition): string {
+  private updateMethod(code: string, methodName: string, method: MethodDefinition, targetState: IntermediateState, sourceState: IntermediateState): string {
+    // 先移除旧方法，再添加新方法
+    let updatedCode = this.removeMethod(code, methodName);
+    return this.addMethod(updatedCode, method, targetState, sourceState);
+  }
+
+  /**
+   * 生成 API 方法代码
+   */
+  private generateApiMethod(method: MethodDefinition, sourceState: IntermediateState): string {
     const lines: string[] = [];
+    const entityName = sourceState.metadata.className.replace('Controller', '');
+    const entityCap = entityName.charAt(0).toUpperCase() + entityName.slice(1);
 
-    // 生成装饰器
-    const { verb, path, decoratorOptions } = method;
-    if (decoratorOptions && Object.keys(decoratorOptions).length > 0) {
-      const optionsStr = JSON.stringify(decoratorOptions);
-      lines.push(`  @${verb}('${path}', ${optionsStr})`);
-    } else {
-      lines.push(`  @${verb}('${path}')`);
+    // 生成方法名 - 直接使用源方法名
+    const methodName = method.name;
+
+    // 合并Controller基础路径和方法路径
+    const basePath = sourceState.metadata.basePath || '';
+    const fullPath = basePath ? `${basePath}${method.path}` : method.path;
+
+    // 生成方法签名和请求调用
+    let signature = `  static async ${methodName}(`;
+    let requestCall = `request`;
+    let pathStr = fullPath;
+    let bodyParam = '';
+
+    // 根据参数样式生成不同的方法签名和请求调用
+    const httpMethod = method.verb.toLowerCase() === 'delete' ? 'remove' : method.verb.toLowerCase();
+
+    // 使用从server controller提取的返回类型
+    const genericType = method.returnType ? `<${method.returnType}>` : '';
+
+    // 根据方法参数生成对应的 API 方法参数
+    const paramStyle = this.detectParameterStyle(method);
+
+    switch (paramStyle) {
+      case 'none':
+        signature += ') {';
+        requestCall += `${genericType}({ method: "${httpMethod}" })`;
+        break;
+      case 'id':
+        const idType = this.extractIdType(method) || 'string';
+        signature += `id: ${idType}) {`;
+        pathStr = pathStr.replace('/:id', '/${id}');
+        requestCall += `${genericType}({ method: "${httpMethod}" })`;
+        break;
+      case 'id+body':
+        const idType2 = this.extractIdType(method) || 'string';
+        const bodyType = this.getDefaultBodyType(methodName, entityCap);
+        signature += `id: ${idType2}, body: ${bodyType}) {`;
+        pathStr = pathStr.replace('/:id', '/${id}');
+        requestCall += `${genericType}({ method: "${httpMethod}" })`;
+        bodyParam = ', body';
+        break;
+      case 'query':
+        const queryType = this.getDefaultQueryType(methodName, entityCap);
+        signature += `params: ${queryType}) {`;
+        requestCall += `${genericType}({ method: "${httpMethod}" })`;
+        bodyParam = ', params';
+        break;
+      case 'body':
+        const bodyType2 = this.getDefaultBodyType(methodName, entityCap);
+        signature += `body: ${bodyType2}) {`;
+        requestCall += `${genericType}({ method: "${httpMethod}" })`;
+        bodyParam = ', body';
+        break;
     }
 
-    // 生成方法签名
-    const params = method.parameters
-      .map((param) => {
-        const { decorator, decoratorArgs, name, type, optional } = param;
-        // 修复引号问题：检查 decoratorArgs 是否已经包含引号
-        let decoratorStr;
-        if (decoratorArgs && decoratorArgs.length > 0) {
-          const arg = decoratorArgs[0];
-          // 如果参数已经包含引号，直接使用；否则添加引号
-          const argStr = arg.startsWith("'") && arg.endsWith("'") ? arg : `'${arg}'`;
-          decoratorStr = `@${decorator}(${argStr})`;
-        } else {
-          decoratorStr = `@${decorator}()`;
-        }
-        const optionalStr = optional ? '?' : '';
-        return `${decoratorStr} ${name}${optionalStr}: ${type}`;
-      })
-      .join(', ');
-
-    // 处理返回类型，避免双重 Promise
-    const returnType = method.returnType.startsWith('Promise<') ? method.returnType : `Promise<${method.returnType}>`;
-    lines.push(`  async ${method.name}(${params}): ${returnType} {`);
-
-    // 生成方法体 - 简单的代理调用
-    const callParams = method.parameters.map((p) => p.name).join(', ');
-    lines.push(`    return this.controller.${method.name}(${callParams});`);
+    lines.push(signature);
+    lines.push(`    return ${requestCall}(\`${pathStr}\`${bodyParam});`);
     lines.push('  }');
 
     return lines.join('\n');
   }
 
   /**
+   * 检测参数样式
+   */
+  private detectParameterStyle(method: MethodDefinition): 'none' | 'id' | 'id+body' | 'query' | 'body' {
+    if (method.parameters.length === 0) {
+      return 'none';
+    }
+
+    const hasId = method.parameters.some(p => p.decorator === 'Param' && p.name === 'id');
+    const hasBody = method.parameters.some(p => p.decorator === 'Body');
+    const hasQuery = method.parameters.some(p => p.decorator === 'Query');
+
+    if (hasId && hasBody) {
+      return 'id+body';
+    } else if (hasId) {
+      return 'id';
+    } else if (hasQuery) {
+      return 'query';
+    } else if (hasBody) {
+      return 'body';
+    }
+
+    return 'none';
+  }
+
+  /**
+   * 提取 ID 类型
+   */
+  private extractIdType(method: MethodDefinition): string | null {
+    const idParam = method.parameters.find(p => p.decorator === 'Param' && p.name === 'id');
+    return idParam ? idParam.type : null;
+  }
+
+  /**
+   * 根据方法名和实体名生成默认的 body 类型
+   */
+  private getDefaultBodyType(methodName: string, entityCap: string): string {
+    switch (methodName) {
+      case 'create':
+        return `${entityCap}VO.Create${entityCap}Vo`;
+      case 'update':
+        return `${entityCap}VO.Update${entityCap}Vo`;
+      case 'doneBatch':
+        return `${entityCap}VO.${entityCap}ListFiltersVo`;
+      default:
+        return 'any';
+    }
+  }
+
+  /**
+   * 根据方法名和实体名生成默认的 query 类型
+   */
+  private getDefaultQueryType(methodName: string, entityCap: string): string {
+    switch (methodName) {
+      case 'page':
+        return `${entityCap}VO.${entityCap}PageFilterVo`;
+      case 'list':
+        return `${entityCap}VO.${entityCap}ListFiltersVo`;
+      default:
+        return 'any';
+    }
+  }
+
+  /**
    * 查找类体范围
    */
   private findClassBodyRange(code: string, className: string): { start: number; end: number } | null {
-    const classRegex = new RegExp(`export\\s+class\\s+${className}\\s*{`, 'g');
+    const classRegex = new RegExp(`export\\s+(?:default\\s+)?class\\s+${className}\\s*{`, 'g');
     const match = classRegex.exec(code);
 
     if (!match) {
@@ -190,37 +252,32 @@ export class ControllerApiCodeGenerator {
   }
 
   /**
-   * 查找方法范围 - 最终修复版本
+   * 查找方法范围
    */
   private findMethodRange(code: string, methodName: string): { start: number; end: number } | null {
-    // 使用更简单但更可靠的方法：查找方法名，然后向前向后扩展
-    const methodRegex = new RegExp(`async\\s+${methodName}\\s*\\(`, 'g');
+    // 查找静态方法
+    const methodRegex = new RegExp(`static\\s+async\\s+${methodName}\\s*\\(`, 'g');
     const match = methodRegex.exec(code);
 
     if (!match) {
       return null;
     }
 
-    // 从匹配位置向前查找装饰器开始
+    // 找到方法开始位置（包括前面的空行）
     let start = match.index;
     const lines = code.substring(0, start).split('\n');
-
-    // 向前查找到非装饰器、非空行为止
+    
+    // 向前查找到非空行为止
     let lineIndex = lines.length - 1;
-    while (lineIndex > 0) {
-      const prevLine = lines[lineIndex - 1].trim();
-      if (prevLine.startsWith('@') || prevLine === '') {
-        lineIndex--;
-      } else {
-        break;
-      }
+    while (lineIndex > 0 && lines[lineIndex - 1].trim() === '') {
+      lineIndex--;
     }
 
     // 重新计算开始位置
     if (lineIndex === 0) {
       start = 0;
     } else {
-      start = lines.slice(0, lineIndex).join('\n').length + 1; // +1 for the newline
+      start = lines.slice(0, lineIndex).join('\n').length + 1;
     }
 
     // 找到方法体结束

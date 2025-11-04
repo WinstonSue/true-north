@@ -2,7 +2,8 @@ import express from 'express';
 import path from 'path';
 import { findControllerPairs } from '../watch-controllers/utils/file-finder';
 import { createProxySyncEngine } from '../controller/target-proxy/sync-engine';
-import { SOURCE_BASE, PROXY_TARGET_BASE } from '../constants';
+import { createApiSyncEngine } from '../controller/target-api/sync-engine';
+import { SOURCE_BASE, PROXY_TARGET_BASE, API_TARGET_BASE } from '../constants';
 import { existsSync } from 'fs';
 
 const app = express();
@@ -41,9 +42,50 @@ function findControllerPairsV2() {
   return pairs;
 }
 
+// 辅助函数：查找 API 控制器对
+function findApiControllerPairs() {
+  const pairs = [];
+
+  // 硬编码的控制器列表（后续可以改为自动发现）
+  const controllers = [
+    { name: 'todo', path: 'growth/todo' },
+    { name: 'goal', path: 'growth/goal' },
+    { name: 'habit', path: 'growth/habit' },
+    { name: 'task', path: 'growth/task' },
+  ];
+
+  for (const controller of controllers) {
+    const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
+    const sourcePath = path.join(SOURCE_BASE, controller.path, `${controller.name}.controller.ts`);
+    // API 控制器文件直接在 controller 目录下，不按模块分组
+    const targetPath = path.join(API_TARGET_BASE, `${controller.name}.ts`);
+
+    if (existsSync(sourcePath) && existsSync(targetPath)) {
+      pairs.push({
+        className,
+        name: controller.name,
+        sourcePath,
+        targetPath,
+      });
+    }
+  }
+
+  return pairs;
+}
+
 // 辅助函数：查找单个控制器对
 function findControllerPairV2(name: string) {
   const pairs = findControllerPairsV2();
+  return (
+    pairs.find(
+      (p) => p.name.toLowerCase() === name.toLowerCase() || p.className.toLowerCase().includes(name.toLowerCase())
+    ) || null
+  );
+}
+
+// 辅助函数：查找单个 API 控制器对
+function findApiControllerPair(name: string) {
+  const pairs = findApiControllerPairs();
   return (
     pairs.find(
       (p) => p.name.toLowerCase() === name.toLowerCase() || p.className.toLowerCase().includes(name.toLowerCase())
@@ -302,6 +344,255 @@ app.post('/api/v2/sync/controllers', async (req, res) => {
     });
   } finally {
     engine.dispose();
+  }
+});
+
+// ========== API 控制器 V3 API 端点 ==========
+
+// V3: 检查 API 控制器差异
+app.get('/api/v3/check/api-controllers', async (req, res) => {
+  const engine = createApiSyncEngine();
+
+  try {
+    const pairs = findApiControllerPairs();
+    const results = await engine.syncControllers(
+      pairs.map((p) => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
+      { dryRun: true, verbose: false }
+    );
+
+    const controllerStatuses = results.map((result, index) => ({
+      name: pairs[index].name,
+      className: pairs[index].className,
+      needsSync: result.diff.needsSync,
+      changeCount: result.diff.changes.length,
+      success: result.success,
+      error: result.error,
+      changes: result.diff.changes.map((change) => ({
+        type: change.type,
+        methodName: change.methodName,
+        description: change.details.description,
+        severity: change.details.severity,
+      })),
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        controllers: controllerStatuses,
+        lastChecked: new Date().toISOString(),
+        summary: {
+          total: controllerStatuses.length,
+          needsSync: controllerStatuses.filter((c) => c.needsSync).length,
+          totalChanges: controllerStatuses.reduce((sum, c) => sum + c.changeCount, 0),
+        },
+      },
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  } finally {
+    engine.dispose();
+  }
+});
+
+// V3: 检查单个 API 控制器差异
+app.get('/api/v3/check/api-controller/:name', async (req, res) => {
+  const { name } = req.params;
+  const engine = createApiSyncEngine();
+
+  try {
+    const pair = findApiControllerPair(name);
+    if (!pair) {
+      res.json({ success: false, error: `未找到 API 控制器: ${name}` });
+      return;
+    }
+
+    const result = await engine.checkController(pair.sourcePath, pair.targetPath, {
+      verbose: true,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        name: pair.name,
+        className: pair.className,
+        needsSync: result.diff.needsSync,
+        changeCount: result.diff.changes.length,
+        changes: result.diff.changes.map((change) => ({
+          type: change.type,
+          methodName: change.methodName,
+          description: change.details.description,
+          severity: change.details.severity,
+        })),
+        actions: result.actions.map((action) => ({
+          type: action.type,
+          methodName: action.methodName,
+          description: action.description,
+        })),
+      },
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  } finally {
+    engine.dispose();
+  }
+});
+
+// V3: 同步单个 API 控制器
+app.post('/api/v3/sync/api-controller', async (req, res) => {
+  const { name, dryRun = false } = req.body;
+  const engine = createApiSyncEngine();
+
+  try {
+    if (!name) {
+      res.json({ success: false, error: '缺少 name 参数' });
+      return;
+    }
+
+    const pair = findApiControllerPair(name);
+    if (!pair) {
+      res.json({ success: false, error: `未找到 API 控制器: ${name}` });
+      return;
+    }
+
+    const result = await engine.syncController(pair.sourcePath, pair.targetPath, {
+      dryRun,
+      verbose: true,
+    });
+
+    res.json({
+      success: result.success,
+      data: {
+        name: pair.name,
+        className: pair.className,
+        needsSync: result.diff.needsSync,
+        changeCount: result.diff.changes.length,
+        actionCount: result.actions.length,
+        dryRun,
+        changes: result.diff.changes.map((change) => ({
+          type: change.type,
+          methodName: change.methodName,
+          description: change.details.description,
+        })),
+        actions: result.actions.map((action) => ({
+          type: action.type,
+          methodName: action.methodName,
+          description: action.description,
+        })),
+      },
+      message: result.success
+        ? dryRun
+          ? `API 控制器 ${pair.className} 检查完成`
+          : `API 控制器 ${pair.className} 同步完成`
+        : `API 控制器 ${pair.className} 同步失败`,
+      error: result.error,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  } finally {
+    engine.dispose();
+  }
+});
+
+// V3: 批量同步 API 控制器
+app.post('/api/v3/sync/api-controllers', async (req, res) => {
+  const { controllers = [], dryRun = false } = req.body;
+  const engine = createApiSyncEngine();
+
+  try {
+    let pairs;
+    if (controllers.length === 0) {
+      // 同步所有 API 控制器
+      pairs = findApiControllerPairs();
+    } else {
+      // 同步指定的 API 控制器
+      pairs = controllers.map((name: string) => findApiControllerPair(name)).filter(Boolean);
+    }
+
+    if (pairs.length === 0) {
+      res.json({ success: false, error: '没有找到可同步的 API 控制器' });
+      return;
+    }
+
+    const results = await engine.syncControllers(
+      pairs.map((p: any) => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
+      { dryRun, verbose: true }
+    );
+
+    const summary = {
+      total: results.length,
+      successful: results.filter((r) => r.success).length,
+      needsSync: results.filter((r) => r.diff.needsSync).length,
+      totalChanges: results.reduce((sum, r) => sum + r.diff.changes.length, 0),
+      totalActions: results.reduce((sum, r) => sum + r.actions.length, 0),
+    };
+
+    const controllerResults = results.map((result, index) => ({
+      name: pairs[index].name,
+      className: pairs[index].className,
+      success: result.success,
+      needsSync: result.diff.needsSync,
+      changeCount: result.diff.changes.length,
+      actionCount: result.actions.length,
+      error: result.error,
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        controllers: controllerResults,
+        summary,
+        dryRun,
+      },
+      message: dryRun
+        ? `API 控制器批量检查完成 (${summary.successful}/${summary.total})`
+        : `API 控制器批量同步完成 (${summary.successful}/${summary.total})`,
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  } finally {
+    engine.dispose();
+  }
+});
+
+// V3: 获取 API 控制器方法级别详情
+app.get('/api/v3/check/api-method-details', async (req, res) => {
+  try {
+    console.log('开始检查 API 控制器方法详情...');
+    const engine = createApiSyncEngine();
+    console.log('API 同步引擎创建成功');
+    
+    const controllers = await engine.checkAllControllers();
+    console.log('检查完成，找到控制器数量:', controllers.length);
+    
+    if (controllers.length > 0) {
+      console.log('控制器列表:', controllers.map(c => c.className));
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        controllers,
+        lastChecked: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('API 控制器方法详情检查失败:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 });
 

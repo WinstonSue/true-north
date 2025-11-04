@@ -32,8 +32,8 @@ export class HabitController {
   }
 
   @Get('/page')
-  async page(@Query() habitPageFiltersVo?: HabitVO.HabitPageFilterVo) {
-    return this.controller.page(habitPageFiltersVo);
+  async page(@Query() habitPageFilterVo?: HabitVO.HabitPageFilterVo) {
+    return this.controller.page(habitPageFilterVo);
   }
 
   @Put('/abandon/:id')

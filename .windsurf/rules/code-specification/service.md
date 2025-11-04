@@ -16,7 +16,7 @@ globs:
 
 ```typescript
 import { ModuleRepository, RelatedService } from './module.repository';
-import { CreateModuleDto, UpdateModuleDto, ModulePageFiltersDto, ModuleListFilterDto, ModuleDto } from './dto';
+import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from './dto';
 import { ModuleStatus } from '@life-toolkit/enum';
 
 export class ModuleService {
@@ -80,7 +80,7 @@ async list(filter: ModuleListFilterDto): Promise<ModuleDto[]> {
 
 // 分页查询
 async page(
-  filter: ModulePageFiltersDto
+  filter: ModulePageFilterDto
 ): Promise<{ list: ModuleDto[]; total: number; pageNum: number; pageSize: number }> {
   const { list, total, pageNum, pageSize } =
     await this.moduleRepository.page(filter);
@@ -285,7 +285,7 @@ const relatedConfig = {
 
 ```typescript
 import { ModuleRepository, RelatedService } from './module.repository';
-import { CreateModuleDto, UpdateModuleDto, ModulePageFiltersDto, ModuleListFilterDto, ModuleDto } from './dto';
+import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from './dto';
 import { ModuleStatus } from '@life-toolkit/enum';
 
 export class ModuleService {
@@ -318,7 +318,7 @@ export class ModuleService {
   }
 
   async page(
-    filter: ModulePageFiltersDto
+    filter: ModulePageFilterDto
   ): Promise<{ list: ModuleDto[]; total: number; pageNum: number; pageSize: number }> {
     const { list, total, pageNum, pageSize } = await this.moduleRepository.page(filter);
     return { list, total, pageNum, pageSize };

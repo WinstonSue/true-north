@@ -108,6 +108,12 @@ const DevToolsPage: React.FC = () => {
   const [methodDetailsLoading, setMethodDetailsLoading] = useState(false)
   const [selectedController, setSelectedController] = useState<ControllerSyncStatus | null>(null)
   const [methodModalVisible, setMethodModalVisible] = useState(false)
+  
+  // API 控制器相关状态
+  const [apiMethodDetails, setApiMethodDetails] = useState<MethodDetails | null>(null)
+  const [apiMethodDetailsLoading, setApiMethodDetailsLoading] = useState(false)
+  const [selectedApiController, setSelectedApiController] = useState<ControllerSyncStatus | null>(null)
+  const [apiMethodModalVisible, setApiMethodModalVisible] = useState(false)
 
   const executeCommand = async (operation: SyncOperation) => {
     const { id, command, type } = operation
@@ -231,15 +237,65 @@ const DevToolsPage: React.FC = () => {
     }
   }
 
+  // API 控制器相关函数
+  const checkApiMethodDetails = async () => {
+    setApiMethodDetailsLoading(true)
+    try {
+      const response = await fetch('/api/v3/check/api-method-details')
+      const result = await response.json()
+      
+      if (result.success) {
+        setApiMethodDetails(result.data)
+        message.success('API 控制器方法详情检查完成')
+      } else {
+        message.error(`API 控制器方法详情检查失败: ${result.error}`)
+      }
+    } catch (error) {
+      message.error(`API 控制器方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      setApiMethodDetailsLoading(false)
+    }
+  }
+
+  const syncApiController = async (className: string) => {
+    try {
+      const response = await fetch('/api/v3/sync/api-controller', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: className }),
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        message.success(result.message || `API 控制器 ${className} 同步完成`)
+        // 重新检查状态
+        await checkApiMethodDetails()
+      } else {
+        message.error(`API 控制器同步失败: ${result.error}`)
+      }
+    } catch (error) {
+      message.error(`API 控制器同步失败: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
   const showMethodDetails = (controller: ControllerSyncStatus) => {
     setSelectedController(controller)
     setMethodModalVisible(true)
+  }
+
+  const showApiMethodDetails = (controller: ControllerSyncStatus) => {
+    setSelectedApiController(controller)
+    setApiMethodModalVisible(true)
   }
 
   useEffect(() => {
     // 页面加载时自动检查一次状态
     checkControllerStatus()
     checkMethodDetails()
+    checkApiMethodDetails()
   }, [])
 
   const renderOperationCard = (operation: SyncOperation) => {
@@ -427,6 +483,134 @@ const DevToolsPage: React.FC = () => {
     )
   }
 
+  const renderApiMethodDetailsTable = () => {
+    if (!apiMethodDetails) return null
+
+    const columns = [
+      {
+        title: 'API Controller',
+        dataIndex: 'className',
+        key: 'className',
+        render: (className: string, record: ControllerSyncStatus) => (
+          <div>
+            <div style={{ fontWeight: 'bold' }}>{className}</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{record.filePath}</div>
+          </div>
+        ),
+      },
+      {
+        title: '同步状态',
+        key: 'syncStatus',
+        render: (record: ControllerSyncStatus) => (
+          <Space direction="vertical" size="small">
+            <div>
+              {record.needsSync ? (
+                <Tag color="orange" icon={<ExclamationCircleOutlined />}>需要同步</Tag>
+              ) : (
+                <Tag color="green" icon={<CheckCircleOutlined />}>已同步</Tag>
+              )}
+            </div>
+          </Space>
+        ),
+      },
+      {
+        title: 'API 方法统计',
+        key: 'methodStats',
+        render: (record: ControllerSyncStatus) => (
+          <Space wrap>
+            <Tag>总计: {record.summary.totalMethods}</Tag>
+            {record.summary.changedMethods > 0 && (
+              <Tag color="orange">变更: {record.summary.changedMethods}</Tag>
+            )}
+            {record.summary.addedMethods > 0 && (
+              <Tag color="blue">新增: {record.summary.addedMethods}</Tag>
+            )}
+            {record.summary.parameterChanges > 0 && (
+              <Tag color="purple">参数: {record.summary.parameterChanges}</Tag>
+            )}
+            {record.summary.decoratorChanges > 0 && (
+              <Tag color="gold">装饰器: {record.summary.decoratorChanges}</Tag>
+            )}
+          </Space>
+        ),
+      },
+      {
+        title: '操作',
+        key: 'actions',
+        render: (record: ControllerSyncStatus) => (
+          <Space>
+            <Button
+              size="small"
+              icon={<UnorderedListOutlined />}
+              onClick={() => showApiMethodDetails(record)}
+            >
+              查看详情
+            </Button>
+            {record.needsSync && (
+              <Button
+                size="small"
+                type="primary"
+                icon={<SyncOutlined />}
+                onClick={() => syncApiController(record.className)}
+              >
+                同步
+              </Button>
+            )}
+          </Space>
+        ),
+      },
+    ]
+
+    const needsSyncCount = apiMethodDetails.controllers.filter(c => c.needsSync).length
+
+    return (
+      <div style={{ marginTop: 24 }}>
+        <Card
+          title={
+            <Space>
+              <span>API 控制器方法级别差异检查</span>
+              <Button
+                size="small"
+                icon={<ReloadOutlined />}
+                loading={apiMethodDetailsLoading}
+                onClick={checkApiMethodDetails}
+              >
+                刷新
+              </Button>
+            </Space>
+          }
+          extra={
+            <Space>
+              <span>总计: {apiMethodDetails.controllers.length}</span>
+              <span>需要同步: {needsSyncCount}</span>
+              <span style={{ fontSize: '12px', color: '#666' }}>
+                最后检查: {new Date(apiMethodDetails.lastChecked).toLocaleString()}
+              </span>
+            </Space>
+          }
+        >
+          {needsSyncCount > 0 && (
+            <Alert
+              message={`发现 ${needsSyncCount} 个 API 控制器需要同步`}
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+          )}
+          
+          <Table
+            columns={columns}
+            dataSource={apiMethodDetails.controllers}
+            rowKey="className"
+            size="small"
+            pagination={{ pageSize: 10 }}
+            loading={apiMethodDetailsLoading}
+          />
+        </Card>
+      </div>
+    )
+  }
+
   const tabItems = [
     {
       key: 'operations',
@@ -447,8 +631,13 @@ const DevToolsPage: React.FC = () => {
     },
     {
       key: 'method-details',
-      label: '方法级别差异',
+      label: 'Desktop 控制器差异',
       children: renderMethodDetailsTable()
+    },
+    {
+      key: 'api-method-details',
+      label: 'API 控制器差异',
+      children: renderApiMethodDetailsTable()
     }
   ]
 
@@ -461,13 +650,20 @@ const DevToolsPage: React.FC = () => {
       
       <Divider />
       
-      <Tabs defaultActiveKey="method-details" items={tabItems} />
+      <Tabs defaultActiveKey="api-method-details" items={tabItems} />
       
       <MethodDetailsModal
         visible={methodModalVisible}
         onClose={() => setMethodModalVisible(false)}
         controller={selectedController}
         onSync={syncController}
+      />
+      
+      <MethodDetailsModal
+        visible={apiMethodModalVisible}
+        onClose={() => setApiMethodModalVisible(false)}
+        controller={selectedApiController}
+        onSync={syncApiController}
       />
     </div>
   )

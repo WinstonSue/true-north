@@ -95,7 +95,7 @@ function getDefaultBodyType(methodName: string, entityCap: string): string {
 function getDefaultQueryType(methodName: string, entityCap: string): string {
   switch (methodName) {
     case 'page':
-      return `${entityCap}VO.${entityCap}PageFiltersVo`;
+      return `${entityCap}VO.${entityCap}PageFilterVo`;
     case 'list':
       return `${entityCap}VO.${entityCap}ListFiltersVo`;
     default:

@@ -53,10 +53,10 @@ export class GoalController {
 
   @Get('/page', { description: '分页查询目标列表' })
   async page(
-    @Query() goalPageFiltersVo?: GoalVO.GoalPageFilterVo
+    @Query() goalPageFilterVo?: GoalVO.GoalPageFilterVo
   ): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
     const goalPageFilterDto = new GoalPageFilterDto();
-    goalPageFilterDto.importPageVo(goalPageFiltersVo ?? {});
+    goalPageFilterDto.importPageVo(goalPageFilterVo ?? {});
     const { list, total, pageNum, pageSize } = await this.goalService.page(goalPageFilterDto);
     return GoalDto.dtoListToPageVo(list, total, pageNum, pageSize);
   }

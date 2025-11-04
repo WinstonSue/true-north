@@ -45,10 +45,10 @@ export class TaskController {
 
   @Get('/page', { description: '分页查询任务列表' })
   async page(
-    @Query() taskPageFiltersVo?: TaskVO.TaskPageFilterVo
+    @Query() taskPageFilterVo?: TaskVO.TaskPageFilterVo
   ): Promise<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>> {
     const filter = new TaskPageFilterDto();
-    if (taskPageFiltersVo) filter.importPageVo(taskPageFiltersVo);
+    if (taskPageFilterVo) filter.importPageVo(taskPageFilterVo);
     const { list, total, pageNum, pageSize } = await this.taskService.page(filter);
     return TaskDto.dtoListToPageVo(list, total, pageNum, pageSize);
   }

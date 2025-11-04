@@ -272,7 +272,7 @@ export abstract class ModuleRepository {
 ```typescript
 // packages/business/server/src/{domain}/{module}/{module}.repository.ts
 import { Module } from './{module}.entity';
-import { CreateModuleDto, UpdateModuleDto, ModulePageFiltersDto, ModuleListFilterDto, ModuleDto } from './dto';
+import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from './dto';
 
 export interface ModuleRepository {
   // 创建操作
@@ -281,7 +281,7 @@ export interface ModuleRepository {
 
   // 查询操作
   findByFilter(filter: ModuleListFilterDto): Promise<ModuleDto[]>;
-  page(filter: ModulePageFiltersDto): Promise<{
+  page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;
@@ -295,7 +295,7 @@ export interface ModuleRepository {
 
   // 删除操作
   delete(id: string): Promise<boolean>;
-  deleteByFilter(filter: ModulePageFiltersDto): Promise<void>;
+  deleteByFilter(filter: ModulePageFilterDto): Promise<void>;
   softDeleteByParentIds(parentIds: string[]): Promise<void>;
 
   // 特殊业务操作
@@ -335,7 +335,7 @@ export class ModuleRepository {
     return this.findWithRelations(module.id);
   }
 
-  async page(filter: ModulePageFiltersDto): Promise<{
+  async page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;
@@ -358,7 +358,7 @@ export class ModuleRepository {
     };
   }
 
-  private buildWhere(filter: ModulePageFiltersDto): FindOptionsWhere<Module> {
+  private buildWhere(filter: ModulePageFilterDto): FindOptionsWhere<Module> {
     const where: FindOptionsWhere<Module> = {};
 
     // 日期范围条件
@@ -427,7 +427,7 @@ export class ModuleRepository {
     return ModuleDto.importEntity(saved);
   }
 
-  async page(filter: ModulePageFiltersDto): Promise<{
+  async page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;
@@ -505,7 +505,7 @@ export class ModuleService {
     return await this.moduleRepository.update(id, updateDto);
   }
 
-  async page(filter: ModulePageFiltersDto): Promise<{
+  async page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;

@@ -30,7 +30,7 @@ import { AppDataSource } from '../../database.config';
 import {
   CreateModuleDto,
   UpdateModuleDto,
-  ModulePageFiltersDto,
+  ModulePageFilterDto,
   ModuleListFilterDto,
   ModuleDto,
   ModuleMapper,
@@ -118,7 +118,7 @@ export class ModuleRepository {
     return list.map((item) => ModuleDto.importEntity(item));
   }
 
-  async page(filter: ModulePageFiltersDto): Promise<{
+  async page(filter: ModulePageFilterDto): Promise<{
     list: ResourceDto[];
     total: number;
     pageNum: number;
@@ -167,7 +167,7 @@ export class ModuleRepository {
     return true;
   }
 
-  async deleteByFilter(filter: ModulePageFiltersDto): Promise<void> {
+  async deleteByFilter(filter: ModulePageFilterDto): Promise<void> {
     const qb = this.repo.createQueryBuilder('resource');
     if (filter.relatedIds && filter.relatedIds.length > 0) {
       qb.where('resource.relatedId IN (:...ids)', { ids: filter.relatedIds });
@@ -293,7 +293,7 @@ async create(createDto: CreateModuleDto): Promise<ResourceDto> {
 ### 分页查询实现
 
 ```typescript
-async page(filter: ModulePageFiltersDto): Promise<{
+async page(filter: ModulePageFilterDto): Promise<{
   list: ResourceDto[];
   total: number;
   pageNum: number;
@@ -463,7 +463,7 @@ import { AppDataSource } from '../../database.config';
 import {
   CreateModuleDto,
   UpdateModuleDto,
-  ModulePageFiltersDto,
+  ModulePageFilterDto,
   ModuleListFilterDto,
   ResourceDto,
   ModuleMapper,
@@ -556,7 +556,7 @@ export class ModuleRepository {
     return list.map((item) => ModuleDto.importEntity(item));
   }
 
-  async page(filter: ModulePageFiltersDto): Promise<{
+  async page(filter: ModulePageFilterDto): Promise<{
     list: ResourceDto[];
     total: number;
     pageNum: number;
@@ -605,7 +605,7 @@ export class ModuleRepository {
     return true;
   }
 
-  async deleteByFilter(filter: ModulePageFiltersDto): Promise<void> {
+  async deleteByFilter(filter: ModulePageFilterDto): Promise<void> {
     const qb = this.repo.createQueryBuilder('resource');
     if (filter.relatedIds && filter.relatedIds.length > 0) {
       qb.where('resource.relatedId IN (:...ids)', { ids: filter.relatedIds });

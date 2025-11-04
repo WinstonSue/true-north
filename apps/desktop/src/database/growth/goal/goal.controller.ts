@@ -37,8 +37,8 @@ export class GoalController {
   }
 
   @Get('/page')
-  async page(@Query() goalPageFiltersVo?: GoalVO.GoalPageFilterVo): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
-    return this.controller.page(goalPageFiltersVo);
+  async page(@Query() goalPageFilterVo?: GoalVO.GoalPageFilterVo): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
+    return this.controller.page(goalPageFilterVo);
   }
 
   @Get('/get-tree')

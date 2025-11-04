@@ -47,10 +47,10 @@ export class HabitController {
 
   @Get('/page', { description: '分页查询习惯列表' })
   async page(
-    @Query() habitPageFiltersVo?: HabitVO.HabitPageFilterVo
+    @Query() habitPageFilterVo?: HabitVO.HabitPageFilterVo
   ): Promise<ResponsePageVo<HabitVO.HabitWithoutRelationsVo>> {
     const filter = new HabitPageFilterDto();
-    if (habitPageFiltersVo) filter.importPageVo(habitPageFiltersVo);
+    if (habitPageFilterVo) filter.importPageVo(habitPageFilterVo);
     const { list, total, pageNum, pageSize } = await this.habitService.page(filter);
     return HabitDto.dtoListToPageVo(list, total, pageNum, pageSize);
   }

@@ -32,8 +32,8 @@ export class TaskController {
   }
 
   @Get('/page')
-  async page(@Query() taskPageFiltersVo?: TaskVO.TaskPageFilterVo) {
-    return this.controller.page(taskPageFiltersVo);
+  async page(@Query() taskPageFilterVo?: TaskVO.TaskPageFilterVo) {
+    return this.controller.page(taskPageFilterVo);
   }
 
   @Get('/task-with-relations/:id')

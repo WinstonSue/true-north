@@ -2,14 +2,6 @@ import { request } from '@life-toolkit/share-request';
 import { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
 
 export default class TodoController {
-  static async create(body: TodoVO.CreateTodoVo) {
-    return request<TodoVO.TodoVo>({ method: 'post' })(`/todo/create`, body);
-  }
-
-  static async delete(id: string) {
-    return request<boolean>({ method: 'remove' })(`/todo/delete/${id}`);
-  }
-
   static async update(id: string, body: TodoVO.UpdateTodoVo) {
     return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update/${id}`, body);
   }
