@@ -5,9 +5,9 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { SourceAdapter } from '../core/adapters/index.js';
-import { ControllerApiDiffEngine } from './diff-engine';
-import { ControllerApiCodeGenerator } from './code-generator';
-import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
+import { ControllerApiDiffEngine } from './diff-engine.js';
+import { ControllerApiCodeGenerator } from './code-generator.js';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state.js';
 import {
   MethodChange,
   MethodDetailsResult,
@@ -15,7 +15,7 @@ import {
   ControllerSyncStatus,
   SyncOptions,
   SyncResult,
-} from '../core/sync-engine';
+} from '../core/sync-engine.js';
 
 /**
  * API 控制器同步引擎

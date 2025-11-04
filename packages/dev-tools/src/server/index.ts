@@ -1,8 +1,8 @@
 import express from 'express';
 import path from 'path';
 import { findControllerPairs } from '../watch-controllers/utils/file-finder';
-import { createProxySyncEngine } from '../controller/target-proxy/sync-engine';
-import { createApiSyncEngine } from '../controller/target-api/sync-engine';
+import { createProxySyncEngine } from '../watch-controller/target-proxy/sync-engine';
+import { createApiSyncEngine } from '../watch-controller/target-api/sync-engine';
 import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH } from '../constants';
 import { existsSync } from 'fs';
 
