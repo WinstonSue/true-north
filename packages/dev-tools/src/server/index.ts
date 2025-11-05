@@ -3,7 +3,8 @@ import path from 'path';
 // 移除已废弃的导入
 import { createProxySyncEngine } from '../watch-controller/target-proxy/sync-engine';
 import { createApiSyncEngine } from '../watch-controller/target-api/sync-engine';
-import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH } from '../constants';
+import { createWebServiceSyncEngine } from '../watch-controller/target-web-service/sync-engine';
+import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH, CONTROLLER_WEB_SERVICE_TARGET_PATH } from '../constants';
 import { existsSync } from 'fs';
 
 const app = express();
@@ -73,6 +74,37 @@ function findApiControllerPairs() {
   return pairs;
 }
 
+// 辅助函数：查找 Web Service 控制器对
+function findWebServiceControllerPairs() {
+  const pairs = [];
+
+  // 硬编码的控制器列表（后续可以改为自动发现）
+  const controllers = [
+    { name: 'todo', path: 'growth/todo' },
+    { name: 'goal', path: 'growth/goal' },
+    { name: 'habit', path: 'growth/habit' },
+    { name: 'task', path: 'growth/task' },
+  ];
+
+  for (const controller of controllers) {
+    const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Service';
+    const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
+    // Web Service 文件按模块分组
+    const targetPath = path.join(CONTROLLER_WEB_SERVICE_TARGET_PATH, controller.path.split('/')[0], `${controller.name}.service.ts`);
+
+    if (existsSync(sourcePath) && existsSync(targetPath)) {
+      pairs.push({
+        className,
+        name: controller.name,
+        sourcePath,
+        targetPath,
+      });
+    }
+  }
+
+  return pairs;
+}
+
 // 辅助函数：查找单个 Desktop 控制器对
 function findDesktopControllerPair(name: string) {
   const pairs = findDesktopControllerPairs();
@@ -86,6 +118,16 @@ function findDesktopControllerPair(name: string) {
 // 辅助函数：查找单个 API 控制器对
 function findApiControllerPair(name: string) {
   const pairs = findApiControllerPairs();
+  return (
+    pairs.find(
+      (p) => p.name.toLowerCase() === name.toLowerCase() || p.className.toLowerCase().includes(name.toLowerCase())
+    ) || null
+  );
+}
+
+// 辅助函数：查找单个 Web Service 控制器对
+function findWebServiceControllerPair(name: string) {
+  const pairs = findWebServiceControllerPairs();
   return (
     pairs.find(
       (p) => p.name.toLowerCase() === name.toLowerCase() || p.className.toLowerCase().includes(name.toLowerCase())
@@ -170,8 +212,6 @@ app.get('/api/check/desktop-controllers', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -216,8 +256,6 @@ app.get('/api/check/desktop-controller/:name', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -275,8 +313,6 @@ app.post('/api/sync/desktop-controller', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -339,8 +375,6 @@ app.post('/api/sync/desktop-controllers', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -389,8 +423,6 @@ app.get('/api/check/api-controllers', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -435,8 +467,6 @@ app.get('/api/check/api-controller/:name', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -494,8 +524,6 @@ app.post('/api/sync/api-controller', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -558,8 +586,6 @@ app.post('/api/sync/api-controllers', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : String(error),
     });
-  } finally {
-    engine.dispose();
   }
 });
 
@@ -586,6 +612,91 @@ app.get('/api/check/api-method-details', async (req, res) => {
     });
   } catch (error) {
     console.error('API 控制器方法详情检查失败:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+// ========== Web Service API 端点 ==========
+
+// 获取 Web Service 方法级别详情
+app.get('/api/check/web-service-method-details', async (req, res) => {
+  try {
+    console.log('开始检查 Web Service 方法详情...');
+    const engine = createWebServiceSyncEngine();
+    console.log('Web Service 同步引擎创建成功');
+    
+    const controllers = await engine.checkAllControllers();
+    console.log('检查完成，找到控制器数量:', controllers.length);
+    
+    if (controllers.length > 0) {
+      console.log('控制器列表:', controllers.map(c => c.className));
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        controllers,
+        lastChecked: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('Web Service 方法详情检查失败:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+// 同步单个 Web Service
+app.post('/api/sync/web-service-controller', async (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    res.status(400).json({
+      success: false,
+      error: '缺少控制器名称参数',
+    });
+    return;
+  }
+
+  try {
+    const pair = findWebServiceControllerPair(name);
+    if (!pair) {
+      res.status(404).json({
+        success: false,
+        error: `未找到 Web Service: ${name}`,
+      });
+      return;
+    }
+
+    const engine = createWebServiceSyncEngine();
+    const result = await engine.syncController(pair.sourcePath, pair.targetPath, {
+      dryRun: false,
+      verbose: true,
+    });
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: `Web Service ${pair.className} 同步完成`,
+        data: {
+          controllerName: result.controllerName,
+          needsSync: result.diff.needsSync,
+          changeCount: result.diff.changes.length,
+          actionCount: result.actions.length,
+        },
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.error || 'Web Service 同步失败',
+      });
+    }
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : String(error),

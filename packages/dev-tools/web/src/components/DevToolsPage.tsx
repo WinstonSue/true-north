@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Typography, Divider, Tabs } from '@arco-design/web-react';
 import DesktopControllerTab from './DesktopControllerTab';
 import ApiControllerTab from './ApiControllerTab';
+import WebServiceTab from './WebServiceTab';
 
 const { Title, Paragraph } = Typography;
 
@@ -26,6 +27,9 @@ const DevToolsPage: React.FC = () => {
         </Tabs.TabPane>
         <Tabs.TabPane key="api-method-details" title="API 控制器差异">
           <ApiControllerTab isActive={activeTab === 'api-method-details'} />
+        </Tabs.TabPane>
+        <Tabs.TabPane key="web-service-method-details" title="Web Service 差异">
+          <WebServiceTab isActive={activeTab === 'web-service-method-details'} />
         </Tabs.TabPane>
       </Tabs>
     </div>

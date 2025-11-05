@@ -115,7 +115,7 @@ export class ControllerApiCodeGenerator {
     const genericType = `<${returnType}>`;
 
     // 根据方法参数生成对应的 API 方法参数
-    const paramStyle = this.detectParameterStyle(method);
+    let paramStyle = this.detectParameterStyle(method);
 
     switch (paramStyle) {
       case 'none':
@@ -145,16 +145,27 @@ export class ControllerApiCodeGenerator {
         bodyParam = ', params';
         break;
       case 'query':
-        const queryType = this.getDefaultQueryType(methodName, entityCap);
-        signature += `params: ${queryType}) {`;
+        const queryType = this.extractQueryType(method) || this.getDefaultQueryType(methodName, entityCap);
+        const queryParam = method.parameters.find(p => p.decorator === 'Query');
+        const isQueryOptional = queryParam?.optional || false;
+        signature += `params${isQueryOptional ? '?' : ''}: ${queryType}) {`;
         requestCall += `${genericType}({ method: "${httpMethod}" })`;
         bodyParam = ', params';
         break;
       case 'body':
-        const bodyType2 = this.getDefaultBodyType(methodName, entityCap);
+        const bodyType2 = this.extractBodyType(method) || this.getDefaultBodyType(methodName, entityCap);
         signature += `body: ${bodyType2}) {`;
         requestCall += `${genericType}({ method: "${httpMethod}" })`;
         bodyParam = ', body';
+        break;
+      case 'query+body':
+        const queryType3 = this.extractQueryType(method) || `${entityCap}VO.${entityCap}FilterVo`;
+        const bodyType3 = this.extractBodyType(method) || 'any';
+        signature += `query: ${queryType3}, body: ${bodyType3}) {`;
+        requestCall += `${genericType}({ method: "${httpMethod}" })`;
+        bodyParam = ', body';
+        // 对于 query+body，需要特殊处理 URL 参数
+        pathStr = `${pathStr}?\${new URLSearchParams(query as any).toString()}`;
         break;
     }
 
@@ -168,7 +179,7 @@ export class ControllerApiCodeGenerator {
   /**
    * 检测参数样式
    */
-  private detectParameterStyle(method: MethodDefinition): 'none' | 'id' | 'id+body' | 'id+query' | 'query' | 'body' {
+  private detectParameterStyle(method: MethodDefinition): 'none' | 'id' | 'id+body' | 'id+query' | 'query' | 'body' | 'query+body' {
     if (method.parameters.length === 0) {
       return 'none';
     }
@@ -181,6 +192,8 @@ export class ControllerApiCodeGenerator {
       return 'id+body';
     } else if (hasId && hasQuery) {
       return 'id+query';
+    } else if (hasQuery && hasBody) {
+      return 'query+body';
     } else if (hasId) {
       return 'id';
     } else if (hasQuery) {
@@ -209,6 +222,14 @@ export class ControllerApiCodeGenerator {
   }
 
   /**
+   * 提取 Body 类型
+   */
+  private extractBodyType(method: MethodDefinition): string | null {
+    const bodyParam = method.parameters.find(p => p.decorator === 'Body');
+    return bodyParam ? bodyParam.type : null;
+  }
+
+  /**
    * 根据方法名和实体名生成默认的 body 类型
    */
   private getDefaultBodyType(methodName: string, entityCap: string): string {
@@ -216,8 +237,10 @@ export class ControllerApiCodeGenerator {
       case 'create':
         return `${entityCap}VO.Create${entityCap}Vo`;
       case 'update':
+      case 'updateWithRepeat':
         return `${entityCap}VO.Update${entityCap}Vo`;
       case 'doneBatch':
+      case 'doneWithRepeatBatch':
         return `${entityCap}VO.${entityCap}ListFilterVo`;
       default:
         return 'any';
@@ -232,7 +255,10 @@ export class ControllerApiCodeGenerator {
       case 'page':
         return `${entityCap}VO.${entityCap}PageFilterVo`;
       case 'list':
+      case 'listMixRepeat':
         return `${entityCap}VO.${entityCap}ListFilterVo`;
+      case 'findByFilter':
+        return `${entityCap}VO.${entityCap}FilterVo`;
       default:
         return 'any';
     }

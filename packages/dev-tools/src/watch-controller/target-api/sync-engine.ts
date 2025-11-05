@@ -90,25 +90,79 @@ export class ControllerApiSyncEngine extends SyncEngine {
 
   /**
    * 解析 API 目标代码为中间态 - API 控制器专用解析
-   * API 控制器已经是生成的代码，我们只需要检查方法是否存在即可
+   * 需要正确解析参数信息以便进行差异比对
    */
   protected parseApiTargetToIntermediateState(code: string, filePath: string): IntermediateState {
     const methods = new Map<string, MethodDefinition>();
 
-    // 解析 API 控制器中的静态方法，只关注方法名
-    const methodRegex = /static\s+async\s+(\w+)\s*\([^)]*\)\s*\{/g;
+    // 更强健的方法解析，支持复杂的参数类型
+    const methodRegex = /static\s+async\s+(\w+)\s*\(/g;
     let match;
 
     while ((match = methodRegex.exec(code)) !== null) {
       const methodName = match[1];
+      const startPos = match.index + match[0].length - 1; // 定位到开括号
       
-      // API 控制器的方法定义简化处理，只用于存在性检查
-      // 不需要详细解析参数和装饰器，因为 API 控制器是生成的代码
+      // 找到匹配的闭括号，处理嵌套的泛型类型
+      let braceCount = 1;
+      let i = startPos + 1;
+      let paramString = '';
+      
+      while (i < code.length && braceCount > 0) {
+        const char = code[i];
+        if (char === '(') {
+          braceCount++;
+        } else if (char === ')') {
+          braceCount--;
+        }
+        
+        if (braceCount > 0) {
+          paramString += char;
+        }
+        i++;
+      }
+      
+      // 解析参数
+      const parameters: any[] = [];
+      if (paramString.trim()) {
+        // 智能分割参数，考虑泛型和嵌套类型
+        const paramParts = this.smartSplitParameters(paramString);
+        for (const param of paramParts) {
+          if (param.trim()) {
+            // 匹配参数名和类型，支持可选参数和复杂类型
+            const paramMatch = param.match(/(\w+)(\??):\s*(.+?)(?:\s*=\s*.*)?$/);
+            if (paramMatch) {
+              const paramName = paramMatch[1];
+              const isOptional = paramMatch[2] === '?';
+              const paramType = paramMatch[3].trim();
+              
+              // 根据参数名推断装饰器类型
+              let decorator = 'Body';
+              if (paramName === 'id') {
+                decorator = 'Param';
+              } else if (paramName === 'params' || paramName === 'query') {
+                decorator = 'Query';
+              } else if (paramName === 'body') {
+                decorator = 'Body';
+              }
+              
+              parameters.push({
+                name: paramName,
+                type: paramType,
+                decorator,
+                decoratorArgs: [],
+                optional: isOptional,
+              });
+            }
+          }
+        }
+      }
+      
       methods.set(methodName, {
         name: methodName,
         verb: 'Get', // 占位符，不用于比对
         path: `/${methodName}`, // 占位符，不用于比对
-        parameters: [], // 占位符，不用于比对
+        parameters,
         returnType: 'any', // 占位符，不用于比对
         bodyText: '',
         bodyHash: '',
@@ -137,21 +191,41 @@ export class ControllerApiSyncEngine extends SyncEngine {
 
   /**
    * 重写变更类型检测 - API 控制器专用
-   * API 控制器是生成的代码，只要方法存在就认为是同步的
+   * 检测参数签名是否发生变化
    */
-  protected detectChangeType(_sourceMethod: MethodDefinition, _targetMethod: MethodDefinition): MethodChangeType {
-    // API 控制器不需要检测变更，只要方法存在就认为是同步的
+  protected detectChangeType(sourceMethod: MethodDefinition, targetMethod: MethodDefinition): MethodChangeType {
+    // 比较参数数量和类型
+    if (sourceMethod.parameters.length !== targetMethod.parameters.length) {
+      return 'parameters_changed';
+    }
+    
+    // 比较参数类型（API 控制器忽略参数名和装饰器差异）
+    for (let i = 0; i < sourceMethod.parameters.length; i++) {
+      const sourceParam = sourceMethod.parameters[i];
+      const targetParam = targetMethod.parameters[i];
+      
+      // API 控制器只比较参数类型，忽略参数名和装饰器差异
+      if (sourceParam.type !== targetParam.type) {
+        return 'parameters_changed';
+      }
+    }
+    
+    // API 控制器忽略返回类型差异，因为 API 控制器是生成的代码
+    // if (sourceMethod.returnType !== targetMethod.returnType) {
+    //   return 'signature_changed';
+    // }
+    
     return 'no_change';
   }
 
   /**
    * 重写方法变更生成 - API 控制器专用
-   * API 控制器只检查方法存在性，不检查详细变更
+   * 检查方法存在性和参数变化
    */
   protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): any[] {
     const changes: any[] = [];
 
-    // 只检查缺失的方法（在 Server 中存在但在 API 中不存在）
+    // 检查缺失的方法（在 Server 中存在但在 API 中不存在）
     for (const [methodName, sourceMethod] of sourceState.methods) {
       const targetMethod = targetState.methods.get(methodName);
       if (!targetMethod) {
@@ -162,8 +236,19 @@ export class ControllerApiSyncEngine extends SyncEngine {
           sourceMethod: this.convertToMethodInfo(sourceMethod),
           details: 'Method not found in target controller',
         });
+      } else {
+        // 方法存在，检查是否有变化
+        const changeType = this.detectChangeType(sourceMethod, targetMethod);
+        if (changeType !== 'no_change') {
+          changes.push({
+            methodName,
+            changeType,
+            sourceMethod: this.convertToMethodInfo(sourceMethod),
+            targetMethod: this.convertToMethodInfo(targetMethod),
+            details: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
+          });
+        }
       }
-      // 如果方法存在，就认为是同步的，不添加到变更列表中
     }
 
     // 检查目标中多余的方法（在 API 中存在但在 Server 中不存在）
@@ -179,6 +264,46 @@ export class ControllerApiSyncEngine extends SyncEngine {
     }
 
     return changes;
+  }
+
+  /**
+   * 智能分割参数字符串，考虑泛型和嵌套类型
+   */
+  private smartSplitParameters(paramString: string): string[] {
+    const params: string[] = [];
+    let current = '';
+    let braceCount = 0;
+    let angleCount = 0;
+    
+    for (let i = 0; i < paramString.length; i++) {
+      const char = paramString[i];
+      
+      if (char === '(') {
+        braceCount++;
+      } else if (char === ')') {
+        braceCount--;
+      } else if (char === '<') {
+        angleCount++;
+      } else if (char === '>') {
+        angleCount--;
+      } else if (char === ',' && braceCount === 0 && angleCount === 0) {
+        // 只有在没有嵌套的情况下才分割
+        if (current.trim()) {
+          params.push(current.trim());
+        }
+        current = '';
+        continue;
+      }
+      
+      current += char;
+    }
+    
+    // 添加最后一个参数
+    if (current.trim()) {
+      params.push(current.trim());
+    }
+    
+    return params;
   }
 
   /**

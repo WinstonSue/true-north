@@ -171,7 +171,7 @@ export abstract class SyncEngine {
 
       // 5. 执行同步（如果不是干运行模式）
       if (!options.dryRun && diff.needsSync) {
-        const newCode = this.codeGenerator.applyChanges(targetCode, actions, sourceState);
+        const newCode = this.codeGenerator.applySyncActions(targetCode, actions, targetState, sourceState);
         writeFileSync(targetPath, newCode, 'utf-8');
 
         if (options.verbose) {

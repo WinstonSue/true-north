@@ -26,13 +26,47 @@ export class ControllerApiDiffEngine extends DiffEngine {
 
   /**
    * API 控制器特有的方法比较逻辑
-   * API 控制器是生成的代码，只需要确保方法存在即可，不比较详细信息
+   * 需要比较参数签名，确保 API 方法与 Server 方法参数一致
    */
-  protected compareMethod(_source: MethodDefinition, _target: MethodDefinition): string[] {
-    // API 控制器的方法比较简化：
-    // 如果方法存在，就认为是同步的，因为 API 控制器是自动生成的代码
-    // 不需要比较参数、装饰器、返回类型等详细信息
-    return [];
+  protected compareMethod(source: MethodDefinition, target: MethodDefinition): string[] {
+    const changes: string[] = [];
+
+    // 比较方法名
+    if (source.name !== target.name) {
+      changes.push(`方法名从 ${target.name} 改为 ${source.name}`);
+    }
+
+    // 比较参数数量和类型
+    if (source.parameters.length !== target.parameters.length) {
+      changes.push(`参数数量从 ${target.parameters.length} 改为 ${source.parameters.length}`);
+    } else {
+      // 比较每个参数
+      for (let i = 0; i < source.parameters.length; i++) {
+        const sourceParam = source.parameters[i];
+        const targetParam = target.parameters[i];
+        
+        // API 控制器忽略参数名差异
+        // if (sourceParam.name !== targetParam.name) {
+        //   changes.push(`参数 ${i + 1} 名称从 ${targetParam.name} 改为 ${sourceParam.name}`);
+        // }
+        
+        if (sourceParam.type !== targetParam.type) {
+          changes.push(`参数 ${i + 1} 类型从 ${targetParam.type} 改为 ${sourceParam.type}`);
+        }
+        
+        // API 控制器忽略装饰器差异
+        // if (sourceParam.decorator !== targetParam.decorator) {
+        //   changes.push(`参数 ${sourceParam.name} 装饰器从 ${targetParam.decorator} 改为 ${sourceParam.decorator}`);
+        // }
+      }
+    }
+
+    // API 控制器忽略返回类型差异，因为 API 控制器是生成的代码
+    // if (source.returnType !== target.returnType) {
+    //   changes.push(`返回类型从 ${target.returnType} 改为 ${source.returnType}`);
+    // }
+
+    return changes;
   }
 
   /**

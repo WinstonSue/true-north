@@ -5,7 +5,7 @@ import MethodDetailsModal from './MethodDetailsModal';
 
 interface MethodChange {
   methodName: string;
-  changeType: 'signature_changed' | 'parameters_changed' | 'decorators_changed' | 'body_changed' | 'no_change';
+  changeType: 'signature_changed' | 'parameters_changed' | 'decorators_changed' | 'body_changed' | 'no_change' | 'method_added' | 'method_removed';
   sourceMethod: any;
   targetMethod?: any;
   details: string;
@@ -32,40 +32,40 @@ interface MethodDetails {
   lastChecked: string;
 }
 
-interface ApiControllerTabProps {
+interface WebServiceTabProps {
   isActive?: boolean;
 }
 
-const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false }) => {
-  const [apiMethodDetails, setApiMethodDetails] = useState<MethodDetails | null>(null);
-  const [apiMethodDetailsLoading, setApiMethodDetailsLoading] = useState(false);
-  const [selectedApiController, setSelectedApiController] = useState<ControllerSyncStatus | null>(null);
-  const [apiMethodModalVisible, setApiMethodModalVisible] = useState(false);
+const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
+  const [webServiceMethodDetails, setWebServiceMethodDetails] = useState<MethodDetails | null>(null);
+  const [webServiceMethodDetailsLoading, setWebServiceMethodDetailsLoading] = useState(false);
+  const [selectedWebServiceController, setSelectedWebServiceController] = useState<ControllerSyncStatus | null>(null);
+  const [webServiceMethodModalVisible, setWebServiceMethodModalVisible] = useState(false);
 
-  const checkApiMethodDetails = async () => {
-    setApiMethodDetailsLoading(true);
+  const checkWebServiceMethodDetails = async () => {
+    setWebServiceMethodDetailsLoading(true);
     try {
-      const response = await fetch('/api/check/api-method-details');
+      const response = await fetch('/api/check/web-service-method-details');
       const result = await response.json();
 
       if (result.success) {
-        setApiMethodDetails(result.data);
+        setWebServiceMethodDetails(result.data);
       } else {
-        Message.error(`API 控制器方法详情检查失败: ${result.error}`);
+        Message.error(`Web Service 方法详情检查失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`API 控制器方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
+      Message.error(`Web Service 方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
-      setApiMethodDetailsLoading(false);
+      setWebServiceMethodDetailsLoading(false);
     }
   };
 
-  const syncApiController = async (className: string) => {
+  const syncWebServiceController = async (className: string) => {
     try {
-      // 从类名中提取控制器名称，如 "Todo.controllerController" -> "todo"
-      const controllerName = className.replace('.controllerController', '').toLowerCase();
+      // 从类名中提取控制器名称，如 "TodoService" -> "todo"
+      const controllerName = className.replace('Service', '').toLowerCase();
       
-      const response = await fetch('/api/sync/api-controller', {
+      const response = await fetch('/api/sync/web-service-controller', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,34 +76,34 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
       const result = await response.json();
 
       if (result.success) {
-        Message.success(result.message || `API 控制器 ${className} 同步完成`);
+        Message.success(result.message || `Web Service ${className} 同步完成`);
         // 重新检查状态
-        await checkApiMethodDetails();
+        await checkWebServiceMethodDetails();
       } else {
-        Message.error(`API 控制器同步失败: ${result.error}`);
+        Message.error(`Web Service 同步失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`API 控制器同步失败: ${error instanceof Error ? error.message : String(error)}`);
+      Message.error(`Web Service 同步失败: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
-  const showApiMethodDetails = (controller: ControllerSyncStatus) => {
-    setSelectedApiController(controller);
-    setApiMethodModalVisible(true);
+  const showWebServiceMethodDetails = (controller: ControllerSyncStatus) => {
+    setSelectedWebServiceController(controller);
+    setWebServiceMethodModalVisible(true);
   };
 
   // 组件挂载时调用父组件的 onLoad，只有当 tab 激活时才加载数据
   React.useEffect(() => {
     if (isActive) {
-      checkApiMethodDetails();
+      checkWebServiceMethodDetails();
     }
   }, [isActive]);
 
-  if (!apiMethodDetails) return null;
+  if (!webServiceMethodDetails) return null;
 
   const columns = [
     {
-      title: 'API Controller',
+      title: 'Web Service',
       dataIndex: 'className',
       key: 'className',
       render: (className: string, record: ControllerSyncStatus) => {
@@ -139,7 +139,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
       },
     },
     {
-      title: 'API 方法统计',
+      title: 'Service 方法统计',
       key: 'methodStats',
       render: (className: string, record: ControllerSyncStatus) => {
         if (!record || !record.summary) return null;
@@ -161,7 +161,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
         if (!record) return null;
         return (
           <Space>
-            <Button size="small" icon={<IconList />} onClick={() => showApiMethodDetails(record)}>
+            <Button size="small" icon={<IconList />} onClick={() => showWebServiceMethodDetails(record)}>
               查看详情
             </Button>
             {record.needsSync && (
@@ -169,7 +169,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
                 size="small"
                 type="primary"
                 icon={<IconSync />}
-                onClick={() => syncApiController(record.className)}
+                onClick={() => syncWebServiceController(record.className)}
               >
                 同步
               </Button>
@@ -180,19 +180,19 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
     },
   ];
 
-  const needsSyncCount = apiMethodDetails.controllers?.filter((c) => c?.needsSync).length || 0;
+  const needsSyncCount = webServiceMethodDetails.controllers?.filter((c) => c?.needsSync).length || 0;
 
   return (
     <div style={{ marginTop: 24 }}>
       <Card
         title={
           <Space>
-            <span>API 控制器方法级别差异检查</span>
+            <span>Web Service 方法级别差异检查</span>
             <Button
               size="small"
               icon={<IconRefresh />}
-              loading={apiMethodDetailsLoading}
-              onClick={checkApiMethodDetails}
+              loading={webServiceMethodDetailsLoading}
+              onClick={checkWebServiceMethodDetails}
             >
               刷新
             </Button>
@@ -200,18 +200,18 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
         }
         extra={
           <Space>
-            <span>总计: {apiMethodDetails.controllers?.length || 0}</span>
+            <span>总计: {webServiceMethodDetails.controllers?.length || 0}</span>
             <span>需要同步: {needsSyncCount}</span>
             <span style={{ fontSize: '12px', color: '#666' }}>
               最后检查:{' '}
-              {apiMethodDetails.lastChecked ? new Date(apiMethodDetails.lastChecked).toLocaleString() : '未知'}
+              {webServiceMethodDetails.lastChecked ? new Date(webServiceMethodDetails.lastChecked).toLocaleString() : '未知'}
             </span>
           </Space>
         }
       >
         {needsSyncCount > 0 && (
           <Alert
-            content={`发现 ${needsSyncCount} 个 API 控制器需要同步`}
+            content={`发现 ${needsSyncCount} 个 Web Service 需要同步`}
             type="warning"
             showIcon
             style={{ marginBottom: 16 }}
@@ -220,22 +220,22 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
 
         <Table
           columns={columns}
-          data={apiMethodDetails.controllers || []}
+          data={webServiceMethodDetails.controllers || []}
           rowKey="className"
           size="small"
           pagination={{ pageSize: 10 }}
-          loading={apiMethodDetailsLoading}
+          loading={webServiceMethodDetailsLoading}
         />
       </Card>
 
       <MethodDetailsModal
-        visible={apiMethodModalVisible}
-        onClose={() => setApiMethodModalVisible(false)}
-        controller={selectedApiController}
-        onSync={syncApiController}
+        visible={webServiceMethodModalVisible}
+        onClose={() => setWebServiceMethodModalVisible(false)}
+        controller={selectedWebServiceController}
+        onSync={syncWebServiceController}
       />
     </div>
   );
 };
 
-export default ApiControllerTab;
+export default WebServiceTab;

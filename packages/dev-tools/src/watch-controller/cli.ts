@@ -8,9 +8,10 @@
 import { Command } from 'commander';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { createProxySyncEngine } from './target-proxy/sync-engine';
-import { createApiSyncEngine } from './target-api/sync-engine';
-import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH } from '../constants';
+import { createProxySyncEngine } from './target-proxy/sync-engine.js';
+import { createApiSyncEngine } from './target-api/sync-engine.js';
+import { createWebServiceSyncEngine } from './target-web-service/sync-engine.js';
+import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH, CONTROLLER_WEB_SERVICE_TARGET_PATH } from '../constants';
 
 interface ControllerPair {
   className: string;
@@ -18,7 +19,7 @@ interface ControllerPair {
   targetPath: string;
 }
 
-type SyncTarget = 'desktop' | 'api' | 'all';
+type SyncTarget = 'desktop' | 'api' | 'web-service' | 'all';
 
 /**
  * 查找控制器对
@@ -54,6 +55,13 @@ function findControllerPairs(target: SyncTarget): ControllerPair[] {
         targetPaths.push({ target: 'api', path: apiPath });
       }
     }
+    
+    if (target === 'web-service' || target === 'all') {
+      const webServicePath = join(CONTROLLER_WEB_SERVICE_TARGET_PATH, controller.path.split('/')[0], `${controller.name}.service.ts`);
+      if (existsSync(sourcePath) && existsSync(webServicePath)) {
+        targetPaths.push({ target: 'web-service', path: webServicePath });
+      }
+    }
 
     for (const { path: targetPath } of targetPaths) {
       pairs.push({
@@ -75,6 +83,8 @@ function findControllerPairs(target: SyncTarget): ControllerPair[] {
 function createSyncEngine(targetPath: string) {
   if (targetPath.includes('/api/controller/')) {
     return createApiSyncEngine();
+  } else if (targetPath.includes('/web-service/')) {
+    return createWebServiceSyncEngine();
   } else {
     return createProxySyncEngine();
   }
@@ -86,6 +96,8 @@ function createSyncEngine(targetPath: string) {
 function getTargetDescription(targetPath: string): string {
   if (targetPath.includes('/api/controller/')) {
     return 'API';
+  } else if (targetPath.includes('/web-service/')) {
+    return 'Web Service';
   } else if (targetPath.includes('/desktop/')) {
     return 'Desktop';
   } else {
@@ -140,8 +152,8 @@ async function syncCommand(controllerName?: string, options: any = {}) {
           } else {
             console.error(`❌ ${pair.className} (${targetType}) 同步失败: ${result.error}`);
           }
-        } finally {
-          engine.dispose();
+        } catch (error) {
+          console.error(`❌ ${pair.className} (${targetType}) 同步过程中发生错误: ${error}`);
         }
         
         console.log(); // 添加空行分隔
@@ -154,6 +166,7 @@ async function syncCommand(controllerName?: string, options: any = {}) {
       // 按目标类型分组
       const desktopPairs = pairs.filter(p => p.targetPath.includes('/desktop/'));
       const apiPairs = pairs.filter(p => p.targetPath.includes('/api/controller/'));
+      const webServicePairs = pairs.filter(p => p.targetPath.includes('/web-service/'));
 
       let allResults: any[] = [];
 
@@ -172,8 +185,8 @@ async function syncCommand(controllerName?: string, options: any = {}) {
             }
           );
           allResults.push(...results.map(r => ({ ...r, type: 'Desktop' })));
-        } finally {
-          engine.dispose();
+        } catch (error) {
+          console.error('❌ Desktop 控制器同步失败:', error);
         }
       }
 
@@ -192,8 +205,28 @@ async function syncCommand(controllerName?: string, options: any = {}) {
             }
           );
           allResults.push(...results.map(r => ({ ...r, type: 'API' })));
-        } finally {
-          engine.dispose();
+        } catch (error) {
+          console.error('❌ API 控制器同步失败:', error);
+        }
+      }
+
+      // 同步 Web Service
+      if (webServicePairs.length > 0) {
+        console.log(`🔧 同步 Web Service (${webServicePairs.length} 个)...`);
+        const engine = createWebServiceSyncEngine();
+        
+        try {
+          const results = await engine.syncControllers(
+            webServicePairs.map(p => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
+            {
+              dryRun: options.dryRun,
+              verbose: options.verbose,
+              force: options.force,
+            }
+          );
+          allResults.push(...results.map(r => ({ ...r, type: 'Web Service' })));
+        } catch (error) {
+          console.error('❌ Web Service 同步失败:', error);
         }
       }
 
@@ -265,8 +298,8 @@ async function checkCommand(controllerName?: string, options: any = {}) {
           } else {
             console.log('   需要同步: 否');
           }
-        } finally {
-          engine.dispose();
+        } catch (error) {
+          console.error(`❌ ${pair.className} (${targetType}) 检查失败: ${error}`);
         }
         
         console.log(); // 添加空行分隔
@@ -278,6 +311,7 @@ async function checkCommand(controllerName?: string, options: any = {}) {
       // 按目标类型分组检查
       const desktopPairs = pairs.filter(p => p.targetPath.includes('/desktop/'));
       const apiPairs = pairs.filter(p => p.targetPath.includes('/api/controller/'));
+      const webServicePairs = pairs.filter(p => p.targetPath.includes('/web-service/'));
 
       // 检查 Desktop 控制器
       if (desktopPairs.length > 0) {
@@ -295,8 +329,8 @@ async function checkCommand(controllerName?: string, options: any = {}) {
             const changeCount = result.diff.changes.length;
             console.log(`   ${result.controllerName}: ${status} (${changeCount} 个变更)`);
           }
-        } finally {
-          engine.dispose();
+        } catch (error) {
+          console.error('❌ Desktop 控制器检查失败:', error);
         }
         
         console.log();
@@ -318,8 +352,29 @@ async function checkCommand(controllerName?: string, options: any = {}) {
             const changeCount = result.diff.changes.length;
             console.log(`   ${result.controllerName}: ${status} (${changeCount} 个变更)`);
           }
-        } finally {
-          engine.dispose();
+        } catch (error) {
+          console.error('❌ API 控制器检查失败:', error);
+        }
+      }
+
+      // 检查 Web Service
+      if (webServicePairs.length > 0) {
+        console.log('🔧 Web Service 检查结果:');
+        const engine = createWebServiceSyncEngine();
+        
+        try {
+          const results = await engine.syncControllers(
+            webServicePairs.map(p => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
+            { dryRun: true, verbose: options.verbose }
+          );
+
+          for (const result of results) {
+            const status = result.diff.needsSync ? '🔄 需要同步' : '✅ 无需同步';
+            const changeCount = result.diff.changes.length;
+            console.log(`   ${result.controllerName}: ${status} (${changeCount} 个变更)`);
+          }
+        } catch (error) {
+          console.error('❌ Web Service 检查失败:', error);
         }
       }
     }
@@ -363,8 +418,8 @@ async function debugCommand(filePath: string, options: any = {}) {
           console.log(`  ${imp.importType}: ${imp.source}`);
         }
       }
-    } finally {
-      engine.dispose();
+    } catch (error) {
+      console.error(`❌ 调试失败: ${error}`);
     }
   } catch (error) {
     console.error('❌ 调试过程中发生错误:', error);
@@ -384,7 +439,7 @@ program
   .command('sync')
   .description('同步控制器')
   .argument('[controller]', '控制器名称（可选）')
-  .option('-t, --target <type>', '同步目标 (desktop|api|all)', 'all')
+  .option('-t, --target <type>', '同步目标 (desktop|api|web-service|all)', 'all')
   .option('-d, --dry-run', '干运行模式，不实际修改文件')
   .option('-v, --verbose', '显示详细信息')
   .option('-f, --force', '强制同步')
@@ -395,7 +450,7 @@ program
   .command('check')
   .description('检查控制器差异')
   .argument('[controller]', '控制器名称（可选）')
-  .option('-t, --target <type>', '检查目标 (desktop|api|all)', 'all')
+  .option('-t, --target <type>', '检查目标 (desktop|api|web-service|all)', 'all')
   .option('-v, --verbose', '显示详细信息')
   .action(checkCommand);
 
