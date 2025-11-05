@@ -136,6 +136,14 @@ export class ControllerApiCodeGenerator {
         requestCall += `${genericType}({ method: "${httpMethod}" })`;
         bodyParam = ', body';
         break;
+      case 'id+query':
+        const idType3 = this.extractIdType(method) || 'string';
+        const queryType2 = this.extractQueryType(method) || 'any';
+        signature += `id: ${idType3}, params?: ${queryType2}) {`;
+        pathStr = pathStr.replace('/:id', '/${id}');
+        requestCall += `${genericType}({ method: "${httpMethod}" })`;
+        bodyParam = ', params';
+        break;
       case 'query':
         const queryType = this.getDefaultQueryType(methodName, entityCap);
         signature += `params: ${queryType}) {`;
@@ -160,7 +168,7 @@ export class ControllerApiCodeGenerator {
   /**
    * 检测参数样式
    */
-  private detectParameterStyle(method: MethodDefinition): 'none' | 'id' | 'id+body' | 'query' | 'body' {
+  private detectParameterStyle(method: MethodDefinition): 'none' | 'id' | 'id+body' | 'id+query' | 'query' | 'body' {
     if (method.parameters.length === 0) {
       return 'none';
     }
@@ -171,6 +179,8 @@ export class ControllerApiCodeGenerator {
 
     if (hasId && hasBody) {
       return 'id+body';
+    } else if (hasId && hasQuery) {
+      return 'id+query';
     } else if (hasId) {
       return 'id';
     } else if (hasQuery) {
@@ -188,6 +198,14 @@ export class ControllerApiCodeGenerator {
   private extractIdType(method: MethodDefinition): string | null {
     const idParam = method.parameters.find(p => p.decorator === 'Param' && p.name === 'id');
     return idParam ? idParam.type : null;
+  }
+
+  /**
+   * 提取 Query 类型
+   */
+  private extractQueryType(method: MethodDefinition): string | null {
+    const queryParam = method.parameters.find(p => p.decorator === 'Query');
+    return queryParam ? queryParam.type : null;
   }
 
   /**

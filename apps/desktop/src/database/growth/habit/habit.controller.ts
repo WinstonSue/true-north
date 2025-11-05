@@ -27,16 +27,12 @@ export class HabitController {
   }
 
   @Get('/find-by-filter')
-  async findByFilter(
-    @Query() habitListFiltersVo?: HabitVO.HabitFilterVo
-  ): Promise<ResponseListVo<HabitVO.HabitWithoutRelationsVo>> {
+  async findByFilter(@Query() habitListFiltersVo?: HabitVO.HabitFilterVo): Promise<ResponseListVo<HabitVO.HabitWithoutRelationsVo>> {
     return this.controller.findByFilter(habitListFiltersVo);
   }
 
   @Get('/page')
-  async page(
-    @Query() habitPageFilterVo?: HabitVO.HabitPageFilterVo
-  ): Promise<ResponsePageVo<HabitVO.HabitWithoutRelationsVo>> {
+  async page(@Query() habitPageFilterVo?: HabitVO.HabitPageFilterVo): Promise<ResponsePageVo<HabitVO.HabitWithoutRelationsVo>> {
     return this.controller.page(habitPageFilterVo);
   }
 

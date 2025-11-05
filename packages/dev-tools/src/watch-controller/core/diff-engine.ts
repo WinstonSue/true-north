@@ -1,11 +1,18 @@
 /**
- * 差异比对引擎
- * 比较两个中间态，生成差异报告和同步操作
+ * 差异比对引擎基类
+ * 提供通用的差异比对逻辑，子类可以重写特定的比较方法
  */
 
-import { IntermediateState, DiffResult, ChangeRecord, ChangeDetails, SyncAction, MethodDefinition, ParameterDefinition } from './intermediate-state';
+import {
+  IntermediateState,
+  DiffResult,
+  ChangeRecord,
+  SyncAction,
+  MethodDefinition,
+  ParameterDefinition,
+} from './intermediate-state';
 
-export class DiffEngine {
+export abstract class DiffEngine {
   /**
    * 比较两个中间态，生成差异报告
    */
@@ -16,13 +23,13 @@ export class DiffEngine {
     const methodChanges = this.compareMethods(source.methods, target.methods);
     changes.push(...methodChanges);
 
-    // 比较构造函数
+    // 比较构造函数（子类可以选择是否比较）
     const constructorChanges = this.compareConstructor(source.constructor, target.constructor);
     if (constructorChanges) {
       changes.push(constructorChanges);
     }
 
-    // 比较导入
+    // 比较导入（子类可以选择是否比较）
     const importChanges = this.compareImports(source.imports, target.imports);
     if (importChanges) {
       changes.push(importChanges);
@@ -102,9 +109,12 @@ export class DiffEngine {
   }
 
   /**
-   * 比较方法集合
+   * 比较方法集合 - 子类可以重写
    */
-  private compareMethods(sourceMethods: Map<string, MethodDefinition>, targetMethods: Map<string, MethodDefinition>): ChangeRecord[] {
+  protected compareMethods(
+    sourceMethods: Map<string, MethodDefinition>,
+    targetMethods: Map<string, MethodDefinition>
+  ): ChangeRecord[] {
     const changes: ChangeRecord[] = [];
 
     // 检查新增的方法
@@ -161,69 +171,14 @@ export class DiffEngine {
   }
 
   /**
-   * 比较单个方法
+   * 比较单个方法 - 抽象方法，子类必须实现
    */
-  private compareMethod(source: MethodDefinition, target: MethodDefinition): string[] {
-    const changes: string[] = [];
-
-    // 比较 HTTP 动词
-    if (source.verb !== target.verb) {
-      changes.push(`HTTP动词从 ${target.verb} 改为 ${source.verb}`);
-    }
-
-    // 比较路径
-    if (source.path !== target.path) {
-      changes.push(`路径从 ${target.path} 改为 ${source.path}`);
-    }
-
-    // 比较参数
-    const paramChanges = this.compareParameters(source.parameters, target.parameters);
-    if (paramChanges.length > 0) {
-      changes.push(`参数变更: ${paramChanges.join(', ')}`);
-    }
-
-    // 比较返回类型
-    if (source.returnType !== target.returnType) {
-      changes.push(`返回类型从 ${target.returnType} 改为 ${source.returnType}`);
-    }
-
-    // 智能比较方法体：检查 Target 是否已经是正确的代理调用
-    if (!this.isCorrectProxyCall(source, target)) {
-      changes.push('方法体需要更新为代理调用');
-    }
-
-    // 比较装饰器选项
-    if (!this.deepEqual(source.decoratorOptions, target.decoratorOptions)) {
-      changes.push('装饰器选项已修改');
-    }
-
-    return changes;
-  }
+  protected abstract compareMethod(source: MethodDefinition, target: MethodDefinition): string[];
 
   /**
-   * 检查 Target 方法是否已经是正确的代理调用
+   * 比较参数列表 - 通用实现
    */
-  private isCorrectProxyCall(source: MethodDefinition, target: MethodDefinition): boolean {
-    // 检查 Target 方法体是否包含正确的代理调用模式
-    const expectedCall = `return this.controller.${source.name}(`;
-    
-    // 如果 Target 方法体包含期望的代理调用，认为是正确的
-    if (target.bodyText.includes(expectedCall)) {
-      // 进一步检查参数是否匹配
-      const sourceParamNames = source.parameters.map(p => p.name);
-      const expectedParams = sourceParamNames.join(', ');
-      const fullExpectedCall = `return this.controller.${source.name}(${expectedParams});`;
-      
-      return target.bodyText.includes(fullExpectedCall);
-    }
-    
-    return false;
-  }
-
-  /**
-   * 比较参数列表
-   */
-  private compareParameters(sourceParams: ParameterDefinition[], targetParams: ParameterDefinition[]): string[] {
+  protected compareParameters(sourceParams: ParameterDefinition[], targetParams: ParameterDefinition[]): string[] {
     const changes: string[] = [];
 
     // 比较参数数量
@@ -253,9 +208,9 @@ export class DiffEngine {
   }
 
   /**
-   * 比较单个参数
+   * 比较单个参数 - 通用实现
    */
-  private compareParameter(source: ParameterDefinition, target: ParameterDefinition): string[] {
+  protected compareParameter(source: ParameterDefinition, target: ParameterDefinition): string[] {
     const changes: string[] = [];
 
     if (source.name !== target.name) {
@@ -282,9 +237,9 @@ export class DiffEngine {
   }
 
   /**
-   * 比较构造函数
+   * 比较构造函数 - 子类可以重写
    */
-  private compareConstructor(source: any, target: any): ChangeRecord | null {
+  protected compareConstructor(source: any, target: any): ChangeRecord | null {
     // 简化比较，主要检查参数数量和类型
     const sourceParamCount = source.parameters?.length || 0;
     const targetParamCount = target.parameters?.length || 0;
@@ -318,9 +273,9 @@ export class DiffEngine {
   }
 
   /**
-   * 比较导入声明
+   * 比较导入声明 - 子类可以重写
    */
-  private compareImports(source: any[], target: any[]): ChangeRecord | null {
+  protected compareImports(source: any[], target: any[]): ChangeRecord | null {
     // 简化比较，检查导入数量
     if (source.length !== target.length) {
       return {
@@ -339,9 +294,9 @@ export class DiffEngine {
   }
 
   /**
-   * 深度比较两个对象
+   * 深度比较两个对象 - 工具方法
    */
-  private deepEqual(a: any, b: any): boolean {
+  protected deepEqual(a: any, b: any): boolean {
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (typeof a !== typeof b) return false;
@@ -349,14 +304,14 @@ export class DiffEngine {
     if (typeof a === 'object') {
       const keysA = Object.keys(a);
       const keysB = Object.keys(b);
-      
+
       if (keysA.length !== keysB.length) return false;
-      
+
       for (const key of keysA) {
         if (!keysB.includes(key)) return false;
         if (!this.deepEqual(a[key], b[key])) return false;
       }
-      
+
       return true;
     }
 
@@ -364,9 +319,9 @@ export class DiffEngine {
   }
 
   /**
-   * 比较两个数组
+   * 比较两个数组 - 工具方法
    */
-  private arrayEqual(a: any[], b: any[]): boolean {
+  protected arrayEqual(a: any[], b: any[]): boolean {
     if (a.length !== b.length) return false;
     return a.every((val, index) => this.deepEqual(val, b[index]));
   }

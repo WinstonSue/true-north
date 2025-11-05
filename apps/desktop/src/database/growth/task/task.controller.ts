@@ -28,16 +28,12 @@ export class TaskController {
   }
 
   @Get('/find-by-filter')
-  async findByFilter(
-    @Query() taskListFiltersVo?: TaskVO.TaskFilterVo
-  ): Promise<ResponseListVo<TaskVO.TaskWithoutRelationsVo>> {
+  async findByFilter(@Query() taskListFiltersVo?: TaskVO.TaskFilterVo): Promise<ResponseListVo<TaskVO.TaskWithoutRelationsVo>> {
     return this.controller.findByFilter(taskListFiltersVo);
   }
 
   @Get('/page')
-  async page(
-    @Query() taskPageFilterVo?: TaskVO.TaskPageFilterVo
-  ): Promise<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>> {
+  async page(@Query() taskPageFilterVo?: TaskVO.TaskPageFilterVo): Promise<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>> {
     return this.controller.page(taskPageFilterVo);
   }
 

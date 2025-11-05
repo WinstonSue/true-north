@@ -5,7 +5,8 @@ import { goalService } from './goal.service';
 
 @Controller('/goal')
 export class GoalController {
-      private readonly controller = new _GoalController(goalService);
+  private readonly controller = new _GoalController(goalService);
+
   @Post('/create')
   async create(@Body() body: GoalVO.CreateGoalVo): Promise<GoalVO.GoalVo> {
     return this.controller.create(body);

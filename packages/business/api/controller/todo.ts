@@ -46,7 +46,7 @@ export default class TodoController {
     return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: "get" })(`/todo/list-mixed-repeat`, params);
   }
 
-  static async findMixRepeat(id: string) {
-    return request<TodoVO.TodoVo>({ method: "get" })(`/todo/find-mix-repeat/${id}`);
+  static async findMixRepeat(id: string, params?: { source?: string; }) {
+    return request<TodoVO.TodoVo>({ method: "get" })(`/todo/find-mix-repeat/${id}`, params);
   }
 }

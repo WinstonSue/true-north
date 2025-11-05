@@ -3,34 +3,34 @@ import { request } from '@life-toolkit/share-request';
 
 export default class HabitController {
   static async create(body: HabitVO.CreateHabitVo) {
-    return request<HabitVO.HabitVo>({ method: 'post' })(`/habit/create`, body);
+    return request<HabitVO.HabitVo>({ method: "post" })(`/habit/create`, body);
   }
 
   static async delete(id: string) {
-    return request<void>({ method: 'remove' })(`/habit/delete/${id}`);
+    return request<void>({ method: "remove" })(`/habit/delete/${id}`);
   }
 
   static async update(id: string, body: HabitVO.UpdateHabitVo) {
-    return request<HabitVO.HabitVo>({ method: 'put' })(`/habit/update/${id}`, body);
+    return request<HabitVO.HabitVo>({ method: "put" })(`/habit/update/${id}`, body);
   }
 
   static async find(id: string) {
-    return request<HabitVO.HabitVo>({ method: 'get' })(`/habit/find/${id}`);
+    return request<HabitVO.HabitVo>({ method: "get" })(`/habit/find/${id}`);
   }
 
-  static async findByFilter(body: HabitVO.HabitFilterVo) {
-    return request<ResponseListVo<HabitVO.HabitWithoutRelationsVo>>({ method: 'get' })(`/habit/find-by-filter`, body);
+  static async findByFilter(params: any) {
+    return request<ResponseListVo<HabitVO.HabitWithoutRelationsVo>>({ method: "get" })(`/habit/find-by-filter`, params);
   }
 
-  static async page(body: HabitVO.HabitPageFilterVo) {
-    return request<ResponsePageVo<HabitVO.HabitWithoutRelationsVo>>({ method: 'get' })(`/habit/page`, body);
+  static async page(params: HabitVO.HabitPageFilterVo) {
+    return request<ResponsePageVo<HabitVO.HabitWithoutRelationsVo>>({ method: "get" })(`/habit/page`, params);
   }
 
   static async abandon(id: string) {
-    return request<void>({ method: 'put' })(`/habit/abandon/${id}`);
+    return request<void>({ method: "put" })(`/habit/abandon/${id}`);
   }
 
   static async restore(id: string) {
-    return request<void>({ method: 'put' })(`/habit/restore/${id}`);
+    return request<void>({ method: "put" })(`/habit/restore/${id}`);
   }
 }
