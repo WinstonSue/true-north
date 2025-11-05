@@ -10,7 +10,8 @@ export default class TodoMapping {
       importance: todoVo.importance,
       urgency: todoVo.urgency,
       planDate: todoVo.planDate,
-      planTimeRange: [todoVo.planStartTime, todoVo.planEndTime],
+      planTimeRange:
+        todoVo.planStartTime && todoVo.planEndTime ? [todoVo.planStartTime, todoVo.planEndTime] : undefined,
       repeatConfig: todoVo.repeatConfig,
       source: todoVo.source,
     };

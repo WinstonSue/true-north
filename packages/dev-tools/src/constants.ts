@@ -11,7 +11,7 @@ export const ROOT = path.resolve(__dirname, '../../..');
 export const CONTROLLER_SOURCE_PATH = path.join(ROOT, 'packages/business/server/src');
 export const CONTROLLER_PROXY_TARGET_PATH = path.join(ROOT, 'apps/desktop/src/database');
 export const CONTROLLER_API_TARGET_PATH = path.join(ROOT, 'packages/business/api/controller');
-export const CONTROLLER_WEB_SERVICE_TARGET_PATH = path.join(ROOT, 'packages/business/web-service/src');
+export const CONTROLLER_WEB_SERVICE_TARGET_PATH = path.join(ROOT, 'packages/business/web-service');
 
 export const DTO_SOURCE_PATH = path.join(ROOT, 'packages/business/server/src');
 export const DTO_VO_TARGET_PATH = path.join(ROOT, 'packages/business/vo');

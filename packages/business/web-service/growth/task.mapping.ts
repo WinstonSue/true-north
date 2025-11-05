@@ -1,7 +1,7 @@
 import type { TaskVo, UpdateTaskVo, CreateTaskVo } from '@life-toolkit/vo';
 import type { TaskFormData } from './task.types';
 
-export class TaskMapping {
+export default class TaskMapping {
   static voToFormData(taskVo: TaskVo): TaskFormData {
     return {
       name: taskVo.name,
@@ -29,9 +29,10 @@ export class TaskMapping {
       goalId: isSubTask ? undefined : formData.goalId,
       startAt: formData.planTimeRange[0],
       endAt: formData.planTimeRange[1],
-      children: formData.children || [],
+      tags: formData.tags || [],
     };
   }
+
   static formDataToUpdateVo(formData: TaskFormData): UpdateTaskVo {
     const { isSubTask, ...rest } = formData;
     return {
@@ -40,7 +41,7 @@ export class TaskMapping {
       goalId: isSubTask ? undefined : formData.goalId,
       startAt: formData.planTimeRange[0],
       endAt: formData.planTimeRange[1],
-      children: formData.children || [],
+      tags: formData.tags || [],
     };
   }
 }

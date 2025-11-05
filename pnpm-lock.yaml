@@ -435,6 +435,9 @@ importers:
       '@life-toolkit/tabs':
         specifier: workspace:*
         version: link:../../components/tabs
+      '@life-toolkit/web-service':
+        specifier: workspace:*
+        version: link:../web-service
       '@loadable/component':
         specifier: ^5.13.2
         version: 5.16.7(react@18.3.1)
@@ -592,15 +595,6 @@ importers:
 
   packages/business/web-service:
     dependencies:
-      '@arco-design/color':
-        specifier: ^0.4.0
-        version: 0.4.0
-      '@arco-design/web-react':
-        specifier: ^2.66.0
-        version: 2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@arco-themes/react-francis':
-        specifier: ^0.0.1
-        version: 0.0.1(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@life-toolkit/api':
         specifier: workspace:*
         version: link:../api
@@ -610,6 +604,9 @@ importers:
       '@life-toolkit/share-types':
         specifier: workspace:*
         version: link:../../share/types
+      '@life-toolkit/vo':
+        specifier: workspace:*
+        version: link:../vo
 
   packages/common-web/utils:
     dependencies:

@@ -32,6 +32,7 @@
     "@life-toolkit/enum": "workspace:*",
     "@life-toolkit/tabs": "workspace:*",
     "@life-toolkit/share-types": "workspace:*",
+    "@life-toolkit/web-service": "workspace:*",
     "@loadable/component": "^5.13.2",
     "@nanostores/react": "^0.8.4",
     "@turf/turf": "^6.5.0",

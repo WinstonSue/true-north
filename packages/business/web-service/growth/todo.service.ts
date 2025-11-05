@@ -22,7 +22,7 @@ export default class TodoService {
    * @param params 任务ID列表
    * @returns 操作结果
    */
-  static async doneBatchWithRepeat(params: TodoFilterVo, options: MethodOptions) {
+  static async doneWithRepeatBatch(params: TodoFilterVo, options: MethodOptions) {
     try {
       const res = await TodoController.doneWithRepeatBatch(params);
       if (options.silent) {

@@ -1,7 +1,7 @@
 import type { GoalVo, UpdateGoalVo, CreateGoalVo } from '@life-toolkit/vo';
 import type { GoalFormData } from './goal.types';
 
-export class GoalMapping {
+export default class GoalMapping {
   static voToGoalFormData(goalVo: GoalVo): GoalFormData {
     return {
       name: goalVo.name,

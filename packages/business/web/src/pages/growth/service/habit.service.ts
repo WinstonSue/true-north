@@ -5,11 +5,12 @@ import type {
   UpdateHabitVo,
   HabitFilterVo,
 } from '@life-toolkit/vo';
-import { HabitFilter, HabitPageFilter } from './habit.types';
 import {
+  HabitFilter,
+  HabitPageFilter,
   mapHabitFilterToParams,
   mapHabitPageFilterToParams,
-} from './habit.mapping';
+} from './index';
 
 export default class HabitService {
   static async createHabit(params: CreateHabitVo) {
