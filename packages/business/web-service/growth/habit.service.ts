@@ -3,76 +3,130 @@ import type { CreateHabitVo, UpdateHabitVo, HabitFilterVo, HabitPageFilterVo } f
 import { Message } from '../message';
 
 export default class HabitService {
-  static async create(params: CreateHabitVo) {
+  /**
+   * create
+   * @param createHabitVo 请求体数据
+   * @returns 操作结果
+   */
+  static async create(createHabitVo: HabitVO.CreateHabitVo, options: MethodOptions) {
     try {
-      const res = await HabitController.create(params);
-      Message.success('创建习惯成功');
+      const res = await HabitController.create(createHabitVo);
+      if (!options.silent) {
+        Message.success('创建成功');
+      }
       return res;
-    } catch (error) {
+    } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async update(id: string, params: UpdateHabitVo) {
-    try {
-      const res = await HabitController.update(id, params);
-      Message.success('更新习惯成功');
-      return res;
-    } catch (error) {
-      Message.error(error);
-    }
-  }
-
-  static async getDetail(id: string) {
-    try {
-      return await HabitController.find(id);
-    } catch (error) {
-      Message.error(error);
-    }
-  }
-
-  static async getList(filter: HabitFilterVo ) {
-    try {
-      return await HabitController.findByFilter(filter);
-    } catch (error) {
-      Message.error(error);
-    }
-  }
-
-  static async getPage(filter: HabitPageFilterVo) {
-    try {
-      return await HabitController.page(filter);
-    } catch (error) {
-      Message.error(error);
-    }
-  }
-
-  static async delete(id: string) {
+  /**
+   * delete
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async delete(id: string, options: MethodOptions) {
     try {
       const res = await HabitController.delete(id);
-      Message.success('删除习惯成功');
+      if (!options.silent) {
+        Message.success('删除成功');
+      }
       return res;
-    } catch (error) {
+    } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async abandon(id: string) {
+  /**
+   * update
+   * @param id idID
+   * @param updateHabitVo 请求体数据
+   * @returns 操作结果
+   */
+  static async update(id: string, updateHabitVo: HabitVO.UpdateHabitVo, options: MethodOptions) {
+    try {
+      const res = await HabitController.update(id, updateHabitVo);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * find
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async find(id: string) {
+    try {
+      const res = await HabitController.find(id);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * findByFilter
+   * @param habitListFiltersVo 查询参数
+   * @returns 操作结果
+   */
+  static async findByFilter(habitListFiltersVo?: HabitVO.HabitFilterVo) {
+    try {
+      const res = await HabitController.findByFilter(habitListFiltersVo);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * page
+   * @param habitPageFilterVo 查询参数
+   * @returns 操作结果
+   */
+  static async page(habitPageFilterVo?: HabitVO.HabitPageFilterVo) {
+    try {
+      const res = await HabitController.page(habitPageFilterVo);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * abandon
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async abandon(id: string, options: MethodOptions) {
     try {
       const res = await HabitController.abandon(id);
-      Message.success('已放弃该习惯');
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
       return res;
-    } catch (error) {
+    } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async restore(id: string) {
+  /**
+   * restore
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async restore(id: string, options: MethodOptions) {
     try {
       const res = await HabitController.restore(id);
-      Message.success('已恢复该习惯');
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
       return res;
-    } catch (error) {
+    } catch (error: unknown) {
       Message.error(error);
     }
   }

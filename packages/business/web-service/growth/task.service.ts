@@ -10,70 +10,50 @@ import { useState, useEffect } from 'react';
 import { Message } from '../message';
 
 export default class TaskService {
-  static async getDetail(taskId: string) {
+  /**
+   * create
+   * @param createTaskVo 请求体数据
+   * @returns 操作结果
+   */
+  static async create(createTaskVo: TaskVO.CreateTaskVo, options: MethodOptions) {
     try {
-      const res = await TaskController.find(taskId);
+      const res = await TaskController.create(createTaskVo);
+      if (!options.silent) {
+        Message.success('创建成功');
+      }
       return res;
     } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async doneBatchTask(params: TaskFilterVo) {
-    try {
-      // Task 模块暂时没有批量操作方法，需要逐个处理
-      const results = await Promise.all(params.includeIds?.map((id) => TaskController.abandon(id)) || []);
-      Message.success('操作成功');
-      return results;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async restoreTask(id: string) {
-    try {
-      const res = await TaskController.restore(id);
-      Message.success('操作成功');
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async abandon(id: string) {
-    try {
-      const res = await TaskController.abandon(id);
-      Message.success('操作成功');
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async create(task: CreateTaskVo) {
-    try {
-      const res = await TaskController.create(task);
-      Message.success('操作成功');
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async delete(id: string) {
+  /**
+   * delete
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async delete(id: string, options: MethodOptions) {
     try {
       const res = await TaskController.delete(id);
-      Message.success('操作成功');
+      if (!options.silent) {
+        Message.success('删除成功');
+      }
       return res;
     } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async update(id: string, task: UpdateTaskVo, silent = true) {
+  /**
+   * update
+   * @param id idID
+   * @param body 请求体数据
+   * @returns 操作结果
+   */
+  static async update(id: string, body: TaskVO.UpdateTaskVo, options: MethodOptions) {
     try {
-      const res = await TaskController.update(id, task);
-      if (!silent) {
+      const res = await TaskController.update(id, body);
+      if (!options.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -82,37 +62,93 @@ export default class TaskService {
     }
   }
 
-  static async getList(params: TaskFilterVo) {
+  /**
+   * find
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async find(id: string) {
     try {
-      return TaskController.findByFilter(params);
+      const res = await TaskController.find(id);
+      return res;
     } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async getPage(params: TaskPageFilterVo) {
+  /**
+   * findByFilter
+   * @param taskListFiltersVo 查询参数
+   * @returns 操作结果
+   */
+  static async findByFilter(taskListFiltersVo?: TaskVO.TaskFilterVo) {
     try {
-      return TaskController.page(params);
+      const res = await TaskController.findByFilter(taskListFiltersVo);
+      return res;
     } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static useTaskList = (params: TaskFilterVo) => {
-    const [taskList, setTaskList] = useState<TaskWithoutRelationsVo[]>([]);
-    const [loading, setLoading] = useState(false);
+  /**
+   * page
+   * @param taskPageFilterVo 查询参数
+   * @returns 操作结果
+   */
+  static async page(taskPageFilterVo?: TaskVO.TaskPageFilterVo) {
+    try {
+      const res = await TaskController.page(taskPageFilterVo);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 
-    const fetchTaskList = async () => {
-      setLoading(true);
-      const res = await TaskService.getList(params);
-      setTaskList(res?.list || []);
-      setLoading(false);
-    };
+  /**
+   * taskWithRelations
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async taskWithRelations(id: string) {
+    try {
+      const res = await TaskController.taskWithRelations(id);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 
-    useEffect(() => {
-      fetchTaskList();
-    }, []);
+  /**
+   * abandon
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async abandon(id: string, options: MethodOptions) {
+    try {
+      const res = await TaskController.abandon(id);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 
-    return { taskList, loading };
-  };
+  /**
+   * restore
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async restore(id: string, options: MethodOptions) {
+    try {
+      const res = await TaskController.restore(id);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 }

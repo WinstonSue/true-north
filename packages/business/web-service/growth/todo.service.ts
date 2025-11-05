@@ -1,81 +1,17 @@
 import { TodoController } from '@life-toolkit/api';
-import type { CreateTodoVo, TodoPageFilterVo, TodoFilterVo, UpdateTodoVo } from '@life-toolkit/vo';
+import type { Todo as TodoVO } from '@life-toolkit/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 
 export default class TodoService {
   /**
-   * 获取单个任务
-   * @param todoId 任务ID
-   * @returns 任务详情
-   */
-  static async findMixRepeat(todoId: string, { source }: { source?: string } = {}) {
-    try {
-      return TodoController.findMixRepeat(todoId, { source });
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  /**
-   * 批量完成任务
-   * @param params 任务ID列表
+   * create
+   * @param createTodoVo 请求体数据
    * @returns 操作结果
    */
-  static async doneWithRepeatBatch(params: TodoFilterVo, options: MethodOptions) {
+  static async create(createTodoVo: TodoVO.CreateTodoVo, options: MethodOptions) {
     try {
-      const res = await TodoController.doneWithRepeatBatch(params);
-      if (options.silent) {
-        Message.success('操作成功');
-      }
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  /**
-   * 恢复任务
-   * @param id 任务ID
-   * @returns 操作结果
-   */
-  static async restoreWithRepeat(id: string, options: MethodOptions) {
-    try {
-      const res = await TodoController.restoreWithRepeat(id);
-      if (options.silent) {
-        Message.success('操作成功');
-      }
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  /**
-   * 放弃任务
-   * @param id 任务ID
-   * @returns 操作结果
-   */
-  static async abandonWithRepeat(id: string, options: MethodOptions) {
-    try {
-      const res = await TodoController.abandonWithRepeat(id);
-      if (!options.silent) {
-        Message.success('操作成功');
-      }
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  /**
-   * 添加任务
-   * @param todo 任务详情
-   * @returns 操作结果
-   */
-  static async create(todo: CreateTodoVo, options: MethodOptions) {
-    try {
-      const res = await TodoController.create(todo);
+      const res = await TodoController.create(createTodoVo);
       if (!options.silent) {
         Message.success('创建成功');
       }
@@ -86,8 +22,8 @@ export default class TodoService {
   }
 
   /**
-   * 删除任务
-   * @param id 任务ID
+   * delete
+   * @param id idID
    * @returns 操作结果
    */
   static async delete(id: string, options: MethodOptions) {
@@ -103,15 +39,14 @@ export default class TodoService {
   }
 
   /**
-   * 更新任务
-   * @param id 任务ID
-   * @param todo 任务详情
-   * @param silent 是否静默
+   * update
+   * @param id idID
+   * @param updateVo 请求体数据
    * @returns 操作结果
    */
-  static async update(id: string, todo: UpdateTodoVo, options: MethodOptions) {
+  static async update(id: string, updateVo: TodoVO.UpdateTodoVo, options: MethodOptions) {
     try {
-      const res = await TodoController.update(id, todo);
+      const res = await TodoController.update(id, updateVo);
       if (!options.silent) {
         Message.success('操作成功');
       }
@@ -122,15 +57,56 @@ export default class TodoService {
   }
 
   /**
-   * 更新待办及重复待办
-   * @param id 待办ID
-   * @param todo 待办详情
-   * @param silent 是否静默
+   * find
+   * @param id idID
    * @returns 操作结果
    */
-  static async updateWithRepeat(id: string, todo: UpdateTodoVo, options: MethodOptions) {
+  static async find(id: string) {
     try {
-      const res = await TodoController.updateWithRepeat(id, todo);
+      const res = await TodoController.find(id);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * findByFilter
+   * @param query 查询参数
+   * @returns 操作结果
+   */
+  static async findByFilter(query?: TodoVO.TodoFilterVo) {
+    try {
+      const res = await TodoController.findByFilter(query);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * page
+   * @param query 查询参数
+   * @returns 操作结果
+   */
+  static async page(query?: TodoVO.TodoPageFilterVo) {
+    try {
+      const res = await TodoController.page(query);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * updateWithRepeat
+   * @param id idID
+   * @param updateVo 请求体数据
+   * @returns 操作结果
+   */
+  static async updateWithRepeat(id: string, updateVo: TodoVO.UpdateTodoVo, options: MethodOptions) {
+    try {
+      const res = await TodoController.updateWithRepeat(id, updateVo);
       if (!options.silent) {
         Message.success('操作成功');
       }
@@ -141,26 +117,81 @@ export default class TodoService {
   }
 
   /**
-   * 获取任务列表
-   * @param params 任务列表过滤条件
-   * @returns 任务列表
+   * doneWithRepeatBatch
+   * @param query 查询参数
+   * @param body 请求体数据
+   * @returns 操作结果
    */
-  static async listMixRepeat(params: TodoFilterVo = {}) {
+  static async doneWithRepeatBatch(query?: TodoVO.TodoFilterVo, body: any, options: MethodOptions) {
     try {
-      return TodoController.listMixRepeat(params);
+      const res = await TodoController.doneWithRepeatBatch(query, body);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
     } catch (error: unknown) {
       Message.error(error);
     }
   }
 
   /**
-   * 获取任务分页列表
-   * @param params 任务分页过滤条件
-   * @returns 任务分页列表
+   * abandonWithRepeat
+   * @param id idID
+   * @returns 操作结果
    */
-  static async page(params: TodoPageFilterVo) {
+  static async abandonWithRepeat(id: string, options: MethodOptions) {
     try {
-      return TodoController.page(params);
+      const res = await TodoController.abandonWithRepeat(id);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * restoreWithRepeat
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async restoreWithRepeat(id: string, options: MethodOptions) {
+    try {
+      const res = await TodoController.restoreWithRepeat(id);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * listMixRepeat
+   * @param query 查询参数
+   * @returns 操作结果
+   */
+  static async listMixRepeat(query?: TodoVO.TodoFilterVo) {
+    try {
+      const res = await TodoController.listMixRepeat(query);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * findMixRepeat
+   * @param id idID
+   * @param query 查询参数
+   * @returns 操作结果
+   */
+  static async findMixRepeat(id: string, query?: { source?: string; }) {
+    try {
+      const res = await TodoController.findMixRepeat(id, query);
+      return res;
     } catch (error: unknown) {
       Message.error(error);
     }

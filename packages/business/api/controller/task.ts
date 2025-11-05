@@ -17,11 +17,6 @@ export default class TaskController {
   static async find(id: string) {
     return request<TaskVO.TaskVo>({ method: "get" })(`/task/find/${id}`);
   }
-
-  static async findByFilter(params: any) {
-    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/find-by-filter`, params);
-  }
-
   static async page(params: TaskVO.TaskPageFilterVo) {
     return request<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/page`, params);
   }
@@ -36,5 +31,9 @@ export default class TaskController {
 
   static async restore(id: string) {
     return request<boolean>({ method: "put" })(`/task/restore/${id}`);
+  }
+
+  static async findByFilter(params: TaskVO.TaskFilterVo) {
+    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/find-by-filter`, params);
   }
 }

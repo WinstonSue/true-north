@@ -10,113 +10,172 @@ import { useState, useEffect } from 'react';
 import { Message } from '../message';
 
 export default class GoalService {
-  static async find(todoId: string) {
+  /**
+   * create
+   * @param body 请求体数据
+   * @returns 操作结果
+   */
+  static async create(body: GoalVO.CreateGoalVo, options: MethodOptions) {
     try {
-      return GoalController.find(todoId);
-    } catch (error) {
-      Message.error(error);
-      throw error;
-    }
-  }
-
-  static async restore(id: string) {
-    try {
-      const res = await GoalController.restore(id);
-      Message.success('操作成功');
+      const res = await GoalController.create(body);
+      if (!options.silent) {
+        Message.success('创建成功');
+      }
       return res;
-    } catch (error) {
+    } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async abandon(id: string) {
-    try {
-      const res = await GoalController.abandon(id);
-      Message.success('操作成功');
-      return res;
-    } catch (error) {
-      Message.error(error);
-      throw error;
-    }
-  }
-
-  static async create(goal: CreateGoalVo) {
-    try {
-      const res = await GoalController.create(goal);
-      Message.success('操作成功');
-      return res;
-    } catch (error) {
-      Message.error(error);
-      throw error;
-    }
-  }
-
-  static async delete(id: string) {
+  /**
+   * delete
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async delete(id: string, options: MethodOptions) {
     try {
       const res = await GoalController.delete(id);
-      Message.success('操作成功');
+      if (!options.silent) {
+        Message.success('删除成功');
+      }
       return res;
-    } catch (error) {
+    } catch (error: unknown) {
       Message.error(error);
-      throw error;
     }
   }
 
-  static async update(id: string, goal: UpdateGoalVo, silent = true) {
+  /**
+   * update
+   * @param id idID
+   * @param updateGoalVo 请求体数据
+   * @returns 操作结果
+   */
+  static async update(id: string, updateGoalVo: GoalVO.UpdateGoalVo, options: MethodOptions) {
     try {
-      const res = await GoalController.update(id, goal);
-      if (!silent) {
+      const res = await GoalController.update(id, updateGoalVo);
+      if (!options.silent) {
         Message.success('操作成功');
       }
       return res;
-    } catch (error) {
+    } catch (error: unknown) {
       Message.error(error);
-      throw error;
     }
   }
 
-  static async findByFilter(params: GoalFilterVo = {}) {
+  /**
+   * find
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async find(id: string) {
     try {
-      return GoalController.findByFilter(params);
-    } catch (error) {
+      const res = await GoalController.find(id);
+      return res;
+    } catch (error: unknown) {
       Message.error(error);
-      throw error;
     }
   }
 
-  static async getTree(params: GoalFilterVo = {}) {
+  /**
+   * findWithRelations
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async findWithRelations(id: string) {
     try {
-      return GoalController.getTree(params);
-    } catch (error) {
+      const res = await GoalController.findWithRelations(id);
+      return res;
+    } catch (error: unknown) {
       Message.error(error);
-      throw error;
     }
   }
 
-  static async getPage(params: GoalPageFilterVo) {
+  /**
+   * findByFilter
+   * @param goalListFiltersVo 查询参数
+   * @returns 操作结果
+   */
+  static async findByFilter(goalListFiltersVo?: GoalVO.GoalFilterVo) {
     try {
-      return GoalController.page(params);
-    } catch (error) {
+      const res = await GoalController.findByFilter(goalListFiltersVo);
+      return res;
+    } catch (error: unknown) {
       Message.error(error);
-      throw error;
     }
   }
 
-  static useGoalList = (params: GoalFilterVo = {}) => {
-    const [goalList, setGoalList] = useState<GoalWithoutRelationsVo[]>([]);
-    const [loading, setLoading] = useState(false);
+  /**
+   * page
+   * @param goalPageFilterVo 查询参数
+   * @returns 操作结果
+   */
+  static async page(goalPageFilterVo?: GoalVO.GoalPageFilterVo) {
+    try {
+      const res = await GoalController.page(goalPageFilterVo);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 
-    const fetchGoalList = async () => {
-      setLoading(true);
-      const res = await GoalService.findByFilter(params);
-      setGoalList(res.list);
-      setLoading(false);
-    };
+  /**
+   * getTree
+   * @param goalListFiltersVo 查询参数
+   * @returns 操作结果
+   */
+  static async getTree(goalListFiltersVo?: GoalVO.GoalFilterVo) {
+    try {
+      const res = await GoalController.getTree(goalListFiltersVo);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 
-    useEffect(() => {
-      fetchGoalList();
-    }, []);
+  /**
+   * findRoots
+   * @returns 操作结果
+   */
+  static async findRoots() {
+    try {
+      const res = await GoalController.findRoots();
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 
-    return { goalList, loading };
-  };
+  /**
+   * abandon
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async abandon(id: string, options: MethodOptions) {
+    try {
+      const res = await GoalController.abandon(id);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * restore
+   * @param id idID
+   * @returns 操作结果
+   */
+  static async restore(id: string, options: MethodOptions) {
+    try {
+      const res = await GoalController.restore(id);
+      if (!options.silent) {
+        Message.success('操作成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
 }

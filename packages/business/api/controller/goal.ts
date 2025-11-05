@@ -21,19 +21,9 @@ export default class GoalController {
   static async findWithRelations(id: string) {
     return request<GoalVO.GoalVo>({ method: "get" })(`/goal/find-with-relations/${id}`);
   }
-
-  static async findByFilter(params: any) {
-    return request<ResponseListVo<GoalVO.GoalWithoutRelationsVo>>({ method: "get" })(`/goal/find-by-filter`, params);
-  }
-
   static async page(params: GoalVO.GoalPageFilterVo) {
     return request<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>>({ method: "get" })(`/goal/page`, params);
   }
-
-  static async getTree(params: any) {
-    return request<ResponseTreeVo<GoalVO.GoalVo>>({ method: "get" })(`/goal/get-tree`, params);
-  }
-
   static async findRoots() {
     return request<GoalVO.GoalVo[]>({ method: "get" })(`/goal/find-roots`);
   }
@@ -44,5 +34,12 @@ export default class GoalController {
 
   static async restore(id: string) {
     return request<boolean>({ method: "put" })(`/goal/restore/${id}`);
+  }
+  static async findByFilter(params: GoalVO.GoalFilterVo) {
+    return request<ResponseListVo<GoalVO.GoalWithoutRelationsVo>>({ method: "get" })(`/goal/find-by-filter`, params);
+  }
+
+  static async getTree(params: GoalVO.GoalFilterVo) {
+    return request<ResponseTreeVo<GoalVO.GoalVo>>({ method: "get" })(`/goal/get-tree`, params);
   }
 }

@@ -99,9 +99,9 @@ export class TodoController {
   }
 
   @Put('/done-with-repeat/batch', { description: '批量完成待办' })
-  async doneWithRepeatBatch(@Query() query: TodoVO.TodoFilterVo, @Body() body: any): Promise<any> {
+  async doneWithRepeatBatch(@Query() query?: TodoVO.TodoFilterVo, @Body() body?: any): Promise<any> {
     const filter = new TodoFilterDto();
-    filter.importListVo(query);
+    if (query) filter.importListVo(query);
     return await this.todoService.doneWithRepeatBatch(filter);
   }
 

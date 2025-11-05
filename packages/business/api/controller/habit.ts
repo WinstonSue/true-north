@@ -17,11 +17,6 @@ export default class HabitController {
   static async find(id: string) {
     return request<HabitVO.HabitVo>({ method: "get" })(`/habit/find/${id}`);
   }
-
-  static async findByFilter(params: any) {
-    return request<ResponseListVo<HabitVO.HabitWithoutRelationsVo>>({ method: "get" })(`/habit/find-by-filter`, params);
-  }
-
   static async page(params: HabitVO.HabitPageFilterVo) {
     return request<ResponsePageVo<HabitVO.HabitWithoutRelationsVo>>({ method: "get" })(`/habit/page`, params);
   }
@@ -32,5 +27,9 @@ export default class HabitController {
 
   static async restore(id: string) {
     return request<void>({ method: "put" })(`/habit/restore/${id}`);
+  }
+
+  static async findByFilter(params: HabitVO.HabitFilterVo) {
+    return request<ResponseListVo<HabitVO.HabitWithoutRelationsVo>>({ method: "get" })(`/habit/find-by-filter`, params);
   }
 }
