@@ -6,6 +6,7 @@
 import { SyncEngine, DiffEngine, TargetAdapter, MethodInfo, MethodDefinition } from '../core';
 import { ControllerProxyDiffEngine } from './diff-engine';
 import { ControllerProxyCodeGenerator } from './code-generator';
+import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH } from '../../constants';
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
@@ -44,9 +45,7 @@ export class ControllerProxySyncEngine extends SyncEngine {
   protected findAllControllerPairs(): Array<{ sourcePath: string; targetPath: string; className: string }> {
     const pairs: Array<{ sourcePath: string; targetPath: string; className: string }> = [];
 
-    // 定义路径常量
-    const CONTROLLER_SOURCE_PATH = '/Users/xuwenhua/code/application-mine/life-toolkit/packages/business/server/src';
-    const CONTROLLER_PROXY_TARGET_PATH = '/Users/xuwenhua/code/application-mine/life-toolkit/apps/desktop/src/database';
+    // 使用全局路径常量
 
     try {
       // 递归查找所有 .controller.ts 文件

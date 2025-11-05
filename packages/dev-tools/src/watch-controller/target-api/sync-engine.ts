@@ -6,6 +6,7 @@
 import { SyncEngine, DiffEngine, MethodDefinition, MethodInfo, IntermediateState, MethodChangeType } from '../core';
 import { ControllerApiDiffEngine } from './diff-engine';
 import { ControllerApiCodeGenerator } from './code-generator';
+import { CONTROLLER_SOURCE_PATH, CONTROLLER_API_TARGET_PATH } from '../../constants';
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
@@ -41,10 +42,7 @@ export class ControllerApiSyncEngine extends SyncEngine {
   protected findAllControllerPairs(): Array<{ sourcePath: string; targetPath: string; className: string }> {
     const pairs: Array<{ sourcePath: string; targetPath: string; className: string }> = [];
 
-    // 定义路径常量
-    const CONTROLLER_SOURCE_PATH = '/Users/xuwenhua/code/application-mine/life-toolkit/packages/business/server/src';
-    const CONTROLLER_API_TARGET_PATH =
-      '/Users/xuwenhua/code/application-mine/life-toolkit/packages/business/api/controller';
+    // 使用全局路径常量
 
     try {
       // 递归查找所有 .controller.ts 文件
@@ -151,17 +149,12 @@ export class ControllerApiSyncEngine extends SyncEngine {
    * API 控制器只检查方法存在性，不检查详细变更
    */
   protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): any[] {
-    console.log('🔧 API 控制器使用重写的 generateMethodChanges 方法');
-    console.log(`   源方法数: ${sourceState.methods.size}`);
-    console.log(`   目标方法数: ${targetState.methods.size}`);
-    
     const changes: any[] = [];
 
     // 只检查缺失的方法（在 Server 中存在但在 API 中不存在）
     for (const [methodName, sourceMethod] of sourceState.methods) {
       const targetMethod = targetState.methods.get(methodName);
       if (!targetMethod) {
-        console.log(`   ❌ 缺失方法: ${methodName}`);
         // 方法在目标中不存在
         changes.push({
           methodName,
@@ -169,8 +162,6 @@ export class ControllerApiSyncEngine extends SyncEngine {
           sourceMethod: this.convertToMethodInfo(sourceMethod),
           details: 'Method not found in target controller',
         });
-      } else {
-        console.log(`   ✅ 方法存在: ${methodName}`);
       }
       // 如果方法存在，就认为是同步的，不添加到变更列表中
     }
@@ -178,7 +169,6 @@ export class ControllerApiSyncEngine extends SyncEngine {
     // 检查目标中多余的方法（在 API 中存在但在 Server 中不存在）
     for (const [methodName, targetMethod] of targetState.methods) {
       if (!sourceState.methods.has(methodName)) {
-        console.log(`   🗑️ 多余方法: ${methodName}`);
         changes.push({
           methodName,
           changeType: 'method_removed',
@@ -188,7 +178,6 @@ export class ControllerApiSyncEngine extends SyncEngine {
       }
     }
 
-    console.log(`   📊 总变更数: ${changes.length}`);
     return changes;
   }
 
