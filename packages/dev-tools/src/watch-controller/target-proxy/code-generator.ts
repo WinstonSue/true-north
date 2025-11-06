@@ -3,7 +3,8 @@
  * 专注于目标代码控制器的代码同步
  */
 
-import { IntermediateState, SyncAction, MethodDefinition, ConstructorDefinition } from '../core/intermediate-state';
+import { IntermediateState, MethodDefinition, ConstructorDefinition } from '../core/intermediate-state';
+import { SyncAction } from '../core/sync-engine';
 
 export class ControllerProxyCodeGenerator {
   /**

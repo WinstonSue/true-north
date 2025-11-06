@@ -6,7 +6,7 @@
 import { ASTParser } from '../ast/ast-parser';
 import { IntermediateState } from '../intermediate-state';
 import { ASTClassInfo } from '../ast/ast-types';
-import { ObjectParser, ValidationUtils, ErrorHandler, Logger } from '../utils';
+import { ErrorHandler, Logger, ObjectParser, ValidationUtils } from '../../helpers';
 
 export abstract class BaseAdapter {
   protected astParser: ASTParser;

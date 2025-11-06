@@ -1,7 +1,7 @@
 import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH } from '../../constants';
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
-import { extractClassNameFromPath } from '../core/utils';
+import { extractClassNameFromPath } from '../utils';
 
 /**
  * 查找所有控制器对

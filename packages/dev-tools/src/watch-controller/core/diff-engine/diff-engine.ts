@@ -3,14 +3,8 @@
  * 提供通用的差异比对逻辑，子类可以重写特定的比较方法
  */
 
-import {
-  IntermediateState,
-  DiffResult,
-  ChangeRecord,
-  MethodDefinition,
-  ParameterDefinition,
-} from '../intermediate-state';
-import { MethodChange, MethodChangeType, MethodDetailsResult } from './types';
+import { IntermediateState, MethodDefinition, ParameterDefinition } from '../intermediate-state';
+import { MethodChange, MethodChangeType, MethodDetailsResult, DiffResult, ChangeRecord } from './types';
 import { SourceAdapter } from '../adapters';
 import { TargetAdapter } from '../adapters';
 import { readFileSync } from 'fs';

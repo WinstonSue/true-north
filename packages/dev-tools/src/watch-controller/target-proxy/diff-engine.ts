@@ -3,10 +3,10 @@
  * 专门处理 Server Controller 到 Desktop Controller 的差异比对
  */
 
-import { MethodDefinition, DiffResult, ChangeRecord } from '../core/intermediate-state';
-import { DiffEngine, MethodChange, MethodInfo, detectChangeType } from '../core/diff-engine';
+import { MethodDefinition } from '../core/intermediate-state';
+import { DiffEngine, MethodChange, MethodInfo, detectChangeType, DiffResult, ChangeRecord } from '../core/diff-engine';
 import { findAllControllerPairs } from './helpers';
-import { IntermediateState } from '../core';
+import { IntermediateState } from '../core/intermediate-state';
 import { ControllerSyncStatus } from '../core/sync-engine';
 import { TargetProxyAdapter } from './target-adapter';
 import { isEqual } from 'lodash-es';

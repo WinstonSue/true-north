@@ -5,9 +5,8 @@
 
 import { ControllerWebServiceCodeGenerator } from './code-generator';
 import { readFileSync, writeFileSync } from 'fs';
-import { SyncOptions, SyncResult } from '../core';
 import { ControllerWebServiceDiffEngine } from './diff-engine';
-import { generateSyncActions } from '../core/sync-engine';
+import { generateSyncActions, SyncOptions, SyncResult } from '../core/sync-engine';
 
 export class ControllerWebServiceSyncEngine {
   diffEngine: ControllerWebServiceDiffEngine;

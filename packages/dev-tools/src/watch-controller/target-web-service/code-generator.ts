@@ -3,7 +3,8 @@
  * 专注于根据 Server Controller 生成对应的 Web Service 方法
  */
 
-import { IntermediateState, SyncAction, MethodDefinition } from '../core/intermediate-state';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
+import { SyncAction } from '../core/sync-engine';
 
 export class ControllerWebServiceCodeGenerator {
   /**

@@ -3,7 +3,8 @@
  * 专门处理 API Controller 的代码生成和同步
  */
 
-import { IntermediateState, SyncAction, MethodDefinition } from '../core/intermediate-state';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
+import { SyncAction } from '../core/sync-engine';
 
 export class ControllerApiCodeGenerator {
   /**
@@ -30,7 +31,13 @@ export class ControllerApiCodeGenerator {
           break;
         case 'update_method':
           if (action.methodName) {
-            updatedCode = this.updateMethod(updatedCode, action.methodName, action.data as MethodDefinition, targetState, sourceState);
+            updatedCode = this.updateMethod(
+              updatedCode,
+              action.methodName,
+              action.data as MethodDefinition,
+              targetState,
+              sourceState
+            );
           }
           break;
       }
@@ -42,7 +49,12 @@ export class ControllerApiCodeGenerator {
   /**
    * 添加新的 API 方法
    */
-  private addMethod(code: string, method: MethodDefinition, targetState: IntermediateState, sourceState: IntermediateState): string {
+  private addMethod(
+    code: string,
+    method: MethodDefinition,
+    targetState: IntermediateState,
+    sourceState: IntermediateState
+  ): string {
     const classBodyRange = this.findClassBodyRange(code, targetState.metadata.className);
     if (!classBodyRange) {
       return code;
@@ -54,17 +66,17 @@ export class ControllerApiCodeGenerator {
 
     // 生成 API 方法代码
     const methodCode = this.generateApiMethod(method, sourceState);
-    
+
     // 确保正确的换行处理
     const needsLeadingNewline = !beforeClosingBrace.endsWith('\n');
     const needsTrailingNewline = !closingBraceAndAfter.startsWith('\n');
-    
+
     let result = beforeClosingBrace;
     if (needsLeadingNewline) result += '\n';
     result += methodCode;
     if (needsTrailingNewline) result += '\n';
     result += closingBraceAndAfter;
-    
+
     return result;
   }
 
@@ -79,14 +91,20 @@ export class ControllerApiCodeGenerator {
 
     const before = code.slice(0, methodRange.start);
     const after = code.slice(methodRange.end);
-    
+
     return before + after;
   }
 
   /**
    * 更新 API 方法
    */
-  private updateMethod(code: string, methodName: string, method: MethodDefinition, targetState: IntermediateState, sourceState: IntermediateState): string {
+  private updateMethod(
+    code: string,
+    methodName: string,
+    method: MethodDefinition,
+    targetState: IntermediateState,
+    sourceState: IntermediateState
+  ): string {
     const methodRange = this.findMethodRange(code, methodName);
     if (!methodRange) {
       // 如果找不到旧方法，直接添加新方法
@@ -97,7 +115,7 @@ export class ControllerApiCodeGenerator {
     const before = code.slice(0, methodRange.start);
     const after = code.slice(methodRange.end);
     const methodCode = this.generateApiMethod(method, sourceState);
-    
+
     return before + methodCode + '\n' + after;
   }
 
@@ -164,7 +182,7 @@ export class ControllerApiCodeGenerator {
         break;
       case 'query':
         const queryType = this.extractQueryType(method) || this.getDefaultQueryType(methodName, entityCap);
-        const queryParam = method.parameters.find(p => p.decorator === 'Query');
+        const queryParam = method.parameters.find((p) => p.decorator === 'Query');
         const isQueryOptional = queryParam?.optional || false;
         signature += `params${isQueryOptional ? '?' : ''}: ${queryType}) {`;
         requestCall += `${genericType}({ method: "${httpMethod}" })`;
@@ -197,14 +215,16 @@ export class ControllerApiCodeGenerator {
   /**
    * 检测参数样式
    */
-  private detectParameterStyle(method: MethodDefinition): 'none' | 'id' | 'id+body' | 'id+query' | 'query' | 'body' | 'query+body' {
+  private detectParameterStyle(
+    method: MethodDefinition
+  ): 'none' | 'id' | 'id+body' | 'id+query' | 'query' | 'body' | 'query+body' {
     if (method.parameters.length === 0) {
       return 'none';
     }
 
-    const hasId = method.parameters.some(p => p.decorator === 'Param' && p.name === 'id');
-    const hasBody = method.parameters.some(p => p.decorator === 'Body');
-    const hasQuery = method.parameters.some(p => p.decorator === 'Query');
+    const hasId = method.parameters.some((p) => p.decorator === 'Param' && p.name === 'id');
+    const hasBody = method.parameters.some((p) => p.decorator === 'Body');
+    const hasQuery = method.parameters.some((p) => p.decorator === 'Query');
 
     if (hasId && hasBody) {
       return 'id+body';
@@ -227,7 +247,7 @@ export class ControllerApiCodeGenerator {
    * 提取 ID 类型
    */
   private extractIdType(method: MethodDefinition): string | null {
-    const idParam = method.parameters.find(p => p.decorator === 'Param' && p.name === 'id');
+    const idParam = method.parameters.find((p) => p.decorator === 'Param' && p.name === 'id');
     return idParam ? idParam.type : null;
   }
 
@@ -235,7 +255,7 @@ export class ControllerApiCodeGenerator {
    * 提取 Query 类型
    */
   private extractQueryType(method: MethodDefinition): string | null {
-    const queryParam = method.parameters.find(p => p.decorator === 'Query');
+    const queryParam = method.parameters.find((p) => p.decorator === 'Query');
     return queryParam ? queryParam.type : null;
   }
 
@@ -243,7 +263,7 @@ export class ControllerApiCodeGenerator {
    * 提取 Body 类型
    */
   private extractBodyType(method: MethodDefinition): string | null {
-    const bodyParam = method.parameters.find(p => p.decorator === 'Body');
+    const bodyParam = method.parameters.find((p) => p.decorator === 'Body');
     return bodyParam ? bodyParam.type : null;
   }
 
@@ -332,7 +352,7 @@ export class ControllerApiCodeGenerator {
     // 找到方法开始位置（包括前面的空行）
     let start = match.index;
     const lines = code.substring(0, start).split('\n');
-    
+
     // 向前查找到非空行为止
     let lineIndex = lines.length - 1;
     while (lineIndex > 0 && lines[lineIndex - 1].trim() === '') {

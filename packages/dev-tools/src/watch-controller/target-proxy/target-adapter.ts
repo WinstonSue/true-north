@@ -6,6 +6,8 @@ import {
   ImportDeclaration,
   ParameterDefinition,
   SourceLocation,
+} from '../core/intermediate-state';
+import {
   ASTClassInfo,
   ASTMethod,
   ASTDecorator,
@@ -13,7 +15,7 @@ import {
   ASTConstructor,
   ASTImport,
   ASTSourceLocation,
-} from '../core';
+} from '../core/ast';
 import { TargetAdapter } from '../core/adapters';
 
 export class TargetProxyAdapter extends TargetAdapter {

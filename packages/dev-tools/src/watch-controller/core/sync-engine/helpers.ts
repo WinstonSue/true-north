@@ -1,4 +1,6 @@
-import { IntermediateState, SyncAction, DiffResult } from '../intermediate-state';
+import { IntermediateState } from '../intermediate-state';
+import { SyncAction } from './types';
+import { DiffResult } from '../diff-engine';
 
 /**
  * 根据差异结果生成同步操作

@@ -3,11 +3,10 @@
  * 专门处理 Server Controller 到 API Controller 的同步
  */
 
-import { SyncOptions, SyncResult } from '../core';
+import { SyncOptions, SyncResult, generateSyncActions } from '../core/sync-engine';
 import { ControllerApiDiffEngine } from './diff-engine';
 import { ControllerApiCodeGenerator } from './code-generator';
 import { readFileSync, writeFileSync } from 'fs';
-import { generateSyncActions } from '../core/sync-engine';
 
 export class ControllerApiSyncEngine {
   diffEngine: ControllerApiDiffEngine;

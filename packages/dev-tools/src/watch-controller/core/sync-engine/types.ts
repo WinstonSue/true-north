@@ -1,5 +1,4 @@
-import { DiffResult, SyncAction } from '../intermediate-state';
-import { MethodChange } from '../diff-engine';
+import { MethodChange, DiffResult } from '../diff-engine';
 
 export interface ControllerSyncStatus {
   className: string;
@@ -44,4 +43,18 @@ export interface SyncResult {
   error?: string;
   /** 详细信息 */
   details?: string;
+}
+
+/**
+ * 同步操作
+ */
+export interface SyncAction {
+  /** 操作类型 */
+  type: 'add_method' | 'remove_method' | 'update_method' | 'update_constructor' | 'update_imports';
+  /** 目标方法名 */
+  methodName?: string;
+  /** 操作数据 */
+  data: any;
+  /** 操作描述 */
+  description: string;
 }

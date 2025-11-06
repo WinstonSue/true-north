@@ -4,8 +4,8 @@
  */
 
 import { DiffEngine } from '../core/diff-engine';
-import { IntermediateState, DiffResult, ChangeRecord, MethodDefinition } from '../core/intermediate-state';
-import { MethodInfo, MethodChange, detectChangeType } from '../core/diff-engine';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
+import { MethodInfo, MethodChange, detectChangeType, DiffResult, ChangeRecord } from '../core/diff-engine';
 import { findAllControllerPairs } from './helpers';
 import { TargetApiAdapter } from './target-adapter';
 import { ControllerSyncStatus } from '../core/sync-engine';

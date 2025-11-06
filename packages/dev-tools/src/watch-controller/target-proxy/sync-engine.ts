@@ -6,9 +6,8 @@
 import { ControllerProxyDiffEngine } from './diff-engine';
 import { ControllerProxyCodeGenerator } from './code-generator';
 import { readFileSync, writeFileSync } from 'fs';
-import { SyncOptions, SyncResult } from '../core';
-import { generateSyncActions } from '../core/sync-engine';
-import { ErrorHandler, Logger } from '../core/utils';
+import { generateSyncActions, SyncOptions, SyncResult } from '../core/sync-engine';
+import { ErrorHandler, Logger } from '../helpers';
 
 export class ControllerProxySyncEngine {
   private codeGenerator: ControllerProxyCodeGenerator;
@@ -39,7 +38,7 @@ export class ControllerProxySyncEngine {
       if (options.verbose) {
         this.logger.info('解析完成', {
           sourceMethods: sourceState.methods.size,
-          targetMethods: targetState.methods.size
+          targetMethods: targetState.methods.size,
         });
       }
 
@@ -49,7 +48,7 @@ export class ControllerProxySyncEngine {
       if (options.verbose) {
         this.logger.info('差异比对完成', {
           changeCount: diff.changes.length,
-          needsSync: diff.needsSync
+          needsSync: diff.needsSync,
         });
       }
 
