@@ -1,22 +1,18 @@
-import { ASTParser } from '../ast/ast-parser';
 import { IntermediateState } from '../intermediate-state';
 import { ASTClassInfo } from '../ast/ast-types';
+import { BaseAdapter } from './base-adapter';
 
-export abstract class TargetAdapter {
-  astParser: ASTParser;
-
+export abstract class TargetAdapter extends BaseAdapter {
   constructor() {
-    this.astParser = new ASTParser();
+    super();
   }
 
   /**
    * 解析目标代码为中间态
    */
   parseToIntermediateState(code: string, filePath: string): IntermediateState {
-    const astInfo = this.astParser.parse(code, filePath);
-    return this.astToIntermediateState(astInfo, filePath);
+    return this.safeParseToIntermediateState(code, filePath);
   }
 
   abstract astToIntermediateState(astInfo: ASTClassInfo, filePath: string): IntermediateState;
-
 }

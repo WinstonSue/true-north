@@ -8,10 +8,12 @@ import { ControllerProxyCodeGenerator } from './code-generator';
 import { readFileSync, writeFileSync } from 'fs';
 import { SyncOptions, SyncResult } from '../core';
 import { generateSyncActions } from '../core/sync-engine';
+import { ErrorHandler, Logger } from '../core/utils';
 
 export class ControllerProxySyncEngine {
   private codeGenerator: ControllerProxyCodeGenerator;
   diffEngine: ControllerProxyDiffEngine;
+  private logger = Logger.createContextLogger('ProxySyncEngine');
 
   constructor() {
     this.diffEngine = new ControllerProxyDiffEngine();
@@ -27,9 +29,7 @@ export class ControllerProxySyncEngine {
       const targetCode = readFileSync(targetPath, 'utf-8');
 
       if (options.verbose) {
-        console.log(`📖 读取源码文件:`);
-        console.log(`   Server: ${sourcePath}`);
-        console.log(`   Target: ${targetPath}`);
+        this.logger.info('读取源码文件', { server: sourcePath, target: targetPath });
       }
 
       // 2. 解析为中间态
@@ -37,18 +37,20 @@ export class ControllerProxySyncEngine {
       const targetState = this.diffEngine.getTargetIntermediateState(targetPath);
 
       if (options.verbose) {
-        console.log(`🔍 解析完成:`);
-        console.log(`   源方法数: ${sourceState.methods.size}`);
-        console.log(`   目标方法数: ${targetState.methods.size}`);
+        this.logger.info('解析完成', {
+          sourceMethods: sourceState.methods.size,
+          targetMethods: targetState.methods.size
+        });
       }
 
       // 3. 比对差异
       const diff = this.diffEngine.compare(sourceState, targetState);
 
       if (options.verbose) {
-        console.log(`📊 差异比对完成:`);
-        console.log(`   变更数量: ${diff.changes.length}`);
-        console.log(`   需要同步: ${diff.needsSync}`);
+        this.logger.info('差异比对完成', {
+          changeCount: diff.changes.length,
+          needsSync: diff.needsSync
+        });
       }
 
       // 4. 生成同步操作
@@ -60,7 +62,7 @@ export class ControllerProxySyncEngine {
         writeFileSync(targetPath, newCode, 'utf-8');
 
         if (options.verbose) {
-          console.log(`✅ 同步完成: ${targetPath}`);
+          this.logger.info('同步完成', { targetPath });
         }
       }
 
@@ -72,12 +74,14 @@ export class ControllerProxySyncEngine {
         details: options.verbose ? `处理了 ${actions.length} 个操作` : undefined,
       };
     } catch (error) {
+      const errorResult = ErrorHandler.handleSyncError(error, 'syncController');
+      this.logger.error('同步失败', errorResult.error);
       return {
         success: false,
         controllerName: 'Unknown',
         diff: { controllerName: 'Unknown', changes: [], needsSync: false },
         actions: [],
-        error: error instanceof Error ? error.message : String(error),
+        error: errorResult.error,
       };
     }
   }

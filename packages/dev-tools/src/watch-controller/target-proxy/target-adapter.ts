@@ -230,10 +230,6 @@ export class TargetProxyAdapter extends TargetAdapter {
    * 解析对象字面量
    */
   private parseObjectLiteral(text: string): Record<string, any> {
-    try {
-      return JSON.parse(text.replace(/'/g, '"'));
-    } catch (e) {
-      return {};
-    }
+    return this.safeParseObjectLiteral(text);
   }
 }

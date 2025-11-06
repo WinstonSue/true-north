@@ -7,7 +7,6 @@ import {
   ParameterDefinition,
   SourceLocation,
 } from '../intermediate-state';
-import { ASTParser } from '../ast/ast-parser';
 import {
   ASTClassInfo,
   ASTMethod,
@@ -17,19 +16,17 @@ import {
   ASTImport,
   ASTSourceLocation,
 } from '../ast/ast-types';
+import { BaseAdapter } from './base-adapter';
 
-export class SourceAdapter {
-  private astParser: ASTParser;
-
+export class SourceAdapter extends BaseAdapter {
   constructor() {
-    this.astParser = new ASTParser();
+    super();
   }
   /**
    * 解析源码为中间态
    */
   parseToIntermediateState(code: string, filePath: string): IntermediateState {
-    const astInfo = this.astParser.parse(code, filePath);
-    return this.astToIntermediateState(astInfo, filePath);
+    return this.safeParseToIntermediateState(code, filePath);
   }
 
   /**
@@ -231,10 +228,6 @@ export class SourceAdapter {
    * 解析对象字面量
    */
   private parseObjectLiteral(text: string): Record<string, any> {
-    try {
-      return JSON.parse(text.replace(/'/g, '"'));
-    } catch (e) {
-      return {};
-    }
+    return this.safeParseObjectLiteral(text);
   }
 }

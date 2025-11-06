@@ -6,3 +6,4 @@ export * from './intermediate-state';
 export * from './sync-engine';
 export * from './ast';
 export * from './adapters';
+export * from './utils';

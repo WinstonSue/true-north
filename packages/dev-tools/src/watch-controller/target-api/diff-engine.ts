@@ -67,11 +67,6 @@ export class ControllerApiDiffEngine extends DiffEngine {
       }
     }
 
-    console.log('=====================');
-    console.log('sourceParam', source.parameters);
-    console.log('targetParam', target.parameters);
-    console.log('changes', changes);
-
     return changes;
   }
 
