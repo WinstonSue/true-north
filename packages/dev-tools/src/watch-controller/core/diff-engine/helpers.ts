@@ -1,26 +1,26 @@
-import { MethodChangeType } from '../diff-engine';
 import { MethodDefinition } from '../intermediate-state';
+import { MethodChangeType } from '../../../../types';
 
 /**
  * 检测变更类型 - 通用实现
  */
-export function detectChangeType(sourceMethod: MethodDefinition, targetMethod: MethodDefinition): MethodChangeType {
+export function detectMethodChangeType(sourceMethod: MethodDefinition, targetMethod: MethodDefinition): MethodChangeType {
   // 比较装饰器
   if (sourceMethod.verb !== targetMethod.verb || sourceMethod.path !== targetMethod.path) {
-    return 'decorators_changed';
+    return 'method_decorators_changed';
   }
 
   // 比较参数
   if (parametersChanged(sourceMethod.parameters, targetMethod.parameters)) {
-    return 'parameters_changed';
+    return 'method_parameters_changed';
   }
 
   // 比较方法签名
   if (sourceMethod.returnType !== targetMethod.returnType) {
-    return 'signature_changed';
+    return 'method_signature_changed';
   }
 
-  return 'no_change';
+  return 'method_no_change';
 }
 
 /**

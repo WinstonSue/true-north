@@ -78,7 +78,7 @@ export class ControllerProxySyncEngine {
       return {
         success: false,
         controllerName: 'Unknown',
-        diff: { controllerName: 'Unknown', changes: [], needsSync: false },
+        diff: { controllerName: 'Unknown', changes: [], methodChanges: [], needsSync: false },
         actions: [],
         error: errorResult.error,
       };

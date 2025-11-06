@@ -5,12 +5,13 @@
 
 import { MethodDefinition } from '../core/intermediate-state';
 import { DiffEngine } from '../core/diff-engine';
-import { MethodChange, MethodInfo, DiffResult, ChangeRecord } from '../core/diff-engine/types';
-import { detectChangeType } from '../core/diff-engine/helpers';
+import { DiffResult, ChangeRecord } from '../core/diff-engine/types';
+import { detectMethodChangeType } from '../core/diff-engine/helpers';
 import { findAllControllerPairs } from './helpers';
 import { IntermediateState } from '../core/intermediate-state';
 import { ControllerSyncStatus } from '../core/sync-engine';
 import { TargetProxyAdapter } from './target-adapter';
+import { MethodChange, MethodInfo } from '../../../types';
 
 export class ControllerProxyDiffEngine extends DiffEngine {
   targetAdapter: TargetProxyAdapter;
@@ -40,7 +41,9 @@ export class ControllerProxyDiffEngine extends DiffEngine {
           filePath: pair.targetPath, // 前端兼容字段
           needsSync: controllerDetails.methodChanges.length > 0,
           changeCount: controllerDetails.methodChanges.length,
+          methodChanges: controllerDetails.methodChanges,
           changes: controllerDetails.methodChanges,
+
           summary,
           lastChecked: new Date().toISOString(),
           error: undefined,
@@ -53,6 +56,7 @@ export class ControllerProxyDiffEngine extends DiffEngine {
           filePath: pair.targetPath,
           needsSync: false,
           changeCount: 0,
+          methodChanges: [],
           changes: [],
           summary: {
             totalMethods: 0,
@@ -75,11 +79,7 @@ export class ControllerProxyDiffEngine extends DiffEngine {
    * 比较两个中间态，生成差异报告
    */
   compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult {
-    const changes: (ChangeRecord | MethodChange)[] = [];
-
-    // 比较方法
-    const methodChanges = this.generateMethodChanges(source, target);
-    changes.push(...methodChanges);
+    const changes: ChangeRecord[] = [];
 
     // 比较构造函数（子类可以选择是否比较）
     const constructorChanges = this.compareConstructor(source.constructor, target.constructor);
@@ -93,10 +93,14 @@ export class ControllerProxyDiffEngine extends DiffEngine {
       changes.push(importChanges);
     }
 
+    // 比较方法
+    const methodChanges = this.generateMethodChanges(source, target);
+
     return {
       controllerName: source.metadata.className,
       changes,
-      needsSync: changes.length > 0,
+      methodChanges,
+      needsSync: changes.length + methodChanges.length > 0,
     };
   }
 
@@ -113,20 +117,20 @@ export class ControllerProxyDiffEngine extends DiffEngine {
           methodName,
           changeType: 'method_added',
           sourceMethod: this.convertToMethodInfo(sourceMethod),
-          details: 'Method not found in target controller',
+          description: 'Method not found in target controller',
         });
         continue;
       }
 
       // 比较方法差异
-      const changeType = detectChangeType(sourceMethod, targetMethod);
-      if (changeType !== 'no_change') {
+      const changeType = detectMethodChangeType(sourceMethod, targetMethod);
+      if (changeType !== 'method_no_change') {
         changes.push({
           methodName,
           changeType,
           sourceMethod: this.convertToMethodInfo(sourceMethod),
           targetMethod: this.convertToMethodInfo(targetMethod),
-          details: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
+          description: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
         });
       }
     }
@@ -138,7 +142,7 @@ export class ControllerProxyDiffEngine extends DiffEngine {
           methodName,
           changeType: 'method_removed',
           sourceMethod: this.convertToMethodInfo(targetMethod), // 使用目标方法作为源
-          details: 'Method exists in target but not in source',
+          description: 'Method exists in target but not in source',
         });
       }
     }

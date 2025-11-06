@@ -5,11 +5,12 @@
 
 import { DiffEngine } from '../core/diff-engine';
 import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
-import { MethodChange, DiffResult, MethodInfo } from '../core/diff-engine';
-import { detectChangeType } from '../core/diff-engine/helpers';
+import { DiffResult } from '../core/diff-engine';
+import { detectMethodChangeType } from '../core/diff-engine/helpers';
 import { findAllControllerPairs } from './helpers';
 import { TargetApiAdapter } from './target-adapter';
 import { ControllerSyncStatus } from '../core/sync-engine';
+import { MethodChange, MethodInfo } from '../../../types';
 
 export class ControllerApiDiffEngine extends DiffEngine {
   targetAdapter: TargetApiAdapter;
@@ -41,6 +42,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
           needsSync: controllerDetails.methodChanges.length > 0,
           changeCount: controllerDetails.methodChanges.length,
           changes: controllerDetails.methodChanges,
+          methodChanges: controllerDetails.methodChanges,
           summary,
           lastChecked: new Date().toISOString(),
           error: undefined,
@@ -54,6 +56,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
           needsSync: false,
           changeCount: 0,
           changes: [],
+          methodChanges: [],
           summary: {
             totalMethods: 0,
             changedMethods: 0,
@@ -79,7 +82,8 @@ export class ControllerApiDiffEngine extends DiffEngine {
 
     return {
       controllerName: source.metadata.className,
-      changes: [...methodChanges],
+      changes: [],
+      methodChanges,
       needsSync: methodChanges.length > 0,
     };
   }
@@ -100,18 +104,18 @@ export class ControllerApiDiffEngine extends DiffEngine {
           methodName,
           changeType: 'method_added',
           sourceMethod: this.convertToMethodInfo(sourceMethod),
-          details: 'Method not found in target controller',
+          description: 'Method not found in target controller',
         });
       } else {
         // 方法存在，检查是否有变化
-        const changeType = detectChangeType(sourceMethod, targetMethod);
-        if (changeType !== 'no_change') {
+        const changeType = detectMethodChangeType(sourceMethod, targetMethod);
+        if (changeType !== 'method_no_change') {
           changes.push({
             methodName,
             changeType,
             sourceMethod: this.convertToMethodInfo(sourceMethod),
             targetMethod: this.convertToMethodInfo(targetMethod),
-            details: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
+            description: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
           });
         }
       }
@@ -124,7 +128,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
           methodName,
           changeType: 'method_removed',
           sourceMethod: this.convertToMethodInfo(targetMethod),
-          details: 'Method exists in target but not in source',
+          description: 'Method exists in target but not in source',
         });
       }
     }

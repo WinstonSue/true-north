@@ -4,9 +4,10 @@
  */
 
 import { IntermediateState, MethodDefinition } from '../intermediate-state';
-import { MethodChange, MethodChangeType, MethodDetailsResult, DiffResult, ChangeRecord } from './types';
+import { DiffResult, ChangeRecord } from './types';
 import { SourceAdapter, TargetAdapter } from '../adapters';
 import { readFileSync } from 'fs';
+import { MethodChange, MethodChangeType, MethodDetailsResult } from '../../../../types';
 
 export abstract class DiffEngine {
   sourceAdapter: SourceAdapter;
@@ -76,26 +77,20 @@ export abstract class DiffEngine {
 
     if (sourceParamCount !== targetParamCount) {
       return {
-        type: 'constructor_changed',
-        details: {
-          oldValue: target,
-          newValue: source,
-          description: `构造函数参数数量从 ${targetParamCount} 改为 ${sourceParamCount}`,
-          severity: 'high',
-        },
+        changeType: 'constructor_changed',
+        oldValue: target,
+        newValue: source,
+        description: `构造函数参数数量从 ${targetParamCount} 改为 ${sourceParamCount}`,
       };
     }
 
     // 检查服务实例化代码
     if (source.serviceInstantiation !== target.serviceInstantiation) {
       return {
-        type: 'constructor_changed',
-        details: {
-          oldValue: target,
-          newValue: source,
-          description: '构造函数服务实例化代码已修改',
-          severity: 'medium',
-        },
+        changeType: 'constructor_changed',
+        oldValue: target,
+        newValue: source,
+        description: '构造函数服务实例化代码已修改',
       };
     }
 
@@ -109,13 +104,10 @@ export abstract class DiffEngine {
     // 简化比较，检查导入数量
     if (source.length !== target.length) {
       return {
-        type: 'imports_changed',
-        details: {
-          oldValue: target,
-          newValue: source,
-          description: `导入声明数量从 ${target.length} 改为 ${source.length}`,
-          severity: 'low',
-        },
+        changeType: 'imports_changed',
+        oldValue: target,
+        newValue: source,
+        description: `导入声明数量从 ${target.length} 改为 ${source.length}`,
       };
     }
 
@@ -127,9 +119,9 @@ export abstract class DiffEngine {
    * 生成详细统计摘要 - 通用实现
    */
   generateDetailedSummary(methodChanges: MethodChange[]) {
-    const signatureChanges = methodChanges.filter((c) => c.changeType === 'signature_changed').length;
-    const parameterChanges = methodChanges.filter((c) => c.changeType === 'parameters_changed').length;
-    const decoratorChanges = methodChanges.filter((c) => c.changeType === 'decorators_changed').length;
+    const signatureChanges = methodChanges.filter((c) => c.changeType === 'method_signature_changed').length;
+    const parameterChanges = methodChanges.filter((c) => c.changeType === 'method_parameters_changed').length;
+    const decoratorChanges = methodChanges.filter((c) => c.changeType === 'method_decorators_changed').length;
 
     return {
       totalMethods: methodChanges.length,
@@ -172,11 +164,11 @@ export abstract class DiffEngine {
     changeType: MethodChangeType
   ): string {
     switch (changeType) {
-      case 'decorators_changed':
+      case 'method_decorators_changed':
         return `Decorators changed: ${targetMethod.verb}('${targetMethod.path}') -> ${sourceMethod.verb}('${sourceMethod.path}')`;
-      case 'parameters_changed':
+      case 'method_parameters_changed':
         return `Parameters changed: ${targetMethod.parameters.length} -> ${sourceMethod.parameters.length} parameters`;
-      case 'signature_changed':
+      case 'method_signature_changed':
         return `Return type changed: ${targetMethod.returnType} -> ${sourceMethod.returnType}`;
       default:
         return 'Method changed';

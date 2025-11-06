@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
 import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
 import MethodDetailsModal from './MethodDetailsModal';
-
-interface MethodChange {
-  methodName: string;
-  changeType: 'signature_changed' | 'parameters_changed' | 'decorators_changed' | 'body_changed' | 'no_change';
-  sourceMethod: any;
-  targetMethod?: any;
-  details: string;
-}
+import { MethodChange } from '../../../types';
 
 interface ControllerSyncStatus {
   className: string;
@@ -64,7 +57,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
     try {
       // 从类名中提取控制器名称，如 "Todo.controllerController" -> "todo"
       const controllerName = className.replace('.controllerController', '').toLowerCase();
-      
+
       const response = await fetch('/api/sync/api-controller', {
         method: 'POST',
         headers: {
@@ -88,6 +81,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
   };
 
   const showApiMethodDetails = (controller: ControllerSyncStatus) => {
+    console.log('controller', controller);
     setSelectedApiController(controller);
     setApiMethodModalVisible(true);
   };

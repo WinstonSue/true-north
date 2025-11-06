@@ -1,4 +1,5 @@
-import { MethodChange, DiffResult } from '../diff-engine';
+import { DiffResult } from '../diff-engine';
+import { MethodChange } from '../../../../types';
 
 export interface ControllerSyncStatus {
   className: string;
@@ -11,6 +12,7 @@ export interface ControllerSyncStatus {
   // 前端兼容字段
   filePath: string;
   changes: MethodChange[];
+  methodChanges: MethodChange[];
   summary: {
     totalMethods: number;
     changedMethods: number;

@@ -74,7 +74,7 @@ export class ControllerWebServiceSyncEngine {
       return {
         success: false,
         controllerName: 'Unknown',
-        diff: { controllerName: 'Unknown', changes: [], needsSync: false },
+        diff: { controllerName: 'Unknown', changes: [], methodChanges: [], needsSync: false },
         actions: [],
         error: error instanceof Error ? error.message : String(error),
       };

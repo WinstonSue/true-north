@@ -7,9 +7,10 @@ import { MethodDefinition } from '../core/intermediate-state';
 import { CONTROLLER_SOURCE_PATH, CONTROLLER_WEB_SERVICE_TARGET_PATH } from '../../constants';
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
-import { DiffEngine, MethodInfo } from '../core/diff-engine';
+import { DiffEngine } from '../core/diff-engine';
 import { ControllerSyncStatus } from '../core/sync-engine';
 import { TargetWebServiceAdapter } from './target-adapter';
+import { MethodInfo } from '../../../types';
 
 export class ControllerWebServiceDiffEngine extends DiffEngine {
   constructor() {
@@ -39,6 +40,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
           needsSync: controllerDetails.methodChanges.length > 0,
           changeCount: controllerDetails.methodChanges.length,
           changes: controllerDetails.methodChanges,
+          methodChanges: controllerDetails.methodChanges,
           summary,
           lastChecked: new Date().toISOString(),
           error: undefined,
@@ -52,6 +54,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
           needsSync: false,
           changeCount: 0,
           changes: [],
+          methodChanges: [],
           summary: {
             totalMethods: 0,
             changedMethods: 0,
@@ -78,6 +81,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
       controllerName: sourceState.metadata?.className || 'Unknown',
       needsSync: false,
       changes: [] as any[],
+      methodChanges: [] as any[],
     };
 
     // 只比较方法，使用 Web Service 专用逻辑
@@ -104,7 +108,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
           methodName,
           changeType: 'method_added',
           sourceMethod: this.convertToMethodInfo(sourceMethod),
-          details: 'Method not found in target Web Service',
+          description: 'Method not found in target Web Service',
         });
       } else {
         // 方法存在，只检查方法名是否匹配（极简检查）
@@ -114,7 +118,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
             changeType: 'method_modified',
             sourceMethod: this.convertToMethodInfo(sourceMethod),
             targetMethod: this.convertToMethodInfo(targetMethod),
-            details: `Method name changed from ${targetMethod.name} to ${sourceMethod.name}`,
+            description: `Method name changed from ${targetMethod.name} to ${sourceMethod.name}`,
           });
         }
         // 跳过所有其他检查（参数、装饰器、返回类型等）
@@ -128,7 +132,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
           methodName,
           changeType: 'method_removed',
           targetMethod: this.convertToMethodInfo(targetMethod),
-          details: 'Method exists in target but not in source',
+          description: 'Method exists in target but not in source',
         });
       }
     }

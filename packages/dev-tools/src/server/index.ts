@@ -177,51 +177,6 @@ app.get('/api/check/method-details', async (req, res) => {
 });
 
 // ========== Desktop 控制器 API 端点 ==========
-
-// 检查单个 Desktop 控制器差异
-app.get('/api/check/desktop-controller/:name', async (req, res) => {
-  const { name } = req.params;
-  const engine = createProxySyncEngine();
-
-  try {
-    const pair = findDesktopControllerPair(name);
-    if (!pair) {
-      res.json({ success: false, error: `未找到控制器: ${name}` });
-      return;
-    }
-
-    const result = await engine.checkController(pair.sourcePath, pair.targetPath, {
-      verbose: true,
-    });
-
-    res.json({
-      success: true,
-      data: {
-        name: pair.name,
-        className: pair.className,
-        needsSync: result.diff.needsSync,
-        changeCount: result.diff.changes.length,
-        changes: result.diff.changes.map((change) => ({
-          type: change.type,
-          methodName: change.methodName,
-          description: change.details.description,
-          severity: change.details.severity,
-        })),
-        actions: result.actions.map((action) => ({
-          type: action.type,
-          methodName: action.methodName,
-          description: action.description,
-        })),
-      },
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
 // 同步单个 Desktop 控制器
 app.post('/api/sync/desktop-controller', async (req, res) => {
   const { name, dryRun = false } = req.body;
@@ -254,9 +209,13 @@ app.post('/api/sync/desktop-controller', async (req, res) => {
         actionCount: result.actions.length,
         dryRun,
         changes: result.diff.changes.map((change) => ({
-          type: change.type,
+          type: change.changeType,
+          description: change.description,
+        })),
+        methodChanges: result.diff.methodChanges.map((change) => ({
+          type: change.changeType,
           methodName: change.methodName,
-          description: change.details.description,
+          description: change.description,
         })),
         actions: result.actions.map((action) => ({
           type: action.type,
@@ -280,51 +239,6 @@ app.post('/api/sync/desktop-controller', async (req, res) => {
 });
 
 // ========== API 控制器 API 端点 ==========
-
-// 检查单个 API 控制器差异
-app.get('/api/check/api-controller/:name', async (req, res) => {
-  const { name } = req.params;
-  const engine = createApiSyncEngine();
-
-  try {
-    const pair = findApiControllerPair(name);
-    if (!pair) {
-      res.json({ success: false, error: `未找到 API 控制器: ${name}` });
-      return;
-    }
-
-    const result = await engine.checkController(pair.sourcePath, pair.targetPath, {
-      verbose: true,
-    });
-
-    res.json({
-      success: true,
-      data: {
-        name: pair.name,
-        className: pair.className,
-        needsSync: result.diff.needsSync,
-        changeCount: result.diff.changes.length,
-        changes: result.diff.changes.map((change) => ({
-          type: change.type,
-          methodName: change.methodName,
-          description: change.details.description,
-          severity: change.details.severity,
-        })),
-        actions: result.actions.map((action) => ({
-          type: action.type,
-          methodName: action.methodName,
-          description: action.description,
-        })),
-      },
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
 // 同步单个 API 控制器
 app.post('/api/sync/api-controller', async (req, res) => {
   const { name, dryRun = false } = req.body;
@@ -357,9 +271,8 @@ app.post('/api/sync/api-controller', async (req, res) => {
         actionCount: result.actions.length,
         dryRun,
         changes: result.diff.changes.map((change) => ({
-          type: change.type,
-          methodName: change.methodName,
-          description: change.details.description,
+          type: change.changeType,
+          description: change.description,
         })),
         actions: result.actions.map((action) => ({
           type: action.type,

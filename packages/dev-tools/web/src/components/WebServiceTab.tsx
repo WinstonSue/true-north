@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
 import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
 import MethodDetailsModal from './MethodDetailsModal';
-
-interface MethodChange {
-  methodName: string;
-  changeType: 'signature_changed' | 'parameters_changed' | 'decorators_changed' | 'body_changed' | 'no_change' | 'method_added' | 'method_removed';
-  sourceMethod: any;
-  targetMethod?: any;
-  details: string;
-}
+import { MethodChange } from '../../../types';
 
 interface ControllerSyncStatus {
   className: string;
@@ -64,7 +57,7 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
     try {
       // 从类名中提取控制器名称，如 "TodoService" -> "todo"
       const controllerName = className.replace('Service', '').toLowerCase();
-      
+
       const response = await fetch('/api/sync/web-service-controller', {
         method: 'POST',
         headers: {
@@ -204,7 +197,9 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
             <span>需要同步: {needsSyncCount}</span>
             <span style={{ fontSize: '12px', color: '#666' }}>
               最后检查:{' '}
-              {webServiceMethodDetails.lastChecked ? new Date(webServiceMethodDetails.lastChecked).toLocaleString() : '未知'}
+              {webServiceMethodDetails.lastChecked
+                ? new Date(webServiceMethodDetails.lastChecked).toLocaleString()
+                : '未知'}
             </span>
           </Space>
         }

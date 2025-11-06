@@ -9,7 +9,27 @@ export function generateSyncActions(diffResult: DiffResult, source: Intermediate
   const actions: SyncAction[] = [];
 
   for (const change of diffResult.changes) {
-    switch (change.type) {
+    switch (change.changeType) {
+      case 'constructor_changed':
+        actions.push({
+          type: 'update_constructor',
+          data: source.constructor,
+          description: '更新构造函数',
+        });
+        break;
+
+      case 'imports_changed':
+        actions.push({
+          type: 'update_imports',
+          data: source.imports,
+          description: '更新导入声明',
+        });
+        break;
+    }
+  }
+
+  for (const change of diffResult.methodChanges) {
+    switch (change.changeType) {
       case 'method_added':
         if (change.methodName) {
           const method = source.methods.get(change.methodName);
@@ -33,7 +53,10 @@ export function generateSyncActions(diffResult: DiffResult, source: Intermediate
         });
         break;
 
-      case 'method_modified':
+      case 'method_signature_changed':
+      case 'method_parameters_changed':
+      case 'method_decorators_changed':
+      case 'method_body_changed':
         if (change.methodName) {
           const method = source.methods.get(change.methodName);
           if (method) {
@@ -45,22 +68,6 @@ export function generateSyncActions(diffResult: DiffResult, source: Intermediate
             });
           }
         }
-        break;
-
-      case 'constructor_changed':
-        actions.push({
-          type: 'update_constructor',
-          data: source.constructor,
-          description: '更新构造函数',
-        });
-        break;
-
-      case 'imports_changed':
-        actions.push({
-          type: 'update_imports',
-          data: source.imports,
-          description: '更新导入声明',
-        });
         break;
     }
   }

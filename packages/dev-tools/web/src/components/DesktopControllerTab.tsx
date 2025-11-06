@@ -2,14 +2,8 @@ import React, { useState } from 'react';
 import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
 import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
 import MethodDetailsModal from './MethodDetailsModal';
+import { MethodChange } from '../../../types';
 
-interface MethodChange {
-  methodName: string;
-  changeType: 'signature_changed' | 'parameters_changed' | 'decorators_changed' | 'body_changed' | 'no_change';
-  sourceMethod: any;
-  targetMethod?: any;
-  details: string;
-}
 
 interface ControllerSyncStatus {
   className: string;
