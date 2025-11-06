@@ -85,11 +85,13 @@ export class ControllerApiDiffEngine extends DiffEngine {
   }
 
   /**
-   * 重写方法变更生成 - API 控制器专用
+   * API 控制器专用
    * 检查方法存在性和参数变化
    */
   protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): MethodChange[] {
     const changes: any[] = [];
+
+    console.log('================');
 
     // 检查缺失的方法（在 Server 中存在但在 API 中不存在）
     for (const [methodName, sourceMethod] of sourceState.methods) {
@@ -104,7 +106,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
         });
       } else {
         // 方法存在，检查是否有变化
-        const changeType = detectMethodChangeType(sourceMethod, targetMethod);
+        const changeType = detectMethodChangeType(sourceMethod, targetMethod, { ignore: ['decorators'] });
         if (changeType !== 'method_no_change') {
           changes.push({
             methodName,

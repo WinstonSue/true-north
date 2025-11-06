@@ -175,18 +175,18 @@ export class ControllerApiCodeGenerator {
       case 'id+query':
         const idType3 = this.extractIdType(method) || 'string';
         const queryType2 = this.extractQueryType(method) || 'any';
-        signature += `id: ${idType3}, params?: ${queryType2}) {`;
+        signature += `id: ${idType3}, query?: ${queryType2}) {`;
         pathStr = pathStr.replace('/:id', '/${id}');
         requestCall += `${genericType}({ method: "${httpMethod}" })`;
-        bodyParam = ', params';
+        bodyParam = ', query';
         break;
       case 'query':
         const queryType = this.extractQueryType(method) || this.getDefaultQueryType(methodName, entityCap);
         const queryParam = method.parameters.find((p) => p.decorator === 'Query');
         const isQueryOptional = queryParam?.optional || false;
-        signature += `params${isQueryOptional ? '?' : ''}: ${queryType}) {`;
+        signature += `query${isQueryOptional ? '?' : ''}: ${queryType}) {`;
         requestCall += `${genericType}({ method: "${httpMethod}" })`;
-        bodyParam = ', params';
+        bodyParam = ', query';
         break;
       case 'body':
         const bodyType2 = this.extractBodyType(method) || this.getDefaultBodyType(methodName, entityCap);
@@ -200,7 +200,6 @@ export class ControllerApiCodeGenerator {
         signature += `query: ${queryType3}, body: ${bodyType3}) {`;
         requestCall += `${genericType}({ method: "${httpMethod}" })`;
         bodyParam = ', body';
-        // 对于 query+body，需要特殊处理 URL 参数
         pathStr = `${pathStr}?\${new URLSearchParams(query as any).toString()}`;
         break;
     }

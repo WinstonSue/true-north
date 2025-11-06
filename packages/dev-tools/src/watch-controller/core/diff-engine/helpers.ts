@@ -6,20 +6,28 @@ import { MethodChangeType } from '../../../../types';
  */
 export function detectMethodChangeType(
   sourceMethod: MethodDefinition,
-  targetMethod: MethodDefinition
+  targetMethod: MethodDefinition,
+  options: {
+    ignore?: string[];
+  } = {}
 ): MethodChangeType {
+  const { ignore } = options;
+
   // 比较装饰器
-  if (sourceMethod.verb !== targetMethod.verb || sourceMethod.path !== targetMethod.path) {
+  if (
+    !ignore?.includes('decorators') &&
+    (sourceMethod.verb !== targetMethod.verb || sourceMethod.path !== targetMethod.path)
+  ) {
     return 'method_decorators_changed';
   }
 
   // 比较参数
-  if (parametersChanged(sourceMethod.parameters, targetMethod.parameters)) {
+  if (!ignore?.includes('parameters') && parametersChanged(sourceMethod.parameters, targetMethod.parameters)) {
     return 'method_parameters_changed';
   }
 
   // 比较方法签名
-  if (sourceMethod.returnType !== targetMethod.returnType) {
+  if (!ignore?.includes('signature') && sourceMethod.returnType !== targetMethod.returnType) {
     return 'method_signature_changed';
   }
 

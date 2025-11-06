@@ -20,20 +20,10 @@ export abstract class DiffEngine {
    * 获取控制器的详细信息
    */
   async getDiffResultDetail(pair: { sourcePath: string; targetPath: string }): Promise<DiffResult> {
-    try {
-      const sourceState = this.getSourceIntermediateState(pair.sourcePath);
-      const targetState = this.getTargetIntermediateState(pair.targetPath);
+    const sourceState = this.getSourceIntermediateState(pair.sourcePath);
+    const targetState = this.getTargetIntermediateState(pair.targetPath);
 
-      return this.compareIntermediateState(sourceState, targetState);
-    } catch (error) {
-      return {
-        className: '',
-        needsSync: false,
-        changes: [],
-        methodChanges: [],
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
+    return this.compareIntermediateState(sourceState, targetState);
   }
 
   /**
