@@ -7,12 +7,23 @@ import {
   IntermediateState,
   DiffResult,
   ChangeRecord,
-  SyncAction,
   MethodDefinition,
   ParameterDefinition,
-} from './intermediate-state';
+} from '../intermediate-state';
+import { MethodChange, MethodChangeType } from './types';
+import { SourceAdapter } from '../adapters';
+import { TargetAdapter } from '../adapters';
+import { readFileSync } from 'fs';
+import { isEqual } from 'lodash-es';
 
 export abstract class DiffEngine {
+  sourceAdapter: SourceAdapter;
+  targetAdapter!: TargetAdapter;
+
+  constructor() {
+    this.sourceAdapter = new SourceAdapter();
+  }
+
   /**
    * 比较两个中间态，生成差异报告
    */
@@ -40,72 +51,6 @@ export abstract class DiffEngine {
       changes,
       needsSync: changes.length > 0,
     };
-  }
-
-  /**
-   * 根据差异结果生成同步操作
-   */
-  generateSyncActions(diffResult: DiffResult, source: IntermediateState): SyncAction[] {
-    const actions: SyncAction[] = [];
-
-    for (const change of diffResult.changes) {
-      switch (change.type) {
-        case 'method_added':
-          if (change.methodName) {
-            const method = source.methods.get(change.methodName);
-            if (method) {
-              actions.push({
-                type: 'add_method',
-                methodName: change.methodName,
-                data: method,
-                description: `添加方法 ${change.methodName}`,
-              });
-            }
-          }
-          break;
-
-        case 'method_removed':
-          actions.push({
-            type: 'remove_method',
-            methodName: change.methodName,
-            data: null,
-            description: `移除方法 ${change.methodName}`,
-          });
-          break;
-
-        case 'method_modified':
-          if (change.methodName) {
-            const method = source.methods.get(change.methodName);
-            if (method) {
-              actions.push({
-                type: 'update_method',
-                methodName: change.methodName,
-                data: method,
-                description: `更新方法 ${change.methodName}`,
-              });
-            }
-          }
-          break;
-
-        case 'constructor_changed':
-          actions.push({
-            type: 'update_constructor',
-            data: source.constructor,
-            description: '更新构造函数',
-          });
-          break;
-
-        case 'imports_changed':
-          actions.push({
-            type: 'update_imports',
-            data: source.imports,
-            description: '更新导入声明',
-          });
-          break;
-      }
-    }
-
-    return actions;
   }
 
   /**
@@ -229,7 +174,7 @@ export abstract class DiffEngine {
       changes.push(`可选性从 ${target.optional} 改为 ${source.optional}`);
     }
 
-    if (!this.arrayEqual(source.decoratorArgs || [], target.decoratorArgs || [])) {
+    if (!isEqual(source.decoratorArgs || [], target.decoratorArgs || [])) {
       changes.push('装饰器参数已修改');
     }
 
@@ -294,35 +239,72 @@ export abstract class DiffEngine {
   }
 
   /**
-   * 深度比较两个对象 - 工具方法
+   * 生成详细统计摘要 - 通用实现
    */
-  protected deepEqual(a: any, b: any): boolean {
-    if (a === b) return true;
-    if (a == null || b == null) return false;
-    if (typeof a !== typeof b) return false;
+  generateDetailedSummary(methodChanges: MethodChange[]) {
+    const signatureChanges = methodChanges.filter((c) => c.changeType === 'signature_changed').length;
+    const parameterChanges = methodChanges.filter((c) => c.changeType === 'parameters_changed').length;
+    const decoratorChanges = methodChanges.filter((c) => c.changeType === 'decorators_changed').length;
 
-    if (typeof a === 'object') {
-      const keysA = Object.keys(a);
-      const keysB = Object.keys(b);
-
-      if (keysA.length !== keysB.length) return false;
-
-      for (const key of keysA) {
-        if (!keysB.includes(key)) return false;
-        if (!this.deepEqual(a[key], b[key])) return false;
-      }
-
-      return true;
-    }
-
-    return false;
+    return {
+      totalMethods: methodChanges.length,
+      changedMethods: methodChanges.filter((c) => c.changeType !== 'method_added' && c.changeType !== 'method_removed')
+        .length,
+      addedMethods: methodChanges.filter((c) => c.changeType === 'method_added').length,
+      signatureChanges,
+      parameterChanges,
+      decoratorChanges,
+    };
   }
 
   /**
-   * 比较两个数组 - 工具方法
+   * 生成统计摘要 - 通用实现
    */
-  protected arrayEqual(a: any[], b: any[]): boolean {
-    if (a.length !== b.length) return false;
-    return a.every((val, index) => this.deepEqual(val, b[index]));
+  generateSummary(
+    methodChanges: MethodChange[],
+    totalMethods: number
+  ): { totalMethods: number; changedMethods: number; addedMethods: number; removedMethods: number } {
+    const addedMethods = methodChanges.filter((c) => c.changeType === 'method_added').length;
+    const removedMethods = methodChanges.filter((c) => c.changeType === 'method_removed').length;
+    const changedMethods = methodChanges.filter(
+      (c) => c.changeType !== 'method_added' && c.changeType !== 'method_removed'
+    ).length;
+
+    return {
+      totalMethods,
+      changedMethods,
+      addedMethods,
+      removedMethods,
+    };
+  }
+
+  /**
+   * 生成变更详情 - 通用实现
+   */
+  generateChangeDetails(
+    sourceMethod: MethodDefinition,
+    targetMethod: MethodDefinition,
+    changeType: MethodChangeType
+  ): string {
+    switch (changeType) {
+      case 'decorators_changed':
+        return `Decorators changed: ${targetMethod.verb}('${targetMethod.path}') -> ${sourceMethod.verb}('${sourceMethod.path}')`;
+      case 'parameters_changed':
+        return `Parameters changed: ${targetMethod.parameters.length} -> ${sourceMethod.parameters.length} parameters`;
+      case 'signature_changed':
+        return `Return type changed: ${targetMethod.returnType} -> ${sourceMethod.returnType}`;
+      default:
+        return 'Method changed';
+    }
+  }
+
+  getSourceIntermediateState(sourcePath: string): IntermediateState {
+    const sourceCode = readFileSync(sourcePath, 'utf-8');
+    return this.sourceAdapter.parseToIntermediateState(sourceCode, sourcePath);
+  }
+
+  getTargetIntermediateState(targetPath: string): IntermediateState {
+    const targetCode = readFileSync(targetPath, 'utf-8');
+    return this.targetAdapter.parseToIntermediateState(targetCode, targetPath);
   }
 }

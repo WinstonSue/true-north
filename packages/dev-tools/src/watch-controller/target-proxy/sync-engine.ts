@@ -3,118 +3,83 @@
  * 专门处理 Server Controller 到 Desktop Controller 的同步
  */
 
-import { SyncEngine, DiffEngine, TargetAdapter, MethodInfo, MethodDefinition } from '../core';
 import { ControllerProxyDiffEngine } from './diff-engine';
 import { ControllerProxyCodeGenerator } from './code-generator';
-import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH } from '../../constants';
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync } from 'fs';
+import { SyncOptions, SyncResult } from '../core';
+import { generateSyncActions } from '../core/sync-engine';
 
-export class ControllerProxySyncEngine extends SyncEngine {
-  private targetAdapter: TargetAdapter;
+export class ControllerProxySyncEngine {
+  private codeGenerator: ControllerProxyCodeGenerator;
+  diffEngine: ControllerProxyDiffEngine;
 
   constructor() {
-    super();
-    this.targetAdapter = new TargetAdapter();
+    this.diffEngine = new ControllerProxyDiffEngine();
+    this.codeGenerator = new ControllerProxyCodeGenerator();
   }
 
   /**
-   * 创建差异比对引擎
+   * 同步单个控制器 - 通用实现
    */
-  protected createDiffEngine(): DiffEngine {
-    return new ControllerProxyDiffEngine();
-  }
-
-  /**
-   * 创建代码生成器
-   */
-  protected createCodeGenerator(): ControllerProxyCodeGenerator {
-    return new ControllerProxyCodeGenerator();
-  }
-
-  /**
-   * 获取目标适配器
-   */
-  protected getTargetAdapter(): TargetAdapter {
-    return this.targetAdapter;
-  }
-
-  /**
-   * 查找所有控制器对
-   */
-  protected findAllControllerPairs(): Array<{ sourcePath: string; targetPath: string; className: string }> {
-    const pairs: Array<{ sourcePath: string; targetPath: string; className: string }> = [];
-
-    // 使用全局路径常量
-
+  async syncController(sourcePath: string, targetPath: string, options: SyncOptions = {}): Promise<SyncResult> {
     try {
-      // 递归查找所有 .controller.ts 文件
-      const findControllerFiles = (dir: string, basePath: string): string[] => {
-        const files: string[] = [];
-        const items = readdirSync(dir);
+      // 1. 读取源码
+      const targetCode = readFileSync(targetPath, 'utf-8');
 
-        for (const item of items) {
-          const fullPath = join(dir, item);
-          const stat = statSync(fullPath);
-
-          if (stat.isDirectory()) {
-            files.push(...findControllerFiles(fullPath, basePath));
-          } else if (item.endsWith('.controller.ts')) {
-            const relativePath = fullPath.replace(basePath, '').replace(/^\//, '');
-            files.push(relativePath);
-          }
-        }
-
-        return files;
-      };
-
-      const sourceFiles = findControllerFiles(CONTROLLER_SOURCE_PATH, CONTROLLER_SOURCE_PATH);
-
-      for (const sourceFile of sourceFiles) {
-        const sourcePath = join(CONTROLLER_SOURCE_PATH, sourceFile);
-        const targetPath = join(CONTROLLER_PROXY_TARGET_PATH, sourceFile);
-        const className = this.extractClassNameFromPath(sourceFile);
-
-        pairs.push({
-          sourcePath,
-          targetPath,
-          className,
-        });
+      if (options.verbose) {
+        console.log(`📖 读取源码文件:`);
+        console.log(`   Server: ${sourcePath}`);
+        console.log(`   Target: ${targetPath}`);
       }
+
+      // 2. 解析为中间态
+      const sourceState = this.diffEngine.getSourceIntermediateState(sourcePath);
+      const targetState = this.diffEngine.getTargetIntermediateState(targetPath);
+
+      if (options.verbose) {
+        console.log(`🔍 解析完成:`);
+        console.log(`   源方法数: ${sourceState.methods.size}`);
+        console.log(`   目标方法数: ${targetState.methods.size}`);
+      }
+
+      // 3. 比对差异
+      const diff = this.diffEngine.compare(sourceState, targetState);
+
+      if (options.verbose) {
+        console.log(`📊 差异比对完成:`);
+        console.log(`   变更数量: ${diff.changes.length}`);
+        console.log(`   需要同步: ${diff.needsSync}`);
+      }
+
+      // 4. 生成同步操作
+      const actions = generateSyncActions(diff, sourceState);
+
+      // 5. 执行同步（如果不是干运行模式）
+      if (!options.dryRun && diff.needsSync) {
+        const newCode = this.codeGenerator.applySyncActions(targetCode, actions, targetState, sourceState);
+        writeFileSync(targetPath, newCode, 'utf-8');
+
+        if (options.verbose) {
+          console.log(`✅ 同步完成: ${targetPath}`);
+        }
+      }
+
+      return {
+        success: true,
+        controllerName: sourceState.metadata.className,
+        diff,
+        actions,
+        details: options.verbose ? `处理了 ${actions.length} 个操作` : undefined,
+      };
     } catch (error) {
-      console.error('查找控制器文件时出错:', error);
+      return {
+        success: false,
+        controllerName: 'Unknown',
+        diff: { controllerName: 'Unknown', changes: [], needsSync: false },
+        actions: [],
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
-
-    return pairs;
-  }
-
-  /**
-   * Desktop 控制器特有的方法信息转换
-   */
-  protected convertToMethodInfo(method: MethodDefinition): MethodInfo {
-    return {
-      name: method.name,
-      signature: `async ${method.name}(${method.parameters
-        .map(
-          (p) =>
-            `${p.decorator ? `@${p.decorator}${p.decoratorArgs?.length ? `(${p.decoratorArgs.join(', ')})` : '()'} ` : ''}${p.name}${p.optional ? '?' : ''}: ${p.type}`
-        )
-        .join(', ')})`,
-      returnType: method.returnType,
-      parameters: method.parameters.map((p) => ({
-        name: p.name,
-        type: p.type,
-        decorator: p.decorator,
-        decoratorArgs: p.decoratorArgs?.join(', '),
-      })),
-      decorators: [
-        {
-          name: method.verb,
-          args: method.path,
-        },
-      ],
-      body: method.bodyText,
-    };
   }
 }
 

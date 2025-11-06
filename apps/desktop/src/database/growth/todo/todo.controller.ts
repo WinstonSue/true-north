@@ -43,7 +43,7 @@ export class TodoController {
   }
 
   @Put('/done-with-repeat/batch')
-  async doneWithRepeatBatch(@Query() query: TodoVO.TodoFilterVo, @Body() body: any): Promise<any> {
+  async doneWithRepeatBatch(@Query() query?: TodoVO.TodoFilterVo, @Body() body?: any): Promise<any> {
     return this.controller.doneWithRepeatBatch(query, body);
   }
 

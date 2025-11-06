@@ -1,31 +1,29 @@
 import {
   IntermediateState,
-  ControllerMetadata,
   MethodDefinition,
+  ControllerMetadata,
   ConstructorDefinition,
   ImportDeclaration,
   ParameterDefinition,
   SourceLocation,
-} from '../intermediate-state';
-import { ASTParser } from '../ast/ast-parser';
+} from '../core/intermediate-state';
 import {
   ASTClassInfo,
   ASTMethod,
-  ASTDecorator,
   ASTParameter,
   ASTConstructor,
   ASTImport,
   ASTSourceLocation,
-} from '../ast/ast-types';
+} from '../core/ast/ast-types';
+import { TargetAdapter } from '../core/adapters/target-adapter';
 
-export class SourceAdapter {
-  private astParser: ASTParser;
-
+export class TargetApiAdapter extends TargetAdapter {
   constructor() {
-    this.astParser = new ASTParser();
+    super();
   }
+
   /**
-   * 解析源码为中间态
+   * 解析目标代码为中间态
    */
   parseToIntermediateState(code: string, filePath: string): IntermediateState {
     const astInfo = this.astParser.parse(code, filePath);
@@ -34,7 +32,7 @@ export class SourceAdapter {
 
   /**
    * 将 AST 结构转换为中间态
-   * 包含 Source 代码的业务转换规则
+   * 包含 Target API 代码的业务转换规则
    */
   astToIntermediateState(astInfo: ASTClassInfo, filePath: string): IntermediateState {
     const metadata = this.parseControllerMetadata(astInfo, filePath);
@@ -51,31 +49,19 @@ export class SourceAdapter {
   }
 
   /**
-   * 解析控制器元数据 - Source 业务规则
+   * 解析控制器元数据 - Target API 业务规则
    */
   private parseControllerMetadata(astInfo: ASTClassInfo, filePath: string): ControllerMetadata {
-    const className = astInfo.className;
-    let basePath = '';
-
-    // 解析 @Controller 装饰器的路径参数 - Source 特定逻辑
-    const controllerDecorator = astInfo.decorators.find((d) => d.name === 'Controller');
-    if (controllerDecorator && controllerDecorator.arguments.length > 0) {
-      const pathArg = controllerDecorator.arguments[0];
-      if (pathArg.type === 'string') {
-        basePath = pathArg.value;
-      }
-    }
-
     return {
-      className,
-      basePath,
-      sourceType: 'source',
+      className: astInfo.className,
+      basePath: '',
+      sourceType: 'target',
       filePath,
     };
   }
 
   /**
-   * 解析方法定义 - Source 业务规则
+   * 解析方法定义 - Target API 业务规则
    */
   private parseMethods(astMethods: ASTMethod[]): Map<string, MethodDefinition> {
     const methods = new Map<string, MethodDefinition>();
@@ -91,21 +77,14 @@ export class SourceAdapter {
   }
 
   /**
-   * 解析单个方法 - Source 业务规则
+   * 解析单个方法 - Target API 业务规则
    */
   private parseMethod(astMethod: ASTMethod): MethodDefinition | null {
     const name = astMethod.name;
-    const decorators = astMethod.decorators;
 
-    // 查找 HTTP 动词装饰器 - Source 特定逻辑
-    const httpDecorator = decorators.find((d) => ['Get', 'Post', 'Put', 'Delete', 'Patch'].includes(d.name));
+    // Target API 方法通常是 static async 方法
+    // 不需要检查 HTTP 装饰器，因为 API 控制器是生成的代码
 
-    if (!httpDecorator) {
-      return null; // 不是 HTTP 方法
-    }
-
-    const verb = httpDecorator.name as 'Get' | 'Post' | 'Put' | 'Delete' | 'Patch';
-    const { path, decoratorOptions } = this.parseHttpDecorator(httpDecorator);
     const parameters = this.parseParameters(astMethod.parameters);
     const returnType = astMethod.returnType;
     const bodyText = astMethod.bodyText;
@@ -113,47 +92,18 @@ export class SourceAdapter {
 
     return {
       name,
-      verb,
-      path: path || `/${name}`,
+      verb: 'Get', // 占位符，Target API 不使用 HTTP 动词
+      path: `/${name}`, // 占位符，Target API 不使用路径
       parameters,
       returnType,
       bodyText,
-      decoratorOptions,
+      decoratorOptions: {},
       sourceLocation,
     };
   }
 
   /**
-   * 解析 HTTP 装饰器 - Source 业务规则
-   */
-  private parseHttpDecorator(decorator: ASTDecorator): { path?: string; decoratorOptions?: Record<string, any> } {
-    const args = decorator.arguments;
-    let path: string | undefined;
-    let decoratorOptions: Record<string, any> | undefined;
-
-    if (args.length > 0) {
-      const firstArg = args[0];
-      if (firstArg.type === 'string') {
-        path = firstArg.value;
-      }
-    }
-
-    if (args.length > 1) {
-      const secondArg = args[1];
-      if (secondArg.type === 'object') {
-        try {
-          decoratorOptions = this.parseObjectLiteral(secondArg.rawText);
-        } catch (e) {
-          // 解析失败，忽略
-        }
-      }
-    }
-
-    return { path, decoratorOptions };
-  }
-
-  /**
-   * 解析方法参数 - Source 业务规则
+   * 解析方法参数 - Target API 业务规则
    */
   private parseParameters(astParameters: ASTParameter[]): ParameterDefinition[] {
     return astParameters.map((param) => {
@@ -161,20 +111,18 @@ export class SourceAdapter {
       const type = param.type;
       const optional = param.optional;
 
-      // 解析参数装饰器 - Source 特定逻辑
+      // Target API 参数装饰器推断逻辑
       let decorator: 'Param' | 'Query' | 'Body' = 'Body';
       let decoratorArgs: string[] = [];
 
-      const paramDecorator = param.decorators.find((d) => ['Param', 'Query', 'Body'].includes(d.name));
-
-      if (paramDecorator) {
-        decorator = paramDecorator.name as 'Param' | 'Query' | 'Body';
-        decoratorArgs = paramDecorator.arguments.map((arg) => {
-          if (arg.type === 'string') {
-            return arg.value;
-          }
-          return arg.rawText;
-        });
+      // 根据参数名推断装饰器类型
+      if (name === 'id') {
+        decorator = 'Param';
+        decoratorArgs = ['id'];
+      } else if (name === 'params' || name === 'query') {
+        decorator = 'Query';
+      } else if (name === 'body') {
+        decorator = 'Body';
       }
 
       return {
@@ -188,7 +136,7 @@ export class SourceAdapter {
   }
 
   /**
-   * 解析构造函数 - Source 业务规则
+   * 解析构造函数 - Target API 业务规则
    */
   private parseConstructor(astConstructor?: ASTConstructor): ConstructorDefinition {
     if (!astConstructor) {
@@ -205,7 +153,7 @@ export class SourceAdapter {
   }
 
   /**
-   * 解析导入声明 - Source 业务规则
+   * 解析导入声明 - Target API 业务规则
    */
   private parseImports(astImports: ASTImport[]): ImportDeclaration[] {
     return astImports.map((astImport) => ({
@@ -225,16 +173,5 @@ export class SourceAdapter {
       endLine: astLocation.endLine,
       endColumn: astLocation.endColumn,
     };
-  }
-
-  /**
-   * 解析对象字面量
-   */
-  private parseObjectLiteral(text: string): Record<string, any> {
-    try {
-      return JSON.parse(text.replace(/'/g, '"'));
-    } catch (e) {
-      return {};
-    }
   }
 }

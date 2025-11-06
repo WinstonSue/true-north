@@ -3,10 +3,20 @@
  * 专门处理 Server Controller 到 Desktop Controller 的差异比对
  */
 
-import { DiffEngine } from '../core';
 import { MethodDefinition } from '../core/intermediate-state';
+import { DiffEngine, MethodDetailsResult, MethodChange, MethodInfo, detectChangeType } from '../core/diff-engine';
+import { findAllControllerPairs } from './helpers';
+import { IntermediateState } from '../core';
+import { ControllerSyncStatus } from '../core/sync-engine';
+import { TargetProxyAdapter } from './target-adapter';
+import { isEqual } from 'lodash-es';
 
 export class ControllerProxyDiffEngine extends DiffEngine {
+  targetAdapter: TargetProxyAdapter;
+  constructor() {
+    super();
+    this.targetAdapter = new TargetProxyAdapter();
+  }
   /**
    * Desktop 控制器特有的方法比较逻辑
    */
@@ -40,7 +50,7 @@ export class ControllerProxyDiffEngine extends DiffEngine {
     }
 
     // 比较装饰器选项
-    if (!this.deepEqual(source.decoratorOptions, target.decoratorOptions)) {
+    if (!isEqual(source.decoratorOptions, target.decoratorOptions)) {
       changes.push('装饰器选项已修改');
     }
 
@@ -65,5 +75,171 @@ export class ControllerProxyDiffEngine extends DiffEngine {
     }
 
     return false;
+  }
+  /**
+   * 检查所有控制器的同步状态
+   */
+  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
+    const pairs = findAllControllerPairs();
+    const results: ControllerSyncStatus[] = [];
+
+    for (const pair of pairs) {
+      try {
+        const methodDetails = await this.getMethodDetails([pair]);
+        const controllerDetails = methodDetails[0];
+
+        // 生成详细的统计信息
+        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
+
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath, // 前端兼容字段
+          needsSync: controllerDetails.methodChanges.length > 0,
+          changeCount: controllerDetails.methodChanges.length,
+          changes: controllerDetails.methodChanges,
+          summary,
+          lastChecked: new Date().toISOString(),
+          error: undefined,
+        });
+      } catch (error) {
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath,
+          needsSync: false,
+          changeCount: 0,
+          changes: [],
+          summary: {
+            totalMethods: 0,
+            changedMethods: 0,
+            addedMethods: 0,
+            signatureChanges: 0,
+            parameterChanges: 0,
+            decoratorChanges: 0,
+          },
+          lastChecked: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * 获取方法级别的详细比对信息
+   */
+  async getMethodDetails(
+    pairs: Array<{ sourcePath: string; targetPath: string; className: string }>
+  ): Promise<MethodDetailsResult[]> {
+    const results: MethodDetailsResult[] = [];
+
+    for (const pair of pairs) {
+      try {
+        const sourceState = this.getSourceIntermediateState(pair.sourcePath);
+        const targetState = this.getTargetIntermediateState(pair.targetPath);
+
+        const diff = this.compare(sourceState, targetState);
+        const methodChanges = this.generateMethodChanges(sourceState, targetState);
+
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          needsSync: diff.needsSync,
+          methodChanges,
+          summary: this.generateSummary(methodChanges, sourceState.methods.size),
+        });
+      } catch (error) {
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          needsSync: false,
+          methodChanges: [],
+          summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    return results;
+  }
+
+  generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): MethodChange[] {
+    const changes: MethodChange[] = [];
+
+    // 检查源码中的每个方法
+    for (const [methodName, sourceMethod] of sourceState.methods) {
+      const targetMethod = targetState.methods.get(methodName);
+
+      if (!targetMethod) {
+        // 方法在目标中不存在
+        changes.push({
+          methodName,
+          changeType: 'method_added',
+          sourceMethod: this.convertToMethodInfo(sourceMethod),
+          details: 'Method not found in target controller',
+        });
+        continue;
+      }
+
+      // 比较方法差异
+      const changeType = detectChangeType(sourceMethod, targetMethod);
+      if (changeType !== 'no_change') {
+        changes.push({
+          methodName,
+          changeType,
+          sourceMethod: this.convertToMethodInfo(sourceMethod),
+          targetMethod: this.convertToMethodInfo(targetMethod),
+          details: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
+        });
+      }
+    }
+
+    // 检查目标中多余的方法
+    for (const [methodName, targetMethod] of targetState.methods) {
+      if (!sourceState.methods.has(methodName)) {
+        changes.push({
+          methodName,
+          changeType: 'method_removed',
+          sourceMethod: this.convertToMethodInfo(targetMethod), // 使用目标方法作为源
+          details: 'Method exists in target but not in source',
+        });
+      }
+    }
+
+    return changes;
+  }
+  /**
+   * Desktop 控制器特有的方法信息转换
+   */
+  protected convertToMethodInfo(method: MethodDefinition): MethodInfo {
+    return {
+      name: method.name,
+      signature: `async ${method.name}(${method.parameters
+        .map(
+          (p) =>
+            `${p.decorator ? `@${p.decorator}${p.decoratorArgs?.length ? `(${p.decoratorArgs.join(', ')})` : '()'} ` : ''}${p.name}${p.optional ? '?' : ''}: ${p.type}`
+        )
+        .join(', ')})`,
+      returnType: method.returnType,
+      parameters: method.parameters.map((p) => ({
+        name: p.name,
+        type: p.type,
+        decorator: p.decorator,
+        decoratorArgs: p.decoratorArgs?.join(', '),
+      })),
+      decorators: [
+        {
+          name: method.verb,
+          args: method.path,
+        },
+      ],
+      body: method.bodyText,
+    };
   }
 }

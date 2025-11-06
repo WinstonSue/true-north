@@ -55,8 +55,17 @@ export class ControllerApiCodeGenerator {
     // 生成 API 方法代码
     const methodCode = this.generateApiMethod(method, sourceState);
     
-    // 在类的闭合大括号之前添加新方法
-    return beforeClosingBrace + '\n' + methodCode + '\n' + closingBraceAndAfter;
+    // 确保正确的换行处理
+    const needsLeadingNewline = !beforeClosingBrace.endsWith('\n');
+    const needsTrailingNewline = !closingBraceAndAfter.startsWith('\n');
+    
+    let result = beforeClosingBrace;
+    if (needsLeadingNewline) result += '\n';
+    result += methodCode;
+    if (needsTrailingNewline) result += '\n';
+    result += closingBraceAndAfter;
+    
+    return result;
   }
 
   /**
@@ -78,9 +87,18 @@ export class ControllerApiCodeGenerator {
    * 更新 API 方法
    */
   private updateMethod(code: string, methodName: string, method: MethodDefinition, targetState: IntermediateState, sourceState: IntermediateState): string {
-    // 先移除旧方法，再添加新方法
-    let updatedCode = this.removeMethod(code, methodName);
-    return this.addMethod(updatedCode, method, targetState, sourceState);
+    const methodRange = this.findMethodRange(code, methodName);
+    if (!methodRange) {
+      // 如果找不到旧方法，直接添加新方法
+      return this.addMethod(code, method, targetState, sourceState);
+    }
+
+    // 直接替换方法，避免先删除再添加可能导致的位置错乱
+    const before = code.slice(0, methodRange.start);
+    const after = code.slice(methodRange.end);
+    const methodCode = this.generateApiMethod(method, sourceState);
+    
+    return before + methodCode + '\n' + after;
   }
 
   /**

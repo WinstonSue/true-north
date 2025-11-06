@@ -5,14 +5,6 @@
   "description": "Life Toolkit 开发辅助工具",
   "main": "src/watch-controllers.ts",
   "scripts": {
-    "watch:controllers": "tsx ./src/watch-controller/cli.ts watch",
-    "sync:controllers": "tsx ./src/watch-controller/cli.ts sync",
-    "sync:controllers:enhanced": "tsx ./src/watch-controller/cli.ts sync",
-    "check:controllers": "tsx ./src/watch-controller/cli.ts check",
-    "sync:controllers:content": "tsx ./src/watch-controller/cli.ts sync --verbose",
-    "sync:v2": "tsx ./src/core/cli.ts sync",
-    "check:v2": "tsx ./src/core/cli.ts check",
-    "debug:v2": "tsx ./src/core/cli.ts debug",
     "watch:dto": "tsx ./src/watch-dto/index.ts",
     "sync:dto": "tsx ./src/watch-dto/index.ts --once && cd ../../ && npx prettier --write **/*.{js,jsx,ts,tsx,json,css,scss,less,html,md} --ignore-path .gitignore",
     "dev": "vite",
@@ -24,6 +16,7 @@
   },
   "dependencies": {
     "chokidar": "^3.6.0",
+    "lodash-es": "^4.17.21",
     "fast-glob": "^3.3.2",
     "ts-morph": "^26.0.0",
     "tsx": "^4.16.2",

@@ -38,8 +38,6 @@ export interface MethodDefinition {
   returnType: string;
   /** 方法体文本 */
   bodyText: string;
-  /** 方法体（仅用于比对，不用于生成） */
-  bodyHash: string;
   /** 装饰器选项 */
   decoratorOptions?: Record<string, any>;
   /** 源码位置信息 */

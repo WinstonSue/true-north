@@ -3,336 +3,83 @@
  * 专门处理 Server Controller 到 API Controller 的同步
  */
 
-import { SyncEngine, DiffEngine, MethodDefinition, MethodInfo, IntermediateState, MethodChangeType } from '../core';
+import { SyncOptions, SyncResult } from '../core';
 import { ControllerApiDiffEngine } from './diff-engine';
 import { ControllerApiCodeGenerator } from './code-generator';
-import { CONTROLLER_SOURCE_PATH, CONTROLLER_API_TARGET_PATH } from '../../constants';
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync } from 'fs';
+import { generateSyncActions } from '../core/sync-engine';
 
-export class ControllerApiSyncEngine extends SyncEngine {
+export class ControllerApiSyncEngine {
+  diffEngine: ControllerApiDiffEngine;
+  private codeGenerator: ControllerApiCodeGenerator;
+
   constructor() {
-    super();
+    this.diffEngine = new ControllerApiDiffEngine();
+    this.codeGenerator = new ControllerApiCodeGenerator();
   }
 
   /**
-   * 创建差异比对引擎
+   * 同步单个控制器 - 通用实现
    */
-  protected createDiffEngine(): DiffEngine {
-    return new ControllerApiDiffEngine();
-  }
-
-  /**
-   * 创建代码生成器
-   */
-  protected createCodeGenerator(): ControllerApiCodeGenerator {
-    return new ControllerApiCodeGenerator();
-  }
-
-  /**
-   * API 控制器不需要目标适配器
-   */
-  protected getTargetAdapter(): null {
-    return null;
-  }
-
-  /**
-   * 查找所有 API 控制器对
-   */
-  protected findAllControllerPairs(): Array<{ sourcePath: string; targetPath: string; className: string }> {
-    const pairs: Array<{ sourcePath: string; targetPath: string; className: string }> = [];
-
-    // 使用全局路径常量
-
+  async syncController(sourcePath: string, targetPath: string, options: SyncOptions = {}): Promise<SyncResult> {
     try {
-      // 递归查找所有 .controller.ts 文件
-      const findControllerFiles = (dir: string, basePath: string): string[] => {
-        const files: string[] = [];
-        const items = readdirSync(dir);
+      // 1. 读取源码
+      const targetCode = readFileSync(targetPath, 'utf-8');
 
-        for (const item of items) {
-          const fullPath = join(dir, item);
-          const stat = statSync(fullPath);
+      if (options.verbose) {
+        console.log(`📖 读取源码文件:`);
+        console.log(`   Server: ${sourcePath}`);
+        console.log(`   Target: ${targetPath}`);
+      }
 
-          if (stat.isDirectory()) {
-            files.push(...findControllerFiles(fullPath, basePath));
-          } else if (item.endsWith('.controller.ts')) {
-            const relativePath = fullPath.replace(basePath, '').replace(/^\//, '');
-            files.push(relativePath);
-          }
+      // 2. 解析为中间态
+      const sourceState = this.diffEngine.getSourceIntermediateState(sourcePath);
+      const targetState = this.diffEngine.getTargetIntermediateState(targetPath);
+
+      if (options.verbose) {
+        console.log(`🔍 解析完成:`);
+        console.log(`   源方法数: ${sourceState.methods.size}`);
+        console.log(`   目标方法数: ${targetState.methods.size}`);
+      }
+
+      // 3. 比对差异
+      const diff = this.diffEngine.compare(sourceState, targetState);
+
+      if (options.verbose) {
+        console.log(`📊 差异比对完成:`);
+        console.log(`   变更数量: ${diff.changes.length}`);
+        console.log(`   需要同步: ${diff.needsSync}`);
+      }
+
+      // 4. 生成同步操作
+      const actions = generateSyncActions(diff, sourceState);
+
+      // 5. 执行同步（如果不是干运行模式）
+      if (!options.dryRun && diff.needsSync) {
+        const newCode = this.codeGenerator.applySyncActions(targetCode, actions, targetState, sourceState);
+        writeFileSync(targetPath, newCode, 'utf-8');
+
+        if (options.verbose) {
+          console.log(`✅ 同步完成: ${targetPath}`);
         }
+      }
 
-        return files;
+      return {
+        success: true,
+        controllerName: sourceState.metadata.className,
+        diff,
+        actions,
+        details: options.verbose ? `处理了 ${actions.length} 个操作` : undefined,
       };
-
-      const sourceFiles = findControllerFiles(CONTROLLER_SOURCE_PATH, CONTROLLER_SOURCE_PATH);
-
-      for (const sourceFile of sourceFiles) {
-        const sourcePath = join(CONTROLLER_SOURCE_PATH, sourceFile);
-
-        // API 控制器的目标路径结构不同
-        const fileName = sourceFile.split('/').pop()?.replace('.controller.ts', '.ts') || '';
-        const targetPath = join(CONTROLLER_API_TARGET_PATH, fileName);
-        const className = this.extractClassNameFromPath(sourceFile);
-
-        pairs.push({
-          sourcePath,
-          targetPath,
-          className,
-        });
-      }
     } catch (error) {
-      console.error('查找 API 控制器文件时出错:', error);
+      return {
+        success: false,
+        controllerName: 'Unknown',
+        diff: { controllerName: 'Unknown', changes: [], needsSync: false },
+        actions: [],
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
-
-    return pairs;
-  }
-
-  /**
-   * 解析 API 目标代码为中间态 - API 控制器专用解析
-   * 需要正确解析参数信息以便进行差异比对
-   */
-  protected parseApiTargetToIntermediateState(code: string, filePath: string): IntermediateState {
-    const methods = new Map<string, MethodDefinition>();
-
-    // 更强健的方法解析，支持复杂的参数类型
-    const methodRegex = /static\s+async\s+(\w+)\s*\(/g;
-    let match;
-
-    while ((match = methodRegex.exec(code)) !== null) {
-      const methodName = match[1];
-      const startPos = match.index + match[0].length - 1; // 定位到开括号
-      
-      // 找到匹配的闭括号，处理嵌套的泛型类型
-      let braceCount = 1;
-      let i = startPos + 1;
-      let paramString = '';
-      
-      while (i < code.length && braceCount > 0) {
-        const char = code[i];
-        if (char === '(') {
-          braceCount++;
-        } else if (char === ')') {
-          braceCount--;
-        }
-        
-        if (braceCount > 0) {
-          paramString += char;
-        }
-        i++;
-      }
-      
-      // 解析参数
-      const parameters: any[] = [];
-      if (paramString.trim()) {
-        // 智能分割参数，考虑泛型和嵌套类型
-        const paramParts = this.smartSplitParameters(paramString);
-        for (const param of paramParts) {
-          if (param.trim()) {
-            // 匹配参数名和类型，支持可选参数和复杂类型
-            const paramMatch = param.match(/(\w+)(\??):\s*(.+?)(?:\s*=\s*.*)?$/);
-            if (paramMatch) {
-              const paramName = paramMatch[1];
-              const isOptional = paramMatch[2] === '?';
-              const paramType = paramMatch[3].trim();
-              
-              // 根据参数名推断装饰器类型
-              let decorator = 'Body';
-              if (paramName === 'id') {
-                decorator = 'Param';
-              } else if (paramName === 'params' || paramName === 'query') {
-                decorator = 'Query';
-              } else if (paramName === 'body') {
-                decorator = 'Body';
-              }
-              
-              parameters.push({
-                name: paramName,
-                type: paramType,
-                decorator,
-                decoratorArgs: [],
-                optional: isOptional,
-              });
-            }
-          }
-        }
-      }
-      
-      methods.set(methodName, {
-        name: methodName,
-        verb: 'Get', // 占位符，不用于比对
-        path: `/${methodName}`, // 占位符，不用于比对
-        parameters,
-        returnType: 'any', // 占位符，不用于比对
-        bodyText: '',
-        bodyHash: '',
-        decoratorOptions: {},
-        sourceLocation: {
-          startLine: 0,
-          endLine: 0,
-          startColumn: 0,
-          endColumn: 0,
-        },
-      });
-    }
-
-    return {
-      metadata: {
-        className: this.extractClassNameFromPath(filePath),
-        basePath: '',
-        filePath,
-        sourceType: 'target',
-      },
-      methods,
-      constructor: { parameters: [] },
-      imports: [],
-    };
-  }
-
-  /**
-   * 重写变更类型检测 - API 控制器专用
-   * 检测参数签名是否发生变化
-   */
-  protected detectChangeType(sourceMethod: MethodDefinition, targetMethod: MethodDefinition): MethodChangeType {
-    // 比较参数数量和类型
-    if (sourceMethod.parameters.length !== targetMethod.parameters.length) {
-      return 'parameters_changed';
-    }
-    
-    // 比较参数类型（API 控制器忽略参数名和装饰器差异）
-    for (let i = 0; i < sourceMethod.parameters.length; i++) {
-      const sourceParam = sourceMethod.parameters[i];
-      const targetParam = targetMethod.parameters[i];
-      
-      // API 控制器只比较参数类型，忽略参数名和装饰器差异
-      if (sourceParam.type !== targetParam.type) {
-        return 'parameters_changed';
-      }
-    }
-    
-    // API 控制器忽略返回类型差异，因为 API 控制器是生成的代码
-    // if (sourceMethod.returnType !== targetMethod.returnType) {
-    //   return 'signature_changed';
-    // }
-    
-    return 'no_change';
-  }
-
-  /**
-   * 重写方法变更生成 - API 控制器专用
-   * 检查方法存在性和参数变化
-   */
-  protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): any[] {
-    const changes: any[] = [];
-
-    // 检查缺失的方法（在 Server 中存在但在 API 中不存在）
-    for (const [methodName, sourceMethod] of sourceState.methods) {
-      const targetMethod = targetState.methods.get(methodName);
-      if (!targetMethod) {
-        // 方法在目标中不存在
-        changes.push({
-          methodName,
-          changeType: 'method_added',
-          sourceMethod: this.convertToMethodInfo(sourceMethod),
-          details: 'Method not found in target controller',
-        });
-      } else {
-        // 方法存在，检查是否有变化
-        const changeType = this.detectChangeType(sourceMethod, targetMethod);
-        if (changeType !== 'no_change') {
-          changes.push({
-            methodName,
-            changeType,
-            sourceMethod: this.convertToMethodInfo(sourceMethod),
-            targetMethod: this.convertToMethodInfo(targetMethod),
-            details: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
-          });
-        }
-      }
-    }
-
-    // 检查目标中多余的方法（在 API 中存在但在 Server 中不存在）
-    for (const [methodName, targetMethod] of targetState.methods) {
-      if (!sourceState.methods.has(methodName)) {
-        changes.push({
-          methodName,
-          changeType: 'method_removed',
-          sourceMethod: this.convertToMethodInfo(targetMethod),
-          details: 'Method exists in target but not in source',
-        });
-      }
-    }
-
-    return changes;
-  }
-
-  /**
-   * 智能分割参数字符串，考虑泛型和嵌套类型
-   */
-  private smartSplitParameters(paramString: string): string[] {
-    const params: string[] = [];
-    let current = '';
-    let braceCount = 0;
-    let angleCount = 0;
-    
-    for (let i = 0; i < paramString.length; i++) {
-      const char = paramString[i];
-      
-      if (char === '(') {
-        braceCount++;
-      } else if (char === ')') {
-        braceCount--;
-      } else if (char === '<') {
-        angleCount++;
-      } else if (char === '>') {
-        angleCount--;
-      } else if (char === ',' && braceCount === 0 && angleCount === 0) {
-        // 只有在没有嵌套的情况下才分割
-        if (current.trim()) {
-          params.push(current.trim());
-        }
-        current = '';
-        continue;
-      }
-      
-      current += char;
-    }
-    
-    // 添加最后一个参数
-    if (current.trim()) {
-      params.push(current.trim());
-    }
-    
-    return params;
-  }
-
-  /**
-   * API 控制器特有的方法信息转换
-   */
-  protected convertToMethodInfo(method: MethodDefinition): MethodInfo {
-    return {
-      name: method.name,
-      signature: `static async ${method.name}(${method.parameters
-        .map(
-          (p) =>
-            `${p.decorator ? `@${p.decorator}${p.decoratorArgs?.length ? `(${p.decoratorArgs.join(', ')})` : '()'} ` : ''}${p.name}${p.optional ? '?' : ''}: ${p.type}`
-        )
-        .join(', ')})`,
-      returnType: method.returnType,
-      parameters: method.parameters.map((p) => ({
-        name: p.name,
-        type: p.type,
-        decorator: p.decorator,
-        decoratorArgs: p.decoratorArgs?.join(', '),
-      })),
-      decorators: [
-        {
-          name: method.verb,
-          args: method.path,
-        },
-      ],
-      body: method.bodyText,
-    };
   }
 }
 

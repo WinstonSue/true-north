@@ -4,7 +4,12 @@ import path from 'path';
 import { createProxySyncEngine } from '../watch-controller/target-proxy/sync-engine';
 import { createApiSyncEngine } from '../watch-controller/target-api/sync-engine';
 import { createWebServiceSyncEngine } from '../watch-controller/target-web-service/sync-engine';
-import { CONTROLLER_SOURCE_PATH, CONTROLLER_PROXY_TARGET_PATH, CONTROLLER_API_TARGET_PATH, CONTROLLER_WEB_SERVICE_TARGET_PATH } from '../constants';
+import {
+  CONTROLLER_SOURCE_PATH,
+  CONTROLLER_PROXY_TARGET_PATH,
+  CONTROLLER_API_TARGET_PATH,
+  CONTROLLER_WEB_SERVICE_TARGET_PATH,
+} from '../constants';
 import { existsSync } from 'fs';
 
 const app = express();
@@ -90,7 +95,11 @@ function findWebServiceControllerPairs() {
     const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Service';
     const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
     // Web Service 文件按模块分组
-    const targetPath = path.join(CONTROLLER_WEB_SERVICE_TARGET_PATH, controller.path.split('/')[0], `${controller.name}.service.ts`);
+    const targetPath = path.join(
+      CONTROLLER_WEB_SERVICE_TARGET_PATH,
+      controller.path.split('/')[0],
+      `${controller.name}.service.ts`
+    );
 
     if (existsSync(sourcePath) && existsSync(targetPath)) {
       pairs.push({
@@ -150,7 +159,7 @@ app.get('/api/check/method-details', async (req, res) => {
     const engine = createProxySyncEngine();
 
     // 执行控制器状态检查（包含方法级别的详细信息）
-    const controllers = await engine.checkAllControllers();
+    const controllers = await engine.diffEngine.checkAllControllers();
 
     res.json({
       success: true,
@@ -168,52 +177,6 @@ app.get('/api/check/method-details', async (req, res) => {
 });
 
 // ========== Desktop 控制器 API 端点 ==========
-
-// 检查 Desktop 控制器差异
-app.get('/api/check/desktop-controllers', async (req, res) => {
-  const engine = createProxySyncEngine();
-
-  try {
-    const pairs = findDesktopControllerPairs();
-    const results = await engine.syncControllers(
-      pairs.map((p) => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
-      { dryRun: true, verbose: false }
-    );
-
-    const controllerStatuses = results.map((result, index) => ({
-      name: pairs[index].name,
-      className: pairs[index].className,
-      needsSync: result.diff.needsSync,
-      changeCount: result.diff.changes.length,
-      success: result.success,
-      error: result.error,
-      changes: result.diff.changes.map((change) => ({
-        type: change.type,
-        methodName: change.methodName,
-        description: change.details.description,
-        severity: change.details.severity,
-      })),
-    }));
-
-    res.json({
-      success: true,
-      data: {
-        controllers: controllerStatuses,
-        lastChecked: new Date().toISOString(),
-        summary: {
-          total: controllerStatuses.length,
-          needsSync: controllerStatuses.filter((c) => c.needsSync).length,
-          totalChanges: controllerStatuses.reduce((sum, c) => sum + c.changeCount, 0),
-        },
-      },
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
 
 // 检查单个 Desktop 控制器差异
 app.get('/api/check/desktop-controller/:name', async (req, res) => {
@@ -316,115 +279,7 @@ app.post('/api/sync/desktop-controller', async (req, res) => {
   }
 });
 
-// 批量同步 Desktop 控制器
-app.post('/api/sync/desktop-controllers', async (req, res) => {
-  const { controllers = [], dryRun = false } = req.body;
-  const engine = createProxySyncEngine();
-
-  try {
-    let pairs;
-    if (controllers.length === 0) {
-      // 同步所有控制器
-      pairs = findDesktopControllerPairs();
-    } else {
-      // 同步指定的控制器
-      pairs = controllers.map((name: string) => findDesktopControllerPair(name)).filter(Boolean);
-    }
-
-    if (pairs.length === 0) {
-      res.json({ success: false, error: '没有找到可同步的控制器' });
-      return;
-    }
-
-    const results = await engine.syncControllers(
-      pairs.map((p: any) => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
-      { dryRun, verbose: true }
-    );
-
-    const summary = {
-      total: results.length,
-      successful: results.filter((r) => r.success).length,
-      needsSync: results.filter((r) => r.diff.needsSync).length,
-      totalChanges: results.reduce((sum, r) => sum + r.diff.changes.length, 0),
-      totalActions: results.reduce((sum, r) => sum + r.actions.length, 0),
-    };
-
-    const controllerResults = results.map((result, index) => ({
-      name: pairs[index].name,
-      className: pairs[index].className,
-      success: result.success,
-      needsSync: result.diff.needsSync,
-      changeCount: result.diff.changes.length,
-      actionCount: result.actions.length,
-      error: result.error,
-    }));
-
-    res.json({
-      success: true,
-      data: {
-        controllers: controllerResults,
-        summary,
-        dryRun,
-      },
-      message: dryRun
-        ? `批量检查完成 (${summary.successful}/${summary.total})`
-        : `批量同步完成 (${summary.successful}/${summary.total})`,
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
 // ========== API 控制器 API 端点 ==========
-
-// 检查 API 控制器差异
-app.get('/api/check/api-controllers', async (req, res) => {
-  const engine = createApiSyncEngine();
-
-  try {
-    const pairs = findApiControllerPairs();
-    const results = await engine.syncControllers(
-      pairs.map((p) => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
-      { dryRun: true, verbose: false }
-    );
-
-    const controllerStatuses = results.map((result, index) => ({
-      name: pairs[index].name,
-      className: pairs[index].className,
-      needsSync: result.diff.needsSync,
-      changeCount: result.diff.changes.length,
-      success: result.success,
-      error: result.error,
-      changes: result.diff.changes.map((change) => ({
-        type: change.type,
-        methodName: change.methodName,
-        description: change.details.description,
-        severity: change.details.severity,
-      })),
-    }));
-
-    res.json({
-      success: true,
-      data: {
-        controllers: controllerStatuses,
-        lastChecked: new Date().toISOString(),
-        summary: {
-          total: controllerStatuses.length,
-          needsSync: controllerStatuses.filter((c) => c.needsSync).length,
-          totalChanges: controllerStatuses.reduce((sum, c) => sum + c.changeCount, 0),
-        },
-      },
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
 
 // 检查单个 API 控制器差异
 app.get('/api/check/api-controller/:name', async (req, res) => {
@@ -527,82 +382,16 @@ app.post('/api/sync/api-controller', async (req, res) => {
   }
 });
 
-// 批量同步 API 控制器
-app.post('/api/sync/api-controllers', async (req, res) => {
-  const { controllers = [], dryRun = false } = req.body;
-  const engine = createApiSyncEngine();
-
-  try {
-    let pairs;
-    if (controllers.length === 0) {
-      // 同步所有 API 控制器
-      pairs = findApiControllerPairs();
-    } else {
-      // 同步指定的 API 控制器
-      pairs = controllers.map((name: string) => findApiControllerPair(name)).filter(Boolean);
-    }
-
-    if (pairs.length === 0) {
-      res.json({ success: false, error: '没有找到可同步的 API 控制器' });
-      return;
-    }
-
-    const results = await engine.syncControllers(
-      pairs.map((p: any) => ({ sourcePath: p.sourcePath, targetPath: p.targetPath })),
-      { dryRun, verbose: true }
-    );
-
-    const summary = {
-      total: results.length,
-      successful: results.filter((r) => r.success).length,
-      needsSync: results.filter((r) => r.diff.needsSync).length,
-      totalChanges: results.reduce((sum, r) => sum + r.diff.changes.length, 0),
-      totalActions: results.reduce((sum, r) => sum + r.actions.length, 0),
-    };
-
-    const controllerResults = results.map((result, index) => ({
-      name: pairs[index].name,
-      className: pairs[index].className,
-      success: result.success,
-      needsSync: result.diff.needsSync,
-      changeCount: result.diff.changes.length,
-      actionCount: result.actions.length,
-      error: result.error,
-    }));
-
-    res.json({
-      success: true,
-      data: {
-        controllers: controllerResults,
-        summary,
-        dryRun,
-      },
-      message: dryRun
-        ? `API 控制器批量检查完成 (${summary.successful}/${summary.total})`
-        : `API 控制器批量同步完成 (${summary.successful}/${summary.total})`,
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
-
 // 获取 API 控制器方法级别详情
 app.get('/api/check/api-method-details', async (req, res) => {
   try {
     console.log('开始检查 API 控制器方法详情...');
     const engine = createApiSyncEngine();
     console.log('API 同步引擎创建成功');
-    
-    const controllers = await engine.checkAllControllers();
+
+    const controllers = await engine.diffEngine.checkAllControllers();
     console.log('检查完成，找到控制器数量:', controllers.length);
-    
-    if (controllers.length > 0) {
-      console.log('控制器列表:', controllers.map(c => c.className));
-    }
-    
+
     res.json({
       success: true,
       data: {
@@ -627,14 +416,17 @@ app.get('/api/check/web-service-method-details', async (req, res) => {
     console.log('开始检查 Web Service 方法详情...');
     const engine = createWebServiceSyncEngine();
     console.log('Web Service 同步引擎创建成功');
-    
-    const controllers = await engine.checkAllControllers();
+
+    const controllers = await engine.diffEngine.checkAllControllers();
     console.log('检查完成，找到控制器数量:', controllers.length);
-    
+
     if (controllers.length > 0) {
-      console.log('控制器列表:', controllers.map(c => c.className));
+      console.log(
+        '控制器列表:',
+        controllers.map((c) => c.className)
+      );
     }
-    
+
     res.json({
       success: true,
       data: {

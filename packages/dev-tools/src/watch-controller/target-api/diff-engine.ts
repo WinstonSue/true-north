@@ -3,10 +3,22 @@
  * 专门处理 Server Controller 到 API Controller 的差异比对
  */
 
-import { DiffEngine } from '../core';
+import { DiffEngine } from '../core/diff-engine';
 import { IntermediateState, DiffResult, ChangeRecord, MethodDefinition } from '../core/intermediate-state';
+import { MethodInfo, MethodDetailsResult, detectChangeType } from '../core/diff-engine';
+import { findAllControllerPairs } from './helpers';
+import { TargetApiAdapter } from './target-adapter';
+import { ControllerSyncStatus } from '../core/sync-engine';
 
 export class ControllerApiDiffEngine extends DiffEngine {
+  targetAdapter: TargetApiAdapter;
+
+  constructor() {
+    super();
+
+    this.targetAdapter = new TargetApiAdapter();
+  }
+
   /**
    * API 控制器只比较方法，不比较构造函数和导入
    */
@@ -44,87 +56,192 @@ export class ControllerApiDiffEngine extends DiffEngine {
       for (let i = 0; i < source.parameters.length; i++) {
         const sourceParam = source.parameters[i];
         const targetParam = target.parameters[i];
-        
-        // API 控制器忽略参数名差异
-        // if (sourceParam.name !== targetParam.name) {
-        //   changes.push(`参数 ${i + 1} 名称从 ${targetParam.name} 改为 ${sourceParam.name}`);
-        // }
-        
+
+        if (sourceParam.name !== targetParam.name) {
+          changes.push(`参数 ${i + 1} 名称从 ${targetParam.name} 改为 ${sourceParam.name}`);
+        }
+
         if (sourceParam.type !== targetParam.type) {
           changes.push(`参数 ${i + 1} 类型从 ${targetParam.type} 改为 ${sourceParam.type}`);
         }
-        
-        // API 控制器忽略装饰器差异
-        // if (sourceParam.decorator !== targetParam.decorator) {
-        //   changes.push(`参数 ${sourceParam.name} 装饰器从 ${targetParam.decorator} 改为 ${sourceParam.decorator}`);
-        // }
       }
     }
 
-    // API 控制器忽略返回类型差异，因为 API 控制器是生成的代码
-    // if (source.returnType !== target.returnType) {
-    //   changes.push(`返回类型从 ${target.returnType} 改为 ${source.returnType}`);
-    // }
+    console.log('=====================');
+    console.log('sourceParam', source.parameters);
+    console.log('targetParam', target.parameters);
+    console.log('changes', changes);
 
     return changes;
   }
 
   /**
-   * 重写方法比较，使用 API 特有的描述
+   * 检查所有控制器的同步状态
    */
-  protected compareMethods(sourceMethods: Map<string, MethodDefinition>, targetMethods: Map<string, MethodDefinition>): ChangeRecord[] {
-    const changes: ChangeRecord[] = [];
+  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
+    const pairs = findAllControllerPairs();
+    const results: ControllerSyncStatus[] = [];
 
-    // 检查新增的方法（在 Server 中存在但在 API 中不存在）
-    for (const [methodName, sourceMethod] of sourceMethods) {
-      if (!targetMethods.has(methodName)) {
-        changes.push({
-          type: 'method_added',
-          methodName,
-          details: {
-            newValue: sourceMethod,
-            description: `API 方法 ${methodName} 需要添加`,
-            severity: 'medium',
+    for (const pair of pairs) {
+      try {
+        const methodDetails = await this.getMethodDetails([pair]);
+        const controllerDetails = methodDetails[0];
+
+        // 生成详细的统计信息
+        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
+
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath, // 前端兼容字段
+          needsSync: controllerDetails.methodChanges.length > 0,
+          changeCount: controllerDetails.methodChanges.length,
+          changes: controllerDetails.methodChanges,
+          summary,
+          lastChecked: new Date().toISOString(),
+          error: undefined,
+        });
+      } catch (error) {
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath,
+          needsSync: false,
+          changeCount: 0,
+          changes: [],
+          summary: {
+            totalMethods: 0,
+            changedMethods: 0,
+            addedMethods: 0,
+            signatureChanges: 0,
+            parameterChanges: 0,
+            decoratorChanges: 0,
           },
+          lastChecked: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
 
-    // 检查删除的方法（在 API 中存在但在 Server 中不存在）
-    for (const [methodName, targetMethod] of targetMethods) {
-      if (!sourceMethods.has(methodName)) {
-        changes.push({
-          type: 'method_removed',
-          methodName,
-          details: {
-            oldValue: targetMethod,
-            description: `API 方法 ${methodName} 需要移除`,
-            severity: 'medium',
-          },
+    return results;
+  }
+
+  /**
+   * 获取方法级别的详细比对信息
+   */
+  async getMethodDetails(
+    pairs: Array<{ sourcePath: string; targetPath: string; className: string }>
+  ): Promise<MethodDetailsResult[]> {
+    const results: MethodDetailsResult[] = [];
+
+    for (const pair of pairs) {
+      try {
+        const sourceState = this.getSourceIntermediateState(pair.sourcePath);
+        const targetState = this.getTargetIntermediateState(pair.targetPath);
+
+        const diff = this.compare(sourceState, targetState);
+        const methodChanges = this.generateMethodChanges(sourceState, targetState);
+
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          needsSync: diff.needsSync,
+          methodChanges,
+          summary: this.generateSummary(methodChanges, sourceState.methods.size),
+        });
+      } catch (error) {
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          needsSync: false,
+          methodChanges: [],
+          summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
 
-    // 检查修改的方法
-    for (const [methodName, sourceMethod] of sourceMethods) {
-      const targetMethod = targetMethods.get(methodName);
-      if (targetMethod) {
-        const methodChanges = this.compareMethod(sourceMethod, targetMethod);
-        if (methodChanges.length > 0) {
+    return results;
+  }
+
+  /**
+   * 重写方法变更生成 - API 控制器专用
+   * 检查方法存在性和参数变化
+   */
+  protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): any[] {
+    const changes: any[] = [];
+
+    // 检查缺失的方法（在 Server 中存在但在 API 中不存在）
+    for (const [methodName, sourceMethod] of sourceState.methods) {
+      const targetMethod = targetState.methods.get(methodName);
+      if (!targetMethod) {
+        // 方法在目标中不存在
+        changes.push({
+          methodName,
+          changeType: 'method_added',
+          sourceMethod: this.convertToMethodInfo(sourceMethod),
+          details: 'Method not found in target controller',
+        });
+      } else {
+        // 方法存在，检查是否有变化
+        const changeType = detectChangeType(sourceMethod, targetMethod);
+        if (changeType !== 'no_change') {
           changes.push({
-            type: 'method_modified',
             methodName,
-            details: {
-              oldValue: targetMethod,
-              newValue: sourceMethod,
-              description: `API 方法 ${methodName} 已修改: ${methodChanges.join(', ')}`,
-              severity: 'high',
-            },
+            changeType,
+            sourceMethod: this.convertToMethodInfo(sourceMethod),
+            targetMethod: this.convertToMethodInfo(targetMethod),
+            details: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
           });
         }
       }
     }
 
+    // 检查目标中多余的方法（在 API 中存在但在 Server 中不存在）
+    for (const [methodName, targetMethod] of targetState.methods) {
+      if (!sourceState.methods.has(methodName)) {
+        changes.push({
+          methodName,
+          changeType: 'method_removed',
+          sourceMethod: this.convertToMethodInfo(targetMethod),
+          details: 'Method exists in target but not in source',
+        });
+      }
+    }
+
     return changes;
+  }
+
+  /**
+   * API 控制器特有的方法信息转换
+   */
+  protected convertToMethodInfo(method: MethodDefinition): MethodInfo {
+    return {
+      name: method.name,
+      signature: `static async ${method.name}(${method.parameters
+        .map(
+          (p) =>
+            `${p.decorator ? `@${p.decorator}${p.decoratorArgs?.length ? `(${p.decoratorArgs.join(', ')})` : '()'} ` : ''}${p.name}${p.optional ? '?' : ''}: ${p.type}`
+        )
+        .join(', ')})`,
+      returnType: method.returnType,
+      parameters: method.parameters.map((p) => ({
+        name: p.name,
+        type: p.type,
+        decorator: p.decorator,
+        decoratorArgs: p.decoratorArgs?.join(', '),
+      })),
+      decorators: [
+        {
+          name: method.verb,
+          args: method.path,
+        },
+      ],
+      body: method.bodyText,
+    };
   }
 }
