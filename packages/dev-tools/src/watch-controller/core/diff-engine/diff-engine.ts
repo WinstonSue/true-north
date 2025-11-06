@@ -10,7 +10,7 @@ import {
   MethodDefinition,
   ParameterDefinition,
 } from '../intermediate-state';
-import { MethodChange, MethodChangeType } from './types';
+import { MethodChange, MethodChangeType, MethodDetailsResult } from './types';
 import { SourceAdapter } from '../adapters';
 import { TargetAdapter } from '../adapters';
 import { readFileSync } from 'fs';
@@ -24,34 +24,60 @@ export abstract class DiffEngine {
     this.sourceAdapter = new SourceAdapter();
   }
 
-  /**
-   * 比较两个中间态，生成差异报告
-   */
-  compare(source: IntermediateState, target: IntermediateState): DiffResult {
-    const changes: ChangeRecord[] = [];
+  async getMethodDetails(
+    pairs: Array<{ sourcePath: string; targetPath: string; className: string }>
+  ): Promise<MethodDetailsResult[]> {
+    const results: MethodDetailsResult[] = [];
 
-    // 比较方法
-    const methodChanges = this.compareMethods(source.methods, target.methods);
-    changes.push(...methodChanges);
+    for (const pair of pairs) {
+      try {
+        const sourceState = this.getSourceIntermediateState(pair.sourcePath);
+        const targetState = this.getTargetIntermediateState(pair.targetPath);
 
-    // 比较构造函数（子类可以选择是否比较）
-    const constructorChanges = this.compareConstructor(source.constructor, target.constructor);
-    if (constructorChanges) {
-      changes.push(constructorChanges);
+        const diff = this.compareIntermediateState(sourceState, targetState);
+        const methodChanges = this.generateMethodChanges(sourceState, targetState);
+
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          needsSync: diff.needsSync,
+          methodChanges,
+          summary: this.generateSummary(methodChanges, sourceState.methods.size),
+        });
+      } catch (error) {
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          needsSync: false,
+          methodChanges: [],
+          summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
 
-    // 比较导入（子类可以选择是否比较）
-    const importChanges = this.compareImports(source.imports, target.imports);
-    if (importChanges) {
-      changes.push(importChanges);
-    }
-
-    return {
-      controllerName: source.metadata.className,
-      changes,
-      needsSync: changes.length > 0,
-    };
+    return results;
   }
+
+  /**
+   * 生成方法变更 - 抽象方法，子类必须实现
+   */
+  protected abstract generateMethodChanges(
+    sourceState: IntermediateState,
+    targetState: IntermediateState
+  ): MethodChange[];
+
+  /**
+   * 比较两个中间态，生成差异报告，子类必须实现
+   */
+  abstract compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult;
+
+  /**
+   * 比较单个方法 - 抽象方法，子类必须实现
+   */
+  protected abstract compareMethod(source: MethodDefinition, target: MethodDefinition): string[];
 
   /**
    * 比较方法集合 - 子类可以重写
@@ -114,12 +140,6 @@ export abstract class DiffEngine {
 
     return changes;
   }
-
-  /**
-   * 比较单个方法 - 抽象方法，子类必须实现
-   */
-  protected abstract compareMethod(source: MethodDefinition, target: MethodDefinition): string[];
-
   /**
    * 比较参数列表 - 通用实现
    */

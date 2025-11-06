@@ -3,8 +3,8 @@
  * 专门处理 Server Controller 到 Desktop Controller 的差异比对
  */
 
-import { MethodDefinition } from '../core/intermediate-state';
-import { DiffEngine, MethodDetailsResult, MethodChange, MethodInfo, detectChangeType } from '../core/diff-engine';
+import { MethodDefinition, DiffResult, ChangeRecord } from '../core/intermediate-state';
+import { DiffEngine, MethodChange, MethodInfo, detectChangeType } from '../core/diff-engine';
 import { findAllControllerPairs } from './helpers';
 import { IntermediateState } from '../core';
 import { ControllerSyncStatus } from '../core/sync-engine';
@@ -17,6 +17,89 @@ export class ControllerProxyDiffEngine extends DiffEngine {
     super();
     this.targetAdapter = new TargetProxyAdapter();
   }
+
+  /**
+   * 检查所有控制器的同步状态
+   */
+  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
+    const pairs = findAllControllerPairs();
+    const results: ControllerSyncStatus[] = [];
+
+    for (const pair of pairs) {
+      try {
+        const methodDetails = await this.getMethodDetails([pair]);
+        const controllerDetails = methodDetails[0];
+
+        // 生成详细的统计信息
+        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
+
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath, // 前端兼容字段
+          needsSync: controllerDetails.methodChanges.length > 0,
+          changeCount: controllerDetails.methodChanges.length,
+          changes: controllerDetails.methodChanges,
+          summary,
+          lastChecked: new Date().toISOString(),
+          error: undefined,
+        });
+      } catch (error) {
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath,
+          needsSync: false,
+          changeCount: 0,
+          changes: [],
+          summary: {
+            totalMethods: 0,
+            changedMethods: 0,
+            addedMethods: 0,
+            signatureChanges: 0,
+            parameterChanges: 0,
+            decoratorChanges: 0,
+          },
+          lastChecked: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * 比较两个中间态，生成差异报告
+   */
+  compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult {
+    const changes: ChangeRecord[] = [];
+
+    // 比较方法
+    const methodChanges = this.compareMethods(source.methods, target.methods);
+    changes.push(...methodChanges);
+
+    // 比较构造函数（子类可以选择是否比较）
+    const constructorChanges = this.compareConstructor(source.constructor, target.constructor);
+    if (constructorChanges) {
+      changes.push(constructorChanges);
+    }
+
+    // 比较导入（子类可以选择是否比较）
+    const importChanges = this.compareImports(source.imports, target.imports);
+    if (importChanges) {
+      changes.push(importChanges);
+    }
+
+    return {
+      controllerName: source.metadata.className,
+      changes,
+      needsSync: changes.length > 0,
+    };
+  }
+
   /**
    * Desktop 控制器特有的方法比较逻辑
    */
@@ -75,98 +158,6 @@ export class ControllerProxyDiffEngine extends DiffEngine {
     }
 
     return false;
-  }
-  /**
-   * 检查所有控制器的同步状态
-   */
-  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
-    const pairs = findAllControllerPairs();
-    const results: ControllerSyncStatus[] = [];
-
-    for (const pair of pairs) {
-      try {
-        const methodDetails = await this.getMethodDetails([pair]);
-        const controllerDetails = methodDetails[0];
-
-        // 生成详细的统计信息
-        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          filePath: pair.targetPath, // 前端兼容字段
-          needsSync: controllerDetails.methodChanges.length > 0,
-          changeCount: controllerDetails.methodChanges.length,
-          changes: controllerDetails.methodChanges,
-          summary,
-          lastChecked: new Date().toISOString(),
-          error: undefined,
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          filePath: pair.targetPath,
-          needsSync: false,
-          changeCount: 0,
-          changes: [],
-          summary: {
-            totalMethods: 0,
-            changedMethods: 0,
-            addedMethods: 0,
-            signatureChanges: 0,
-            parameterChanges: 0,
-            decoratorChanges: 0,
-          },
-          lastChecked: new Date().toISOString(),
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return results;
-  }
-
-  /**
-   * 获取方法级别的详细比对信息
-   */
-  async getMethodDetails(
-    pairs: Array<{ sourcePath: string; targetPath: string; className: string }>
-  ): Promise<MethodDetailsResult[]> {
-    const results: MethodDetailsResult[] = [];
-
-    for (const pair of pairs) {
-      try {
-        const sourceState = this.getSourceIntermediateState(pair.sourcePath);
-        const targetState = this.getTargetIntermediateState(pair.targetPath);
-
-        const diff = this.compare(sourceState, targetState);
-        const methodChanges = this.generateMethodChanges(sourceState, targetState);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: diff.needsSync,
-          methodChanges,
-          summary: this.generateSummary(methodChanges, sourceState.methods.size),
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: false,
-          methodChanges: [],
-          summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return results;
   }
 
   generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): MethodChange[] {

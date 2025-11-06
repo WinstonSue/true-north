@@ -7,8 +7,7 @@ import { MethodDefinition } from '../core/intermediate-state';
 import { CONTROLLER_SOURCE_PATH, CONTROLLER_WEB_SERVICE_TARGET_PATH } from '../../constants';
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
-import { readFileSync, writeFileSync } from 'fs';
-import { DiffEngine, MethodDetailsResult, MethodInfo } from '../core/diff-engine';
+import { DiffEngine, MethodInfo } from '../core/diff-engine';
 import { ControllerSyncStatus } from '../core/sync-engine';
 import { TargetWebServiceAdapter } from './target-adapter';
 
@@ -16,6 +15,59 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
   constructor() {
     super();
     this.targetAdapter = new TargetWebServiceAdapter();
+  }
+
+  /**
+   * 检查所有控制器的同步状态
+   */
+  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
+    const pairs = this.findAllControllerPairs();
+    const results: ControllerSyncStatus[] = [];
+
+    for (const pair of pairs) {
+      try {
+        const methodDetails = await this.getMethodDetails([pair]);
+        const controllerDetails = methodDetails[0];
+
+        // 生成详细的统计信息
+        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
+
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath, // 前端兼容字段
+          needsSync: controllerDetails.methodChanges.length > 0,
+          changeCount: controllerDetails.methodChanges.length,
+          changes: controllerDetails.methodChanges,
+          summary,
+          lastChecked: new Date().toISOString(),
+          error: undefined,
+        });
+      } catch (error) {
+        results.push({
+          className: pair.className,
+          sourcePath: pair.sourcePath,
+          targetPath: pair.targetPath,
+          filePath: pair.targetPath,
+          needsSync: false,
+          changeCount: 0,
+          changes: [],
+          summary: {
+            totalMethods: 0,
+            changedMethods: 0,
+            addedMethods: 0,
+            signatureChanges: 0,
+            parameterChanges: 0,
+            decoratorChanges: 0,
+          },
+          lastChecked: new Date().toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    return results;
   }
 
   /**
@@ -40,7 +92,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
    * 重写比较方法，只比较方法，不比较构造函数和导入
    * 使用 Web Service 专用的方法比较逻辑
    */
-  compare(sourceState: any, targetState: any) {
+  compareIntermediateState(sourceState: any, targetState: any) {
     const result = {
       controllerName: sourceState.metadata?.className || 'Unknown',
       needsSync: false,
@@ -168,102 +220,6 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
   }
 
   /**
-   * 获取方法级别的详细比对信息
-   */
-  async getMethodDetails(
-    pairs: Array<{ sourcePath: string; targetPath: string; className: string }>
-  ): Promise<MethodDetailsResult[]> {
-    const results: MethodDetailsResult[] = [];
-
-    for (const pair of pairs) {
-      try {
-        const sourceCode = readFileSync(pair.sourcePath, 'utf-8');
-        const targetCode = readFileSync(pair.targetPath, 'utf-8');
-
-        const sourceState = this.sourceAdapter.parseToIntermediateState(sourceCode, pair.sourcePath);
-        const targetState = this.targetAdapter.parseToIntermediateState(targetCode, pair.targetPath);
-
-        const diff = this.compare(sourceState, targetState);
-        const methodChanges = this.generateMethodChanges(sourceState, targetState);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: diff.needsSync,
-          methodChanges,
-          summary: this.generateSummary(methodChanges, sourceState.methods.size),
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: false,
-          methodChanges: [],
-          summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return results;
-  }
-
-  /**
-   * 检查所有控制器的同步状态
-   */
-  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
-    const pairs = this.findAllControllerPairs();
-    const results: ControllerSyncStatus[] = [];
-
-    for (const pair of pairs) {
-      try {
-        const methodDetails = await this.getMethodDetails([pair]);
-        const controllerDetails = methodDetails[0];
-
-        // 生成详细的统计信息
-        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          filePath: pair.targetPath, // 前端兼容字段
-          needsSync: controllerDetails.methodChanges.length > 0,
-          changeCount: controllerDetails.methodChanges.length,
-          changes: controllerDetails.methodChanges,
-          summary,
-          lastChecked: new Date().toISOString(),
-          error: undefined,
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          filePath: pair.targetPath,
-          needsSync: false,
-          changeCount: 0,
-          changes: [],
-          summary: {
-            totalMethods: 0,
-            changedMethods: 0,
-            addedMethods: 0,
-            signatureChanges: 0,
-            parameterChanges: 0,
-            decoratorChanges: 0,
-          },
-          lastChecked: new Date().toISOString(),
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return results;
-  }
-
-  /**
    * 重写方法变更生成 - Web Service 专用
    * 使用简化的比较逻辑，不比较装饰器
    */
@@ -310,7 +266,6 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
 
     return changes;
   }
-
 
   /**
    * 查找所有控制器对

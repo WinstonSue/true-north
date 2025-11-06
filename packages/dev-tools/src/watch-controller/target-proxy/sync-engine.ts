@@ -44,7 +44,7 @@ export class ControllerProxySyncEngine {
       }
 
       // 3. 比对差异
-      const diff = this.diffEngine.compare(sourceState, targetState);
+      const diff = this.diffEngine.compareIntermediateState(sourceState, targetState);
 
       if (options.verbose) {
         this.logger.info('差异比对完成', {

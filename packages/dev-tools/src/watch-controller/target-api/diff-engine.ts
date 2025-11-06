@@ -5,7 +5,7 @@
 
 import { DiffEngine } from '../core/diff-engine';
 import { IntermediateState, DiffResult, ChangeRecord, MethodDefinition } from '../core/intermediate-state';
-import { MethodInfo, MethodDetailsResult, detectChangeType } from '../core/diff-engine';
+import { MethodInfo, MethodChange, detectChangeType } from '../core/diff-engine';
 import { findAllControllerPairs } from './helpers';
 import { TargetApiAdapter } from './target-adapter';
 import { ControllerSyncStatus } from '../core/sync-engine';
@@ -15,59 +15,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
 
   constructor() {
     super();
-
     this.targetAdapter = new TargetApiAdapter();
-  }
-
-  /**
-   * API 控制器只比较方法，不比较构造函数和导入
-   */
-  compare(source: IntermediateState, target: IntermediateState): DiffResult {
-    const changes: ChangeRecord[] = [];
-
-    // 比较方法 - API 控制器主要关注方法的存在性
-    const methodChanges = this.compareMethods(source.methods, target.methods);
-    changes.push(...methodChanges);
-
-    return {
-      controllerName: source.metadata.className,
-      changes,
-      needsSync: changes.length > 0,
-    };
-  }
-
-  /**
-   * API 控制器特有的方法比较逻辑
-   * 需要比较参数签名，确保 API 方法与 Server 方法参数一致
-   */
-  protected compareMethod(source: MethodDefinition, target: MethodDefinition): string[] {
-    const changes: string[] = [];
-
-    // 比较方法名
-    if (source.name !== target.name) {
-      changes.push(`方法名从 ${target.name} 改为 ${source.name}`);
-    }
-
-    // 比较参数数量和类型
-    if (source.parameters.length !== target.parameters.length) {
-      changes.push(`参数数量从 ${target.parameters.length} 改为 ${source.parameters.length}`);
-    } else {
-      // 比较每个参数
-      for (let i = 0; i < source.parameters.length; i++) {
-        const sourceParam = source.parameters[i];
-        const targetParam = target.parameters[i];
-
-        if (sourceParam.name !== targetParam.name) {
-          changes.push(`参数 ${i + 1} 名称从 ${targetParam.name} 改为 ${sourceParam.name}`);
-        }
-
-        if (sourceParam.type !== targetParam.type) {
-          changes.push(`参数 ${i + 1} 类型从 ${targetParam.type} 改为 ${sourceParam.type}`);
-        }
-      }
-    }
-
-    return changes;
   }
 
   /**
@@ -124,50 +72,61 @@ export class ControllerApiDiffEngine extends DiffEngine {
   }
 
   /**
-   * 获取方法级别的详细比对信息
+   * API 控制器只比较方法，不比较构造函数和导入
    */
-  async getMethodDetails(
-    pairs: Array<{ sourcePath: string; targetPath: string; className: string }>
-  ): Promise<MethodDetailsResult[]> {
-    const results: MethodDetailsResult[] = [];
+  compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult {
+    const changes: ChangeRecord[] = [];
 
-    for (const pair of pairs) {
-      try {
-        const sourceState = this.getSourceIntermediateState(pair.sourcePath);
-        const targetState = this.getTargetIntermediateState(pair.targetPath);
+    // 比较方法 - API 控制器主要关注方法的存在性
+    const methodChanges = this.compareMethods(source.methods, target.methods);
+    changes.push(...methodChanges);
 
-        const diff = this.compare(sourceState, targetState);
-        const methodChanges = this.generateMethodChanges(sourceState, targetState);
+    return {
+      controllerName: source.metadata.className,
+      changes,
+      needsSync: changes.length > 0,
+    };
+  }
 
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: diff.needsSync,
-          methodChanges,
-          summary: this.generateSummary(methodChanges, sourceState.methods.size),
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: false,
-          methodChanges: [],
-          summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
-          error: error instanceof Error ? error.message : String(error),
-        });
+  /**
+   * API 控制器特有的方法比较逻辑
+   * 需要比较参数签名，确保 API 方法与 Server 方法参数一致
+   */
+  protected compareMethod(source: MethodDefinition, target: MethodDefinition): string[] {
+    const changes: string[] = [];
+
+    // 比较方法名
+    if (source.name !== target.name) {
+      changes.push(`方法名从 ${target.name} 改为 ${source.name}`);
+    }
+
+    // 比较参数数量和类型
+    if (source.parameters.length !== target.parameters.length) {
+      changes.push(`参数数量从 ${target.parameters.length} 改为 ${source.parameters.length}`);
+    } else {
+      // 比较每个参数
+      for (let i = 0; i < source.parameters.length; i++) {
+        const sourceParam = source.parameters[i];
+        const targetParam = target.parameters[i];
+
+        if (sourceParam.name !== targetParam.name) {
+          changes.push(`参数 ${i + 1} 名称从 ${targetParam.name} 改为 ${sourceParam.name}`);
+        }
+
+        if (sourceParam.type !== targetParam.type) {
+          changes.push(`参数 ${i + 1} 类型从 ${targetParam.type} 改为 ${sourceParam.type}`);
+        }
       }
     }
 
-    return results;
+    return changes;
   }
 
   /**
    * 重写方法变更生成 - API 控制器专用
    * 检查方法存在性和参数变化
    */
-  protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): any[] {
+  protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): MethodChange[] {
     const changes: any[] = [];
 
     // 检查缺失的方法（在 Server 中存在但在 API 中不存在）
