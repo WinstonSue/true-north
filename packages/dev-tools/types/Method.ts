@@ -1,3 +1,5 @@
+
+
 export interface MethodChange {
   methodName: string;
   changeType: MethodChangeType;
@@ -32,17 +34,14 @@ export interface MethodInfo {
   body: string;
 }
 
-export interface MethodDetailsResult {
-  className: string;
-  sourcePath: string;
-  targetPath: string;
-  needsSync: boolean;
-  methodChanges: MethodChange[];
-  summary: {
-    totalMethods: number;
-    changedMethods: number;
-    addedMethods: number;
-    removedMethods: number;
-  };
-  error?: string;
+export interface CommonChange {
+  /** 变更类型 */
+  changeType: 'constructor_changed' | 'imports_changed';
+
+  /** 旧值 */
+  oldValue?: any;
+  /** 新值 */
+  newValue?: any;
+  /** 变更描述 */
+  description: string;
 }

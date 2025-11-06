@@ -1,27 +1,4 @@
-import { DiffResult } from '../diff-engine';
-import { MethodChange } from '../../../../types';
-
-export interface ControllerSyncStatus {
-  className: string;
-  sourcePath: string;
-  targetPath: string;
-  needsSync: boolean;
-  changeCount: number;
-  lastChecked: string;
-  error?: string;
-  // 前端兼容字段
-  filePath: string;
-  changes: MethodChange[];
-  methodChanges: MethodChange[];
-  summary: {
-    totalMethods: number;
-    changedMethods: number;
-    addedMethods: number;
-    signatureChanges: number;
-    parameterChanges: number;
-    decoratorChanges: number;
-  };
-}
+import { DiffResult } from '../../../../types';
 
 export interface SyncOptions {
   /** 是否为干运行模式 */

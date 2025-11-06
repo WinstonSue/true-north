@@ -43,7 +43,7 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({ visible, onClos
             <strong>类名:</strong> {controller.className}
           </p>
           <p>
-            <strong>文件路径:</strong> {controller.filePath}
+            <strong>文件路径:</strong> {controller.targetPath}
           </p>
           <p>
             <strong>需要同步:</strong> {controller.needsSync ? '是' : '否'}

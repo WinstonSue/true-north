@@ -2,23 +2,7 @@ import React, { useState } from 'react';
 import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
 import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
 import MethodDetailsModal from './MethodDetailsModal';
-import { MethodChange } from '../../../types';
-
-interface ControllerSyncStatus {
-  className: string;
-  filePath: string;
-  needsSync: boolean;
-  changes: MethodChange[];
-  summary: {
-    totalMethods: number;
-    changedMethods: number;
-    addedMethods: number;
-    signatureChanges: number;
-    parameterChanges: number;
-    decoratorChanges: number;
-    bodyChanges: number;
-  };
-}
+import { ControllerSyncStatus } from '../../../types';
 
 interface MethodDetails {
   controllers: ControllerSyncStatus[];
@@ -105,7 +89,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
         return (
           <div>
             <div style={{ fontWeight: 'bold' }}>{className}</div>
-            <div style={{ fontSize: '12px', color: '#666' }}>{record.filePath}</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>{record.targetPath}</div>
           </div>
         );
       },

@@ -3,11 +3,10 @@
  * 提供通用的差异比对逻辑，子类可以重写特定的比较方法
  */
 
-import { IntermediateState, MethodDefinition } from '../intermediate-state';
-import { DiffResult, ChangeRecord } from './types';
+import { IntermediateState } from '../intermediate-state';
 import { SourceAdapter, TargetAdapter } from '../adapters';
 import { readFileSync } from 'fs';
-import { MethodChange, MethodChangeType, MethodDetailsResult } from '../../../../types';
+import { MethodChange, DiffResult, CommonChange } from '../../../../types';
 
 export abstract class DiffEngine {
   sourceAdapter: SourceAdapter;
@@ -20,35 +19,18 @@ export abstract class DiffEngine {
   /**
    * 获取控制器的详细信息
    */
-  async getControllerDetail(pair: {
-    sourcePath: string;
-    targetPath: string;
-    className: string;
-  }): Promise<MethodDetailsResult> {
+  async getDiffResultDetail(pair: { sourcePath: string; targetPath: string }): Promise<DiffResult> {
     try {
       const sourceState = this.getSourceIntermediateState(pair.sourcePath);
       const targetState = this.getTargetIntermediateState(pair.targetPath);
-      console.log('============================');
 
-      const diff = this.compareIntermediateState(sourceState, targetState);
-      const methodChanges = this.generateMethodChanges(sourceState, targetState);
-
-      return {
-        className: pair.className,
-        sourcePath: pair.sourcePath,
-        targetPath: pair.targetPath,
-        needsSync: diff.needsSync,
-        methodChanges,
-        summary: this.generateSummary(methodChanges, sourceState.methods.size),
-      };
+      return this.compareIntermediateState(sourceState, targetState);
     } catch (error) {
       return {
-        className: pair.className,
-        sourcePath: pair.sourcePath,
-        targetPath: pair.targetPath,
+        className: '',
         needsSync: false,
+        changes: [],
         methodChanges: [],
-        summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
         error: error instanceof Error ? error.message : String(error),
       };
     }
@@ -70,7 +52,7 @@ export abstract class DiffEngine {
   /**
    * 比较构造函数 - 子类可以重写
    */
-  protected compareConstructor(source: any, target: any): ChangeRecord | null {
+  protected compareConstructor(source: any, target: any): CommonChange | null {
     // 简化比较，主要检查参数数量和类型
     const sourceParamCount = source.parameters?.length || 0;
     const targetParamCount = target.parameters?.length || 0;
@@ -100,7 +82,7 @@ export abstract class DiffEngine {
   /**
    * 比较导入声明 - 子类可以重写
    */
-  protected compareImports(source: any[], target: any[]): ChangeRecord | null {
+  protected compareImports(source: any[], target: any[]): CommonChange | null {
     // 简化比较，检查导入数量
     if (source.length !== target.length) {
       return {
@@ -118,7 +100,7 @@ export abstract class DiffEngine {
   /**
    * 生成详细统计摘要 - 通用实现
    */
-  generateDetailedSummary(methodChanges: MethodChange[]) {
+  generateDiffResultSummary(methodChanges: MethodChange[]) {
     const signatureChanges = methodChanges.filter((c) => c.changeType === 'method_signature_changed').length;
     const parameterChanges = methodChanges.filter((c) => c.changeType === 'method_parameters_changed').length;
     const decoratorChanges = methodChanges.filter((c) => c.changeType === 'method_decorators_changed').length;
@@ -128,51 +110,11 @@ export abstract class DiffEngine {
       changedMethods: methodChanges.filter((c) => c.changeType !== 'method_added' && c.changeType !== 'method_removed')
         .length,
       addedMethods: methodChanges.filter((c) => c.changeType === 'method_added').length,
+      removedMethods: methodChanges.filter((c) => c.changeType === 'method_removed').length,
       signatureChanges,
       parameterChanges,
       decoratorChanges,
     };
-  }
-
-  /**
-   * 生成统计摘要 - 通用实现
-   */
-  generateSummary(
-    methodChanges: MethodChange[],
-    totalMethods: number
-  ): { totalMethods: number; changedMethods: number; addedMethods: number; removedMethods: number } {
-    const addedMethods = methodChanges.filter((c) => c.changeType === 'method_added').length;
-    const removedMethods = methodChanges.filter((c) => c.changeType === 'method_removed').length;
-    const changedMethods = methodChanges.filter(
-      (c) => c.changeType !== 'method_added' && c.changeType !== 'method_removed'
-    ).length;
-
-    return {
-      totalMethods,
-      changedMethods,
-      addedMethods,
-      removedMethods,
-    };
-  }
-
-  /**
-   * 生成变更详情 - 通用实现
-   */
-  generateChangeDetails(
-    sourceMethod: MethodDefinition,
-    targetMethod: MethodDefinition,
-    changeType: MethodChangeType
-  ): string {
-    switch (changeType) {
-      case 'method_decorators_changed':
-        return `Decorators changed: ${targetMethod.verb}('${targetMethod.path}') -> ${sourceMethod.verb}('${sourceMethod.path}')`;
-      case 'method_parameters_changed':
-        return `Parameters changed: ${targetMethod.parameters.length} -> ${sourceMethod.parameters.length} parameters`;
-      case 'method_signature_changed':
-        return `Return type changed: ${targetMethod.returnType} -> ${sourceMethod.returnType}`;
-      default:
-        return 'Method changed';
-    }
   }
 
   getSourceIntermediateState(sourcePath: string): IntermediateState {

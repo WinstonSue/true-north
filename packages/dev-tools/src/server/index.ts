@@ -159,12 +159,12 @@ app.get('/api/check/method-details', async (req, res) => {
     const engine = createProxySyncEngine();
 
     // 执行控制器状态检查（包含方法级别的详细信息）
-    const controllers = await engine.diffEngine.checkAllControllers();
+    const results = await engine.diffEngine.checkAllDiffResults();
 
     res.json({
       success: true,
       data: {
-        controllers: controllers,
+        controllers: results,
         lastChecked: new Date().toISOString(),
       },
     });
@@ -298,17 +298,14 @@ app.post('/api/sync/api-controller', async (req, res) => {
 // 获取 API 控制器方法级别详情
 app.get('/api/check/api-method-details', async (req, res) => {
   try {
-    console.log('开始检查 API 控制器方法详情...');
     const engine = createApiSyncEngine();
-    console.log('API 同步引擎创建成功');
 
-    const controllers = await engine.diffEngine.checkAllControllers();
-    console.log('检查完成，找到控制器数量:', controllers.length);
+    const results = await engine.diffEngine.checkAllDiffResults();
 
     res.json({
       success: true,
       data: {
-        controllers,
+        controllers: results,
         lastChecked: new Date().toISOString(),
       },
     });
@@ -326,24 +323,21 @@ app.get('/api/check/api-method-details', async (req, res) => {
 // 获取 Web Service 方法级别详情
 app.get('/api/check/web-service-method-details', async (req, res) => {
   try {
-    console.log('开始检查 Web Service 方法详情...');
     const engine = createWebServiceSyncEngine();
-    console.log('Web Service 同步引擎创建成功');
 
-    const controllers = await engine.diffEngine.checkAllControllers();
-    console.log('检查完成，找到控制器数量:', controllers.length);
+    const results = await engine.diffEngine.checkAllDiffResults();
 
-    if (controllers.length > 0) {
+    if (results.length > 0) {
       console.log(
         '控制器列表:',
-        controllers.map((c) => c.className)
+        results.map((c) => c.className)
       );
     }
 
     res.json({
       success: true,
       data: {
-        controllers,
+        controllers: results,
         lastChecked: new Date().toISOString(),
       },
     });

@@ -74,7 +74,7 @@ export class ControllerApiSyncEngine {
       return {
         success: false,
         controllerName: 'Unknown',
-        diff: { controllerName: 'Unknown', changes: [], methodChanges: [], needsSync: false },
+        diff: { className: 'Unknown', changes: [], methodChanges: [], needsSync: false },
         actions: [],
         error: error instanceof Error ? error.message : String(error),
       };

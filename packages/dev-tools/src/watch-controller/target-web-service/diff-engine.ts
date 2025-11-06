@@ -8,9 +8,8 @@ import { CONTROLLER_SOURCE_PATH, CONTROLLER_WEB_SERVICE_TARGET_PATH } from '../.
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { DiffEngine } from '../core/diff-engine';
-import { ControllerSyncStatus } from '../core/sync-engine';
 import { TargetWebServiceAdapter } from './target-adapter';
-import { MethodInfo } from '../../../types';
+import { MethodInfo, ControllerSyncStatus } from '../../../types';
 
 export class ControllerWebServiceDiffEngine extends DiffEngine {
   constructor() {
@@ -21,26 +20,25 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
   /**
    * 检查所有控制器的同步状态
    */
-  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
+  async checkAllDiffResults(): Promise<ControllerSyncStatus[]> {
     const pairs = this.findAllControllerPairs();
     const results: ControllerSyncStatus[] = [];
 
     for (const pair of pairs) {
       try {
-        const controllerDetails = await this.getControllerDetail(pair);
+        const diffResultDetail = await this.getDiffResultDetail(pair);
 
         // 生成详细的统计信息
-        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
+        const summary = this.generateDiffResultSummary(diffResultDetail.methodChanges);
 
         results.push({
           className: pair.className,
           sourcePath: pair.sourcePath,
           targetPath: pair.targetPath,
-          filePath: pair.targetPath, // 前端兼容字段
-          needsSync: controllerDetails.methodChanges.length > 0,
-          changeCount: controllerDetails.methodChanges.length,
-          changes: controllerDetails.methodChanges,
-          methodChanges: controllerDetails.methodChanges,
+          needsSync: diffResultDetail.methodChanges.length + diffResultDetail.changes.length > 0,
+          changeCount: diffResultDetail.methodChanges.length + diffResultDetail.changes.length,
+          changes: diffResultDetail.changes,
+          methodChanges: diffResultDetail.methodChanges,
           summary,
           lastChecked: new Date().toISOString(),
           error: undefined,
@@ -50,7 +48,6 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
           className: pair.className,
           sourcePath: pair.sourcePath,
           targetPath: pair.targetPath,
-          filePath: pair.targetPath,
           needsSync: false,
           changeCount: 0,
           changes: [],
@@ -59,6 +56,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
             totalMethods: 0,
             changedMethods: 0,
             addedMethods: 0,
+            removedMethods: 0,
             signatureChanges: 0,
             parameterChanges: 0,
             decoratorChanges: 0,
@@ -78,7 +76,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
    */
   compareIntermediateState(sourceState: any, targetState: any) {
     const result = {
-      controllerName: sourceState.metadata?.className || 'Unknown',
+      className: sourceState.metadata?.className || 'Unknown',
       needsSync: false,
       changes: [] as any[],
       methodChanges: [] as any[],

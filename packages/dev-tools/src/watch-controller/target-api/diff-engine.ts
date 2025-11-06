@@ -3,14 +3,11 @@
  * 专门处理 Server Controller 到 API Controller 的差异比对
  */
 
-import { DiffEngine } from '../core/diff-engine';
 import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
-import { DiffResult } from '../core/diff-engine';
-import { detectMethodChangeType } from '../core/diff-engine/helpers';
+import { DiffEngine, detectMethodChangeType, generateChangeDetails } from '../core/diff-engine';
 import { findAllControllerPairs } from './helpers';
 import { TargetApiAdapter } from './target-adapter';
-import { ControllerSyncStatus } from '../core/sync-engine';
-import { MethodChange, MethodInfo } from '../../../types';
+import { MethodChange, MethodInfo, DiffResult, ControllerSyncStatus } from '../../../types';
 
 export class ControllerApiDiffEngine extends DiffEngine {
   targetAdapter: TargetApiAdapter;
@@ -23,26 +20,25 @@ export class ControllerApiDiffEngine extends DiffEngine {
   /**
    * 检查所有控制器的同步状态
    */
-  async checkAllControllers(): Promise<ControllerSyncStatus[]> {
+  async checkAllDiffResults(): Promise<ControllerSyncStatus[]> {
     const pairs = findAllControllerPairs();
     const results: ControllerSyncStatus[] = [];
 
     for (const pair of pairs) {
       try {
-        const controllerDetails = await this.getControllerDetail(pair);
+        const diffResultDetail = await this.getDiffResultDetail(pair);
 
         // 生成详细的统计信息
-        const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
+        const summary = this.generateDiffResultSummary(diffResultDetail.methodChanges);
 
         results.push({
           className: pair.className,
           sourcePath: pair.sourcePath,
           targetPath: pair.targetPath,
-          filePath: pair.targetPath, // 前端兼容字段
-          needsSync: controllerDetails.methodChanges.length > 0,
-          changeCount: controllerDetails.methodChanges.length,
-          changes: controllerDetails.methodChanges,
-          methodChanges: controllerDetails.methodChanges,
+          needsSync: diffResultDetail.methodChanges.length + diffResultDetail.changes.length > 0,
+          changeCount: diffResultDetail.methodChanges.length + diffResultDetail.changes.length,
+          changes: diffResultDetail.changes,
+          methodChanges: diffResultDetail.methodChanges,
           summary,
           lastChecked: new Date().toISOString(),
           error: undefined,
@@ -52,7 +48,6 @@ export class ControllerApiDiffEngine extends DiffEngine {
           className: pair.className,
           sourcePath: pair.sourcePath,
           targetPath: pair.targetPath,
-          filePath: pair.targetPath,
           needsSync: false,
           changeCount: 0,
           changes: [],
@@ -61,6 +56,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
             totalMethods: 0,
             changedMethods: 0,
             addedMethods: 0,
+            removedMethods: 0,
             signatureChanges: 0,
             parameterChanges: 0,
             decoratorChanges: 0,
@@ -81,7 +77,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
     const methodChanges = this.generateMethodChanges(source, target);
 
     return {
-      controllerName: source.metadata.className,
+      className: source.metadata.className,
       changes: [],
       methodChanges,
       needsSync: methodChanges.length > 0,
@@ -115,7 +111,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
             changeType,
             sourceMethod: this.convertToMethodInfo(sourceMethod),
             targetMethod: this.convertToMethodInfo(targetMethod),
-            description: this.generateChangeDetails(sourceMethod, targetMethod, changeType),
+            description: generateChangeDetails(sourceMethod, targetMethod, changeType),
           });
         }
       }

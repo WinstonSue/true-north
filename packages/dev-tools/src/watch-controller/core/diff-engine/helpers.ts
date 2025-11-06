@@ -4,7 +4,10 @@ import { MethodChangeType } from '../../../../types';
 /**
  * 检测变更类型 - 通用实现
  */
-export function detectMethodChangeType(sourceMethod: MethodDefinition, targetMethod: MethodDefinition): MethodChangeType {
+export function detectMethodChangeType(
+  sourceMethod: MethodDefinition,
+  targetMethod: MethodDefinition
+): MethodChangeType {
   // 比较装饰器
   if (sourceMethod.verb !== targetMethod.verb || sourceMethod.path !== targetMethod.path) {
     return 'method_decorators_changed';
@@ -46,4 +49,24 @@ export function parametersChanged(sourceParams: any[], targetParams: any[]): boo
   }
 
   return false;
+}
+
+/**
+ * 生成变更详情 - 通用实现
+ */
+export function generateChangeDetails(
+  sourceMethod: MethodDefinition,
+  targetMethod: MethodDefinition,
+  changeType: MethodChangeType
+): string {
+  switch (changeType) {
+    case 'method_decorators_changed':
+      return `Decorators changed: ${targetMethod.verb}('${targetMethod.path}') -> ${sourceMethod.verb}('${sourceMethod.path}')`;
+    case 'method_parameters_changed':
+      return `Parameters changed: ${targetMethod.parameters.length} -> ${sourceMethod.parameters.length} parameters`;
+    case 'method_signature_changed':
+      return `Return type changed: ${targetMethod.returnType} -> ${sourceMethod.returnType}`;
+    default:
+      return 'Method changed';
+  }
 }
