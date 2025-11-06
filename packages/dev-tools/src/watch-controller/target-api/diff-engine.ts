@@ -5,7 +5,8 @@
 
 import { DiffEngine } from '../core/diff-engine';
 import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
-import { MethodInfo, MethodChange, detectChangeType, DiffResult, ChangeRecord } from '../core/diff-engine';
+import { MethodChange, DiffResult, MethodInfo } from '../core/diff-engine';
+import { detectChangeType } from '../core/diff-engine/helpers';
 import { findAllControllerPairs } from './helpers';
 import { TargetApiAdapter } from './target-adapter';
 import { ControllerSyncStatus } from '../core/sync-engine';
@@ -27,8 +28,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
 
     for (const pair of pairs) {
       try {
-        const methodDetails = await this.getMethodDetails([pair]);
-        const controllerDetails = methodDetails[0];
+        const controllerDetails = await this.getControllerDetail(pair);
 
         // 生成详细的统计信息
         const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
@@ -75,51 +75,13 @@ export class ControllerApiDiffEngine extends DiffEngine {
    * API 控制器只比较方法，不比较构造函数和导入
    */
   compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult {
-    const changes: ChangeRecord[] = [];
-
-    // 比较方法 - API 控制器主要关注方法的存在性
-    const methodChanges = this.compareMethods(source.methods, target.methods);
-    changes.push(...methodChanges);
+    const methodChanges = this.generateMethodChanges(source, target);
 
     return {
       controllerName: source.metadata.className,
-      changes,
-      needsSync: changes.length > 0,
+      changes: [...methodChanges],
+      needsSync: methodChanges.length > 0,
     };
-  }
-
-  /**
-   * API 控制器特有的方法比较逻辑
-   * 需要比较参数签名，确保 API 方法与 Server 方法参数一致
-   */
-  protected compareMethod(source: MethodDefinition, target: MethodDefinition): string[] {
-    const changes: string[] = [];
-
-    // 比较方法名
-    if (source.name !== target.name) {
-      changes.push(`方法名从 ${target.name} 改为 ${source.name}`);
-    }
-
-    // 比较参数数量和类型
-    if (source.parameters.length !== target.parameters.length) {
-      changes.push(`参数数量从 ${target.parameters.length} 改为 ${source.parameters.length}`);
-    } else {
-      // 比较每个参数
-      for (let i = 0; i < source.parameters.length; i++) {
-        const sourceParam = source.parameters[i];
-        const targetParam = target.parameters[i];
-
-        if (sourceParam.name !== targetParam.name) {
-          changes.push(`参数 ${i + 1} 名称从 ${targetParam.name} 改为 ${sourceParam.name}`);
-        }
-
-        if (sourceParam.type !== targetParam.type) {
-          changes.push(`参数 ${i + 1} 类型从 ${targetParam.type} 改为 ${sourceParam.type}`);
-        }
-      }
-    }
-
-    return changes;
   }
 
   /**

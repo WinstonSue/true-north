@@ -55,7 +55,7 @@ export interface DiffResult {
   /** 控制器名称 */
   controllerName: string;
   /** 变更类型 */
-  changes: ChangeRecord[];
+  changes: (ChangeRecord | MethodChange)[];
   /** 是否需要同步 */
   needsSync: boolean;
 }

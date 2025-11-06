@@ -4,12 +4,13 @@
  */
 
 import { MethodDefinition } from '../core/intermediate-state';
-import { DiffEngine, MethodChange, MethodInfo, detectChangeType, DiffResult, ChangeRecord } from '../core/diff-engine';
+import { DiffEngine } from '../core/diff-engine';
+import { MethodChange, MethodInfo, DiffResult, ChangeRecord } from '../core/diff-engine/types';
+import { detectChangeType } from '../core/diff-engine/helpers';
 import { findAllControllerPairs } from './helpers';
 import { IntermediateState } from '../core/intermediate-state';
 import { ControllerSyncStatus } from '../core/sync-engine';
 import { TargetProxyAdapter } from './target-adapter';
-import { isEqual } from 'lodash-es';
 
 export class ControllerProxyDiffEngine extends DiffEngine {
   targetAdapter: TargetProxyAdapter;
@@ -27,8 +28,7 @@ export class ControllerProxyDiffEngine extends DiffEngine {
 
     for (const pair of pairs) {
       try {
-        const methodDetails = await this.getMethodDetails([pair]);
-        const controllerDetails = methodDetails[0];
+        const controllerDetails = await this.getControllerDetail(pair);
 
         // 生成详细的统计信息
         const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
@@ -75,10 +75,10 @@ export class ControllerProxyDiffEngine extends DiffEngine {
    * 比较两个中间态，生成差异报告
    */
   compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult {
-    const changes: ChangeRecord[] = [];
+    const changes: (ChangeRecord | MethodChange)[] = [];
 
     // 比较方法
-    const methodChanges = this.compareMethods(source.methods, target.methods);
+    const methodChanges = this.generateMethodChanges(source, target);
     changes.push(...methodChanges);
 
     // 比较构造函数（子类可以选择是否比较）
@@ -98,66 +98,6 @@ export class ControllerProxyDiffEngine extends DiffEngine {
       changes,
       needsSync: changes.length > 0,
     };
-  }
-
-  /**
-   * Desktop 控制器特有的方法比较逻辑
-   */
-  protected compareMethod(source: MethodDefinition, target: MethodDefinition): string[] {
-    const changes: string[] = [];
-
-    // 比较 HTTP 动词
-    if (source.verb !== target.verb) {
-      changes.push(`HTTP动词从 ${target.verb} 改为 ${source.verb}`);
-    }
-
-    // 比较路径
-    if (source.path !== target.path) {
-      changes.push(`路径从 ${target.path} 改为 ${source.path}`);
-    }
-
-    // 比较参数
-    const paramChanges = this.compareParameters(source.parameters, target.parameters);
-    if (paramChanges.length > 0) {
-      changes.push(`参数变更: ${paramChanges.join(', ')}`);
-    }
-
-    // 比较返回类型
-    if (source.returnType !== target.returnType) {
-      changes.push(`返回类型从 ${target.returnType} 改为 ${source.returnType}`);
-    }
-
-    // 智能比较方法体：检查 Target 是否已经是正确的代理调用
-    if (!this.isCorrectProxyCall(source, target)) {
-      changes.push('方法体需要更新为代理调用');
-    }
-
-    // 比较装饰器选项
-    if (!isEqual(source.decoratorOptions, target.decoratorOptions)) {
-      changes.push('装饰器选项已修改');
-    }
-
-    return changes;
-  }
-
-  /**
-   * 检查 Target 方法是否已经是正确的代理调用
-   */
-  private isCorrectProxyCall(source: MethodDefinition, target: MethodDefinition): boolean {
-    // 检查 Target 方法体是否包含正确的代理调用模式
-    const expectedCall = `return this.controller.${source.name}(`;
-
-    // 如果 Target 方法体包含期望的代理调用，认为是正确的
-    if (target.bodyText.includes(expectedCall)) {
-      // 进一步检查参数是否匹配
-      const sourceParamNames = source.parameters.map((p) => p.name);
-      const expectedParams = sourceParamNames.join(', ');
-      const fullExpectedCall = `return this.controller.${source.name}(${expectedParams});`;
-
-      return target.bodyText.includes(fullExpectedCall);
-    }
-
-    return false;
   }
 
   generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): MethodChange[] {

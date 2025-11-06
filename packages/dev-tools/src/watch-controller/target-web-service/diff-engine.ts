@@ -26,8 +26,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
 
     for (const pair of pairs) {
       try {
-        const methodDetails = await this.getMethodDetails([pair]);
-        const controllerDetails = methodDetails[0];
+        const controllerDetails = await this.getControllerDetail(pair);
 
         // 生成详细的统计信息
         const summary = this.generateDetailedSummary(controllerDetails.methodChanges);
@@ -71,24 +70,6 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
   }
 
   /**
-   * Web Service 特有的方法比较逻辑 - 极简版本
-   * 只检查真正重要的差异，忽略装饰器、返回类型等
-   */
-  protected compareMethod(source: MethodDefinition, target: MethodDefinition): string[] {
-    const changes: string[] = [];
-
-    // 比较方法名
-    if (source.name !== target.name) {
-      changes.push(`方法名从 ${target.name} 改为 ${source.name}`);
-    }
-
-    // 暂时跳过所有其他比较，专注于解决装饰器问题
-    // 只有在方法名不匹配时才报告差异
-
-    return changes;
-  }
-
-  /**
    * 重写比较方法，只比较方法，不比较构造函数和导入
    * 使用 Web Service 专用的方法比较逻辑
    */
@@ -100,123 +81,11 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
     };
 
     // 只比较方法，使用 Web Service 专用逻辑
-    const methodChanges = this.compareWebServiceMethods(sourceState.methods, targetState.methods);
+    const methodChanges = this.generateMethodChanges(sourceState, targetState);
     result.changes = methodChanges;
     result.needsSync = methodChanges.length > 0;
 
     return result;
-  }
-
-  /**
-   * Web Service 专用的方法比较逻辑
-   */
-  private compareWebServiceMethods(sourceMethods: Map<string, any>, targetMethods: Map<string, any>) {
-    const changes: any[] = [];
-
-    // 检查源码中的每个方法
-    for (const [methodName, sourceMethod] of sourceMethods) {
-      const targetMethod = targetMethods.get(methodName);
-
-      if (!targetMethod) {
-        changes.push({
-          type: 'method_added' as const,
-          methodName,
-          details: {
-            description: `Web Service 方法 ${methodName} 需要添加`,
-            severity: 'high' as const,
-            newValue: sourceMethod,
-          },
-        });
-        continue;
-      }
-
-      const methodChanges = this.compareMethod(sourceMethod, targetMethod);
-      if (methodChanges.length > 0) {
-        changes.push({
-          type: 'method_modified' as const,
-          methodName,
-          details: {
-            description: `Web Service 方法 ${methodName} 需要更新: ${methodChanges.join(', ')}`,
-            severity: 'medium' as const,
-            oldValue: targetMethod,
-            newValue: sourceMethod,
-          },
-        });
-      }
-    }
-
-    // 检查目标中多余的方法
-    for (const [methodName, targetMethod] of targetMethods) {
-      if (!sourceMethods.has(methodName)) {
-        changes.push({
-          type: 'method_removed' as const,
-          methodName,
-          details: {
-            description: `Web Service 方法 ${methodName} 应该移除`,
-            severity: 'low' as const,
-            oldValue: targetMethod,
-          },
-        });
-      }
-    }
-
-    return changes;
-  }
-
-  /**
-   * 重写方法比较，使用 Web Service 特有的错误描述
-   */
-  protected compareMethods(sourceMethods: Map<string, MethodDefinition>, targetMethods: Map<string, MethodDefinition>) {
-    const changes: any[] = [];
-
-    // 检查源码中的每个方法
-    for (const [methodName, sourceMethod] of sourceMethods) {
-      const targetMethod = targetMethods.get(methodName);
-
-      if (!targetMethod) {
-        changes.push({
-          type: 'method_added' as const,
-          methodName,
-          details: {
-            description: `Web Service 方法 ${methodName} 需要添加`,
-            severity: 'high' as const,
-            newValue: sourceMethod,
-          },
-        });
-        continue;
-      }
-
-      const methodChanges = this.compareMethod(sourceMethod, targetMethod);
-      if (methodChanges.length > 0) {
-        changes.push({
-          type: 'method_modified' as const,
-          methodName,
-          details: {
-            description: `Web Service 方法 ${methodName} 需要更新: ${methodChanges.join(', ')}`,
-            severity: 'medium' as const,
-            oldValue: targetMethod,
-            newValue: sourceMethod,
-          },
-        });
-      }
-    }
-
-    // 检查目标中多余的方法
-    for (const [methodName, targetMethod] of targetMethods) {
-      if (!sourceMethods.has(methodName)) {
-        changes.push({
-          type: 'method_removed' as const,
-          methodName,
-          details: {
-            description: `Web Service 方法 ${methodName} 应该移除`,
-            severity: 'low' as const,
-            oldValue: targetMethod,
-          },
-        });
-      }
-    }
-
-    return changes;
   }
 
   /**

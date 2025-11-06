@@ -3,12 +3,10 @@
  * 提供通用的差异比对逻辑，子类可以重写特定的比较方法
  */
 
-import { IntermediateState, MethodDefinition, ParameterDefinition } from '../intermediate-state';
+import { IntermediateState, MethodDefinition } from '../intermediate-state';
 import { MethodChange, MethodChangeType, MethodDetailsResult, DiffResult, ChangeRecord } from './types';
-import { SourceAdapter } from '../adapters';
-import { TargetAdapter } from '../adapters';
+import { SourceAdapter, TargetAdapter } from '../adapters';
 import { readFileSync } from 'fs';
-import { isEqual } from 'lodash-es';
 
 export abstract class DiffEngine {
   sourceAdapter: SourceAdapter;
@@ -18,41 +16,41 @@ export abstract class DiffEngine {
     this.sourceAdapter = new SourceAdapter();
   }
 
-  async getMethodDetails(
-    pairs: Array<{ sourcePath: string; targetPath: string; className: string }>
-  ): Promise<MethodDetailsResult[]> {
-    const results: MethodDetailsResult[] = [];
+  /**
+   * 获取控制器的详细信息
+   */
+  async getControllerDetail(pair: {
+    sourcePath: string;
+    targetPath: string;
+    className: string;
+  }): Promise<MethodDetailsResult> {
+    try {
+      const sourceState = this.getSourceIntermediateState(pair.sourcePath);
+      const targetState = this.getTargetIntermediateState(pair.targetPath);
+      console.log('============================');
 
-    for (const pair of pairs) {
-      try {
-        const sourceState = this.getSourceIntermediateState(pair.sourcePath);
-        const targetState = this.getTargetIntermediateState(pair.targetPath);
+      const diff = this.compareIntermediateState(sourceState, targetState);
+      const methodChanges = this.generateMethodChanges(sourceState, targetState);
 
-        const diff = this.compareIntermediateState(sourceState, targetState);
-        const methodChanges = this.generateMethodChanges(sourceState, targetState);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: diff.needsSync,
-          methodChanges,
-          summary: this.generateSummary(methodChanges, sourceState.methods.size),
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: false,
-          methodChanges: [],
-          summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: diff.needsSync,
+        methodChanges,
+        summary: this.generateSummary(methodChanges, sourceState.methods.size),
+      };
+    } catch (error) {
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: false,
+        methodChanges: [],
+        summary: { totalMethods: 0, changedMethods: 0, addedMethods: 0, removedMethods: 0 },
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
-
-    return results;
   }
 
   /**
@@ -67,133 +65,6 @@ export abstract class DiffEngine {
    * 比较两个中间态，生成差异报告，子类必须实现
    */
   abstract compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult;
-
-  /**
-   * 比较单个方法 - 抽象方法，子类必须实现
-   */
-  protected abstract compareMethod(source: MethodDefinition, target: MethodDefinition): string[];
-
-  /**
-   * 比较方法集合 - 子类可以重写
-   */
-  protected compareMethods(
-    sourceMethods: Map<string, MethodDefinition>,
-    targetMethods: Map<string, MethodDefinition>
-  ): ChangeRecord[] {
-    const changes: ChangeRecord[] = [];
-
-    // 检查新增的方法
-    for (const [methodName, sourceMethod] of sourceMethods) {
-      if (!targetMethods.has(methodName)) {
-        changes.push({
-          type: 'method_added',
-          methodName,
-          details: {
-            newValue: sourceMethod,
-            description: `方法 ${methodName} 在目标中不存在`,
-            severity: 'medium',
-          },
-        });
-      }
-    }
-
-    // 检查删除的方法
-    for (const [methodName, targetMethod] of targetMethods) {
-      if (!sourceMethods.has(methodName)) {
-        changes.push({
-          type: 'method_removed',
-          methodName,
-          details: {
-            oldValue: targetMethod,
-            description: `方法 ${methodName} 在源中不存在`,
-            severity: 'medium',
-          },
-        });
-      }
-    }
-
-    // 检查修改的方法
-    for (const [methodName, sourceMethod] of sourceMethods) {
-      const targetMethod = targetMethods.get(methodName);
-      if (targetMethod) {
-        const methodChanges = this.compareMethod(sourceMethod, targetMethod);
-        if (methodChanges.length > 0) {
-          changes.push({
-            type: 'method_modified',
-            methodName,
-            details: {
-              oldValue: targetMethod,
-              newValue: sourceMethod,
-              description: `方法 ${methodName} 已修改: ${methodChanges.join(', ')}`,
-              severity: 'high',
-            },
-          });
-        }
-      }
-    }
-
-    return changes;
-  }
-  /**
-   * 比较参数列表 - 通用实现
-   */
-  protected compareParameters(sourceParams: ParameterDefinition[], targetParams: ParameterDefinition[]): string[] {
-    const changes: string[] = [];
-
-    // 比较参数数量
-    if (sourceParams.length !== targetParams.length) {
-      changes.push(`参数数量从 ${targetParams.length} 改为 ${sourceParams.length}`);
-    }
-
-    // 比较每个参数
-    const maxLength = Math.max(sourceParams.length, targetParams.length);
-    for (let i = 0; i < maxLength; i++) {
-      const sourceParam = sourceParams[i];
-      const targetParam = targetParams[i];
-
-      if (!sourceParam && targetParam) {
-        changes.push(`删除参数 ${targetParam.name}`);
-      } else if (sourceParam && !targetParam) {
-        changes.push(`添加参数 ${sourceParam.name}`);
-      } else if (sourceParam && targetParam) {
-        const paramChanges = this.compareParameter(sourceParam, targetParam);
-        if (paramChanges.length > 0) {
-          changes.push(`参数 ${sourceParam.name}: ${paramChanges.join(', ')}`);
-        }
-      }
-    }
-
-    return changes;
-  }
-
-  /**
-   * 比较单个参数 - 通用实现
-   */
-  protected compareParameter(source: ParameterDefinition, target: ParameterDefinition): string[] {
-    const changes: string[] = [];
-
-    if (source.name !== target.name) {
-      changes.push(`名称从 ${target.name} 改为 ${source.name}`);
-    }
-
-    if (source.type !== target.type) {
-      changes.push(`类型从 ${target.type} 改为 ${source.type}`);
-    }
-
-    if (source.decorator !== target.decorator) {
-      changes.push(`装饰器从 @${target.decorator} 改为 @${source.decorator}`);
-    }
-
-    if (source.optional !== target.optional) {
-      changes.push(`可选性从 ${target.optional} 改为 ${source.optional}`);
-    }
-
-    if (!isEqual(source.decoratorArgs || [], target.decoratorArgs || [])) {
-      changes.push('装饰器参数已修改');
-    }
-
-    return changes;
-  }
 
   /**
    * 比较构造函数 - 子类可以重写
