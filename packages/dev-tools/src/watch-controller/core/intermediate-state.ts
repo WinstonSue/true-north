@@ -3,6 +3,8 @@
  * 用于统一表示 Server 和 Desktop Controller 的结构
  */
 
+import { ASTClassInfo } from './ast/ast-types';
+
 export interface IntermediateState {
   /** 控制器元信息 */
   metadata: ControllerMetadata;
@@ -12,6 +14,10 @@ export interface IntermediateState {
   constructor: ConstructorDefinition;
   /** 导入声明 */
   imports: ImportDeclaration[];
+  /** AST 原始数据，用于代码恢复 */
+  astData?: ASTClassInfo;
+  /** 原始源码，用于快速恢复 */
+  code?: string;
 }
 
 export interface ControllerMetadata {

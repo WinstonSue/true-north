@@ -91,7 +91,7 @@ export abstract class DiffEngine {
    * 生成详细统计摘要 - 通用实现
    */
   generateDiffResultSummary(methodChanges: MethodChange[]) {
-    const signatureChanges = methodChanges.filter((c) => c.changeType === 'method_signature_changed').length;
+    const returnTypeChanges = methodChanges.filter((c) => c.changeType === 'method_return_type_changed').length;
     const parameterChanges = methodChanges.filter((c) => c.changeType === 'method_parameters_changed').length;
     const decoratorChanges = methodChanges.filter((c) => c.changeType === 'method_decorators_changed').length;
 
@@ -101,7 +101,7 @@ export abstract class DiffEngine {
         .length,
       addedMethods: methodChanges.filter((c) => c.changeType === 'method_added').length,
       removedMethods: methodChanges.filter((c) => c.changeType === 'method_removed').length,
-      signatureChanges,
+      returnTypeChanges,
       parameterChanges,
       decoratorChanges,
     };

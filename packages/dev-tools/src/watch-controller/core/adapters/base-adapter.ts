@@ -29,7 +29,13 @@ export abstract class BaseAdapter {
 
     try {
       const astInfo = this.astParser.parse(code, filePath);
-      return this.astToIntermediateState(astInfo, filePath);
+      const intermediateState = this.astToIntermediateState(astInfo, filePath);
+      
+      // 挂载 AST 数据和源码，用于后续恢复
+      intermediateState.astData = astInfo;
+      intermediateState.code = code;
+      
+      return intermediateState;
     } catch (error) {
       const errorResult = ErrorHandler.handleASTError(error, filePath);
       this.logger.error('AST 解析失败', errorResult.error);

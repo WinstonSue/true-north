@@ -57,7 +57,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
             changedMethods: 0,
             addedMethods: 0,
             removedMethods: 0,
-            signatureChanges: 0,
+            returnTypeChanges: 0,
             parameterChanges: 0,
             decoratorChanges: 0,
           },

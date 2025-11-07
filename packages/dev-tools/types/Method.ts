@@ -9,7 +9,7 @@ export interface MethodChange {
 }
 
 export type MethodChangeType =
-  | 'method_signature_changed'
+  | 'method_return_type_changed'
   | 'method_parameters_changed'
   | 'method_decorators_changed'
   | 'method_body_changed'

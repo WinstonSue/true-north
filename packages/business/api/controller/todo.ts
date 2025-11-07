@@ -1,55 +1,55 @@
 import { request } from '@life-toolkit/share-request';
 import { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
 
-export default class TodoController {
-  static async delete(id: string) {
+export class TodoController {
+  create(body: TodoVO.CreateTodoVo): Promise<any> {
+    return request<TodoVO.TodoVo>({ method: 'post' })(`/todo/create`, body);
+  }
+
+  delete(id: string): Promise<any> {
     return request<boolean>({ method: 'remove' })(`/todo/delete/${id}`);
   }
 
-  static async find(id: string) {
+  update(id: string, body: TodoVO.UpdateTodoVo): Promise<any> {
+    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update/${id}`, body);
+  }
+
+  find(id: string): Promise<any> {
     return request<TodoVO.TodoVo>({ method: 'get' })(`/todo/find/${id}`);
   }
 
-  static async abandonWithRepeat(id: string) {
-    return request<boolean>({ method: 'put' })(`/todo/abandon-with-repeat/${id}`);
+  findByFilter(query?: TodoVO.TodoFilterVo): Promise<any> {
+    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/find-by-filter`, query);
   }
 
-  static async restoreWithRepeat(id: string) {
-    return request<boolean>({ method: 'put' })(`/todo/restore-with-repeat/${id}`);
+  page(query?: TodoVO.TodoPageFilterVo): Promise<any> {
+    return request<ResponsePageVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/page`, query);
   }
 
-  static async doneWithRepeatBatch(query: TodoVO.TodoFilterVo, body: any) {
+  updateWithRepeat(id: string, body: TodoVO.UpdateTodoVo): Promise<any> {
+    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update-with-repeat/${id}`, body);
+  }
+
+  doneWithRepeatBatch(query?: TodoVO.TodoFilterVo, body?: any): Promise<any> {
     return request<any>({ method: 'put' })(
       `/todo/done-with-repeat/batch?${new URLSearchParams(query as any).toString()}`,
       body
     );
   }
 
-  static async create(body: TodoVO.CreateTodoVo) {
-    return request<TodoVO.TodoVo>({ method: 'post' })(`/todo/create`, body);
+  abandonWithRepeat(id: string): Promise<any> {
+    return request<boolean>({ method: 'put' })(`/todo/abandon-with-repeat/${id}`);
   }
 
-  static async update(id: string, body: TodoVO.UpdateTodoVo) {
-    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update/${id}`, body);
+  restoreWithRepeat(id: string): Promise<any> {
+    return request<boolean>({ method: 'put' })(`/todo/restore-with-repeat/${id}`);
   }
 
-  static async findByFilter(query?: TodoVO.TodoFilterVo) {
-    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/find-by-filter`, query);
-  }
-
-  static async page(query?: TodoVO.TodoPageFilterVo) {
-    return request<ResponsePageVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/page`, query);
-  }
-
-  static async updateWithRepeat(id: string, body: TodoVO.UpdateTodoVo) {
-    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update-with-repeat/${id}`, body);
-  }
-
-  static async listMixRepeat(query?: TodoVO.TodoFilterVo) {
+  listMixRepeat(query?: TodoVO.TodoFilterVo): Promise<any> {
     return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/list-mixed-repeat`, query);
   }
 
-  static async findMixRepeat(id: string, query?: { source?: string }) {
+  findMixRepeat(id: string, query?: { source?: string }): Promise<any> {
     return request<TodoVO.TodoVo>({ method: 'get' })(`/todo/find-mix-repeat/${id}`, query);
   }
 }

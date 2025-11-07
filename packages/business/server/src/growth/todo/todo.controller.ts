@@ -20,18 +20,18 @@ export class TodoController {
   ) {}
 
   @Post('/create', { description: '创建待办' })
-  async create(@Body() createTodoVo: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
-    if (createTodoVo.repeatConfig) {
+  async create(@Body() body: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
+    if (body.repeatConfig) {
       const createTodoRepeatDto = new CreateTodoRepeatDto();
       createTodoRepeatDto.importCreateVo({
-        ...createTodoVo,
-        repeatConfig: createTodoVo.repeatConfig,
+        ...body,
+        repeatConfig: body.repeatConfig,
       });
       const todoRepeatDto = await this.todoRepeatService.create(createTodoRepeatDto);
       return todoRepeatDto.exportVo();
     }
     const createTodoDto = new CreateTodoDto();
-    createTodoDto.importCreateVo(createTodoVo);
+    createTodoDto.importCreateVo(body);
     const todoDto = await this.todoService.create(createTodoDto);
     return todoDto.exportVo();
   }
@@ -42,9 +42,9 @@ export class TodoController {
   }
 
   @Put('/update/:id', { description: '更新待办' })
-  async update(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
+  async update(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
     const updateDto = new UpdateTodoDto();
-    updateDto.importUpdateVo(updateVo);
+    updateDto.importUpdateVo(body);
     updateDto.id = id;
     const dto = await this.todoService.update(updateDto);
     return dto.exportVo();
@@ -80,19 +80,19 @@ export class TodoController {
   }
 
   @Put('/update-with-repeat/:id', { description: '更新待办' })
-  async updateWithRepeat(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    if (updateVo.source === TodoSource.IS_REPEAT) {
+  async updateWithRepeat(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
+    if (body.source === TodoSource.IS_REPEAT) {
       const updateTodoRepeatDto = new UpdateTodoRepeatDto();
       updateTodoRepeatDto.importUpdateVo({
-        ...updateVo,
-        repeatConfig: updateVo.repeatConfig,
+        ...body,
+        repeatConfig: body.repeatConfig,
       });
       updateTodoRepeatDto.id = id;
       const dto = await this.todoRepeatService.update(updateTodoRepeatDto);
       return dto.exportVo();
     }
     const updateDto = new UpdateTodoDto();
-    updateDto.importUpdateVo(updateVo);
+    updateDto.importUpdateVo(body);
     updateDto.id = id;
     const dto = await this.todoService.update(updateDto);
     return dto.exportVo();

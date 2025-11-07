@@ -53,7 +53,7 @@ export function generateSyncActions(diffResult: DiffResult, source: Intermediate
         });
         break;
 
-      case 'method_signature_changed':
+      case 'method_return_type_changed':
       case 'method_parameters_changed':
       case 'method_decorators_changed':
       case 'method_body_changed':

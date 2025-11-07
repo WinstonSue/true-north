@@ -1,16 +1,53 @@
 /**
  * API 控制器代码生成器
  * 专门处理 API Controller 的代码生成和同步
+ * 现在基于 AST 操作而非字符串操作
  */
 
 import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
 import { SyncAction } from '../core/sync-engine';
+import { ASTCodeGenerator } from '../core/ast';
 
 export class ControllerApiCodeGenerator {
+  private astGenerator: ASTCodeGenerator;
+
+  constructor() {
+    this.astGenerator = new ASTCodeGenerator();
+  }
+
   /**
    * 应用同步操作到 API 控制器代码
+   * 现在基于 AST 操作而非字符串操作
    */
   applySyncActions(
+    targetCode: string,
+    actions: SyncAction[],
+    targetState: IntermediateState,
+    sourceState: IntermediateState
+  ): string {
+    // 使用新的 AST 代码生成器
+    const result = this.astGenerator.generateCodeFromDiff(targetState, actions, sourceState);
+    
+    // 如果有错误，记录并返回原始代码
+    if (result.errors.length > 0) {
+      console.warn('AST 代码生成警告:', result.errors);
+      
+      // 如果完全失败，回退到原始字符串操作方式
+      if (result.appliedActions === 0) {
+        console.warn('AST 代码生成失败，回退到字符串操作方式');
+        return this.fallbackToStringOperations(targetCode, actions, targetState, sourceState);
+      }
+    }
+
+    console.log(`AST 代码生成成功，应用了 ${result.appliedActions}/${actions.length} 个操作`);
+    return result.generatedCode;
+  }
+
+  /**
+   * 回退到原始的字符串操作方式
+   * 当 AST 方式失败时使用
+   */
+  private fallbackToStringOperations(
     targetCode: string,
     actions: SyncAction[],
     targetState: IntermediateState,

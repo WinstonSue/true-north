@@ -26,8 +26,8 @@ export class TargetApiAdapter extends TargetAdapter {
    * 解析目标代码为中间态
    */
   parseToIntermediateState(code: string, filePath: string): IntermediateState {
-    const astInfo = this.astParser.parse(code, filePath);
-    return this.astToIntermediateState(astInfo, filePath);
+    // 使用基类的安全解析方法，这会自动挂载 AST 数据和源码
+    return this.safeParseToIntermediateState(code, filePath);
   }
 
   /**

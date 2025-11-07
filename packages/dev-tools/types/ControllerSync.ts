@@ -15,7 +15,7 @@ export interface ControllerSyncStatus {
     changedMethods: number;
     addedMethods: number;
     removedMethods: number;
-    signatureChanges: number;
+    returnTypeChanges: number;
     parameterChanges: number;
     decoratorChanges: number;
   };

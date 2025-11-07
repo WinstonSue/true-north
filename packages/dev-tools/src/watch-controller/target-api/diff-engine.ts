@@ -57,7 +57,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
             changedMethods: 0,
             addedMethods: 0,
             removedMethods: 0,
-            signatureChanges: 0,
+            returnTypeChanges: 0,
             parameterChanges: 0,
             decoratorChanges: 0,
           },
@@ -106,7 +106,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
         });
       } else {
         // 方法存在，检查是否有变化
-        const changeType = detectMethodChangeType(sourceMethod, targetMethod, { ignore: ['decorators'] });
+        const changeType = detectMethodChangeType(sourceMethod, targetMethod, { ignore: ['decorators', 'returnType'] });
         if (changeType !== 'method_no_change') {
           changes.push({
             methodName,
