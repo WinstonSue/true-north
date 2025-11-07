@@ -3,27 +3,17 @@
  * 提供通用的差异比对逻辑，子类可以重写特定的比较方法
  */
 
-import { IntermediateState } from '../intermediate-state';
-import { SourceAdapter, TargetAdapter } from '../adapters';
+import { IntermediateState } from '../intermediate-state/types';
+import { SourceIntermediateParser } from '../intermediate-state';
 import { readFileSync } from 'fs';
 import { MethodChange, DiffResult, CommonChange } from '../../../../types';
 
 export abstract class DiffEngine {
-  sourceAdapter: SourceAdapter;
-  targetAdapter!: TargetAdapter;
+  sourceAdapter: SourceIntermediateParser;
+  diffResult?: DiffResult;
 
-  constructor() {
-    this.sourceAdapter = new SourceAdapter();
-  }
-
-  /**
-   * 获取控制器的详细信息
-   */
-  async getDiffResultDetail(pair: { sourcePath: string; targetPath: string }): Promise<DiffResult> {
-    const sourceState = this.getSourceIntermediateState(pair.sourcePath);
-    const targetState = this.getTargetIntermediateState(pair.targetPath);
-
-    return this.compareIntermediateState(sourceState, targetState);
+  constructor(filePath: string) {
+    this.sourceAdapter = new SourceIntermediateParser(filePath);
   }
 
   /**
@@ -37,7 +27,7 @@ export abstract class DiffEngine {
   /**
    * 比较两个中间态，生成差异报告，子类必须实现
    */
-  abstract compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult;
+  abstract compareIntermediateState(): void;
 
   /**
    * 比较构造函数 - 子类可以重写
@@ -87,33 +77,8 @@ export abstract class DiffEngine {
     return null;
   }
 
-  /**
-   * 生成详细统计摘要 - 通用实现
-   */
-  generateDiffResultSummary(methodChanges: MethodChange[]) {
-    const returnTypeChanges = methodChanges.filter((c) => c.changeType === 'method_return_type_changed').length;
-    const parameterChanges = methodChanges.filter((c) => c.changeType === 'method_parameters_changed').length;
-    const decoratorChanges = methodChanges.filter((c) => c.changeType === 'method_decorators_changed').length;
-
-    return {
-      totalMethods: methodChanges.length,
-      changedMethods: methodChanges.filter((c) => c.changeType !== 'method_added' && c.changeType !== 'method_removed')
-        .length,
-      addedMethods: methodChanges.filter((c) => c.changeType === 'method_added').length,
-      removedMethods: methodChanges.filter((c) => c.changeType === 'method_removed').length,
-      returnTypeChanges,
-      parameterChanges,
-      decoratorChanges,
-    };
-  }
-
   getSourceIntermediateState(sourcePath: string): IntermediateState {
     const sourceCode = readFileSync(sourcePath, 'utf-8');
     return this.sourceAdapter.parseToIntermediateState(sourceCode, sourcePath);
-  }
-
-  getTargetIntermediateState(targetPath: string): IntermediateState {
-    const targetCode = readFileSync(targetPath, 'utf-8');
-    return this.targetAdapter.parseToIntermediateState(targetCode, targetPath);
   }
 }

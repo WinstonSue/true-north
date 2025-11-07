@@ -4,85 +4,74 @@
  */
 
 import { ControllerProxyDiffEngine } from './diff-engine';
-import { ControllerProxyCodeGenerator } from './code-generator';
+import { TargetProxyComposer } from './target-composer';
 import { readFileSync, writeFileSync } from 'fs';
 import { generateSyncActions, SyncOptions, SyncResult } from '../core/sync-engine';
-import { ErrorHandler, Logger } from '../helpers';
+import { ErrorHandler } from '../helpers';
+import { findAllControllerPairs } from './helpers';
+import { ControllerSyncStatus } from '../../../types';
 
 export class ControllerProxySyncEngine {
-  private codeGenerator: ControllerProxyCodeGenerator;
-  diffEngine: ControllerProxyDiffEngine;
-  private logger = Logger.createContextLogger('ProxySyncEngine');
-
-  constructor() {
-    this.diffEngine = new ControllerProxyDiffEngine();
-    this.codeGenerator = new ControllerProxyCodeGenerator();
-  }
-
   /**
    * 同步单个控制器 - 通用实现
    */
   async syncController(sourcePath: string, targetPath: string, options: SyncOptions = {}): Promise<SyncResult> {
     try {
+      const diffEngine = new ControllerProxyDiffEngine(sourcePath, targetPath);
+
       // 1. 读取源码
       const targetCode = readFileSync(targetPath, 'utf-8');
 
-      if (options.verbose) {
-        this.logger.info('读取源码文件', { server: sourcePath, target: targetPath });
-      }
+      // 2. 比对差异
+      const diff = diffEngine.compareIntermediateState();
 
-      // 2. 解析为中间态
-      const sourceState = this.diffEngine.getSourceIntermediateState(sourcePath);
-      const targetState = this.diffEngine.getTargetIntermediateState(targetPath);
-
-      if (options.verbose) {
-        this.logger.info('解析完成', {
-          sourceMethods: sourceState.methods.size,
-          targetMethods: targetState.methods.size,
-        });
-      }
-
-      // 3. 比对差异
-      const diff = this.diffEngine.compareIntermediateState(sourceState, targetState);
-
-      if (options.verbose) {
-        this.logger.info('差异比对完成', {
-          changeCount: diff.changes.length,
-          needsSync: diff.needsSync,
-        });
-      }
-
-      // 4. 生成同步操作
-      const actions = generateSyncActions(diff, sourceState);
+      // 3. 生成同步操作
+      const actions = generateSyncActions(diff, diffEngine.sourceAdapter.intermediateState);
 
       // 5. 执行同步（如果不是干运行模式）
       if (!options.dryRun && diff.needsSync) {
-        const newCode = this.codeGenerator.applySyncActions(targetCode, actions, targetState, sourceState);
+        const targetComposer = new TargetProxyComposer(
+          diffEngine.sourceAdapter.intermediateState,
+          diffEngine.targetAdapter.intermediateState
+        );
+        const newCode = targetComposer.applySyncActions(targetCode, actions);
         writeFileSync(targetPath, newCode, 'utf-8');
-
-        if (options.verbose) {
-          this.logger.info('同步完成', { targetPath });
-        }
       }
 
       return {
         success: true,
-        controllerName: sourceState.metadata.className,
+        controllerName: diffEngine.sourceAdapter.intermediateState.metadata.className,
         diff,
         actions,
         details: options.verbose ? `处理了 ${actions.length} 个操作` : undefined,
       };
     } catch (error) {
       const errorResult = ErrorHandler.handleSyncError(error, 'syncController');
-      this.logger.error('同步失败', errorResult.error);
       return {
         success: false,
         controllerName: 'Unknown',
-        diff: { controllerName: 'Unknown', changes: [], methodChanges: [], needsSync: false },
+        diff: { className: 'Unknown', changes: [], methodChanges: [], needsSync: false },
         actions: [],
         error: errorResult.error,
       };
     }
+  }
+
+  /**
+   * 检查所有控制器的同步状态
+   */
+  async checkAllDiffResults(): Promise<ControllerSyncStatus[]> {
+    const pairs = findAllControllerPairs();
+    const results: ControllerSyncStatus[] = [];
+
+    for (const pair of pairs) {
+      const diffEngine = new ControllerProxyDiffEngine(pair.sourcePath, pair.targetPath);
+      diffEngine.compareIntermediateState();
+
+      results.push(diffEngine.getSummary(pair));
+    }
+
+    return results;
   }
 }
 

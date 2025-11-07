@@ -3,85 +3,75 @@
  * 专门处理 Server Controller 到 API Controller 的差异比对
  */
 
-import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state/types';
 import { DiffEngine, detectMethodChangeType, generateChangeDetails } from '../core/diff-engine';
-import { findAllControllerPairs } from './helpers';
-import { TargetApiAdapter } from './target-adapter';
-import { MethodChange, MethodInfo, DiffResult, ControllerSyncStatus } from '../../../types';
+import { TargetApiParser } from './target-parser';
+import { MethodChange, MethodInfo, ControllerSyncStatus } from '../../../types';
+import { generateDiffResultSummary } from '../core/diff-engine';
 
 export class ControllerApiDiffEngine extends DiffEngine {
-  targetAdapter: TargetApiAdapter;
+  targetAdapter: TargetApiParser;
 
-  constructor() {
-    super();
-    this.targetAdapter = new TargetApiAdapter();
-  }
-
-  /**
-   * 检查所有控制器的同步状态
-   */
-  async checkAllDiffResults(): Promise<ControllerSyncStatus[]> {
-    const pairs = findAllControllerPairs();
-    const results: ControllerSyncStatus[] = [];
-
-    for (const pair of pairs) {
-      try {
-        const diffResultDetail = await this.getDiffResultDetail(pair);
-
-        // 生成详细的统计信息
-        const summary = this.generateDiffResultSummary(diffResultDetail.methodChanges);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: diffResultDetail.methodChanges.length + diffResultDetail.changes.length > 0,
-          changeCount: diffResultDetail.methodChanges.length + diffResultDetail.changes.length,
-          changes: diffResultDetail.changes,
-          methodChanges: diffResultDetail.methodChanges,
-          summary,
-          lastChecked: new Date().toISOString(),
-          error: undefined,
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: false,
-          changeCount: 0,
-          changes: [],
-          methodChanges: [],
-          summary: {
-            totalMethods: 0,
-            changedMethods: 0,
-            addedMethods: 0,
-            removedMethods: 0,
-            returnTypeChanges: 0,
-            parameterChanges: 0,
-            decoratorChanges: 0,
-          },
-          lastChecked: new Date().toISOString(),
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return results;
+  constructor(sourcePath: string, targetPath: string) {
+    super(sourcePath);
+    this.targetAdapter = new TargetApiParser(targetPath);
   }
 
   /**
    * API 控制器只比较方法，不比较构造函数和导入
    */
-  compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult {
-    const methodChanges = this.generateMethodChanges(source, target);
+  compareIntermediateState() {
+    const sourceState = this.sourceAdapter.intermediateState;
+    const targetState = this.targetAdapter.intermediateState;
+    const methodChanges = this.generateMethodChanges(sourceState, targetState);
 
-    return {
-      className: source.metadata.className,
+    this.diffResult = {
+      className: sourceState.metadata.className,
       changes: [],
       methodChanges,
       needsSync: methodChanges.length > 0,
     };
+  }
+
+  getSummary(pair: { className: string; sourcePath: string; targetPath: string }): ControllerSyncStatus {
+    try {
+      // 生成详细的统计信息
+      const summary = generateDiffResultSummary(this.diffResult!.methodChanges);
+
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: this.diffResult!.methodChanges.length + this.diffResult!.changes.length > 0,
+        changeCount: this.diffResult!.methodChanges.length + this.diffResult!.changes.length,
+        changes: this.diffResult!.changes,
+        methodChanges: this.diffResult!.methodChanges,
+        summary,
+        lastChecked: new Date().toISOString(),
+        error: undefined,
+      };
+    } catch (error) {
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: false,
+        changeCount: 0,
+        changes: [],
+        methodChanges: [],
+        summary: {
+          totalMethods: 0,
+          changedMethods: 0,
+          addedMethods: 0,
+          removedMethods: 0,
+          returnTypeChanges: 0,
+          parameterChanges: 0,
+          decoratorChanges: 0,
+        },
+        lastChecked: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   }
 
   /**

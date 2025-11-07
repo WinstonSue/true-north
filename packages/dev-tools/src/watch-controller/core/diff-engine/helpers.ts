@@ -1,5 +1,5 @@
 import { MethodDefinition } from '../intermediate-state';
-import { MethodChangeType } from '../../../../types';
+import { MethodChangeType, MethodChange } from '../../../../types';
 import { isEqual } from 'lodash-es';
 
 /**
@@ -97,4 +97,24 @@ export function generateChangeDetails(
     default:
       return 'Method changed';
   }
+}
+
+/**
+ * 生成详细统计摘要 - 通用实现
+ */
+export function generateDiffResultSummary(methodChanges: MethodChange[]) {
+  const returnTypeChanges = methodChanges.filter((c) => c.changeType === 'method_return_type_changed').length;
+  const parameterChanges = methodChanges.filter((c) => c.changeType === 'method_parameters_changed').length;
+  const decoratorChanges = methodChanges.filter((c) => c.changeType === 'method_decorators_changed').length;
+
+  return {
+    totalMethods: methodChanges.length,
+    changedMethods: methodChanges.filter((c) => c.changeType !== 'method_added' && c.changeType !== 'method_removed')
+      .length,
+    addedMethods: methodChanges.filter((c) => c.changeType === 'method_added').length,
+    removedMethods: methodChanges.filter((c) => c.changeType === 'method_removed').length,
+    returnTypeChanges,
+    parameterChanges,
+    decoratorChanges,
+  };
 }

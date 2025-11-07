@@ -3,23 +3,25 @@
  * 专注于根据 Server Controller 生成对应的 Web Service 方法
  */
 
-import { IntermediateState, MethodDefinition } from '../core/intermediate-state';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state/types';
 import { SyncAction } from '../core/sync-engine';
 
-export class ControllerWebServiceCodeGenerator {
+export class TargetWebServiceComposer {
+  targetState: IntermediateState;
+  sourceState: IntermediateState;
+
+  constructor(targetState: IntermediateState, sourceState: IntermediateState) {
+    this.targetState = targetState;
+    this.sourceState = sourceState;
+  }
   /**
    * 应用同步操作到目标代码
    */
-  applySyncActions(
-    targetCode: string,
-    _actions: SyncAction[],
-    targetState: IntermediateState,
-    sourceState: IntermediateState
-  ): string {
+  applySyncActions(targetCode: string, _actions: SyncAction[]): string {
     let updatedCode = targetCode;
 
     // 重新生成整个类体，保持源码方法顺序
-    updatedCode = this.regenerateClassBody(updatedCode, sourceState, targetState);
+    updatedCode = this.regenerateClassBody(updatedCode, this.sourceState, this.targetState);
 
     return updatedCode;
   }
@@ -69,35 +71,35 @@ export class ControllerWebServiceCodeGenerator {
     // 生成 JSDoc 注释
     lines.push('  /**');
     lines.push(`   * ${method.decoratorOptions?.description || method.name}`);
-    
+
     // 生成参数注释
     for (const param of method.parameters) {
       const paramDesc = this.getParameterDescription(param);
       lines.push(`   * @param ${param.name} ${paramDesc}`);
     }
-    
+
     lines.push(`   * @returns 操作结果`);
     lines.push('   */');
 
     // 生成方法签名
     const params = this.generateMethodParameters(method);
-    
+
     lines.push(`  static async ${method.name}(${params}) {`);
 
     // 生成方法体
     lines.push('    try {');
-    
+
     // 生成 Controller 调用
     const controllerCall = this.generateControllerCall(method, serviceClassName);
     lines.push(`      ${controllerCall}`);
-    
+
     // 生成成功消息（如果需要）
     if (this.needsSuccessMessage(method)) {
       lines.push('      if (!options.silent) {');
       lines.push(`        Message.success('${this.getSuccessMessage(method)}');`);
       lines.push('      }');
     }
-    
+
     lines.push('      return res;');
     lines.push('    } catch (error: unknown) {');
     lines.push('      Message.error(error);');
@@ -112,7 +114,7 @@ export class ControllerWebServiceCodeGenerator {
    */
   private generateMethodParameters(method: MethodDefinition): string {
     const params: string[] = [];
-    
+
     for (const param of method.parameters) {
       if (param.decorator === 'Param') {
         // Path 参数
@@ -142,13 +144,13 @@ export class ControllerWebServiceCodeGenerator {
   private generateControllerCall(method: MethodDefinition, serviceClassName: string): string {
     const controllerName = serviceClassName.replace('Service', 'Controller');
     const callParams: string[] = [];
-    
+
     for (const param of method.parameters) {
       callParams.push(param.name);
     }
-    
+
     const callParamsStr = callParams.join(', ');
-    
+
     if (method.returnType.includes('boolean') || method.verb === 'Delete') {
       return `const res = await ${controllerName}.${method.name}(${callParamsStr});`;
     } else {
@@ -162,7 +164,7 @@ export class ControllerWebServiceCodeGenerator {
   private convertDtoTypeToVoType(dtoType: string): string {
     // 移除泛型参数
     const baseType = dtoType.replace(/<.*>/, '');
-    
+
     // 转换常见的 DTO 类型
     if (baseType.includes('FilterDto')) {
       return baseType.replace('FilterDto', 'FilterVo');
@@ -175,10 +177,9 @@ export class ControllerWebServiceCodeGenerator {
     } else if (baseType.includes('Dto')) {
       return baseType.replace('Dto', 'Vo');
     }
-    
+
     return dtoType;
   }
-
 
   /**
    * 获取参数描述

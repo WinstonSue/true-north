@@ -3,29 +3,31 @@
  * 专注于目标代码控制器的代码同步
  */
 
-import { IntermediateState, MethodDefinition, ConstructorDefinition } from '../core/intermediate-state';
+import { IntermediateState, MethodDefinition, ConstructorDefinition } from '../core/intermediate-state/types';
 import { SyncAction } from '../core/sync-engine';
 
-export class ControllerProxyCodeGenerator {
+export class TargetProxyComposer {
+  targetState: IntermediateState;
+  sourceState: IntermediateState;
+
+  constructor(targetState: IntermediateState, sourceState: IntermediateState) {
+    this.targetState = targetState;
+    this.sourceState = sourceState;
+  }
   /**
    * 应用同步操作到目标代码
    */
-  applySyncActions(
-    targetCode: string,
-    actions: SyncAction[],
-    targetState: IntermediateState,
-    sourceState: IntermediateState
-  ): string {
+  applySyncActions(targetCode: string, actions: SyncAction[]): string {
     let updatedCode = targetCode;
 
     // 先处理构造函数更新
     const constructorActions = actions.filter((a) => a.type === 'update_constructor');
     for (const action of constructorActions) {
-      updatedCode = this.updateConstructor(updatedCode, action.data as ConstructorDefinition, targetState);
+      updatedCode = this.updateConstructor(updatedCode, action.data as ConstructorDefinition, this.targetState);
     }
 
     // 然后重新生成整个类体，保持源码方法顺序
-    updatedCode = this.regenerateClassBody(updatedCode, sourceState, targetState);
+    updatedCode = this.regenerateClassBody(updatedCode, this.sourceState, this.targetState);
 
     return updatedCode;
   }

@@ -4,22 +4,27 @@
  */
 
 import { ASTParser } from '../ast/ast-parser';
-import { IntermediateState } from '../intermediate-state';
+import { IntermediateState } from './types';
 import { ASTClassInfo } from '../ast/ast-types';
-import { ErrorHandler, Logger, ObjectParser, ValidationUtils } from '../../helpers';
+import { ErrorHandler, Logger, ValidationUtils } from '../../helpers';
+import { readFileSync } from 'fs';
 
-export abstract class BaseAdapter {
+export abstract class BaseParser {
   protected astParser: ASTParser;
   protected logger = Logger.createContextLogger(this.constructor.name);
+  protected filePath: string;
+  intermediateState: IntermediateState;
 
-  constructor() {
+  constructor(filePath: string) {
     this.astParser = new ASTParser();
+    this.filePath = filePath;
+    this.intermediateState = this.parseToIntermediateState(readFileSync(filePath, 'utf-8'), filePath);
   }
 
   /**
    * 安全解析代码为中间态
    */
-  protected safeParseToIntermediateState(code: string, filePath: string): IntermediateState {
+  parseToIntermediateState(code: string, filePath: string): IntermediateState {
     // 输入验证
     const validationResult = ValidationUtils.validateInput(code, filePath);
     if (!ErrorHandler.isSuccess(validationResult)) {
@@ -30,28 +35,16 @@ export abstract class BaseAdapter {
     try {
       const astInfo = this.astParser.parse(code, filePath);
       const intermediateState = this.astToIntermediateState(astInfo, filePath);
-      
+
       // 挂载 AST 数据和源码，用于后续恢复
       intermediateState.astData = astInfo;
       intermediateState.code = code;
-      
+
       return intermediateState;
     } catch (error) {
       const errorResult = ErrorHandler.handleASTError(error, filePath);
       this.logger.error('AST 解析失败', errorResult.error);
       throw new Error(errorResult.error);
-    }
-  }
-
-  /**
-   * 安全解析对象字面量
-   */
-  protected safeParseObjectLiteral(text: string): Record<string, any> {
-    try {
-      return ObjectParser.parseObjectLiteral(text);
-    } catch (error) {
-      this.logger.warn('对象解析失败', { text, error });
-      return {};
     }
   }
 

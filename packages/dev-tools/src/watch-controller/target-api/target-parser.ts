@@ -1,4 +1,12 @@
 import {
+  ASTClassInfo,
+  ASTMethod,
+  ASTParameter,
+  ASTConstructor,
+  ASTImport,
+  ASTSourceLocation,
+} from '../core/ast';
+import {
   IntermediateState,
   MethodDefinition,
   ControllerMetadata,
@@ -6,28 +14,12 @@ import {
   ImportDeclaration,
   ParameterDefinition,
   SourceLocation,
+  BaseParser,
 } from '../core/intermediate-state';
-import {
-  ASTClassInfo,
-  ASTMethod,
-  ASTParameter,
-  ASTConstructor,
-  ASTImport,
-  ASTSourceLocation,
-} from '../core/ast/ast-types';
-import { TargetAdapter } from '../core/adapters/target-adapter';
 
-export class TargetApiAdapter extends TargetAdapter {
-  constructor() {
-    super();
-  }
-
-  /**
-   * 解析目标代码为中间态
-   */
-  parseToIntermediateState(code: string, filePath: string): IntermediateState {
-    // 使用基类的安全解析方法，这会自动挂载 AST 数据和源码
-    return this.safeParseToIntermediateState(code, filePath);
+export class TargetApiParser extends BaseParser {
+  constructor(filePath: string) {
+    super(filePath);
   }
 
   /**
@@ -45,6 +37,7 @@ export class TargetApiAdapter extends TargetAdapter {
       methods,
       constructor,
       imports,
+      astData: astInfo,
     };
   }
 
@@ -55,7 +48,6 @@ export class TargetApiAdapter extends TargetAdapter {
     return {
       className: astInfo.className,
       basePath: '',
-      sourceType: 'target',
       filePath,
     };
   }

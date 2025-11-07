@@ -6,7 +6,7 @@ import {
   ImportDeclaration,
   ParameterDefinition,
   SourceLocation,
-} from '../intermediate-state';
+} from '../core/intermediate-state/types';
 import {
   ASTClassInfo,
   ASTMethod,
@@ -15,23 +15,18 @@ import {
   ASTConstructor,
   ASTImport,
   ASTSourceLocation,
-} from '../ast/ast-types';
-import { BaseAdapter } from './base-adapter';
+} from '../core/ast';
+import { BaseParser } from '../core/intermediate-state';
+import { ObjectParser } from '../helpers';
 
-export class SourceAdapter extends BaseAdapter {
-  constructor() {
-    super();
-  }
-  /**
-   * 解析源码为中间态
-   */
-  parseToIntermediateState(code: string, filePath: string): IntermediateState {
-    return this.safeParseToIntermediateState(code, filePath);
+export class TargetProxyParser extends BaseParser {
+  constructor(filePath: string) {
+    super(filePath);
   }
 
   /**
    * 将 AST 结构转换为中间态
-   * 包含 Source 代码的业务转换规则
+   * 包含 Target 代码的业务转换规则
    */
   astToIntermediateState(astInfo: ASTClassInfo, filePath: string): IntermediateState {
     const metadata = this.parseControllerMetadata(astInfo, filePath);
@@ -44,17 +39,19 @@ export class SourceAdapter extends BaseAdapter {
       methods,
       constructor,
       imports,
+      astData: astInfo,
     };
   }
 
   /**
-   * 解析控制器元数据 - Source 业务规则
+   * 解析控制器元数据 - Target 业务规则
    */
   private parseControllerMetadata(astInfo: ASTClassInfo, filePath: string): ControllerMetadata {
     const className = astInfo.className;
     let basePath = '';
 
-    // 解析 @Controller 装饰器的路径参数 - Source 特定逻辑
+    // Target 代码通常没有 @Controller 装饰器，或者有不同的处理逻辑
+    // 这里可以根据 Target 代码的特点进行定制化处理
     const controllerDecorator = astInfo.decorators.find((d) => d.name === 'Controller');
     if (controllerDecorator && controllerDecorator.arguments.length > 0) {
       const pathArg = controllerDecorator.arguments[0];
@@ -66,13 +63,12 @@ export class SourceAdapter extends BaseAdapter {
     return {
       className,
       basePath,
-      sourceType: 'source',
       filePath,
     };
   }
 
   /**
-   * 解析方法定义 - Source 业务规则
+   * 解析方法定义 - Target 业务规则
    */
   private parseMethods(astMethods: ASTMethod[]): Map<string, MethodDefinition> {
     const methods = new Map<string, MethodDefinition>();
@@ -88,17 +84,24 @@ export class SourceAdapter extends BaseAdapter {
   }
 
   /**
-   * 解析单个方法 - Source 业务规则
+   * 解析单个方法 - Target 业务规则
+   * Target 代码可能没有 HTTP 装饰器，需要不同的识别逻辑
    */
   private parseMethod(astMethod: ASTMethod): MethodDefinition | null {
     const name = astMethod.name;
     const decorators = astMethod.decorators;
 
-    // 查找 HTTP 动词装饰器 - Source 特定逻辑
+    // Target 代码的方法识别逻辑可能不同
+    // 例如：可能通过方法名模式识别，或者有不同的装饰器
     const httpDecorator = decorators.find((d) => ['Get', 'Post', 'Put', 'Delete', 'Patch'].includes(d.name));
 
+    // 如果没有 HTTP 装饰器，可能需要其他识别逻辑
+    // 这里先保持和 Source 一样的逻辑，但可以根据需要定制
     if (!httpDecorator) {
-      return null; // 不是 HTTP 方法
+      // Target 代码可能有不同的方法识别规则
+      // 例如：所有 public 方法都被认为是 API 方法
+      // 这里可以根据实际需求进行调整
+      return null;
     }
 
     const verb = httpDecorator.name as 'Get' | 'Post' | 'Put' | 'Delete' | 'Patch';
@@ -121,7 +124,7 @@ export class SourceAdapter extends BaseAdapter {
   }
 
   /**
-   * 解析 HTTP 装饰器 - Source 业务规则
+   * 解析 HTTP 装饰器 - Target 业务规则
    */
   private parseHttpDecorator(decorator: ASTDecorator): { path?: string; decoratorOptions?: Record<string, any> } {
     const args = decorator.arguments;
@@ -139,7 +142,7 @@ export class SourceAdapter extends BaseAdapter {
       const secondArg = args[1];
       if (secondArg.type === 'object') {
         try {
-          decoratorOptions = this.parseObjectLiteral(secondArg.rawText);
+          decoratorOptions = ObjectParser.parseObjectLiteral(secondArg.rawText);
         } catch (e) {
           // 解析失败，忽略
         }
@@ -150,7 +153,7 @@ export class SourceAdapter extends BaseAdapter {
   }
 
   /**
-   * 解析方法参数 - Source 业务规则
+   * 解析方法参数 - Target 业务规则
    */
   private parseParameters(astParameters: ASTParameter[]): ParameterDefinition[] {
     return astParameters.map((param) => {
@@ -158,7 +161,7 @@ export class SourceAdapter extends BaseAdapter {
       const type = param.type;
       const optional = param.optional;
 
-      // 解析参数装饰器 - Source 特定逻辑
+      // Target 代码的参数装饰器可能有不同的处理逻辑
       let decorator: 'Param' | 'Query' | 'Body' = 'Body';
       let decoratorArgs: string[] = [];
 
@@ -185,13 +188,14 @@ export class SourceAdapter extends BaseAdapter {
   }
 
   /**
-   * 解析构造函数 - Source 业务规则
+   * 解析构造函数 - Target 业务规则
    */
   private parseConstructor(astConstructor?: ASTConstructor): ConstructorDefinition {
     if (!astConstructor) {
       return { parameters: [] };
     }
 
+    // Target 代码的构造函数可能有不同的处理逻辑
     const parameters = astConstructor.parameters.map((param) => ({
       name: param.name,
       type: param.type,
@@ -202,7 +206,7 @@ export class SourceAdapter extends BaseAdapter {
   }
 
   /**
-   * 解析导入声明 - Source 业务规则
+   * 解析导入声明 - Target 业务规则
    */
   private parseImports(astImports: ASTImport[]): ImportDeclaration[] {
     return astImports.map((astImport) => ({
@@ -222,12 +226,5 @@ export class SourceAdapter extends BaseAdapter {
       endLine: astLocation.endLine,
       endColumn: astLocation.endColumn,
     };
-  }
-
-  /**
-   * 解析对象字面量
-   */
-  private parseObjectLiteral(text: string): Record<string, any> {
-    return this.safeParseObjectLiteral(text);
   }
 }

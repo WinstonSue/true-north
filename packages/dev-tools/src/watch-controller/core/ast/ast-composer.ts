@@ -3,10 +3,10 @@
  * 基于中间态中挂载的 AST 数据进行代码恢复
  */
 
-import { IntermediateState } from '../intermediate-state';
+import { IntermediateState } from '../intermediate-state/types';
 import { ASTClassInfo } from './ast-types';
 
-export interface CodeRecoveryOptions {
+export interface ASTComposerOptions {
   /** 是否保留原始格式 */
   preserveFormatting?: boolean;
   /** 是否保留注释 */
@@ -21,8 +21,8 @@ export interface CodeRecoveryOptions {
  * 代码恢复器
  * 从中间态的 AST 数据恢复源代码
  */
-export class CodeRecovery {
-  private defaultOptions: Required<CodeRecoveryOptions> = {
+export class ASTComposer {
+  private defaultOptions: Required<ASTComposerOptions> = {
     preserveFormatting: true,
     preserveComments: true,
     indentChar: ' ',
@@ -30,57 +30,15 @@ export class CodeRecovery {
   };
 
   /**
-   * 从中间态恢复源代码
-   */
-  recoverFromIntermediateState(
-    intermediateState: IntermediateState,
-    options?: CodeRecoveryOptions
-  ): string {
-    const opts = { ...this.defaultOptions, ...options };
-
-    // 优先使用原始源码
-    if (opts.preserveFormatting && intermediateState.code) {
-      return intermediateState.code;
-    }
-
-    // 从 AST 数据重新生成代码
-    if (intermediateState.astData) {
-      return this.recoverFromAST(intermediateState.astData, opts);
-    }
-
-    throw new Error('中间态缺少 AST 数据或源码，无法恢复');
-  }
-
-  /**
-   * 从 AST 数据恢复源代码
-   */
-  recoverFromAST(
-    astData: ASTClassInfo,
-    options?: CodeRecoveryOptions
-  ): string {
-    const opts = { ...this.defaultOptions, ...options };
-
-    // 如果保留格式且有原始源文件，直接返回原始文本
-    if (opts.preserveFormatting && astData.sourceFile) {
-      return astData.sourceFile.getFullText();
-    }
-
-    // 重新生成代码
-    return this.generateCodeFromAST(astData, opts);
-  }
-
-  /**
    * 从 AST 生成代码
    */
-  private generateCodeFromAST(
-    astData: ASTClassInfo,
-    options: Required<CodeRecoveryOptions>
-  ): string {
+  generateCodeFromAST(astData: ASTClassInfo, options?: ASTComposerOptions): string {
+    const opts = { ...this.defaultOptions, ...options };
     const lines: string[] = [];
-    const indent = options.indentChar.repeat(options.indentSize);
+    const indent = opts.indentChar.repeat(opts.indentSize);
 
     // 生成导入语句
-    astData.imports.forEach(importDecl => {
+    astData.imports.forEach((importDecl) => {
       lines.push(this.generateImportStatement(importDecl));
     });
 
@@ -89,10 +47,8 @@ export class CodeRecovery {
     }
 
     // 生成类声明开始
-    const classDecorators = astData.decorators
-      .map(d => this.generateDecorator(d))
-      .join('\n');
-    
+    const classDecorators = astData.decorators.map((d) => this.generateDecorator(d)).join('\n');
+
     if (classDecorators) {
       lines.push(classDecorators);
     }
@@ -106,7 +62,7 @@ export class CodeRecovery {
     }
 
     // 生成方法
-    astData.methods.forEach(method => {
+    astData.methods.forEach((method) => {
       lines.push('');
       lines.push(indent + this.generateMethod(method, indent));
     });
@@ -135,7 +91,7 @@ export class CodeRecovery {
     // named imports
     const namedImports = specifiers
       .filter((s: any) => s.imported !== 'default' && s.imported !== '*')
-      .map((s: any) => s.imported === s.local ? s.imported : `${s.imported} as ${s.local}`)
+      .map((s: any) => (s.imported === s.local ? s.imported : `${s.imported} as ${s.local}`))
       .join(', ');
 
     return `import { ${namedImports} } from '${source}';`;
@@ -149,9 +105,7 @@ export class CodeRecovery {
       return `@${decorator.name}`;
     }
 
-    const args = decorator.arguments
-      .map((arg: any) => arg.rawText)
-      .join(', ');
+    const args = decorator.arguments.map((arg: any) => arg.rawText).join(', ');
 
     return `@${decorator.name}(${args})`;
   }
@@ -184,9 +138,7 @@ export class CodeRecovery {
     // 方法签名
     const params = method.parameters
       .map((p: any) => {
-        const decorators = p.decorators
-          .map((d: any) => this.generateDecorator(d))
-          .join(' ');
+        const decorators = p.decorators.map((d: any) => this.generateDecorator(d)).join(' ');
         const optional = p.optional ? '?' : '';
         return decorators ? `${decorators} ${p.name}${optional}: ${p.type}` : `${p.name}${optional}: ${p.type}`;
       })
@@ -263,13 +215,15 @@ export class CodeRecovery {
     return {
       id: `snapshot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: Date.now(),
-      data: JSON.parse(JSON.stringify(intermediateState, (_key, value) => {
-        // 处理 Map 类型的序列化
-        if (value instanceof Map) {
-          return Object.fromEntries(value);
-        }
-        return value;
-      })),
+      data: JSON.parse(
+        JSON.stringify(intermediateState, (_key, value) => {
+          // 处理 Map 类型的序列化
+          if (value instanceof Map) {
+            return Object.fromEntries(value);
+          }
+          return value;
+        })
+      ),
     };
   }
 }

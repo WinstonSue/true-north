@@ -159,7 +159,7 @@ app.get('/api/check/method-details', async (req, res) => {
     const engine = createProxySyncEngine();
 
     // 执行控制器状态检查（包含方法级别的详细信息）
-    const results = await engine.diffEngine.checkAllDiffResults();
+    const results = await engine.checkAllDiffResults();
 
     res.json({
       success: true,
@@ -300,7 +300,7 @@ app.get('/api/check/api-method-details', async (req, res) => {
   try {
     const engine = createApiSyncEngine();
 
-    const results = await engine.diffEngine.checkAllDiffResults();
+    const results = await engine.checkAllDiffResults();
 
     res.json({
       success: true,
@@ -325,7 +325,7 @@ app.get('/api/check/web-service-method-details', async (req, res) => {
   try {
     const engine = createWebServiceSyncEngine();
 
-    const results = await engine.diffEngine.checkAllDiffResults();
+    const results = await engine.checkAllDiffResults();
 
     if (results.length > 0) {
       console.log(

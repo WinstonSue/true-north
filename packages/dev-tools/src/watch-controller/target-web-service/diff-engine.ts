@@ -3,78 +3,27 @@
  * 专门处理 Server Controller 到 Web Service 的差异比对
  */
 
-import { MethodDefinition } from '../core/intermediate-state';
-import { CONTROLLER_SOURCE_PATH, CONTROLLER_WEB_SERVICE_TARGET_PATH } from '../../constants';
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
-import { DiffEngine } from '../core/diff-engine';
-import { TargetWebServiceAdapter } from './target-adapter';
+import { MethodDefinition } from '../core/intermediate-state/types';
+import { DiffEngine, generateDiffResultSummary } from '../core/diff-engine';
+import { TargetWebServiceParser } from './target-parser';
 import { MethodInfo, ControllerSyncStatus } from '../../../types';
 
 export class ControllerWebServiceDiffEngine extends DiffEngine {
-  constructor() {
-    super();
-    this.targetAdapter = new TargetWebServiceAdapter();
-  }
+  targetAdapter: TargetWebServiceParser;
 
-  /**
-   * 检查所有控制器的同步状态
-   */
-  async checkAllDiffResults(): Promise<ControllerSyncStatus[]> {
-    const pairs = this.findAllControllerPairs();
-    const results: ControllerSyncStatus[] = [];
-
-    for (const pair of pairs) {
-      try {
-        const diffResultDetail = await this.getDiffResultDetail(pair);
-
-        // 生成详细的统计信息
-        const summary = this.generateDiffResultSummary(diffResultDetail.methodChanges);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: diffResultDetail.methodChanges.length + diffResultDetail.changes.length > 0,
-          changeCount: diffResultDetail.methodChanges.length + diffResultDetail.changes.length,
-          changes: diffResultDetail.changes,
-          methodChanges: diffResultDetail.methodChanges,
-          summary,
-          lastChecked: new Date().toISOString(),
-          error: undefined,
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: false,
-          changeCount: 0,
-          changes: [],
-          methodChanges: [],
-          summary: {
-            totalMethods: 0,
-            changedMethods: 0,
-            addedMethods: 0,
-            removedMethods: 0,
-            returnTypeChanges: 0,
-            parameterChanges: 0,
-            decoratorChanges: 0,
-          },
-          lastChecked: new Date().toISOString(),
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return results;
+  constructor(sourcePath: string, targetPath: string) {
+    super(sourcePath);
+    this.targetAdapter = new TargetWebServiceParser(targetPath);
   }
 
   /**
    * 重写比较方法，只比较方法，不比较构造函数和导入
    * 使用 Web Service 专用的方法比较逻辑
    */
-  compareIntermediateState(sourceState: any, targetState: any) {
+  compareIntermediateState() {
+    const sourceState = this.sourceAdapter.intermediateState;
+    const targetState = this.targetAdapter.intermediateState;
+
     const result = {
       className: sourceState.metadata?.className || 'Unknown',
       needsSync: false,
@@ -88,6 +37,47 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
     result.needsSync = methodChanges.length > 0;
 
     return result;
+  }
+
+  getSummary(pair: { className: string; sourcePath: string; targetPath: string }): ControllerSyncStatus {
+    try {
+      // 生成详细的统计信息
+      const summary = generateDiffResultSummary(this.diffResult!.methodChanges);
+
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: this.diffResult!.methodChanges.length + this.diffResult!.changes.length > 0,
+        changeCount: this.diffResult!.methodChanges.length + this.diffResult!.changes.length,
+        changes: this.diffResult!.changes,
+        methodChanges: this.diffResult!.methodChanges,
+        summary,
+        lastChecked: new Date().toISOString(),
+        error: undefined,
+      };
+    } catch (error) {
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: false,
+        changeCount: 0,
+        changes: [],
+        methodChanges: [],
+        summary: {
+          totalMethods: 0,
+          changedMethods: 0,
+          addedMethods: 0,
+          removedMethods: 0,
+          returnTypeChanges: 0,
+          parameterChanges: 0,
+          decoratorChanges: 0,
+        },
+        lastChecked: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   }
 
   /**
@@ -136,76 +126,6 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
     }
 
     return changes;
-  }
-
-  /**
-   * 查找所有控制器对
-   */
-  protected findAllControllerPairs(): Array<{ sourcePath: string; targetPath: string; className: string }> {
-    const pairs: Array<{ sourcePath: string; targetPath: string; className: string }> = [];
-
-    try {
-      // 递归查找所有 .controller.ts 文件
-      const findControllerFiles = (dir: string, basePath: string): string[] => {
-        const files: string[] = [];
-        const items = readdirSync(dir);
-
-        for (const item of items) {
-          const fullPath = join(dir, item);
-          const stat = statSync(fullPath);
-
-          if (stat.isDirectory()) {
-            files.push(...findControllerFiles(fullPath, basePath));
-          } else if (item.endsWith('.controller.ts')) {
-            const relativePath = fullPath.replace(basePath, '').replace(/^\//, '');
-            files.push(relativePath);
-          }
-        }
-
-        return files;
-      };
-
-      const sourceFiles = findControllerFiles(CONTROLLER_SOURCE_PATH, CONTROLLER_SOURCE_PATH);
-
-      for (const sourceFile of sourceFiles) {
-        const sourcePath = join(CONTROLLER_SOURCE_PATH, sourceFile);
-
-        // 转换路径：growth/todo/todo.controller.ts -> growth/todo.service.ts
-        const pathParts = sourceFile.split('/');
-        if (pathParts.length >= 2) {
-          const module = pathParts[0]; // growth
-          const fileName = pathParts[pathParts.length - 1];
-          const serviceName = fileName.replace('.controller.ts', '.service.ts');
-          const targetPath = join(CONTROLLER_WEB_SERVICE_TARGET_PATH, module, serviceName);
-
-          const className = this.extractServiceClassNameFromPath(sourceFile);
-
-          pairs.push({
-            sourcePath,
-            targetPath,
-            className,
-          });
-        }
-      }
-    } catch (error) {
-      console.error('查找控制器文件时出错:', error);
-    }
-
-    return pairs;
-  }
-
-  /**
-   * 从文件路径提取 Service 类名
-   */
-  private extractServiceClassNameFromPath(relativePath: string): string {
-    const fileName = relativePath.split('/').pop() || '';
-    const baseName = fileName.replace('.controller.ts', '');
-    return (
-      baseName
-        .split(/[-_]/)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('') + 'Service'
-    );
   }
 
   /**

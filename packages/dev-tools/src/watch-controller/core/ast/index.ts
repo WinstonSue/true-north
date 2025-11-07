@@ -4,5 +4,4 @@
 
 export * from './ast-types';
 export * from './ast-parser';
-export * from './code-recovery';
-export * from './ast-code-generator';
+export * from './ast-composer';

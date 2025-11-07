@@ -3,7 +3,7 @@
  * 用于统一表示 Server 和 Desktop Controller 的结构
  */
 
-import { ASTClassInfo } from './ast/ast-types';
+import { ASTClassInfo } from '../ast/ast-types';
 
 export interface IntermediateState {
   /** 控制器元信息 */
@@ -15,7 +15,7 @@ export interface IntermediateState {
   /** 导入声明 */
   imports: ImportDeclaration[];
   /** AST 原始数据，用于代码恢复 */
-  astData?: ASTClassInfo;
+  astData: ASTClassInfo;
   /** 原始源码，用于快速恢复 */
   code?: string;
 }
@@ -27,8 +27,6 @@ export interface ControllerMetadata {
   basePath: string;
   /** 文件路径 */
   filePath: string;
-  /** 源码类型 */
-  sourceType: 'source' | 'target';
 }
 
 export interface MethodDefinition {

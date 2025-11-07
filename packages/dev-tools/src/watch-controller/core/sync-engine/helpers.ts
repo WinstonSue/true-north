@@ -1,4 +1,4 @@
-import { IntermediateState } from '../intermediate-state';
+import { IntermediateState } from '../intermediate-state/types';
 import { SyncAction } from './types';
 import { DiffResult } from '../../../../types';
 

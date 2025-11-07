@@ -1,12 +1,4 @@
 import {
-  IntermediateState,
-  MethodDefinition,
-  ConstructorDefinition,
-  ImportDeclaration,
-  ParameterDefinition,
-  SourceLocation,
-} from '../core/intermediate-state';
-import {
   ASTClassInfo,
   ASTMethod,
   ASTParameter,
@@ -14,15 +6,23 @@ import {
   ASTImport,
   ASTSourceLocation,
 } from '../core/ast/ast-types';
-import { TargetAdapter } from '../core/adapters/target-adapter';
+import {
+  IntermediateState,
+  MethodDefinition,
+  ConstructorDefinition,
+  ImportDeclaration,
+  ParameterDefinition,
+  SourceLocation,
+  BaseParser,
+} from '../core/intermediate-state';
 
 /**
  * Web Service 目标适配器
  * 将 Web Service 代码的 AST 转换为中间态
  */
-export class TargetWebServiceAdapter extends TargetAdapter {
-  constructor() {
-    super();
+export class TargetWebServiceParser extends BaseParser {
+  constructor(filePath: string) {
+    super(filePath);
   }
 
   /**
@@ -49,11 +49,11 @@ export class TargetWebServiceAdapter extends TargetAdapter {
         className,
         basePath: '',
         filePath,
-        sourceType: 'target' as const,
       },
       methods,
       constructor: this.convertASTConstructorToConstructorDefinition(astInfo.constructor),
       imports: this.convertASTImportsToImportDeclarations(astInfo.imports),
+      astData: astInfo,
     };
   }
 
@@ -84,7 +84,7 @@ export class TargetWebServiceAdapter extends TargetAdapter {
     return astParameters.map((param, index) => {
       // 根据参数位置和类型推断装饰器类型
       let decorator: 'Param' | 'Query' | 'Body' = 'Body';
-      
+
       if (index === 0 && param.type === 'string') {
         // 第一个参数且类型为 string，通常是路径参数
         decorator = 'Param';
@@ -112,12 +112,16 @@ export class TargetWebServiceAdapter extends TargetAdapter {
     }
 
     return {
-      parameters: astConstructor.parameters.map(param => ({
+      parameters: astConstructor.parameters.map((param) => ({
         name: param.name,
         type: param.type,
-        modifier: param.modifiers.includes('private') ? 'private' : 
-                 param.modifiers.includes('protected') ? 'protected' :
-                 param.modifiers.includes('public') ? 'public' : undefined,
+        modifier: param.modifiers.includes('private')
+          ? 'private'
+          : param.modifiers.includes('protected')
+            ? 'protected'
+            : param.modifiers.includes('public')
+              ? 'public'
+              : undefined,
       })),
     };
   }
@@ -126,8 +130,8 @@ export class TargetWebServiceAdapter extends TargetAdapter {
    * 转换 AST 导入为导入声明
    */
   private convertASTImportsToImportDeclarations(astImports: ASTImport[]): ImportDeclaration[] {
-    return astImports.map(astImport => ({
-      specifiers: astImport.specifiers.map(spec => ({
+    return astImports.map((astImport) => ({
+      specifiers: astImport.specifiers.map((spec) => ({
         imported: spec.imported,
         local: spec.local,
       })),

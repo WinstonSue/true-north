@@ -1,13 +1,12 @@
 /**
- * 基于 AST 的代码生成器
- * 根据 diff 结果调整 AST，然后生成完整代码
+ * API 控制器代码生成器
+ * 专门处理 API Controller 的代码生成和同步
+ * 现在基于 AST 操作而非字符串操作
  */
 
-import { ASTClassInfo, ASTMethod } from './ast-types';
-import { ASTParser } from './ast-parser';
-import { IntermediateState, MethodDefinition } from '../intermediate-state';
-import { SyncAction } from '../sync-engine/types';
-import { CodeRecovery } from './code-recovery';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state/types';
+import { SyncAction } from '../core/sync-engine';
+import { ASTClassInfo, ASTMethod, ASTComposer } from '../core/ast';
 
 export interface ASTModificationResult {
   /** 修改后的 AST */
@@ -20,17 +19,32 @@ export interface ASTModificationResult {
   errors: string[];
 }
 
-/**
- * 基于 AST 的代码生成器
- * 通过修改 AST 结构然后生成代码，而不是直接操作字符串
- */
-export class ASTCodeGenerator {
-  private parser: ASTParser;
-  private codeRecovery: CodeRecovery;
+export class TargetApiComposer {
+  private astComposer: ASTComposer;
+  targetState: IntermediateState;
+  sourceState: IntermediateState;
 
-  constructor() {
-    this.parser = new ASTParser();
-    this.codeRecovery = new CodeRecovery();
+  constructor(targetState: IntermediateState, sourceState: IntermediateState) {
+    this.astComposer = new ASTComposer();
+    this.targetState = targetState;
+    this.sourceState = sourceState;
+  }
+
+  /**
+   * 应用同步操作到 API 控制器代码
+   * 现在基于 AST 操作而非字符串操作
+   */
+  applySyncActions(actions: SyncAction[]): string {
+    // 使用新的 AST 代码生成器
+    const result = this.generateCodeFromDiff(this.targetState, this.sourceState, actions);
+
+    // 如果有错误，记录并返回原始代码
+    if (result.errors.length > 0) {
+      console.warn('AST 代码生成警告:', result.errors);
+    }
+
+    console.log(`AST 代码生成成功，应用了 ${result.appliedActions}/${actions.length} 个操作`);
+    return result.generatedCode;
   }
 
   /**
@@ -38,37 +52,14 @@ export class ASTCodeGenerator {
    */
   generateCodeFromDiff(
     targetState: IntermediateState,
-    actions: SyncAction[],
-    sourceState: IntermediateState
+    sourceState: IntermediateState,
+    actions: SyncAction[]
   ): ASTModificationResult {
     const errors: string[] = [];
     let appliedActions = 0;
 
     // 获取目标代码的 AST
-    let targetAST = targetState.astData;
-    if (!targetAST) {
-      if (targetState.code) {
-        try {
-          targetAST = this.parser.parse(targetState.code, targetState.metadata.filePath);
-        } catch (error) {
-          errors.push(`解析目标代码失败: ${error}`);
-          return {
-            modifiedAST: {} as ASTClassInfo,
-            generatedCode: targetState.code || '',
-            appliedActions: 0,
-            errors,
-          };
-        }
-      } else {
-        errors.push('目标状态缺少 AST 数据和源码');
-        return {
-          modifiedAST: {} as ASTClassInfo,
-          generatedCode: '',
-          appliedActions: 0,
-          errors,
-        };
-      }
-    }
+    const targetAST = targetState.astData;
 
     // 创建 AST 的深拷贝进行修改
     const modifiedAST = this.cloneAST(targetAST);
@@ -108,27 +99,23 @@ export class ASTCodeGenerator {
   /**
    * 应用单个同步操作到 AST
    */
-  private applyActionToAST(
-    ast: ASTClassInfo,
-    action: SyncAction,
-    sourceState: IntermediateState
-  ): boolean {
+  private applyActionToAST(ast: ASTClassInfo, action: SyncAction, sourceState: IntermediateState): boolean {
     switch (action.type) {
       case 'add_method':
         return this.addMethodToAST(ast, action.data as MethodDefinition, sourceState);
-      
+
       case 'remove_method':
         return this.removeMethodFromAST(ast, action.methodName!);
-      
+
       case 'update_method':
         return this.updateMethodInAST(ast, action.methodName!, action.data as MethodDefinition, sourceState);
-      
+
       case 'update_constructor':
         return this.updateConstructorInAST(ast, action.data);
-      
+
       case 'update_imports':
         return this.updateImportsInAST(ast, action.data);
-      
+
       default:
         return false;
     }
@@ -137,14 +124,10 @@ export class ASTCodeGenerator {
   /**
    * 向 AST 添加方法
    */
-  private addMethodToAST(
-    ast: ASTClassInfo,
-    method: MethodDefinition,
-    sourceState: IntermediateState
-  ): boolean {
+  private addMethodToAST(ast: ASTClassInfo, method: MethodDefinition, sourceState: IntermediateState): boolean {
     try {
       // 检查方法是否已存在
-      const existingIndex = ast.methods.findIndex(m => m.name === method.name);
+      const existingIndex = ast.methods.findIndex((m) => m.name === method.name);
       if (existingIndex >= 0) {
         // 如果存在，替换它
         ast.methods[existingIndex] = this.convertMethodDefinitionToASTMethod(method, sourceState);
@@ -164,7 +147,7 @@ export class ASTCodeGenerator {
    */
   private removeMethodFromAST(ast: ASTClassInfo, methodName: string): boolean {
     try {
-      const methodIndex = ast.methods.findIndex(m => m.name === methodName);
+      const methodIndex = ast.methods.findIndex((m) => m.name === methodName);
       if (methodIndex >= 0) {
         ast.methods.splice(methodIndex, 1);
         return true;
@@ -186,7 +169,7 @@ export class ASTCodeGenerator {
     sourceState: IntermediateState
   ): boolean {
     try {
-      const methodIndex = ast.methods.findIndex(m => m.name === methodName);
+      const methodIndex = ast.methods.findIndex((m) => m.name === methodName);
       if (methodIndex >= 0) {
         ast.methods[methodIndex] = this.convertMethodDefinitionToASTMethod(method, sourceState);
         return true;
@@ -234,25 +217,26 @@ export class ASTCodeGenerator {
   /**
    * 将 MethodDefinition 转换为 ASTMethod
    */
-  private convertMethodDefinitionToASTMethod(
-    method: MethodDefinition,
-    sourceState: IntermediateState
-  ): ASTMethod {
+  private convertMethodDefinitionToASTMethod(method: MethodDefinition, sourceState: IntermediateState): ASTMethod {
     return {
       name: method.name,
       decorators: this.convertDecoratorsToAST(method),
-      parameters: method.parameters.map(p => ({
+      parameters: method.parameters.map((p) => ({
         name: p.name,
         type: p.type,
         optional: p.optional,
-        decorators: p.decoratorArgs ? [{
-          name: p.decorator,
-          arguments: p.decoratorArgs.map(arg => ({
-            type: 'string' as const,
-            value: arg,
-            rawText: `'${arg}'`,
-          })),
-        }] : [],
+        decorators: p.decoratorArgs
+          ? [
+              {
+                name: p.decorator,
+                arguments: p.decoratorArgs.map((arg) => ({
+                  type: 'string' as const,
+                  value: arg,
+                  rawText: `'${arg}'`,
+                })),
+              },
+            ]
+          : [],
       })),
       returnType: method.returnType,
       bodyText: this.generateMethodBody(method, sourceState),
@@ -266,15 +250,17 @@ export class ASTCodeGenerator {
    */
   private convertDecoratorsToAST(method: MethodDefinition) {
     const decorators = [];
-    
+
     // 添加 HTTP 方法装饰器
     decorators.push({
       name: method.verb,
-      arguments: [{
-        type: 'string' as const,
-        value: method.path,
-        rawText: `'${method.path}'`,
-      }],
+      arguments: [
+        {
+          type: 'string' as const,
+          value: method.path,
+          rawText: `'${method.path}'`,
+        },
+      ],
     });
 
     // 如果有装饰器选项，添加它们
@@ -282,11 +268,13 @@ export class ASTCodeGenerator {
       Object.entries(method.decoratorOptions).forEach(([key, value]) => {
         decorators.push({
           name: key,
-          arguments: [{
-            type: 'object' as const,
-            value: JSON.stringify(value),
-            rawText: JSON.stringify(value),
-          }],
+          arguments: [
+            {
+              type: 'object' as const,
+              value: JSON.stringify(value),
+              rawText: JSON.stringify(value),
+            },
+          ],
         });
       });
     }
@@ -304,7 +292,7 @@ export class ASTCodeGenerator {
 
     // 根据参数样式生成不同的方法体
     const httpMethod = method.verb.toLowerCase() === 'delete' ? 'remove' : method.verb.toLowerCase();
-    
+
     // 使用从server controller提取的返回类型
     let returnType = method.returnType || 'any';
     if (returnType.startsWith('Promise<') && returnType.endsWith('>')) {
@@ -316,9 +304,9 @@ export class ASTCodeGenerator {
     let bodyParam = '';
 
     // 根据参数生成请求调用
-    const hasId = method.parameters.some(p => p.decorator === 'Param' && p.name === 'id');
-    const hasBody = method.parameters.some(p => p.decorator === 'Body');
-    const hasQuery = method.parameters.some(p => p.decorator === 'Query');
+    const hasId = method.parameters.some((p) => p.decorator === 'Param' && p.name === 'id');
+    const hasBody = method.parameters.some((p) => p.decorator === 'Body');
+    const hasQuery = method.parameters.some((p) => p.decorator === 'Query');
 
     if (hasId) {
       pathStr = pathStr.replace('/:id', '/${id}');
@@ -342,7 +330,7 @@ export class ASTCodeGenerator {
    * 从 AST 生成完整代码
    */
   private generateCodeFromAST(ast: ASTClassInfo): string {
-    return this.codeRecovery.recoverFromAST(ast, {
+    return this.astComposer.generateCodeFromAST(ast, {
       preserveFormatting: false,
       preserveComments: true,
       indentChar: ' ',
@@ -356,23 +344,23 @@ export class ASTCodeGenerator {
   private cloneAST(ast: ASTClassInfo): ASTClassInfo {
     return {
       className: ast.className,
-      decorators: ast.decorators.map(d => ({
+      decorators: ast.decorators.map((d) => ({
         name: d.name,
-        arguments: d.arguments.map(arg => ({ ...arg })),
+        arguments: d.arguments.map((arg) => ({ ...arg })),
       })),
-      methods: ast.methods.map(m => ({
+      methods: ast.methods.map((m) => ({
         name: m.name,
-        decorators: m.decorators.map(d => ({
+        decorators: m.decorators.map((d) => ({
           name: d.name,
-          arguments: d.arguments.map(arg => ({ ...arg })),
+          arguments: d.arguments.map((arg) => ({ ...arg })),
         })),
-        parameters: m.parameters.map(p => ({
+        parameters: m.parameters.map((p) => ({
           name: p.name,
           type: p.type,
           optional: p.optional,
-          decorators: p.decorators.map(d => ({
+          decorators: p.decorators.map((d) => ({
             name: d.name,
-            arguments: d.arguments.map(arg => ({ ...arg })),
+            arguments: d.arguments.map((arg) => ({ ...arg })),
           })),
         })),
         returnType: m.returnType,
@@ -380,16 +368,18 @@ export class ASTCodeGenerator {
         sourceLocation: { ...m.sourceLocation },
         methodDeclaration: m.methodDeclaration,
       })),
-      constructor: ast.constructor ? {
-        parameters: ast.constructor.parameters.map(p => ({
-          name: p.name,
-          type: p.type,
-          modifiers: [...p.modifiers],
-        })),
-      } : undefined,
-      imports: ast.imports.map(i => ({
+      constructor: ast.constructor
+        ? {
+            parameters: ast.constructor.parameters.map((p) => ({
+              name: p.name,
+              type: p.type,
+              modifiers: [...p.modifiers],
+            })),
+          }
+        : undefined,
+      imports: ast.imports.map((i) => ({
         source: i.source,
-        specifiers: i.specifiers.map(s => ({ ...s })),
+        specifiers: i.specifiers.map((s) => ({ ...s })),
         importType: i.importType,
       })),
       sourceFile: ast.sourceFile,
@@ -412,14 +402,14 @@ export class ASTCodeGenerator {
     }
 
     // 检查方法名重复
-    const methodNames = ast.methods.map(m => m.name);
+    const methodNames = ast.methods.map((m) => m.name);
     const duplicates = methodNames.filter((name, index) => methodNames.indexOf(name) !== index);
     if (duplicates.length > 0) {
       errors.push(`方法名重复: ${duplicates.join(', ')}`);
     }
 
     // 检查方法体
-    ast.methods.forEach(method => {
+    ast.methods.forEach((method) => {
       if (!method.bodyText || method.bodyText.trim() === '') {
         errors.push(`方法 ${method.name} 缺少方法体`);
       }

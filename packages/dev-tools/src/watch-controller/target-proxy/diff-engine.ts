@@ -3,96 +3,92 @@
  * 专门处理 Server Controller 到 Desktop Controller 的差异比对
  */
 
-import { MethodDefinition } from '../core/intermediate-state';
-import { DiffEngine, detectMethodChangeType, generateChangeDetails } from '../core/diff-engine';
-import { findAllControllerPairs } from './helpers';
-import { IntermediateState } from '../core/intermediate-state';
-import { TargetProxyAdapter } from './target-adapter';
+import { MethodDefinition } from '../core/intermediate-state/types';
+import {
+  DiffEngine,
+  detectMethodChangeType,
+  generateChangeDetails,
+  generateDiffResultSummary,
+} from '../core/diff-engine';
+import { IntermediateState } from '../core/intermediate-state/types';
+import { TargetProxyParser } from './target-parser';
 import { MethodChange, MethodInfo, ControllerSyncStatus, DiffResult, CommonChange } from '../../../types';
 
 export class ControllerProxyDiffEngine extends DiffEngine {
-  targetAdapter: TargetProxyAdapter;
-  constructor() {
-    super();
-    this.targetAdapter = new TargetProxyAdapter();
+  targetAdapter: TargetProxyParser;
+
+  constructor(sourcePath: string, targetPath: string) {
+    super(sourcePath);
+    this.targetAdapter = new TargetProxyParser(targetPath);
   }
 
-  /**
-   * 检查所有控制器的同步状态
-   */
-  async checkAllDiffResults(): Promise<ControllerSyncStatus[]> {
-    const pairs = findAllControllerPairs();
-    const results: ControllerSyncStatus[] = [];
+  getSummary(pair: { className: string; sourcePath: string; targetPath: string }): ControllerSyncStatus {
+    try {
+      // 生成详细的统计信息
+      const summary = generateDiffResultSummary(this.diffResult!.methodChanges);
 
-    for (const pair of pairs) {
-      try {
-        const diffResultDetail = await this.getDiffResultDetail(pair);
-
-        // 生成详细的统计信息
-        const summary = this.generateDiffResultSummary(diffResultDetail.methodChanges);
-
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: diffResultDetail.methodChanges.length + diffResultDetail.changes.length > 0,
-          changeCount: diffResultDetail.methodChanges.length + diffResultDetail.changes.length,
-          methodChanges: diffResultDetail.methodChanges,
-          changes: diffResultDetail.changes,
-          summary,
-          lastChecked: new Date().toISOString(),
-          error: undefined,
-        });
-      } catch (error) {
-        results.push({
-          className: pair.className,
-          sourcePath: pair.sourcePath,
-          targetPath: pair.targetPath,
-          needsSync: false,
-          changeCount: 0,
-          methodChanges: [],
-          changes: [],
-          summary: {
-            totalMethods: 0,
-            changedMethods: 0,
-            addedMethods: 0,
-            removedMethods: 0,
-            returnTypeChanges: 0,
-            parameterChanges: 0,
-            decoratorChanges: 0,
-          },
-          lastChecked: new Date().toISOString(),
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: this.diffResult!.methodChanges.length + this.diffResult!.changes.length > 0,
+        changeCount: this.diffResult!.methodChanges.length + this.diffResult!.changes.length,
+        changes: this.diffResult!.changes,
+        methodChanges: this.diffResult!.methodChanges,
+        summary,
+        lastChecked: new Date().toISOString(),
+        error: undefined,
+      };
+    } catch (error) {
+      return {
+        className: pair.className,
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+        needsSync: false,
+        changeCount: 0,
+        changes: [],
+        methodChanges: [],
+        summary: {
+          totalMethods: 0,
+          changedMethods: 0,
+          addedMethods: 0,
+          removedMethods: 0,
+          returnTypeChanges: 0,
+          parameterChanges: 0,
+          decoratorChanges: 0,
+        },
+        lastChecked: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
-
-    return results;
   }
 
   /**
    * 比较两个中间态，生成差异报告
    */
-  compareIntermediateState(source: IntermediateState, target: IntermediateState): DiffResult {
+  compareIntermediateState(): DiffResult {
+    const sourceState = this.sourceAdapter.intermediateState;
+    const targetState = this.targetAdapter.intermediateState;
+
     const changes: CommonChange[] = [];
 
     // 比较构造函数（子类可以选择是否比较）
-    const constructorChanges = this.compareConstructor(source.constructor, target.constructor);
+    const constructorChanges = this.compareConstructor(sourceState.constructor, targetState.constructor);
     if (constructorChanges) {
       changes.push(constructorChanges);
     }
 
     // 比较导入（子类可以选择是否比较）
-    const importChanges = this.compareImports(source.imports, target.imports);
+    const importChanges = this.compareImports(sourceState.imports, targetState.imports);
     if (importChanges) {
       changes.push(importChanges);
     }
 
     // 比较方法
-    const methodChanges = this.generateMethodChanges(source, target);
+    const methodChanges = this.generateMethodChanges(sourceState, targetState);
 
     return {
-      className: source.metadata.className,
+      className: sourceState.metadata.className,
       changes,
       methodChanges,
       needsSync: changes.length + methodChanges.length > 0,

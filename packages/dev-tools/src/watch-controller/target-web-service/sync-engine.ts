@@ -3,69 +3,44 @@
  * 专门处理 Server Controller 到 Web Service 的同步
  */
 
-import { ControllerWebServiceCodeGenerator } from './code-generator';
+import { TargetWebServiceComposer } from './target-composer';
 import { readFileSync, writeFileSync } from 'fs';
 import { ControllerWebServiceDiffEngine } from './diff-engine';
 import { generateSyncActions, SyncOptions, SyncResult } from '../core/sync-engine';
+import { ControllerSyncStatus } from '../../../types';
+import { findAllControllerPairs } from './helpers';
 
 export class ControllerWebServiceSyncEngine {
-  diffEngine: ControllerWebServiceDiffEngine;
-  protected codeGenerator: ControllerWebServiceCodeGenerator;
-
-  constructor() {
-    this.diffEngine = new ControllerWebServiceDiffEngine();
-    this.codeGenerator = new ControllerWebServiceCodeGenerator();
-  }
-
   /**
    * 同步单个控制器 - 通用实现
    */
   async syncController(sourcePath: string, targetPath: string, options: SyncOptions = {}): Promise<SyncResult> {
     try {
+      const diffEngine = new ControllerWebServiceDiffEngine(sourcePath, targetPath);
+
       // 1. 读取源码
       const targetCode = readFileSync(targetPath, 'utf-8');
 
-      if (options.verbose) {
-        console.log(`📖 读取源码文件:`);
-        console.log(`   Server: ${sourcePath}`);
-        console.log(`   Target: ${targetPath}`);
-      }
+      // 2. 比对差异
+      const diff = diffEngine.compareIntermediateState();
 
-      // 2. 解析为中间态
-      const sourceState = this.diffEngine.getSourceIntermediateState(sourcePath);
-      const targetState = this.diffEngine.getTargetIntermediateState(targetPath);
-
-      if (options.verbose) {
-        console.log(`🔍 解析完成:`);
-        console.log(`   源方法数: ${sourceState.methods.size}`);
-        console.log(`   目标方法数: ${targetState.methods.size}`);
-      }
-
-      // 3. 比对差异
-      const diff = this.diffEngine.compareIntermediateState(sourceState, targetState);
-
-      if (options.verbose) {
-        console.log(`📊 差异比对完成:`);
-        console.log(`   变更数量: ${diff.changes.length}`);
-        console.log(`   需要同步: ${diff.needsSync}`);
-      }
-
-      // 4. 生成同步操作
-      const actions = generateSyncActions(diff, sourceState);
+      // 3. 生成同步操作
+      const actions = generateSyncActions(diff, diffEngine.sourceAdapter.intermediateState);
 
       // 5. 执行同步（如果不是干运行模式）
       if (!options.dryRun && diff.needsSync) {
-        const newCode = this.codeGenerator.applySyncActions(targetCode, actions, targetState, sourceState);
-        writeFileSync(targetPath, newCode, 'utf-8');
+        const targetComposer = new TargetWebServiceComposer(
+          diffEngine.targetAdapter.intermediateState,
+          diffEngine.sourceAdapter.intermediateState
+        );
 
-        if (options.verbose) {
-          console.log(`✅ 同步完成: ${targetPath}`);
-        }
+        const newCode = targetComposer.applySyncActions(targetCode, actions);
+        writeFileSync(targetPath, newCode, 'utf-8');
       }
 
       return {
         success: true,
-        controllerName: sourceState.metadata.className,
+        controllerName: diffEngine.sourceAdapter.intermediateState.metadata.className,
         diff,
         actions,
         details: options.verbose ? `处理了 ${actions.length} 个操作` : undefined,
@@ -79,6 +54,23 @@ export class ControllerWebServiceSyncEngine {
         error: error instanceof Error ? error.message : String(error),
       };
     }
+  }
+
+  /**
+   * 检查所有控制器的同步状态
+   */
+  async checkAllDiffResults(): Promise<ControllerSyncStatus[]> {
+    const pairs = findAllControllerPairs();
+    const results: ControllerSyncStatus[] = [];
+
+    for (const pair of pairs) {
+      const diffEngine = new ControllerWebServiceDiffEngine(pair.sourcePath, pair.targetPath);
+      diffEngine.compareIntermediateState();
+
+      results.push(diffEngine.getSummary(pair));
+    }
+
+    return results;
   }
 }
 
