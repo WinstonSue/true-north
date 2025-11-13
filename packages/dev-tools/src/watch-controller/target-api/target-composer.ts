@@ -222,7 +222,7 @@ export class TargetApiComposer {
       name: method.name,
       decorators: [], // API 控制器不需要装饰器
       parameters: method.parameters.map((p) => ({
-        name: this.getApiParameterName(p),
+        name: p.name, // 直接使用原始参数名
         type: p.type,
         optional: p.optional,
         decorators: [], // API 控制器参数也不需要装饰器
@@ -239,7 +239,7 @@ export class TargetApiComposer {
 
 
   /**
-   * 生成 API 方法体
+   * 生成 API 方法体 - 基于 AST 参数数据
    */
   private generateMethodBody(method: MethodDefinition, sourceState: IntermediateState): string {
     // 合并Controller基础路径和方法路径
@@ -259,24 +259,24 @@ export class TargetApiComposer {
     let pathStr = fullPath;
     let bodyParam = '';
 
-    // 使用标准化的参数名（因为 AST 中的参数名已经被标准化了）
-    const hasId = method.parameters.some((p) => p.decorator === 'Param' && p.name === 'id');
-    const hasBody = method.parameters.some((p) => p.decorator === 'Body');
-    const hasQuery = method.parameters.some((p) => p.decorator === 'Query');
+    // 基于实际参数名生成方法体，而不是硬编码
+    const idParam = method.parameters.find((p) => p.decorator === 'Param' && p.name === 'id');
+    const bodyParam_obj = method.parameters.find((p) => p.decorator === 'Body');
+    const queryParam = method.parameters.find((p) => p.decorator === 'Query');
 
-    if (hasId) {
-      pathStr = pathStr.replace('/:id', '${id}');
+    if (idParam) {
+      pathStr = pathStr.replace('/:id', `\${${idParam.name}}`);
     }
 
-    if (hasBody) {
-      bodyParam = ', body'; // 使用标准化的参数名
-    } else if (hasQuery) {
-      bodyParam = ', query'; // 使用标准化的参数名
+    if (bodyParam_obj) {
+      bodyParam = `, ${bodyParam_obj.name}`;
+    } else if (queryParam) {
+      bodyParam = `, ${queryParam.name}`;
     }
 
-    if (hasQuery && hasBody) {
-      pathStr = `${pathStr}?\${new URLSearchParams(query as any).toString()}`;
-      bodyParam = ', body';
+    if (queryParam && bodyParam_obj) {
+      pathStr = `${pathStr}?\${new URLSearchParams(${queryParam.name} as any).toString()}`;
+      bodyParam = `, ${bodyParam_obj.name}`;
     }
 
     return `return request${genericType}({ method: "${httpMethod}" })(\`${pathStr}\`${bodyParam});`;
@@ -296,22 +296,6 @@ export class TargetApiComposer {
 
 
 
-  /**
-   * 获取 API 参数的标准名称
-   */
-  private getApiParameterName(parameter: any): string {
-    // 根据装饰器类型返回标准的参数名
-    switch (parameter.decorator) {
-      case 'Param':
-        return parameter.name; // Param 参数保持原名（通常是 id）
-      case 'Body':
-        return 'body'; // Body 参数统一命名为 body
-      case 'Query':
-        return 'query'; // Query 参数统一命名为 query
-      default:
-        return parameter.name; // 其他情况保持原名
-    }
-  }
 
   /**
    * 深拷贝 AST 对象
@@ -328,7 +312,7 @@ export class TargetApiComposer {
         name: m.name,
         decorators: [], // API 控制器所有方法都不需要装饰器
         parameters: m.parameters.map((p) => ({
-          name: this.getApiParameterName(p),
+          name: p.name, // 直接使用原始参数名
           type: p.type,
           optional: p.optional,
           decorators: [], // API 控制器所有参数都不需要装饰器

@@ -61,7 +61,7 @@ export function parametersChanged(
     if (
       source.name !== target.name ||
       source.type !== target.type ||
-      (!ignore?.includes('decorator') &&
+      (!ignore?.includes('decorators') &&
         (!isEqual(source.decorator, target.decorator) || source.optional !== target.optional))
     ) {
       return true;

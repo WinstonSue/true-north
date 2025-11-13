@@ -33,6 +33,7 @@ export class ControllerApiDiffEngine extends DiffEngine {
     };
   }
 
+
   getSummary(pair: { className: string; sourcePath: string; targetPath: string }): ControllerSyncStatus {
     try {
       // 生成详细的统计信息

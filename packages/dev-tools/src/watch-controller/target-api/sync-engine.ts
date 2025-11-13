@@ -4,8 +4,10 @@
  */
 
 import { SyncOptions, SyncResult, generateSyncActions } from '../core/sync-engine';
+import { TargetApiParser } from './target-parser';
 import { ControllerApiDiffEngine } from './diff-engine';
 import { TargetApiComposer } from './target-composer';
+import { formatFile } from '../../utils/formatter';
 import { writeFileSync } from 'fs';
 import { findAllControllerPairs } from './helpers';
 import { ControllerSyncStatus } from '../../../types';
@@ -33,6 +35,9 @@ export class ControllerApiSyncEngine {
 
         const newCode = codeGenerator.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');
+        
+        // 格式化生成的代码
+        formatFile(targetPath);
       }
 
       return {

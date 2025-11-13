@@ -3,9 +3,11 @@
  * 专门处理 Server Controller 到 Web Service 的同步
  */
 
-import { TargetWebServiceComposer } from './target-composer';
 import { readFileSync, writeFileSync } from 'fs';
+import { TargetWebServiceParser } from './target-parser';
 import { ControllerWebServiceDiffEngine } from './diff-engine';
+import { TargetWebServiceComposer } from './target-composer';
+import { formatFile } from '../../utils/formatter';
 import { generateSyncActions, SyncOptions, SyncResult } from '../core/sync-engine';
 import { ControllerSyncStatus } from '../../../types';
 import { findAllControllerPairs } from './helpers';
@@ -34,8 +36,11 @@ export class ControllerWebServiceSyncEngine {
           diffEngine.sourceAdapter.intermediateState
         );
 
-        const newCode = targetComposer.applySyncActions(targetCode, actions);
+        const newCode = targetComposer.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');
+        
+        // 格式化生成的代码
+        formatFile(targetPath);
       }
 
       return {

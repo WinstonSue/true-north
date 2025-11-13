@@ -3,9 +3,11 @@
  * 专门处理 Server Controller 到 Desktop Controller 的同步
  */
 
+import { readFileSync, writeFileSync } from 'fs';
+import { TargetProxyParser } from './target-parser';
 import { ControllerProxyDiffEngine } from './diff-engine';
 import { TargetProxyComposer } from './target-composer';
-import { readFileSync, writeFileSync } from 'fs';
+import { formatFile } from '../../utils/formatter';
 import { generateSyncActions, SyncOptions, SyncResult } from '../core/sync-engine';
 import { ErrorHandler } from '../helpers';
 import { findAllControllerPairs } from './helpers';
@@ -19,9 +21,6 @@ export class ControllerProxySyncEngine {
     try {
       const diffEngine = new ControllerProxyDiffEngine(sourcePath, targetPath);
 
-      // 1. 读取源码
-      const targetCode = readFileSync(targetPath, 'utf-8');
-
       // 2. 比对差异
       const diff = diffEngine.compareIntermediateState();
 
@@ -34,8 +33,11 @@ export class ControllerProxySyncEngine {
           diffEngine.sourceAdapter.intermediateState,
           diffEngine.targetAdapter.intermediateState
         );
-        const newCode = targetComposer.applySyncActions(targetCode, actions);
+        const newCode = targetComposer.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');
+
+        // 格式化生成的代码
+        formatFile(targetPath);
       }
 
       return {

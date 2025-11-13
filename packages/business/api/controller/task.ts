@@ -2,8 +2,9 @@ import { request } from '@true-north/share-request';
 import { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
 
 export default class TaskController {
-  static async create(body: TaskVO.CreateTaskVo) {
-    return request<TaskVO.TaskVo>({ method: 'post' })(`/task/create`, body);
+
+  static async create(createTaskVo: TaskVO.CreateTaskVo) {
+    return request<TaskVO.TaskVo>({ method: "post" })(`/task/create`, createTaskVo);
   }
 
   static async delete(id: string) {
@@ -18,8 +19,8 @@ export default class TaskController {
     return request<TaskVO.TaskVo>({ method: 'get' })(`/task/find/${id}`);
   }
 
-  static async page(query?: TaskVO.TaskPageFilterVo) {
-    return request<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>>({ method: 'get' })(`/task/page`, query);
+  static async page(taskPageFilterVo?: TaskVO.TaskPageFilterVo) {
+    return request<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/page`, taskPageFilterVo);
   }
 
   static async taskWithRelations(id: string) {
@@ -34,7 +35,7 @@ export default class TaskController {
     return request<boolean>({ method: 'put' })(`/task/restore/${id}`);
   }
 
-  static async findByFilter(query?: TaskVO.TaskFilterVo) {
-    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: 'get' })(`/task/find-by-filter`, query);
+  static async findByFilter(taskListFiltersVo?: TaskVO.TaskFilterVo) {
+    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/find-by-filter`, taskListFiltersVo);
   }
 }
