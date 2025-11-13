@@ -150,7 +150,7 @@ export class ASTParser {
   private parseImports(imports: any[]): ASTImport[] {
     return imports.map(importDecl => {
       const source = importDecl.getModuleSpecifierValue();
-      const namedImports = importDecl.getNamedImports().map((ni: any) => ni.getName());
+      const namedImports = importDecl.getNamedImports();
       const defaultImport = importDecl.getDefaultImport()?.getText();
       const namespaceImport = importDecl.getNamespaceImport()?.getText();
 
@@ -171,10 +171,12 @@ export class ASTParser {
         });
       }
 
-      namedImports.forEach((name: string) => {
+      namedImports.forEach((namedImport: any) => {
+        const imported = namedImport.getName();
+        const local = namedImport.getAliasNode()?.getText() || imported;
         specifiers.push({
-          imported: name,
-          local: name,
+          imported,
+          local,
         });
       });
 

@@ -220,67 +220,23 @@ export class TargetApiComposer {
   private convertMethodDefinitionToASTMethod(method: MethodDefinition, sourceState: IntermediateState): ASTMethod {
     return {
       name: method.name,
-      decorators: this.convertDecoratorsToAST(method),
+      decorators: [], // API 控制器不需要装饰器
       parameters: method.parameters.map((p) => ({
-        name: p.name,
+        name: this.getApiParameterName(p),
         type: p.type,
         optional: p.optional,
-        decorators: p.decoratorArgs
-          ? [
-              {
-                name: p.decorator,
-                arguments: p.decoratorArgs.map((arg) => ({
-                  type: 'string' as const,
-                  value: arg,
-                  rawText: `'${arg}'`,
-                })),
-              },
-            ]
-          : [],
+        decorators: [], // API 控制器参数也不需要装饰器
+        showType: true, // API 控制器参数需要显示类型
       })),
       returnType: method.returnType,
       bodyText: this.generateMethodBody(method, sourceState),
       sourceLocation: method.sourceLocation,
       methodDeclaration: null as any, // 这里需要重新生成时会被设置
+      modifiers: ['static', 'async'], // API 控制器方法使用 static async
+      showReturnType: false, // API 控制器不显示返回类型
     };
   }
 
-  /**
-   * 转换装饰器到 AST 格式
-   */
-  private convertDecoratorsToAST(method: MethodDefinition) {
-    const decorators = [];
-
-    // 添加 HTTP 方法装饰器
-    decorators.push({
-      name: method.verb,
-      arguments: [
-        {
-          type: 'string' as const,
-          value: method.path,
-          rawText: `'${method.path}'`,
-        },
-      ],
-    });
-
-    // 如果有装饰器选项，添加它们
-    if (method.decoratorOptions) {
-      Object.entries(method.decoratorOptions).forEach(([key, value]) => {
-        decorators.push({
-          name: key,
-          arguments: [
-            {
-              type: 'object' as const,
-              value: JSON.stringify(value),
-              rawText: JSON.stringify(value),
-            },
-          ],
-        });
-      });
-    }
-
-    return decorators;
-  }
 
   /**
    * 生成 API 方法体
@@ -303,19 +259,19 @@ export class TargetApiComposer {
     let pathStr = fullPath;
     let bodyParam = '';
 
-    // 根据参数生成请求调用
+    // 使用标准化的参数名（因为 AST 中的参数名已经被标准化了）
     const hasId = method.parameters.some((p) => p.decorator === 'Param' && p.name === 'id');
     const hasBody = method.parameters.some((p) => p.decorator === 'Body');
     const hasQuery = method.parameters.some((p) => p.decorator === 'Query');
 
     if (hasId) {
-      pathStr = pathStr.replace('/:id', '/${id}');
+      pathStr = pathStr.replace('/:id', '${id}');
     }
 
     if (hasBody) {
-      bodyParam = ', body';
+      bodyParam = ', body'; // 使用标准化的参数名
     } else if (hasQuery) {
-      bodyParam = ', query';
+      bodyParam = ', query'; // 使用标准化的参数名
     }
 
     if (hasQuery && hasBody) {
@@ -338,6 +294,25 @@ export class TargetApiComposer {
     });
   }
 
+
+
+  /**
+   * 获取 API 参数的标准名称
+   */
+  private getApiParameterName(parameter: any): string {
+    // 根据装饰器类型返回标准的参数名
+    switch (parameter.decorator) {
+      case 'Param':
+        return parameter.name; // Param 参数保持原名（通常是 id）
+      case 'Body':
+        return 'body'; // Body 参数统一命名为 body
+      case 'Query':
+        return 'query'; // Query 参数统一命名为 query
+      default:
+        return parameter.name; // 其他情况保持原名
+    }
+  }
+
   /**
    * 深拷贝 AST 对象
    */
@@ -348,25 +323,23 @@ export class TargetApiComposer {
         name: d.name,
         arguments: d.arguments.map((arg) => ({ ...arg })),
       })),
+      isDefaultExport: true, // API 控制器使用 export default
       methods: ast.methods.map((m) => ({
         name: m.name,
-        decorators: m.decorators.map((d) => ({
-          name: d.name,
-          arguments: d.arguments.map((arg) => ({ ...arg })),
-        })),
+        decorators: [], // API 控制器所有方法都不需要装饰器
         parameters: m.parameters.map((p) => ({
-          name: p.name,
+          name: this.getApiParameterName(p),
           type: p.type,
           optional: p.optional,
-          decorators: p.decorators.map((d) => ({
-            name: d.name,
-            arguments: d.arguments.map((arg) => ({ ...arg })),
-          })),
+          decorators: [], // API 控制器所有参数都不需要装饰器
+          showType: true, // API 控制器参数需要显示类型
         })),
         returnType: m.returnType,
         bodyText: m.bodyText,
         sourceLocation: { ...m.sourceLocation },
         methodDeclaration: m.methodDeclaration,
+        modifiers: ['static', 'async'], // API 控制器所有方法都使用 static async
+        showReturnType: false, // API 控制器所有方法都不显示返回类型
       })),
       constructor: ast.constructor
         ? {

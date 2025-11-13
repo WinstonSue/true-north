@@ -53,7 +53,8 @@ export class ASTComposer {
       lines.push(classDecorators);
     }
 
-    lines.push(`export class ${astData.className} {`);
+    const exportKeyword = astData.isDefaultExport ? 'export default class' : 'export class';
+    lines.push(`${exportKeyword} ${astData.className} {`);
 
     // 生成构造函数
     if (astData.constructor) {
@@ -140,11 +141,18 @@ export class ASTComposer {
       .map((p: any) => {
         const decorators = p.decorators.map((d: any) => this.generateDecorator(d)).join(' ');
         const optional = p.optional ? '?' : '';
-        return decorators ? `${decorators} ${p.name}${optional}: ${p.type}` : `${p.name}${optional}: ${p.type}`;
+        const typeStr = p.showType !== false ? `: ${p.type}` : '';
+        return decorators ? `${decorators} ${p.name}${optional}${typeStr}` : `${p.name}${optional}${typeStr}`;
       })
       .join(', ');
 
-    const methodSignature = `${method.name}(${params}): ${method.returnType} {`;
+    // 生成方法修饰符
+    const modifiers = method.modifiers ? method.modifiers.join(' ') + ' ' : '';
+    
+    // 生成返回类型
+    const returnTypeStr = method.showReturnType !== false ? `: ${method.returnType}` : '';
+    
+    const methodSignature = `${modifiers}${method.name}(${params})${returnTypeStr} {`;
     lines.push(methodSignature);
 
     // 方法体

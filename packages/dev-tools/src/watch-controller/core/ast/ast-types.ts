@@ -13,6 +13,8 @@ export interface ASTClassInfo {
   imports: ASTImport[];
   sourceFile: SourceFile;
   classDeclaration: ClassDeclaration;
+  /** 是否使用 export default */
+  isDefaultExport?: boolean;
 }
 
 export interface ASTDecorator {
@@ -34,6 +36,10 @@ export interface ASTMethod {
   bodyText: string;
   sourceLocation: ASTSourceLocation;
   methodDeclaration: MethodDeclaration;
+  /** 方法修饰符，如 'static', 'async' 等 */
+  modifiers?: string[];
+  /** 是否显示返回类型 */
+  showReturnType?: boolean;
 }
 
 export interface ASTParameter {
@@ -41,6 +47,8 @@ export interface ASTParameter {
   type: string;
   optional: boolean;
   decorators: ASTDecorator[];
+  /** 是否显示参数类型 */
+  showType?: boolean;
 }
 
 export interface ASTConstructor {
