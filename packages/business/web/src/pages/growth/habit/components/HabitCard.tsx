@@ -19,8 +19,8 @@ import {
   IconDelete,
   IconEdit,
 } from '@arco-design/web-react/icon';
-import { HabitWithoutRelationsVo } from '@life-toolkit/vo';
-import { HabitStatus } from '@life-toolkit/enum';
+import { HabitWithoutRelationsVo } from '@true-north/vo';
+import { HabitStatus } from '@true-north/enum';
 import { HABIT_STATUS_OPTIONS, HABIT_DIFFICULTY_OPTIONS } from '../constants';
 
 const { Text, Paragraph } = Typography;

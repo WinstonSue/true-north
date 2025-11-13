@@ -20,7 +20,7 @@ import {
   ModuleListFilterDto,
   ModuleDto,
 } from "./dto";
-import { ModuleStatus } from "@life-toolkit/enum";
+import { ModuleStatus } from "@true-north/enum";
 
 export class ModuleService {
   protected relatedService: RelatedService;
@@ -279,7 +279,7 @@ import {
   ModuleListFilterDto,
   ModuleDto,
 } from "./dto";
-import { ModuleStatus } from "@life-toolkit/enum";
+import { ModuleStatus } from "@true-north/enum";
 
 export class ModuleService {
   protected relatedService: RelatedService;

@@ -5,9 +5,9 @@ import { Collapse, Divider } from '@arco-design/web-react';
 import styles from './style.module.less';
 import { TodoService } from '../../service';
 import { flushSync } from 'react-dom';
-import { TodoVo, TodoWithoutRelationsVo } from '@life-toolkit/vo';
+import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import { useTodoContext } from '../context';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoStatus } from '@true-north/enum';
 
 const { Fixed, Shrink } = FlexibleContainer;
 

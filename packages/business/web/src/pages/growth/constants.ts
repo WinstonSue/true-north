@@ -1,4 +1,4 @@
-import { Importance, Difficulty, Urgency } from '@life-toolkit/enum';
+import { Importance, Difficulty, Urgency } from '@true-north/enum';
 
 export const IMPORTANCE_MAP = new Map([
   [

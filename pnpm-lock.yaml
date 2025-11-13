@@ -12,7 +12,7 @@ importers:
 
   .:
     devDependencies:
-      '@life-toolkit/vo':
+      '@true-north/vo':
         specifier: workspace:*
         version: link:packages/business/vo
       '@types/jest':
@@ -66,19 +66,19 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@life-toolkit/business-server':
+      '@true-north/business-server':
         specifier: workspace:*
         version: link:../../packages/business/server
-      '@life-toolkit/business-web':
+      '@true-north/business-web':
         specifier: workspace:*
         version: link:../../packages/business/web
-      '@life-toolkit/common-web-utils':
+      '@true-north/common-web-utils':
         specifier: workspace:*
         version: link:../../packages/common-web/utils
-      '@life-toolkit/enum':
+      '@true-north/enum':
         specifier: workspace:*
         version: link:../../packages/business/enum
-      '@life-toolkit/share-types':
+      '@true-north/share-types':
         specifier: workspace:*
         version: link:../../packages/share/types
       class-transformer:
@@ -181,9 +181,6 @@ importers:
 
   apps/server:
     dependencies:
-      '@life-toolkit/business-server':
-        specifier: workspace:*
-        version: link:../../packages/business/server
       '@nestjs/common':
         specifier: ^10.0.0
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2)
@@ -208,6 +205,9 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.1
         version: 10.0.2(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.20)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2))(reflect-metadata@0.1.14)(rxjs@7.8.2)(typeorm@0.3.26(mysql2@3.15.0)(reflect-metadata@0.1.14)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.13.5)(@types/node@22.13.0)(typescript@5.7.2)))
+      '@true-north/business-server':
+        specifier: workspace:*
+        version: link:../../packages/business/server
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1(encoding@0.1.13)
@@ -287,7 +287,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@life-toolkit/business-web':
+      '@true-north/business-web':
         specifier: workspace:*
         version: link:../../packages/business/web
       react:
@@ -357,10 +357,10 @@ importers:
 
   packages/business/api:
     dependencies:
-      '@life-toolkit/share-request':
+      '@true-north/share-request':
         specifier: workspace:*
         version: link:../../share-web/request
-      '@life-toolkit/share-types':
+      '@true-north/share-types':
         specifier: workspace:*
         version: link:../../share/types
       axios:
@@ -378,7 +378,7 @@ importers:
         specifier: ^0.3.20
         version: 0.3.26(mysql2@3.15.0)(reflect-metadata@0.1.14)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.13.5)(@types/node@22.13.0)(typescript@5.9.2))
     devDependencies:
-      '@life-toolkit/enum':
+      '@true-north/enum':
         specifier: workspace:*
         version: link:../enum
       francis-helper-repeat:
@@ -399,7 +399,7 @@ importers:
 
   packages/business/vo:
     dependencies:
-      '@life-toolkit/enum':
+      '@true-north/enum':
         specifier: workspace:*
         version: link:../enum
       francis-helper-repeat:
@@ -417,33 +417,33 @@ importers:
       '@arco-themes/react-francis':
         specifier: ^0.0.1
         version: 0.0.1(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
-      '@life-toolkit/api':
-        specifier: workspace:*
-        version: link:../api
-      '@life-toolkit/components-mind':
-        specifier: workspace:*
-        version: link:../../components/mind
-      '@life-toolkit/components-ui':
-        specifier: workspace:*
-        version: link:../../components/ui
-      '@life-toolkit/enum':
-        specifier: workspace:*
-        version: link:../enum
-      '@life-toolkit/share-types':
-        specifier: workspace:*
-        version: link:../../share/types
-      '@life-toolkit/tabs':
-        specifier: workspace:*
-        version: link:../../components/tabs
-      '@life-toolkit/web-service':
-        specifier: workspace:*
-        version: link:../web-service
       '@loadable/component':
         specifier: ^5.13.2
         version: 5.16.7(react@18.3.1)
       '@nanostores/react':
         specifier: ^0.8.4
         version: 0.8.4(nanostores@0.11.4)(react@18.3.1)
+      '@true-north/api':
+        specifier: workspace:*
+        version: link:../api
+      '@true-north/components-mind':
+        specifier: workspace:*
+        version: link:../../components/mind
+      '@true-north/components-ui':
+        specifier: workspace:*
+        version: link:../../components/ui
+      '@true-north/enum':
+        specifier: workspace:*
+        version: link:../enum
+      '@true-north/share-types':
+        specifier: workspace:*
+        version: link:../../share/types
+      '@true-north/tabs':
+        specifier: workspace:*
+        version: link:../../components/tabs
+      '@true-north/web-service':
+        specifier: workspace:*
+        version: link:../web-service
       '@turf/turf':
         specifier: ^6.5.0
         version: 6.5.0
@@ -595,16 +595,16 @@ importers:
 
   packages/business/web-service:
     dependencies:
-      '@life-toolkit/api':
+      '@true-north/api':
         specifier: workspace:*
         version: link:../api
-      '@life-toolkit/enum':
+      '@true-north/enum':
         specifier: workspace:*
         version: link:../enum
-      '@life-toolkit/share-types':
+      '@true-north/share-types':
         specifier: workspace:*
         version: link:../../share/types
-      '@life-toolkit/vo':
+      '@true-north/vo':
         specifier: workspace:*
         version: link:../vo
 
@@ -643,7 +643,7 @@ importers:
       '@arco-design/web-react':
         specifier: ^2.66.0
         version: 2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@life-toolkit/common-web-utils':
+      '@true-north/common-web-utils':
         specifier: workspace:*
         version: link:../../common-web/utils
       react:
@@ -732,6 +732,9 @@ importers:
       fast-glob:
         specifier: ^3.3.2
         version: 3.3.3
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -769,7 +772,7 @@ importers:
 
   packages/share-web/request:
     dependencies:
-      '@life-toolkit/share-types':
+      '@true-north/share-types':
         specifier: workspace:*
         version: link:../../share/types
       axios:

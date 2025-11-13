@@ -1,4 +1,4 @@
-import type { GoalVo, UpdateGoalVo, CreateGoalVo } from '@life-toolkit/vo';
+import type { GoalVo, UpdateGoalVo, CreateGoalVo } from '@true-north/vo';
 import type { GoalFormData } from './goal.types';
 
 export default class GoalMapping {

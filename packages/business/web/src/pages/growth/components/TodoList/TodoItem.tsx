@@ -5,12 +5,12 @@ import { isToday } from 'date-fns';
 import { FlexibleContainer } from 'francis-component-react';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import IconSelector from '../../components/IconSelector';
-import { SiteIcon } from '@life-toolkit/components-ui';
+import { SiteIcon } from '@true-north/components-ui';
 import { TodoService } from '../../service';
-import { TodoWithoutRelationsVo } from '@life-toolkit/vo';
+import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
-import { TodoSource } from '@life-toolkit/enum';
+import { TodoSource } from '@true-north/enum';
 
 const { Paragraph } = Typography;
 

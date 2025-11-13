@@ -1,4 +1,4 @@
-import { HabitStatus, Difficulty } from '@life-toolkit/enum';
+import { HabitStatus, Difficulty } from '@true-north/enum';
 import { HabitVo } from './habit-model.vo';
 import { BaseFilterVo } from '../../common';
 

@@ -1,4 +1,4 @@
-import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
+import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
 import {
   TodoFilterDto,
@@ -10,7 +10,7 @@ import {
 } from './dto';
 import { TodoService } from './todo.service';
 import { TodoRepeatService } from './todo-repeat.service';
-import { TodoSource } from '@life-toolkit/enum';
+import { TodoSource } from '@true-north/enum';
 
 @Controller('/todo')
 export class TodoController {

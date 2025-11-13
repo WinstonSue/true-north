@@ -22,7 +22,7 @@ import { Type } from "class-transformer";
 import { PageFilterDto } from "../../../common/filter";
 import { {Module}Dto } from "./{module}-model.dto";
 import { PickType, IntersectionType, PartialType } from "francis-mapped-types";
-import { {Module}ListFiltersVo, {Module}PageFilterVo } from "@life-toolkit/vo";
+import { {Module}ListFiltersVo, {Module}PageFilterVo } from "@true-north/vo";
 
 // 列表过滤DTO - 选择可过滤的字段
 export class {Module}ListFilterDto extends PartialType(
@@ -108,7 +108,7 @@ import {
   IntersectionType,
   PartialType,
 } from "francis-mapped-types";
-import { EntityListFiltersVo, EntityPageFilterVo } from "@life-toolkit/vo";
+import { EntityListFiltersVo, EntityPageFilterVo } from "@true-north/vo";
 import { EntityStatus, EntityType } from "../entity.entity";
 
 // 列表过滤DTO

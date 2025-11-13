@@ -2,7 +2,7 @@ import { HabitRepository } from './habit.repository';
 import { TodoRepository } from '../todo/todo.repository';
 import { CreateHabitDto, UpdateHabitDto, HabitFilterDto, HabitPageFilterDto, HabitDto } from './dto';
 import { Habit } from './habit.entity';
-import { HabitStatus, TodoStatus } from '@life-toolkit/enum';
+import { HabitStatus, TodoStatus } from '@true-north/enum';
 
 export class HabitService {
   habitRepository: HabitRepository;

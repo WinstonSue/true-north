@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, ReactNode, RefObject } from 'react';
 import { Graph } from '@antv/x6';
 import { useGraphOperations } from './hooks';
-import { createInjectState } from '@life-toolkit/common-web-utils';
+import { createInjectState } from '@true-north/common-web-utils';
 
 export const [MindMapGraphProvider, useMindMapGraphContext] = createInjectState<{
   PropsType: {

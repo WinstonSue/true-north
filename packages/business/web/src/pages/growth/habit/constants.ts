@@ -1,4 +1,4 @@
-import { HabitStatus, Difficulty } from '@life-toolkit/enum';
+import { HabitStatus, Difficulty } from '@true-north/enum';
 
 export const HABIT_STATUS_OPTIONS = [
   {

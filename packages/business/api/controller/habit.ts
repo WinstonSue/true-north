@@ -1,5 +1,5 @@
-import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
-import { request } from '@life-toolkit/share-request';
+import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
+import { request } from '@true-north/share-request';
 
 export default class HabitController {
   static async create(body: HabitVO.CreateHabitVo) {

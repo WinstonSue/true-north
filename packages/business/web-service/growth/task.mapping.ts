@@ -1,4 +1,4 @@
-import type { TaskVo, UpdateTaskVo, CreateTaskVo } from '@life-toolkit/vo';
+import type { TaskVo, UpdateTaskVo, CreateTaskVo } from '@true-north/vo';
 import type { TaskFormData } from './task.types';
 
 export default class TaskMapping {

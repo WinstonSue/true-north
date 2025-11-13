@@ -1,4 +1,4 @@
-import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
+import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { CreateHabitDto, UpdateHabitDto, HabitDto, HabitFilterDto, HabitPageFilterDto } from './dto';
 import { HabitService } from './habit.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';

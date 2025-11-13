@@ -17,7 +17,7 @@ globs:
 ```typescript
 import { ModuleRepository, RelatedService } from './module.repository';
 import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from './dto';
-import { ModuleStatus } from '@life-toolkit/enum';
+import { ModuleStatus } from '@true-north/enum';
 
 export class ModuleService {
   protected relatedService: RelatedService;
@@ -286,7 +286,7 @@ const relatedConfig = {
 ```typescript
 import { ModuleRepository, RelatedService } from './module.repository';
 import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from './dto';
-import { ModuleStatus } from '@life-toolkit/enum';
+import { ModuleStatus } from '@true-north/enum';
 
 export class ModuleService {
   protected relatedService: RelatedService;

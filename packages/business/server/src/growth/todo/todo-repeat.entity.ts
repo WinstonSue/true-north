@@ -3,7 +3,7 @@ import { Entity, OneToMany, Column } from 'typeorm';
 import { Todo } from '../todo/todo.entity';
 import { RepeatMode, RepeatEndMode } from 'francis-types-repeat';
 import type { RepeatConfig } from 'francis-types-repeat';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoStatus } from '@true-north/enum';
 import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BaseEntity } from '@business/common';

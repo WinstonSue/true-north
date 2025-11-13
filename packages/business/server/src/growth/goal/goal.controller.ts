@@ -1,6 +1,6 @@
 import { Controller, Post, Put, Get, Delete, Body, Param, Query } from '@business/decorators';
-import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@life-toolkit/vo';
-import { GoalFilterDto, GoalPageFilterDto, CreateGoalDto, UpdateGoalDto, GoalDto } from '@life-toolkit/business-server';
+import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@true-north/vo';
+import { GoalFilterDto, GoalPageFilterDto, CreateGoalDto, UpdateGoalDto, GoalDto } from '@true-north/business-server';
 import { GoalService } from './goal.service';
 
 @Controller('/goal')

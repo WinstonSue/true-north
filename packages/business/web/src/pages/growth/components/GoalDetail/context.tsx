@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, Dispatch, useRef, useCallback } from 'react';
-import { GoalVo, GoalWithoutRelationsVo } from '@life-toolkit/vo';
+import { GoalVo, GoalWithoutRelationsVo } from '@true-north/vo';
 import { GoalFormData, GoalService, GoalMapping } from '../../service';
 import { createInjectState } from '@/utils/createInjectState';
-import { GoalType, GoalStatus, Importance } from '@life-toolkit/enum';
+import { GoalType, GoalStatus, Importance } from '@true-north/enum';
 
 export type GoalDetailContextProps = {
   goalId?: string;

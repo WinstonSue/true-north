@@ -76,7 +76,7 @@ export class EntityModelDto extends OmitType(EntityDto, ['related'] as const) {}
 import { BaseModelDto } from '../../../base/base-model.dto';
 import { IntersectionType, OmitType } from 'francis-mapped-types';
 import dayjs from 'dayjs';
-import type { Entity as EntityVO } from '@life-toolkit/vo';
+import type { Entity as EntityVO } from '@true-north/vo';
 import { Entity } from '../entity.entity';
 
 export class EntityDto extends IntersectionType(BaseModelDto, OmitType(Entity, ['related'] as const)) {

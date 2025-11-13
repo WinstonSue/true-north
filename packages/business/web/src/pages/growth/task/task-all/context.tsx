@@ -12,10 +12,10 @@ import {
   TaskVo,
   TaskWithoutRelationsVo,
   TaskPageFilterVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import { TaskService } from '../../service';
 import { createInjectState } from '@/utils/createInjectState';
-import { TaskStatus } from '@life-toolkit/enum';
+import { TaskStatus } from '@true-north/enum';
 
 function useSyncState<T>(
   initialValue: T,

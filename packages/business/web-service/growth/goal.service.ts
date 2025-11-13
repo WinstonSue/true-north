@@ -1,11 +1,11 @@
-import { GoalController } from '@life-toolkit/api';
+import { GoalController } from '@true-north/api';
 import type {
   CreateGoalVo,
   GoalPageFilterVo,
   GoalFilterVo,
   UpdateGoalVo,
   GoalWithoutRelationsVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import { useState, useEffect } from 'react';
 import { Message } from '../message';
 

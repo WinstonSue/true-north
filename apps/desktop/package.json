@@ -1,5 +1,5 @@
 {
-  "name": "life-toolkit-desktop",
+  "name": "true-north-desktop",
   "version": "1.0.0",
   "description": "life toolkit",
   "type": "module",
@@ -16,12 +16,12 @@
     "sync-entities:watch": "node scripts/sync-entities.js --watch"
   },
   "dependencies": {
-    "@life-toolkit/business-server": "workspace:*",
-    "@life-toolkit/business-web": "workspace:*",
-    "@life-toolkit/enum": "workspace:*",
+    "@true-north/business-server": "workspace:*",
+    "@true-north/business-web": "workspace:*",
+    "@true-north/enum": "workspace:*",
     "francis-mapped-types": "0.0.1",
-    "@life-toolkit/share-types": "workspace:*",
-    "@life-toolkit/common-web-utils": "workspace:*",
+    "@true-north/share-types": "workspace:*",
+    "@true-north/common-web-utils": "workspace:*",
     "francis-helper-repeat": "0.0.6",
     "francis-types-repeat": "0.0.1",
     "electron-ipc-restful": "0.0.1",

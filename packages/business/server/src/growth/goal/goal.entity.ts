@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { BaseEntity } from '@business/common';
-import { GoalType, GoalStatus, Importance, Difficulty } from '@life-toolkit/enum';
+import { GoalType, GoalStatus, Importance, Difficulty } from '@true-north/enum';
 import { Task } from '../task';
 import { Entity, Column, TreeChildren, TreeParent, Tree, OneToMany } from 'typeorm';
 import { IsEnum, IsOptional, IsString, IsNumber, IsArray } from 'class-validator';

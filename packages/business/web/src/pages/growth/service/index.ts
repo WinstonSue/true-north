@@ -8,4 +8,4 @@ export { default as TodoService } from './todo.service';
 
 export { default as HabitService } from './habit.service';
 
-export * from '@life-toolkit/web-service';
+export * from '@true-north/web-service';

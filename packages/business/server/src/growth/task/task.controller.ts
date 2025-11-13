@@ -1,4 +1,4 @@
-import type { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@life-toolkit/vo';
+import type { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
 import { TaskService } from './task.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
 import { TaskFilterDto, TaskPageFilterDto, UpdateTaskDto, CreateTaskDto, TaskDto } from './dto';

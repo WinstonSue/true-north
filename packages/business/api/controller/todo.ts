@@ -1,5 +1,5 @@
-import { request } from '@life-toolkit/share-request';
-import { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
+import { request } from '@true-north/share-request';
+import { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 
 export class TodoController {
   create(body: TodoVO.CreateTodoVo): Promise<any> {

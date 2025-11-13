@@ -1,6 +1,6 @@
 import { TodoVo, TodoWithoutRelationsVo } from './todo-model.vo';
 import { BaseFilterVo } from '../../common';
-import { TodoSource } from '@life-toolkit/enum';
+import { TodoSource } from '@true-north/enum';
 
 export type TodoFilterVo = {
   planDateStart?: string;

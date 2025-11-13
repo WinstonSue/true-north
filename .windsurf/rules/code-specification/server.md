@@ -72,7 +72,7 @@ globs:
 ```typescript
 // packages/business/server/src/{domain}/{module}/{module}.entity.ts
 import { BaseEntity } from '../../base/base.entity';
-import { EntityStatus, EntityType } from '@life-toolkit/enum';
+import { EntityStatus, EntityType } from '@true-north/enum';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { IsString, IsOptional, IsEnum, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -138,7 +138,7 @@ export class Module extends ModuleModel {
 // packages/business/server/src/{domain}/{module}/dto/create-{module}.dto.ts
 import { IsString, IsOptional, IsEnum, IsNumber, IsISO8601 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { EntityStatus } from '@life-toolkit/enum';
+import { EntityStatus } from '@true-north/enum';
 
 export class CreateModuleDto {
   /** 名称 */

@@ -4,10 +4,10 @@ import { Tag, Typography, Popover, Button } from '@arco-design/web-react';
 import { isToday } from 'date-fns';
 import { FlexibleContainer } from 'francis-component-react';
 import IconSelector from '../../components/IconSelector';
-import { SiteIcon } from '@life-toolkit/components-ui';
+import { SiteIcon } from '@true-north/components-ui';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { TaskService } from '../../service';
-import { TaskWithoutRelationsVo } from '@life-toolkit/vo';
+import { TaskWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
 

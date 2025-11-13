@@ -1,5 +1,5 @@
 {
-  "name": "life-toolkit-server",
+  "name": "true-north-server",
   "version": "1.0.0",
   "description": "Life Toolkit Server",
   "private": true,
@@ -41,7 +41,7 @@
     "typeorm-naming-strategies": "^4.1.0",
     "uuid": "^11.0.5",
     "xlsx": "^0.18.5",
-    "@life-toolkit/business-server": "workspace:*"
+    "@true-north/business-server": "workspace:*"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

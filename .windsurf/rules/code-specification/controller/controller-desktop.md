@@ -40,12 +40,12 @@ apps/desktop/src/database/growth/
 ### 基础Controller模板
 
 ```typescript
-import { {Module}Controller } from "@life-toolkit/business-server";
-import type { {Module} as {Module}VO } from "@life-toolkit/vo";
+import { {Module}Controller } from "@true-north/business-server";
+import type { {Module} as {Module}VO } from "@true-north/vo";
 import {
   {Module}PageFilterDto,
   {Module}ListFilterDto
-} from "@life-toolkit/business-server";
+} from "@true-north/business-server";
 
 /**
  * {资源名称}Desktop适配控制器
@@ -139,7 +139,7 @@ export const {module}IpcHandlers = {
 
 ```typescript
 import { ipcMain } from "electron";
-import { {Module}Controller } from "@life-toolkit/business-server";
+import { {Module}Controller } from "@true-north/business-server";
 import { {Module}DesktopController, {module}IpcHandlers } from "./{module}.controller";
 
 /**
@@ -183,8 +183,8 @@ export const {module}Handlers = {module}IpcHandlers;
 
 ```typescript
 // Desktop适配层使用包路径导入核心业务控制器
-import { {Module}Controller } from "@life-toolkit/business-server";
-import type { {Module} as {Module}VO } from "@life-toolkit/vo";
+import { {Module}Controller } from "@true-north/business-server";
+import type { {Module} as {Module}VO } from "@true-north/vo";
 
 // Electron IPC
 import { ipcMain } from "electron";

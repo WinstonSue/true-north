@@ -35,13 +35,13 @@ import {
   ModuleListFilterDto,
   ModuleDto,
   Module,
-} from '@life-toolkit/business-server';
+} from '@true-north/business-server';
 
 // 3. 导入工具类
 import dayjs from 'dayjs';
 
 // 4. 导入枚举和类型
-import { ModuleStatus } from '@life-toolkit/enum';
+import { ModuleStatus } from '@true-north/enum';
 ```
 
 ## 📋 实现规范
@@ -571,9 +571,9 @@ import {
   ModuleListFilterDto,
   ModuleDto,
   Module,
-} from '@life-toolkit/business-server';
+} from '@true-north/business-server';
 import dayjs from 'dayjs';
-import { ModuleStatus } from '@life-toolkit/enum';
+import { ModuleStatus } from '@true-north/enum';
 
 @Injectable()
 export class ModuleRepository {

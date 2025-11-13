@@ -1,7 +1,7 @@
 import { In, TreeRepository } from 'typeorm';
 import { AppDataSource } from '../../database.config';
-import { Task } from '@life-toolkit/business-server';
-import { TaskTreeRepository as _TaskTreeRepository } from '@life-toolkit/business-server';
+import { Task } from '@true-north/business-server';
+import { TaskTreeRepository as _TaskTreeRepository } from '@true-north/business-server';
 
 export class TaskTreeRepository implements _TaskTreeRepository {
   repo: TreeRepository<Task> = AppDataSource.getTreeRepository(Task);

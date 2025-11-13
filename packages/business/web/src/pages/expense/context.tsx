@@ -13,7 +13,7 @@ import {
   CreateTransactionVo,
   BudgetVo,
   CreateBudgetVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import dayjs from 'dayjs';
 interface ExpensesContextType {
   transactionList: TransactionVo[];

@@ -10,10 +10,10 @@ import {
   useRef,
   useEffect,
 } from 'react';
-import { TodoVo, TodoPageFilterVo } from '@life-toolkit/vo';
+import { TodoVo, TodoPageFilterVo } from '@true-north/vo';
 import { TodoService } from '../../service';
 import { createInjectState } from '@/utils/createInjectState';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoStatus } from '@true-north/enum';
 
 function useSyncState<T>(
   initialValue: T,

@@ -1,7 +1,7 @@
 import { Checkbox, DatePicker, Radio } from '@arco-design/web-react';
 import styles from './style.module.less';
 import { TodoService } from '../../service';
-import { TodoVo } from '@life-toolkit/vo';
+import { TodoVo } from '@true-north/vo';
 import { openModal } from '@/hooks/OpenModal';
 import dayjs from 'dayjs';
 import ConformDoneTime from './ConformDoneTime';

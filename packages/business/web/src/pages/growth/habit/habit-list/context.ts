@@ -13,12 +13,12 @@ import {
   Progress,
   Table,
 } from '@arco-design/web-react';
-import { HabitController, GoalController } from '@life-toolkit/api';
+import { HabitController, GoalController } from '@true-north/api';
 import {
   HabitWithoutRelationsVo,
   HabitPageFilterVo,
   GoalVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import { useHabitContext } from '../context';
 
 export const [HabitListProvider, useHabitListContext] = createInjectState<{

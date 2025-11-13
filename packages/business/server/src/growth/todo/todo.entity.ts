@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { BaseEntity } from '@business/common';
-import { TodoStatus, TodoSource } from '@life-toolkit/enum';
+import { TodoStatus, TodoSource } from '@true-north/enum';
 import { Task } from '../task';
 import { TodoRepeat } from './todo-repeat.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';

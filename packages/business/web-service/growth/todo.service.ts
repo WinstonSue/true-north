@@ -1,5 +1,5 @@
-import { TodoController } from '@life-toolkit/api';
-import type { Todo as TodoVO } from '@life-toolkit/vo';
+import { TodoController } from '@true-north/api';
+import type { Todo as TodoVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 

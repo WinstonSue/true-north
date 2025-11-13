@@ -1,9 +1,9 @@
-import { createInjectState } from '@life-toolkit/common-web-utils';
+import { createInjectState } from '@true-north/common-web-utils';
 import { useState } from 'react';
-import { GoalVo } from '@life-toolkit/vo';
+import { GoalVo } from '@true-north/vo';
 import { GoalService } from '../../service';
 import { Message } from '@arco-design/web-react';
-import { GoalType, GoalStatus } from '@life-toolkit/enum';
+import { GoalType, GoalStatus } from '@true-north/enum';
 
 export const [GoalMindMapContextProvider, useGoalMindMapContext] =
   createInjectState<{

@@ -4,8 +4,8 @@
   - 支持 model.dto.ts, form.dto.ts, filter.dto.ts 三种类型
 
   Usage:
-    pnpm -F @life-toolkit/dev-tools run sync:dto     # one-off
-    pnpm -F @life-toolkit/dev-tools run watch:dto    # watch
+    pnpm -F @true-north/dev-tools run sync:dto     # one-off
+    pnpm -F @true-north/dev-tools run watch:dto    # watch
 */
 
 import path from 'path';

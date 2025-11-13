@@ -41,12 +41,12 @@ apps/server/src/business/{module}/
 
 ```typescript
 import { Controller, Get, Post, Put, Delete, Body, Param, Query } from "@nestjs/common";
-import { {Module}Controller } from "@life-toolkit/business-server";
-import type { {Module} as {Module}VO } from "@life-toolkit/vo";
+import { {Module}Controller } from "@true-north/business-server";
+import type { {Module} as {Module}VO } from "@true-north/vo";
 import {
   {Module}PageFilterDto,
   {Module}ListFilterDto
-} from "@life-toolkit/business-server";
+} from "@true-north/business-server";
 
 /**
  * {资源名称}Server适配控制器
@@ -141,7 +141,7 @@ export class {Module}ServerController {
 ```typescript
 import { Module } from "@nestjs/common";
 import { {Module}ServerController } from "./{module}.controller";
-import { {Module}Controller } from "@life-toolkit/business-server";
+import { {Module}Controller } from "@true-north/business-server";
 
 /**
  * {资源名称}模块定义
@@ -167,8 +167,8 @@ export class {Module}Module {}
 
 ```typescript
 // Server适配层使用包路径导入核心业务控制器
-import { {Module}Controller } from "@life-toolkit/business-server";
-import type { {Module} as {Module}VO } from "@life-toolkit/vo";
+import { {Module}Controller } from "@true-north/business-server";
+import type { {Module} as {Module}VO } from "@true-north/vo";
 
 // NestJS装饰器
 import { Controller, Get, Post, Put, Delete, Body, Param, Query } from "@nestjs/common";

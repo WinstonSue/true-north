@@ -1,11 +1,11 @@
 import { Message } from '@arco-design/web-react';
-import { TodoController } from '@life-toolkit/api';
+import { TodoController } from '@true-north/api';
 import type {
   CreateTodoVo,
   TodoPageFilterVo,
   TodoFilterVo,
   UpdateTodoVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 
 export default class TodoService {
   /**

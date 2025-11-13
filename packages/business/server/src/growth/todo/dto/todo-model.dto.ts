@@ -3,9 +3,9 @@ import { IntersectionType } from 'francis-mapped-types';
 import { Todo, TodoWithoutRelations } from '../todo.entity';
 import { TaskDto } from '../../task';
 import { HabitDto } from '../../habit';
-import { Todo as TodoVO } from '@life-toolkit/vo';
+import { Todo as TodoVO } from '@true-north/vo';
 import dayjs from 'dayjs';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoStatus } from '@true-north/enum';
 import { TodoRepeatDto } from './todo-repeat-model.dto';
 
 export class TodoWithoutRelationsDto extends IntersectionType(BaseModelDto, TodoWithoutRelations) {}

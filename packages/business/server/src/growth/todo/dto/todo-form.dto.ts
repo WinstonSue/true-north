@@ -1,6 +1,6 @@
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
-import { TodoSource, TodoStatus } from '@life-toolkit/enum';
-import { Todo as TodoVO } from '@life-toolkit/vo';
+import { TodoSource, TodoStatus } from '@true-north/enum';
+import { Todo as TodoVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoDto } from './todo-model.dto';
 import { Todo } from '../todo.entity';

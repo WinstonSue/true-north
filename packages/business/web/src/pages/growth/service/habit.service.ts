@@ -1,10 +1,10 @@
 import { Message } from '@arco-design/web-react';
-import { HabitController } from '@life-toolkit/api';
+import { HabitController } from '@true-north/api';
 import type {
   CreateHabitVo,
   UpdateHabitVo,
   HabitFilterVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import {
   HabitFilter,
   HabitPageFilter,

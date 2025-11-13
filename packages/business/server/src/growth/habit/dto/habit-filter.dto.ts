@@ -2,8 +2,8 @@ import { PageFilterDto } from '../../../common';
 import { HabitDto } from './habit-model.dto';
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
 import { IsOptional, IsString, IsArray, IsEnum, IsDateString, IsBoolean } from 'class-validator';
-import { HabitFilterVo, HabitPageFilterVo } from '@life-toolkit/vo';
-import { HabitStatus, Importance, Difficulty } from '@life-toolkit/enum';
+import { HabitFilterVo, HabitPageFilterVo } from '@true-north/vo';
+import { HabitStatus, Importance, Difficulty } from '@true-north/enum';
 import { BaseFilterDto, importBaseVo } from '@business/common';
 
 export class HabitFilterDto extends IntersectionType(

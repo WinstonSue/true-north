@@ -5,8 +5,8 @@
 # 远程服务器配置
 REMOTE_HOST = 112.124.21.126
 REMOTE_USER = root
-REMOTE_PATH = /root/project/life-toolkit-server
-IMAGE_NAME = life-toolkit-server
+REMOTE_PATH = /root/project/true-north-server
+IMAGE_NAME = true-north-server
 PROD_IMAGE_TAG = production
 
 # 默认目标
@@ -75,22 +75,22 @@ build: check-env
 		echo "❌ dist 目录不存在，请先运行: pnpm build"; \
 		exit 1; \
 	fi
-	docker build -t life-toolkit-server:simple -f docker/config/Dockerfile .
+	docker build -t true-north-server:simple -f docker/config/Dockerfile .
 	@echo "✅ 镜像构建完成"
 
 # 运行应用容器
 run: build
 	@echo "🚀 启动应用容器..."
-	@docker stop life-toolkit-server 2>/dev/null || true
-	@docker rm life-toolkit-server 2>/dev/null || true
+	@docker stop true-north-server 2>/dev/null || true
+	@docker rm true-north-server 2>/dev/null || true
 	docker run -d \
-		--name life-toolkit-server \
+		--name true-north-server \
 		-p 3000:3000 \
 		--add-host host.docker.internal:host-gateway \
 		--env-file .env.development.local \
 		-e DB_HOST=host.docker.internal \
 		--restart unless-stopped \
-		life-toolkit-server:simple
+		true-north-server:simple
 	@echo "✅ 应用已启动！访问地址: http://localhost:3000"
 	@echo "💡 使用 .env.development.local 中的配置（DB_HOST 覆盖为 host.docker.internal）"
 
@@ -114,36 +114,36 @@ prod-compose: check-prod-env
 # 停止容器
 stop:
 	@echo "🛑 停止容器..."
-	@docker stop life-toolkit-server 2>/dev/null || true
+	@docker stop true-north-server 2>/dev/null || true
 	@docker-compose -f docker/config/docker-compose.yml down 2>/dev/null || true
 	@echo "✅ 容器已停止"
 
 # 停止生产环境容器
 prod-stop:
 	@echo "🛑 停止生产环境容器..."
-	@docker stop life-toolkit-server-prod 2>/dev/null || true
+	@docker stop true-north-server-prod 2>/dev/null || true
 	@docker-compose -f docker/config/docker-compose.prod.yml down 2>/dev/null || true
 	@echo "✅ 生产环境容器已停止"
 
 # 清理容器和镜像
 clean: stop
 	@echo "🧹 清理容器和镜像..."
-	@docker rm life-toolkit-server 2>/dev/null || true
-	@docker rmi life-toolkit-server:simple 2>/dev/null || true
+	@docker rm true-north-server 2>/dev/null || true
+	@docker rmi true-north-server:simple 2>/dev/null || true
 	@echo "✅ 清理完成"
 
 # 清理生产环境
 prod-clean: prod-stop
 	@echo "🧹 清理生产环境容器和镜像..."
-	@docker rm life-toolkit-server-prod 2>/dev/null || true
-	@docker rmi life-toolkit-server:production 2>/dev/null || true
+	@docker rm true-north-server-prod 2>/dev/null || true
+	@docker rmi true-north-server:production 2>/dev/null || true
 	@echo "✅ 生产环境清理完成"
 
 # 查看日志
 logs:
 	@echo "📋 查看应用日志..."
-	@if docker ps | grep -q life-toolkit-server; then \
-		docker logs -f life-toolkit-server; \
+	@if docker ps | grep -q true-north-server; then \
+		docker logs -f true-north-server; \
 	else \
 		echo "❌ 容器未运行"; \
 	fi
@@ -151,8 +151,8 @@ logs:
 # 查看生产环境日志
 prod-logs:
 	@echo "📋 查看生产环境日志..."
-	@if docker ps | grep -q life-toolkit-server-prod; then \
-		docker logs -f life-toolkit-server-prod; \
+	@if docker ps | grep -q true-north-server-prod; then \
+		docker logs -f true-north-server-prod; \
 	else \
 		echo "❌ 生产环境容器未运行"; \
 	fi
@@ -161,13 +161,13 @@ prod-logs:
 status:
 	@echo "📊 容器状态:"
 	@echo "============"
-	@docker ps --filter "name=life-toolkit-server" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "无运行中的容器"
+	@docker ps --filter "name=true-north-server" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "无运行中的容器"
 
 # 查看生产环境状态
 prod-status:
 	@echo "📊 生产环境容器状态:"
 	@echo "=================="
-	@docker ps --filter "name=life-toolkit-server-prod" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "无运行中的生产环境容器"
+	@docker ps --filter "name=true-north-server-prod" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || echo "无运行中的生产环境容器"
 
 # 保存生产镜像
 prod-save: check-prod-env
@@ -211,20 +211,20 @@ _do-deploy:
 	@ssh $(REMOTE_USER)@$(REMOTE_HOST) "\
 		cd $(REMOTE_PATH) && \
 		echo '🔄 停止旧容器...' && \
-		docker stop life-toolkit-server-prod 2>/dev/null || true && \
-		docker rm life-toolkit-server-prod 2>/dev/null || true && \
+		docker stop true-north-server-prod 2>/dev/null || true && \
+		docker rm true-north-server-prod 2>/dev/null || true && \
 		echo '📦 加载新镜像...' && \
 		docker load -i $(IMAGE_NAME)-$(PROD_IMAGE_TAG).tar && \
 		echo '🚀 启动新容器...' && \
 		docker run -d \
-			--name life-toolkit-server-prod \
+			--name true-north-server-prod \
 			-p 3000:3000 \
 			--env-file .env.production.local \
 			--restart unless-stopped \
 			$(IMAGE_NAME):$(PROD_IMAGE_TAG) && \
 		echo '✅ 部署完成！' && \
 		echo '📊 容器状态:' && \
-		docker ps --filter 'name=life-toolkit-server-prod' --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' \
+		docker ps --filter 'name=true-north-server-prod' --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' \
 	"
 	@echo "🎉 远程部署完成！"
 	@echo "🌐 访问地址: http://$(REMOTE_HOST):3000"
@@ -234,21 +234,21 @@ prod-remote-status:
 	@echo "📊 检查远程服务器状态..."
 	@ssh $(REMOTE_USER)@$(REMOTE_HOST) "\
 		echo '📊 远程服务器容器状态:' && \
-		docker ps --filter 'name=life-toolkit-server-prod' --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo '无运行中的容器' \
+		docker ps --filter 'name=true-north-server-prod' --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || echo '无运行中的容器' \
 	"
 
 # 查看远程服务器日志
 prod-remote-logs:
 	@echo "📋 查看远程服务器日志..."
 	@ssh $(REMOTE_USER)@$(REMOTE_HOST) "\
-		docker logs -f life-toolkit-server-prod \
+		docker logs -f true-north-server-prod \
 	"
 
 # 停止远程服务器容器
 prod-remote-stop:
 	@echo "🛑 停止远程服务器容器..."
 	@ssh $(REMOTE_USER)@$(REMOTE_HOST) "\
-		docker stop life-toolkit-server-prod 2>/dev/null || true && \
+		docker stop true-north-server-prod 2>/dev/null || true && \
 		echo '✅ 远程容器已停止' \
 	"
 

@@ -71,7 +71,7 @@ export class BaseEntity {
 import { BaseEntity } from '../../base/base.entity';
 
 // 2. 枚举和类型
-import { ModuleStatus, ModuleType } from '@life-toolkit/enum';
+import { ModuleStatus, ModuleType } from '@true-north/enum';
 
 // 3. 关联实体
 import { RelatedEntity } from '../related';
@@ -638,7 +638,7 @@ export enum ModuleType {
 
 // module.entity.ts
 import { BaseEntity } from '../../base/base.entity';
-import { ModuleStatus, ModuleType } from '@life-toolkit/enum';
+import { ModuleStatus, ModuleType } from '@true-north/enum';
 import { RelatedEntity } from '../related';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { IsString, IsOptional, IsEnum, IsArray, IsNumber, IsISO8601 } from 'class-validator';

@@ -1,6 +1,6 @@
 'use client';
 
-import { TodoVo, TodoWithoutRelationsVo } from '@life-toolkit/vo';
+import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import TriggerTodoStatus from './TriggerTodoStatus';
 import TodoItem from './TodoItem';
 

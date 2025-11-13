@@ -1,4 +1,4 @@
-import { TodoVo } from '@life-toolkit/vo';
+import { TodoVo } from '@true-north/vo';
 
 export type TodoFormData = {
   name: string;

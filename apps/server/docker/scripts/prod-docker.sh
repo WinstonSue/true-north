@@ -71,15 +71,15 @@ show_config() {
 # 构建生产镜像
 build_image() {
     echo "🔨 构建生产环境镜像..."
-    docker build -t life-toolkit-server:prod -f docker/config/Dockerfile .
+    docker build -t true-north-server:prod -f docker/config/Dockerfile .
     echo "✅ 生产镜像构建完成"
 }
 
 # 运行生产容器
 run_container() {
     echo "🧹 清理旧容器..."
-    docker stop life-toolkit-server-prod 2>/dev/null || true
-    docker rm life-toolkit-server-prod 2>/dev/null || true
+    docker stop true-north-server-prod 2>/dev/null || true
+    docker rm true-north-server-prod 2>/dev/null || true
 
     echo "🚀 启动生产环境容器..."
     
@@ -100,21 +100,21 @@ run_container() {
         echo "📡 检测到本地数据库配置，使用数据库主机: $HOST_IP"
         
         docker run -d \
-            --name life-toolkit-server-prod \
+            --name true-north-server-prod \
             -p 3000:3000 \
             --add-host host.docker.internal:host-gateway \
             -e DB_HOST=$HOST_IP \
             --env-file .env.production.local \
             --restart unless-stopped \
-            life-toolkit-server:prod
+            true-north-server:prod
     else
         # 使用远程数据库
         docker run -d \
-            --name life-toolkit-server-prod \
+            --name true-north-server-prod \
             -p 3000:3000 \
             --env-file .env.production.local \
             --restart unless-stopped \
-            life-toolkit-server:prod
+            true-north-server:prod
     fi
 
     # 等待容器启动
@@ -122,30 +122,30 @@ run_container() {
     sleep 5
 
     # 检查容器状态
-    if docker ps | grep -q "life-toolkit-server-prod"; then
+    if docker ps | grep -q "true-north-server-prod"; then
         echo "✅ 生产环境应用已启动！"
         echo "🌐 访问地址: http://localhost:3000"
         echo "💡 使用 .env.production.local 中的配置"
         echo ""
         echo "📊 容器状态:"
-        docker ps --filter "name=life-toolkit-server-prod" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+        docker ps --filter "name=true-north-server-prod" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
         echo ""
         echo "📋 有用的命令："
-        echo "  查看日志: docker logs -f life-toolkit-server-prod"
-        echo "  停止应用: docker stop life-toolkit-server-prod"
-        echo "  删除容器: docker rm life-toolkit-server-prod"
-        echo "  进入容器: docker exec -it life-toolkit-server-prod sh"
+        echo "  查看日志: docker logs -f true-north-server-prod"
+        echo "  停止应用: docker stop true-north-server-prod"
+        echo "  删除容器: docker rm true-north-server-prod"
+        echo "  进入容器: docker exec -it true-north-server-prod sh"
         echo ""
         echo "🔍 查看实时日志？(y/N): "
         read -r show_logs
         if [[ $show_logs =~ ^[Yy]$ ]]; then
             echo "📋 实时日志 (Ctrl+C 退出):"
-            docker logs -f life-toolkit-server-prod
+            docker logs -f true-north-server-prod
         fi
     else
         echo "❌ 容器启动失败！"
         echo "📋 错误日志:"
-        docker logs life-toolkit-server-prod
+        docker logs true-north-server-prod
         exit 1
     fi
 }

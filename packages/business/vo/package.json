@@ -1,5 +1,5 @@
 {
-  "name": "@life-toolkit/vo",
+  "name": "@true-north/vo",
   "version": "0.0.1",
   "type": "module",
   "main": "index.ts",
@@ -11,7 +11,7 @@
     }
   },
   "dependencies": {
-    "@life-toolkit/enum": "workspace:*"
+    "@true-north/enum": "workspace:*"
   },
   "peerDependencies": {
     "francis-helper-repeat": "0.0.6"

@@ -3,11 +3,11 @@
 import { useState, useEffect, Dispatch, useRef, useCallback } from 'react';
 import { TodoFormData, TodoService } from '../../service';
 import { createInjectState } from '@/utils/createInjectState';
-import { TodoVo, TodoWithoutRelationsVo } from '@life-toolkit/vo';
+import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoMapping } from '../../service';
-import { TodoStatus } from '@life-toolkit/enum';
-import { CreateTodoVo } from '@life-toolkit/vo';
+import { TodoStatus } from '@true-north/enum';
+import { CreateTodoVo } from '@true-north/vo';
 
 export type TodoDetailProviderProps = {
   children: React.ReactNode;

@@ -7,7 +7,7 @@ import type {
   GoalWithoutRelationsVo,
   TaskWithoutRelationsVo,
   CreateTaskVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import {
   TaskFormData,
   TaskService,

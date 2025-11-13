@@ -1,6 +1,6 @@
 module.exports = {
   script: 'serve',
-  name: 'life-toolkit-web',
+  name: 'true-north-web',
   env: {
     PM2_SERVE_PATH: './dist',
     PM2_SERVE_PORT: 8080,

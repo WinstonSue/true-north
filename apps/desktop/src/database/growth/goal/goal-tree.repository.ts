@@ -1,6 +1,6 @@
 import { In, TreeRepository } from 'typeorm';
 import { AppDataSource } from '../../database.config';
-import { Goal, GoalTreeRepository as _GoalTreeRepository } from '@life-toolkit/business-server';
+import { Goal, GoalTreeRepository as _GoalTreeRepository } from '@true-north/business-server';
 
 export class GoalTreeRepository implements _GoalTreeRepository {
   repo: TreeRepository<Goal> = AppDataSource.getTreeRepository(Goal);

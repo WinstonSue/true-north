@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsDateString, IsBoolean } from 'class-validator';
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
-import { GoalFilterVo, GoalPageFilterVo } from '@life-toolkit/vo';
+import { GoalFilterVo, GoalPageFilterVo } from '@true-north/vo';
 import { GoalDto } from './goal-model.dto';
 import { PageFilterDto } from '../../../common';
 import { BaseFilterDto, importBaseVo } from '@business/common';

@@ -24,11 +24,11 @@ import {
   IconPlayArrow,
   IconClose,
 } from '@arco-design/web-react/icon';
-import { HabitController } from '@life-toolkit/api';
-import { HabitVo } from '@life-toolkit/vo';
+import { HabitController } from '@true-north/api';
+import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
 import { useHabitContext } from './context';
-import { HabitStatus } from '@life-toolkit/enum';
+import { HabitStatus } from '@true-north/enum';
 import { DIFFICULTY_MAP } from '../constants';
 
 const { Title, Text, Paragraph } = Typography;

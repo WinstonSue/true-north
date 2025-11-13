@@ -1,5 +1,5 @@
-import { request } from '@life-toolkit/share-request';
-import { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@life-toolkit/vo';
+import { request } from '@true-north/share-request';
+import { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@true-north/vo';
 
 export default class GoalController {
   static async create(body: GoalVO.CreateGoalVo) {

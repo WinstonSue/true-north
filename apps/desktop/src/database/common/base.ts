@@ -1,5 +1,5 @@
 import { Repository, SelectQueryBuilder, DeleteResult, UpdateResult } from 'typeorm';
-import { BaseEntity } from '@life-toolkit/business-server';
+import { BaseEntity } from '@true-north/business-server';
 
 export class BaseRepository<Entity extends BaseEntity, FilterDto> {
   repo: Repository<Entity>;

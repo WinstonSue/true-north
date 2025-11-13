@@ -1,4 +1,4 @@
-import { TaskService as _TaskService } from '@life-toolkit/business-server';
+import { TaskService as _TaskService } from '@true-north/business-server';
 import { TaskRepository } from './task.repository';
 import { TaskTreeRepository } from './task-tree.repository';
 import { TodoRepository } from '../todo/todo.repository';

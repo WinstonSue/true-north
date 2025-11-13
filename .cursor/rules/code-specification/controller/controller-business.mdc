@@ -36,7 +36,7 @@ packages/business/server/src/{module}/
 
 ### 基础Controller模板
 ```typescript
-import type { {Module} as {Module}VO } from "@life-toolkit/vo";
+import type { {Module} as {Module}VO } from "@true-north/vo";
 import { {Module}Service } from "./{module}.service";
 import {
   Create{Module}Dto,

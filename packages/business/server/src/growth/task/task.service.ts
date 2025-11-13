@@ -1,7 +1,7 @@
 import { TaskRepository, TaskTreeRepository } from './task.repository';
 import { CreateTaskDto, UpdateTaskDto, TaskPageFilterDto, TaskFilterDto, TaskDto } from './dto';
 import { Task } from './task.entity';
-import { TaskStatus } from '@life-toolkit/enum';
+import { TaskStatus } from '@true-north/enum';
 import { TodoService, TodoRepository, TodoRepeatRepository } from '../todo';
 
 export class TaskService {

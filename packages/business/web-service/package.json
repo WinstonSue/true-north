@@ -1,5 +1,5 @@
 {
-  "name": "@life-toolkit/web-service",
+  "name": "@true-north/web-service",
   "type": "module",
   "main": "index.ts",
   "types": "index.ts",
@@ -15,10 +15,10 @@
     "lint": "npm run eslint && npm run stylelint"
   },
   "dependencies": {
-    "@life-toolkit/api": "workspace:*",
-    "@life-toolkit/vo": "workspace:*",
-    "@life-toolkit/enum": "workspace:*",
-    "@life-toolkit/share-types": "workspace:*"
+    "@true-north/api": "workspace:*",
+    "@true-north/vo": "workspace:*",
+    "@true-north/enum": "workspace:*",
+    "@true-north/share-types": "workspace:*"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

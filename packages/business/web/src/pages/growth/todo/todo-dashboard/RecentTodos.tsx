@@ -2,7 +2,7 @@
 
 import { Typography, List, Tag, Avatar } from '@arco-design/web-react';
 import { format, isToday, isTomorrow, isPast } from 'date-fns';
-import { TodoVo } from '@life-toolkit/vo';
+import { TodoVo } from '@true-north/vo';
 import {
   IconCheckCircle,
   IconClockCircle,

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron-ipc-restful';
-import type { Goal as GoalVO , ResponseListVo, ResponsePageVo, ResponseTreeVo} from '@life-toolkit/vo';
-import { GoalController as _GoalController } from '@life-toolkit/business-server';
+import type { Goal as GoalVO , ResponseListVo, ResponsePageVo, ResponseTreeVo} from '@true-north/vo';
+import { GoalController as _GoalController } from '@true-north/business-server';
 import { goalService } from './goal.service';
 
 @Controller('/goal')

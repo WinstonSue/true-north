@@ -116,7 +116,7 @@ business/
 ```
 
 ### 后端适配层（控制器/模块）(apps/server/src/business)
-- 作为 Nest 控制器与模块适配层，导入 `@life-toolkit/business-server` 的实体/服务/仓储。
+- 作为 Nest 控制器与模块适配层，导入 `@true-north/business-server` 的实体/服务/仓储。
 - 负责路由、鉴权、参数校验与请求/响应包装，业务逻辑在 `packages/business/server` 中实现。
 
 ### 前端页面模块 (packages/business/web/src/pages)
@@ -132,7 +132,7 @@ pages/
 └── ...                    # 其他功能页面
 ```
 
-apps/web 仅作为宿主入口，通过 `apps/web/src/main.tsx` 引入 `@life-toolkit/business-web` 的 `LifeToolkitApp`。
+apps/web 仅作为宿主入口，通过 `apps/web/src/main.tsx` 引入 `@true-north/business-web` 的 `LifeToolkitApp`。
 
 ## 📦 包管理架构
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, ReactNode, Dispatch, SetStateAction } from 'react';
 import { MindMapData } from '../types';
 import { useNodeOperations } from './hooks';
-import { createInjectState } from '@life-toolkit/common-web-utils';
+import { createInjectState } from '@true-north/common-web-utils';
 
 // 创建 Context
 

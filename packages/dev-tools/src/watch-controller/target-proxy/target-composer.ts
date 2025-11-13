@@ -1,255 +1,387 @@
 /**
- * 简化的代码生成器
- * 专注于目标代码控制器的代码同步
+ * Proxy 控制器代码生成器
+ * 专门处理 Proxy Controller 的代码生成和同步
+ * 现在基于 AST 操作而非字符串操作
  */
 
-import { IntermediateState, MethodDefinition, ConstructorDefinition } from '../core/intermediate-state/types';
+import { IntermediateState, MethodDefinition } from '../core/intermediate-state/types';
 import { SyncAction } from '../core/sync-engine';
+import { ASTClassInfo, ASTMethod, ASTComposer } from '../core/ast';
+
+export interface ASTModificationResult {
+  /** 修改后的 AST */
+  modifiedAST: ASTClassInfo;
+  /** 生成的代码 */
+  generatedCode: string;
+  /** 应用的操作数量 */
+  appliedActions: number;
+  /** 错误信息 */
+  errors: string[];
+}
 
 export class TargetProxyComposer {
+  private astComposer: ASTComposer;
   targetState: IntermediateState;
   sourceState: IntermediateState;
 
   constructor(targetState: IntermediateState, sourceState: IntermediateState) {
+    this.astComposer = new ASTComposer();
     this.targetState = targetState;
     this.sourceState = sourceState;
   }
   /**
-   * 应用同步操作到目标代码
+   * 应用同步操作到 Proxy 控制器代码
+   * 现在基于 AST 操作而非字符串操作
    */
-  applySyncActions(targetCode: string, actions: SyncAction[]): string {
-    let updatedCode = targetCode;
+  applySyncActions(actions: SyncAction[]): string {
+    // 使用新的 AST 代码生成器
+    const result = this.generateCodeFromDiff(this.targetState, this.sourceState, actions);
 
-    // 先处理构造函数更新
-    const constructorActions = actions.filter((a) => a.type === 'update_constructor');
-    for (const action of constructorActions) {
-      updatedCode = this.updateConstructor(updatedCode, action.data as ConstructorDefinition, this.targetState);
+    // 如果有错误，记录并返回原始代码
+    if (result.errors.length > 0) {
+      console.warn('AST 代码生成警告:', result.errors);
     }
 
-    // 然后重新生成整个类体，保持源码方法顺序
-    updatedCode = this.regenerateClassBody(updatedCode, this.sourceState, this.targetState);
-
-    return updatedCode;
+    console.log(`AST 代码生成成功，应用了 ${result.appliedActions}/${actions.length} 个操作`);
+    return result.generatedCode;
   }
 
   /**
-   * 重新生成类体，保持源码方法顺序
+   * 根据 diff 结果和同步操作生成新代码
    */
-  private regenerateClassBody(code: string, sourceState: IntermediateState, targetState: IntermediateState): string {
-    const classBodyRange = this.findClassBodyRange(code, targetState.metadata.className);
-    if (!classBodyRange) {
-      return code;
-    }
+  generateCodeFromDiff(
+    targetState: IntermediateState,
+    sourceState: IntermediateState,
+    actions: SyncAction[]
+  ): ASTModificationResult {
+    const errors: string[] = [];
+    let appliedActions = 0;
 
-    // 保留类定义之前的部分
-    const beforeClass = code.slice(0, classBodyRange.start);
-    const afterClass = code.slice(classBodyRange.end);
+    // 获取目标代码的 AST
+    const targetAST = targetState.astData;
 
-    // 生成新的类体内容
-    const classBodyLines: string[] = [];
+    // 创建 AST 的深拷贝进行修改
+    const modifiedAST = this.cloneAST(targetAST);
 
-    // 1. 保留构造函数实例化行
-    const existingBody = code.slice(classBodyRange.start, classBodyRange.end);
-    const instanceMatch = existingBody.match(/^\s*(private\s+readonly\s+controller\s*=\s*[^;]+;)/m);
-    if (instanceMatch) {
-      classBodyLines.push('  ' + instanceMatch[1]);
-      classBodyLines.push('');
-    }
-
-    // 2. 按源码顺序生成所有方法
-    const sourceMethodNames = Array.from(sourceState.methods.keys());
-    for (const methodName of sourceMethodNames) {
-      const sourceMethod = sourceState.methods.get(methodName);
-      if (sourceMethod) {
-        const methodCode = this.generateDesktopMethod(sourceMethod);
-        classBodyLines.push(methodCode);
-        classBodyLines.push('');
-      }
-    }
-
-    // 移除最后一个空行
-    if (classBodyLines[classBodyLines.length - 1] === '') {
-      classBodyLines.pop();
-    }
-
-    const newClassBody = classBodyLines.join('\n');
-    return beforeClass + '\n' + newClassBody + '\n' + afterClass;
-  }
-
-  /**
-   * 更新构造函数
-   */
-  private updateConstructor(code: string, constructor: ConstructorDefinition, targetState: IntermediateState): string {
-    // 查找控制器实例化行
-    const instancePattern = /private\s+readonly\s+controller\s*=\s*new\s+[^;]+;/;
-    const match = code.match(instancePattern);
-
-    if (constructor.parameters.length > 0) {
-      const serviceNames = constructor.parameters.map((p) => p.name);
-      const newInstantiation = `  private readonly controller = new _${targetState.metadata.className}(${serviceNames.join(', ')});`;
-
-      if (match) {
-        // 更新现有的实例化行
-        return code.replace(instancePattern, newInstantiation);
-      } else {
-        // 在类开头添加实例化行
-        const classStart = code.indexOf('export class ' + targetState.metadata.className);
-        if (classStart === -1) return code;
-
-        const classBodyStart = code.indexOf('{', classStart) + 1;
-        const before = code.slice(0, classBodyStart);
-        const after = code.slice(classBodyStart);
-
-        // 检查是否已经有内容，如果有则添加换行
-        const hasContent = after.trim().length > 1; // 排除只有闭合大括号的情况
-        const spacing = hasContent ? '\n' : '';
-
-        return before + '\n' + newInstantiation + spacing + after;
-      }
-    }
-
-    return code;
-  }
-
-  /**
-   * 生成目标代码方法代码
-   */
-  private generateDesktopMethod(method: MethodDefinition): string {
-    const lines: string[] = [];
-
-    // 生成装饰器
-    const { verb, path, decoratorOptions } = method;
-    if (decoratorOptions && Object.keys(decoratorOptions).length > 0) {
-      const optionsStr = JSON.stringify(decoratorOptions);
-      lines.push(`  @${verb}('${path}', ${optionsStr})`);
-    } else {
-      lines.push(`  @${verb}('${path}')`);
-    }
-
-    // 生成方法签名
-    const params = method.parameters
-      .map((param) => {
-        const { decorator, decoratorArgs, name, type, optional } = param;
-        // 修复引号问题：检查 decoratorArgs 是否已经包含引号
-        let decoratorStr;
-        if (decoratorArgs && decoratorArgs.length > 0) {
-          const arg = decoratorArgs[0];
-          // 如果参数已经包含引号，直接使用；否则添加引号
-          const argStr = arg.startsWith("'") && arg.endsWith("'") ? arg : `'${arg}'`;
-          decoratorStr = `@${decorator}(${argStr})`;
+    // 应用同步操作
+    for (const action of actions) {
+      try {
+        const success = this.applyActionToAST(modifiedAST, action, sourceState);
+        if (success) {
+          appliedActions++;
         } else {
-          decoratorStr = `@${decorator}()`;
+          errors.push(`应用操作失败: ${action.type} - ${action.description}`);
         }
-        const optionalStr = optional ? '?' : '';
-        return `${decoratorStr} ${name}${optionalStr}: ${type}`;
-      })
-      .join(', ');
-
-    // 处理返回类型，避免双重 Promise
-    const returnType = method.returnType.startsWith('Promise<') ? method.returnType : `Promise<${method.returnType}>`;
-    lines.push(`  async ${method.name}(${params}): ${returnType} {`);
-
-    // 生成方法体 - 简单的代理调用
-    const callParams = method.parameters.map((p) => p.name).join(', ');
-    lines.push(`    return this.controller.${method.name}(${callParams});`);
-    lines.push('  }');
-
-    return lines.join('\n');
-  }
-
-  /**
-   * 查找类体范围
-   */
-  private findClassBodyRange(code: string, className: string): { start: number; end: number } | null {
-    const classRegex = new RegExp(`export\\s+class\\s+${className}\\s*{`, 'g');
-    const match = classRegex.exec(code);
-
-    if (!match) {
-      return null;
-    }
-
-    const startBrace = code.indexOf('{', match.index);
-    if (startBrace === -1) {
-      return null;
-    }
-
-    // 找到匹配的闭合大括号
-    let braceCount = 1;
-    let i = startBrace + 1;
-
-    while (i < code.length && braceCount > 0) {
-      if (code[i] === '{') {
-        braceCount++;
-      } else if (code[i] === '}') {
-        braceCount--;
+      } catch (error) {
+        errors.push(`应用操作异常: ${action.type} - ${error}`);
       }
-      i++;
+    }
+
+    // 从修改后的 AST 生成代码
+    let generatedCode = '';
+    try {
+      generatedCode = this.generateCodeFromAST(modifiedAST);
+    } catch (error) {
+      errors.push(`从 AST 生成代码失败: ${error}`);
+      // 如果生成失败，尝试使用原始代码
+      generatedCode = targetState.code || '';
     }
 
     return {
-      start: startBrace + 1,
-      end: i - 1,
+      modifiedAST,
+      generatedCode,
+      appliedActions,
+      errors,
     };
   }
 
   /**
-   * 查找方法范围 - 最终修复版本
+   * 应用单个同步操作到 AST
    */
-  private findMethodRange(code: string, methodName: string): { start: number; end: number } | null {
-    // 使用更简单但更可靠的方法：查找方法名，然后向前向后扩展
-    const methodRegex = new RegExp(`async\\s+${methodName}\\s*\\(`, 'g');
-    const match = methodRegex.exec(code);
+  private applyActionToAST(ast: ASTClassInfo, action: SyncAction, sourceState: IntermediateState): boolean {
+    switch (action.type) {
+      case 'add_method':
+        return this.addMethodToAST(ast, action.data as MethodDefinition, sourceState);
 
-    if (!match) {
-      return null;
+      case 'remove_method':
+        return this.removeMethodFromAST(ast, action.methodName!);
+
+      case 'update_method':
+        return this.updateMethodInAST(ast, action.methodName!, action.data as MethodDefinition, sourceState);
+
+      case 'update_constructor':
+        return this.updateConstructorInAST(ast, action.data);
+
+      case 'update_imports':
+        return this.updateImportsInAST(ast, action.data);
+
+      default:
+        return false;
     }
+  }
 
-    // 从匹配位置向前查找装饰器开始
-    let start = match.index;
-    const lines = code.substring(0, start).split('\n');
-
-    // 向前查找到非装饰器、非空行为止
-    let lineIndex = lines.length - 1;
-    while (lineIndex > 0) {
-      const prevLine = lines[lineIndex - 1].trim();
-      if (prevLine.startsWith('@') || prevLine === '') {
-        lineIndex--;
+  /**
+   * 向 AST 添加方法
+   */
+  private addMethodToAST(ast: ASTClassInfo, method: MethodDefinition, sourceState: IntermediateState): boolean {
+    try {
+      // 检查方法是否已存在
+      const existingIndex = ast.methods.findIndex((m) => m.name === method.name);
+      if (existingIndex >= 0) {
+        // 如果存在，替换它
+        ast.methods[existingIndex] = this.convertMethodDefinitionToASTMethod(method, sourceState);
       } else {
-        break;
+        // 如果不存在，添加新方法
+        ast.methods.push(this.convertMethodDefinitionToASTMethod(method, sourceState));
       }
+      return true;
+    } catch (error) {
+      console.error('添加方法到 AST 失败:', error);
+      return false;
     }
+  }
 
-    // 重新计算开始位置
-    if (lineIndex === 0) {
-      start = 0;
-    } else {
-      start = lines.slice(0, lineIndex).join('\n').length + 1; // +1 for the newline
-    }
-
-    // 找到方法体结束
-    const methodBodyStart = code.indexOf('{', match.index);
-    if (methodBodyStart === -1) return null;
-
-    let braceCount = 1;
-    let i = methodBodyStart + 1;
-
-    while (i < code.length && braceCount > 0) {
-      if (code[i] === '{') {
-        braceCount++;
-      } else if (code[i] === '}') {
-        braceCount--;
+  /**
+   * 从 AST 删除方法
+   */
+  private removeMethodFromAST(ast: ASTClassInfo, methodName: string): boolean {
+    try {
+      const methodIndex = ast.methods.findIndex((m) => m.name === methodName);
+      if (methodIndex >= 0) {
+        ast.methods.splice(methodIndex, 1);
+        return true;
       }
-      i++;
+      return false;
+    } catch (error) {
+      console.error('从 AST 删除方法失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 更新 AST 中的方法
+   */
+  private updateMethodInAST(
+    ast: ASTClassInfo,
+    methodName: string,
+    method: MethodDefinition,
+    sourceState: IntermediateState
+  ): boolean {
+    try {
+      const methodIndex = ast.methods.findIndex((m) => m.name === methodName);
+      if (methodIndex >= 0) {
+        ast.methods[methodIndex] = this.convertMethodDefinitionToASTMethod(method, sourceState);
+        return true;
+      } else {
+        // 如果方法不存在，添加它
+        return this.addMethodToAST(ast, method, sourceState);
+      }
+    } catch (error) {
+      console.error('更新 AST 方法失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 更新 AST 中的构造函数
+   */
+  private updateConstructorInAST(ast: ASTClassInfo, constructorData: any): boolean {
+    try {
+      if (constructorData && ast.constructor) {
+        // 更新构造函数参数
+        ast.constructor.parameters = constructorData.parameters || ast.constructor.parameters;
+      }
+      return true;
+    } catch (error) {
+      console.error('更新 AST 构造函数失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 更新 AST 中的导入声明
+   */
+  private updateImportsInAST(ast: ASTClassInfo, importsData: any): boolean {
+    try {
+      if (Array.isArray(importsData)) {
+        ast.imports = importsData;
+      }
+      return true;
+    } catch (error) {
+      console.error('更新 AST 导入失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 将 MethodDefinition 转换为 ASTMethod
+   */
+  private convertMethodDefinitionToASTMethod(method: MethodDefinition, _sourceState: IntermediateState): ASTMethod {
+    return {
+      name: method.name,
+      decorators: this.convertDecoratorsToAST(method),
+      parameters: method.parameters.map((p) => ({
+        name: p.name,
+        type: p.type,
+        optional: p.optional,
+        decorators: p.decoratorArgs
+          ? [
+              {
+                name: p.decorator,
+                arguments: p.decoratorArgs.map((arg) => ({
+                  type: 'string' as const,
+                  value: arg,
+                  rawText: `'${arg}'`,
+                })),
+              },
+            ]
+          : [],
+      })),
+      returnType: method.returnType.startsWith('Promise<') ? method.returnType : `Promise<${method.returnType}>`,
+      bodyText: this.generateProxyMethodBody(method),
+      sourceLocation: method.sourceLocation,
+      methodDeclaration: null as any, // 这里需要重新生成时会被设置
+    };
+  }
+
+  /**
+   * 转换装饰器到 AST 格式
+   */
+  private convertDecoratorsToAST(method: MethodDefinition) {
+    const decorators = [];
+
+    // 添加 HTTP 方法装饰器
+    decorators.push({
+      name: method.verb,
+      arguments: [
+        {
+          type: 'string' as const,
+          value: method.path,
+          rawText: `'${method.path}'`,
+        },
+      ],
+    });
+
+    // 如果有装饰器选项，添加它们
+    if (method.decoratorOptions) {
+      Object.entries(method.decoratorOptions).forEach(([key, value]) => {
+        decorators.push({
+          name: key,
+          arguments: [
+            {
+              type: 'object' as const,
+              value: JSON.stringify(value),
+              rawText: JSON.stringify(value),
+            },
+          ],
+        });
+      });
     }
 
-    // 包含方法后的空行
-    while (i < code.length && (code[i] === '\n' || code[i] === '\r')) {
-      i++;
+    return decorators;
+  }
+
+  /**
+   * 生成 Proxy 方法体
+   */
+  private generateProxyMethodBody(method: MethodDefinition): string {
+    // 生成方法体 - 简单的代理调用
+    const callParams = method.parameters.map((p) => p.name).join(', ');
+    return `return this.controller.${method.name}(${callParams});`;
+  }
+
+  /**
+   * 从 AST 生成完整代码
+   */
+  private generateCodeFromAST(ast: ASTClassInfo): string {
+    return this.astComposer.generateCodeFromAST(ast, {
+      preserveFormatting: false,
+      preserveComments: true,
+      indentChar: ' ',
+      indentSize: 2,
+    });
+  }
+
+  /**
+   * 深拷贝 AST 对象
+   */
+  private cloneAST(ast: ASTClassInfo): ASTClassInfo {
+    return {
+      className: ast.className,
+      decorators: ast.decorators.map((d) => ({
+        name: d.name,
+        arguments: d.arguments.map((arg) => ({ ...arg })),
+      })),
+      methods: ast.methods.map((m) => ({
+        name: m.name,
+        decorators: m.decorators.map((d) => ({
+          name: d.name,
+          arguments: d.arguments.map((arg) => ({ ...arg })),
+        })),
+        parameters: m.parameters.map((p) => ({
+          name: p.name,
+          type: p.type,
+          optional: p.optional,
+          decorators: p.decorators.map((d) => ({
+            name: d.name,
+            arguments: d.arguments.map((arg) => ({ ...arg })),
+          })),
+        })),
+        returnType: m.returnType,
+        bodyText: m.bodyText,
+        sourceLocation: { ...m.sourceLocation },
+        methodDeclaration: m.methodDeclaration,
+      })),
+      constructor: ast.constructor
+        ? {
+            parameters: ast.constructor.parameters.map((p) => ({
+              name: p.name,
+              type: p.type,
+              modifiers: [...p.modifiers],
+            })),
+          }
+        : undefined,
+      imports: ast.imports.map((i) => ({
+        source: i.source,
+        specifiers: i.specifiers.map((s) => ({ ...s })),
+        importType: i.importType,
+      })),
+      sourceFile: ast.sourceFile,
+      classDeclaration: ast.classDeclaration,
+    };
+  }
+
+  /**
+   * 验证 AST 结构完整性
+   */
+  validateAST(ast: ASTClassInfo): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!ast.className) {
+      errors.push('缺少类名');
     }
+
+    if (!ast.methods || ast.methods.length === 0) {
+      errors.push('缺少方法定义');
+    }
+
+    // 检查方法名重复
+    const methodNames = ast.methods.map((m) => m.name);
+    const duplicates = methodNames.filter((name, index) => methodNames.indexOf(name) !== index);
+    if (duplicates.length > 0) {
+      errors.push(`方法名重复: ${duplicates.join(', ')}`);
+    }
+
+    // 检查方法体
+    ast.methods.forEach((method) => {
+      if (!method.bodyText || method.bodyText.trim() === '') {
+        errors.push(`方法 ${method.name} 缺少方法体`);
+      }
+    });
 
     return {
-      start,
-      end: i,
+      isValid: errors.length === 0,
+      errors,
     };
   }
 }

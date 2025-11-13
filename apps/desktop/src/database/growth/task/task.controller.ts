@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron-ipc-restful';
-import { TaskController as _TaskController } from '@life-toolkit/business-server';
+import { TaskController as _TaskController } from '@true-north/business-server';
 import { taskService } from './task.service';
-import { ResponseListVo, ResponsePageVo, type Task as TaskVO } from '@life-toolkit/vo';
+import { ResponseListVo, ResponsePageVo, type Task as TaskVO } from '@true-north/vo';
 
 @Controller('/task')
 export class TaskController {

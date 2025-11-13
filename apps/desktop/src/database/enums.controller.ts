@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import type { RouteDef, RestHandlerCtx } from 'electron-ipc-restful';
-import { TodoStatus, TodoSource, HabitStatus, Difficulty, TaskStatus, GoalType, GoalStatus } from '@life-toolkit/enum';
+import { TodoStatus, TodoSource, HabitStatus, Difficulty, TaskStatus, GoalType, GoalStatus } from '@true-north/enum';
 
 /**
  * 注册枚举类型相关的 IPC 处理器

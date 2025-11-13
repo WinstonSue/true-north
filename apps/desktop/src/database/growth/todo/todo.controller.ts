@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron-ipc-restful';
-import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
-import { TodoController as _TodoController } from '@life-toolkit/business-server';
+import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
+import { TodoController as _TodoController } from '@true-north/business-server';
 import { todoService, todoRepeatService } from './todo.service';
 
 @Controller('/todo')

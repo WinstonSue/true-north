@@ -9,7 +9,7 @@ set -e
 REMOTE_HOST="112.124.21.126"
 REMOTE_USER="root"
 REMOTE_PATH="/root/project"
-IMAGE_NAME="life-toolkit-server"
+IMAGE_NAME="true-north-server"
 PROD_IMAGE_TAG="remote"
 
 echo "🚀 Life Toolkit Server - 远程发布脚本"
@@ -125,8 +125,8 @@ deploy_on_remote() {
         cd ${REMOTE_PATH}
         
         echo '🔄 停止旧容器...'
-        docker stop life-toolkit-server-remote 2>/dev/null || true
-        docker rm life-toolkit-server-remote 2>/dev/null || true
+        docker stop true-north-server-remote 2>/dev/null || true
+        docker rm true-north-server-remote 2>/dev/null || true
         
         echo '🧹 清理旧镜像...'
         docker rmi ${IMAGE_NAME}:${PROD_IMAGE_TAG} 2>/dev/null || true
@@ -164,7 +164,7 @@ deploy_on_remote() {
         
         echo '🚀 启动新容器...'
         if ! docker run -d \\
-            --name life-toolkit-server-remote \\
+            --name true-north-server-remote \\
             -p 3000:3000 \\
             --env-file .env.production.local \\
             --restart unless-stopped \\
@@ -183,13 +183,13 @@ deploy_on_remote() {
         sleep 5
         
         echo '📊 检查容器状态:'
-        if docker ps | grep -q 'life-toolkit-server-remote'; then
-            docker ps --filter 'name=life-toolkit-server-remote' --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}'
+        if docker ps | grep -q 'true-north-server-remote'; then
+            docker ps --filter 'name=true-north-server-remote' --format 'table {{.Names}}\\t{{.Status}}\\t{{.Ports}}'
             echo '✅ 容器启动成功！'
         else
             echo '❌ 容器启动失败！'
             echo '📋 错误日志:'
-            docker logs life-toolkit-server-remote
+            docker logs true-north-server-remote
             exit 1
         fi
         
@@ -207,19 +207,19 @@ show_result() {
     echo "🌐 访问地址: http://${REMOTE_HOST}:3000"
     echo "📋 部署信息:"
     echo "  镜像文件: $LOCAL_IMAGE_FILE"
-    echo "  容器名称: life-toolkit-server-remote"
+    echo "  容器名称: true-north-server-remote"
     echo "  部署路径: ${REMOTE_PATH}"
     echo ""
     echo "📋 有用的命令："
     echo "  查看远程状态: ssh ${REMOTE_USER}@${REMOTE_HOST} 'docker ps | grep life-toolkit'"
-    echo "  查看远程日志: ssh ${REMOTE_USER}@${REMOTE_HOST} 'docker logs -f life-toolkit-server-remote'"
-    echo "  停止远程容器: ssh ${REMOTE_USER}@${REMOTE_HOST} 'docker stop life-toolkit-server-remote'"
+    echo "  查看远程日志: ssh ${REMOTE_USER}@${REMOTE_HOST} 'docker logs -f true-north-server-remote'"
+    echo "  停止远程容器: ssh ${REMOTE_USER}@${REMOTE_HOST} 'docker stop true-north-server-remote'"
     echo ""
     echo "🔍 立即查看远程日志？(y/N): "
     read -r show_logs
     if [[ $show_logs =~ ^[Yy]$ ]]; then
         echo "📋 远程服务器日志 (Ctrl+C 退出)："
-        ssh ${REMOTE_USER}@${REMOTE_HOST} "docker logs -f life-toolkit-server-remote"
+        ssh ${REMOTE_USER}@${REMOTE_HOST} "docker logs -f true-north-server-remote"
     fi
 }
 

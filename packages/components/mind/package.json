@@ -1,5 +1,5 @@
 {
-  "name": "@life-toolkit/components-mind",
+  "name": "@true-north/components-mind",
   "version": "0.2.0",
   "private": true,
   "module": "src/index.js",
@@ -21,7 +21,7 @@
     "@antv/x6-react-shape": "^2.2.3",
     "@antv/xflow": "^2.1.13",
     "@arco-design/web-react": "^2.66.0",
-    "@life-toolkit/common-web-utils": "workspace:*",
+    "@true-north/common-web-utils": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

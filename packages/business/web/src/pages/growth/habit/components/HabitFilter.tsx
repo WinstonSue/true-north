@@ -10,7 +10,7 @@ import {
   Grid,
 } from '@arco-design/web-react';
 import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
-import { HabitPageFilterVo, GoalVo } from '@life-toolkit/vo';
+import { HabitPageFilterVo, GoalVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS, HABIT_DIFFICULTY_OPTIONS } from '../constants';
 
 const { Option } = Select;

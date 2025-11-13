@@ -1,7 +1,7 @@
 import { Checkbox, Modal } from '@arco-design/web-react';
 import styles from './style.module.less';
 import { GoalService } from '../../service';
-import { GoalVo } from '@life-toolkit/vo';
+import { GoalVo } from '@true-north/vo';
 
 export default function TriggerStatusCheckbox(props: {
   goal: {

@@ -1,12 +1,12 @@
 import { Message } from '@arco-design/web-react';
-import { GoalController } from '@life-toolkit/api';
+import { GoalController } from '@true-north/api';
 import type {
   CreateGoalVo,
   GoalPageFilterVo,
   GoalFilterVo,
   UpdateGoalVo,
   GoalWithoutRelationsVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import { useState, useEffect } from 'react';
 
 export default class GoalService {

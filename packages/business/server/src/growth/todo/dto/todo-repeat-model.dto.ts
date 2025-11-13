@@ -3,7 +3,7 @@ import { BaseModelDto, BaseMapper } from '@business/common';
 import { IntersectionType } from 'francis-mapped-types';
 import { TodoRepeat, TodoRepeatWithoutRelations } from '../todo-repeat.entity';
 import { Todo } from '../../todo/todo.entity';
-import type { Todo as TodoVO } from '@life-toolkit/vo';
+import type { Todo as TodoVO } from '@true-north/vo';
 
 export class TodoRepeatWithoutRelationsDto extends TodoRepeatWithoutRelations {}
 

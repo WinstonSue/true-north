@@ -80,7 +80,7 @@ export function generateVoImports(dtoClasses: DtoClass[], dtoFilePath: string): 
   // 生成枚举类型导入
   if (enumSet.size > 0) {
     const enumImports = Array.from(enumSet).sort();
-    imports.push(`import { ${enumImports.join(', ')} } from '@life-toolkit/enum';`);
+    imports.push(`import { ${enumImports.join(', ')} } from '@true-north/enum';`);
   }
 
   // 生成关联 VO 的导入

@@ -14,10 +14,10 @@ import {
   GoalVo,
   GoalWithoutRelationsVo,
   GoalPageFilterVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import { GoalService } from '../../service';
 import { createInjectState } from '@/utils/createInjectState';
-import { GoalType, GoalStatus } from '@life-toolkit/enum';
+import { GoalType, GoalStatus } from '@true-north/enum';
 
 function useSyncState<T>(
   initialValue: T,

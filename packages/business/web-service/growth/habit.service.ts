@@ -1,5 +1,5 @@
-import { HabitController } from '@life-toolkit/api';
-import type { CreateHabitVo, UpdateHabitVo, HabitFilterVo, HabitPageFilterVo } from '@life-toolkit/vo';
+import { HabitController } from '@true-north/api';
+import type { CreateHabitVo, UpdateHabitVo, HabitFilterVo, HabitPageFilterVo } from '@true-north/vo';
 import { Message } from '../message';
 
 export default class HabitService {

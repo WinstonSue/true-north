@@ -1,4 +1,4 @@
-import type { TodoVo, UpdateTodoVo } from '@life-toolkit/vo';
+import type { TodoVo, UpdateTodoVo } from '@true-north/vo';
 import type { TodoFormData } from './todo.types';
 
 export default class TodoMapping {

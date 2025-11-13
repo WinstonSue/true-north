@@ -16,7 +16,7 @@ import './mock';
 import Router from './router';
 import { generatePermission } from './router/routes';
 import 'dayjs/locale/zh-cn';
-import '@life-toolkit/share-types';
+import '@true-north/share-types';
 import dayjs from 'dayjs';
 
 dayjs.locale('zh-cn');

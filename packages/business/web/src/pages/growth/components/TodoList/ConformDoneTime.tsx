@@ -1,7 +1,7 @@
 import { Radio, DatePicker } from '@arco-design/web-react';
 import dayjs, { Dayjs } from 'dayjs';
 import { useState } from 'react';
-import { TodoVo } from '@life-toolkit/vo';
+import { TodoVo } from '@true-north/vo';
 
 export default function DoneTimeConform(props: {
   todo: TodoVo;

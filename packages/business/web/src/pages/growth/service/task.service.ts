@@ -1,12 +1,12 @@
 import { Message } from '@arco-design/web-react';
-import { TaskController } from '@life-toolkit/api';
+import { TaskController } from '@true-north/api';
 import type {
   CreateTaskVo,
   TaskPageFilterVo,
   TaskFilterVo,
   TaskWithoutRelationsVo,
   UpdateTaskVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import { useState, useEffect } from 'react';
 export default class TaskService {
   static async getTaskDetail(taskId: string) {

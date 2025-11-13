@@ -2,7 +2,7 @@ import { Habit, HabitWithoutRelations } from '../habit.entity';
 import { BaseModelDto, BaseMapper } from '@business/common';
 import { OmitType, IntersectionType } from 'francis-mapped-types';
 import dayjs from 'dayjs';
-import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
+import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { GoalDto } from '../../goal';
 import { TodoDto } from '../../todo';
 

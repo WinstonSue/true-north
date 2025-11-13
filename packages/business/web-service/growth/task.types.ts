@@ -3,7 +3,7 @@ import {
   TaskVo,
   TrackTimeWithoutRelationsVo,
   TodoVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 
 export type TaskFormData = {
   id?: string;

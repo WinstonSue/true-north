@@ -1,5 +1,5 @@
 {
-  "name": "@life-toolkit/helpers",
+  "name": "@true-north/helpers",
   "version": "0.0.2",
   "description": "助手函数库",
   "main": "dist/index.js",

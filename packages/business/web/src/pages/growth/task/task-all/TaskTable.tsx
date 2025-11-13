@@ -4,9 +4,9 @@ import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { useTaskAllContext } from './context';
 import { useEffect, useState } from 'react';
 import { TaskService } from '../../service';
-import { TaskVo } from '@life-toolkit/vo';
+import { TaskVo } from '@true-north/vo';
 import { useTaskDetail } from '../../components';
-import { TaskStatus } from '@life-toolkit/enum';
+import { TaskStatus } from '@true-north/enum';
 
 export default function TaskTable() {
   const { taskList, getTaskPage } = useTaskAllContext();

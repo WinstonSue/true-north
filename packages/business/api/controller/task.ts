@@ -1,5 +1,5 @@
-import { request } from '@life-toolkit/share-request';
-import { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@life-toolkit/vo';
+import { request } from '@true-north/share-request';
+import { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
 
 export default class TaskController {
   static async create(body: TaskVO.CreateTaskVo) {

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Entity, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
-import { Difficulty, HabitStatus, Importance } from '@life-toolkit/enum';
+import { Difficulty, HabitStatus, Importance } from '@true-north/enum';
 import { BaseEntity } from '@business/common';
 import { RepeatMode, RepeatEndMode } from 'francis-types-repeat';
 import type { RepeatConfig } from 'francis-types-repeat';

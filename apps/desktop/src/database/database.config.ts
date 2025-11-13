@@ -4,7 +4,7 @@ import { app } from 'electron';
 import path from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { User } from './users/user.entity';
-import { Goal, Habit, Task, Todo, TodoRepeat } from '@life-toolkit/business-server';
+import { Goal, Habit, Task, Todo, TodoRepeat } from '@true-north/business-server';
 
 // 开发环境使用项目数据库
 const getDatabasePath = () => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { TodoVo, TodoFilterVo } from '@life-toolkit/vo';
+import { TodoVo, TodoFilterVo } from '@true-north/vo';
 import { TodoService } from '../../service';
 
 interface TodoContextType {

@@ -1,6 +1,6 @@
 import { BaseEntityVo } from '../../common';
 import { GoalVo } from '../goal/goal-model.vo';
-import { HabitStatus, Difficulty, Importance } from '@life-toolkit/enum';
+import { HabitStatus, Difficulty, Importance } from '@true-north/enum';
 import { TodoVo } from '../todo/todo-model.vo';
 
 export type HabitWithoutRelationsVo = {

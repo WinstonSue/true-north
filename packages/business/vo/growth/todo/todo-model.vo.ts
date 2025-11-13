@@ -1,7 +1,7 @@
 import { BaseEntityVo } from '../../common';
 import { TaskVo } from '../task/task-model.vo';
 import { TodoRepeatVo } from './todo-repeat-model.vo';
-import { TodoSource, TodoStatus } from '@life-toolkit/enum';
+import { TodoSource, TodoStatus } from '@true-north/enum';
 import { HabitVo } from '../habit/habit-model.vo';
 
 export type TodoWithoutRelationsVo = {
