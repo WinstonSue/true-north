@@ -27,7 +27,7 @@ export abstract class DiffEngine {
   /**
    * 比较两个中间态，生成差异报告，子类必须实现
    */
-  abstract compareIntermediateState(): void;
+  abstract compareIntermediateState(): DiffResult;
 
   /**
    * 比较构造函数 - 子类可以重写

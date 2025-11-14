@@ -3,8 +3,7 @@
  * 专门处理 Server Controller 到 Desktop Controller 的同步
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { TargetProxyParser } from './target-parser';
+import { writeFileSync } from 'fs';
 import { ControllerProxyDiffEngine } from './diff-engine';
 import { TargetProxyComposer } from './target-composer';
 import { formatFile } from '../../utils/formatter';
@@ -29,10 +28,10 @@ export class ControllerProxySyncEngine {
 
       // 5. 执行同步（如果不是干运行模式）
       if (!options.dryRun && diff.needsSync) {
-        const targetComposer = new TargetProxyComposer(
-          diffEngine.sourceAdapter.intermediateState,
-          diffEngine.targetAdapter.intermediateState
-        );
+        const targetComposer = new TargetProxyComposer({
+          sourceState: diffEngine.sourceAdapter.intermediateState,
+          targetState: diffEngine.targetAdapter.intermediateState,
+        });
         const newCode = targetComposer.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');
 
@@ -68,7 +67,8 @@ export class ControllerProxySyncEngine {
 
     for (const pair of pairs) {
       const diffEngine = new ControllerProxyDiffEngine(pair.sourcePath, pair.targetPath);
-      diffEngine.compareIntermediateState();
+      const diffResult = diffEngine.compareIntermediateState();
+      diffEngine.diffResult = diffResult; // 保存差异结果
 
       results.push(diffEngine.getSummary(pair));
     }

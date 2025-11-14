@@ -36,6 +36,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
     result.changes = methodChanges;
     result.needsSync = methodChanges.length > 0;
 
+    this.diffResult = result;
     return result;
   }
 

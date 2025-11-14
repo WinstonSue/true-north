@@ -7,6 +7,7 @@
 import { IntermediateState, MethodDefinition } from '../core/intermediate-state/types';
 import { SyncAction } from '../core/sync-engine';
 import { ASTClassInfo, ASTMethod, ASTComposer } from '../core/ast';
+import { cloneDeep } from 'lodash-es';
 
 export interface ASTModificationResult {
   /** 修改后的 AST */
@@ -24,7 +25,7 @@ export class TargetProxyComposer {
   targetState: IntermediateState;
   sourceState: IntermediateState;
 
-  constructor(targetState: IntermediateState, sourceState: IntermediateState) {
+  constructor({ sourceState, targetState }: { sourceState: IntermediateState; targetState: IntermediateState }) {
     this.astComposer = new ASTComposer();
     this.targetState = targetState;
     this.sourceState = sourceState;
@@ -35,7 +36,7 @@ export class TargetProxyComposer {
    */
   applySyncActions(actions: SyncAction[]): string {
     // 使用新的 AST 代码生成器
-    const result = this.generateCodeFromDiff(this.targetState, this.sourceState, actions);
+    const result = this.generateCodeFromDiff(actions);
 
     // 如果有错误，记录并返回原始代码
     if (result.errors.length > 0) {
@@ -49,24 +50,22 @@ export class TargetProxyComposer {
   /**
    * 根据 diff 结果和同步操作生成新代码
    */
-  generateCodeFromDiff(
-    targetState: IntermediateState,
-    sourceState: IntermediateState,
-    actions: SyncAction[]
-  ): ASTModificationResult {
+  generateCodeFromDiff(actions: SyncAction[]): ASTModificationResult {
+    console.log('================');
+
     const errors: string[] = [];
     let appliedActions = 0;
 
     // 获取目标代码的 AST
-    const targetAST = targetState.astData;
+    const targetAST = this.targetState.astData;
 
     // 创建 AST 的深拷贝进行修改
-    const modifiedAST = this.cloneAST(targetAST);
+    const modifiedAST = cloneDeep(targetAST);
 
     // 应用同步操作
     for (const action of actions) {
       try {
-        const success = this.applyActionToAST(modifiedAST, action, sourceState);
+        const success = this.applyActionToAST(modifiedAST, action);
         if (success) {
           appliedActions++;
         } else {
@@ -83,8 +82,6 @@ export class TargetProxyComposer {
       generatedCode = this.generateCodeFromAST(modifiedAST);
     } catch (error) {
       errors.push(`从 AST 生成代码失败: ${error}`);
-      // 如果生成失败，尝试使用原始代码
-      generatedCode = targetState.code || '';
     }
 
     return {
@@ -98,22 +95,22 @@ export class TargetProxyComposer {
   /**
    * 应用单个同步操作到 AST
    */
-  private applyActionToAST(ast: ASTClassInfo, action: SyncAction, sourceState: IntermediateState): boolean {
+  private applyActionToAST(ast: ASTClassInfo, action: SyncAction): boolean {
     switch (action.type) {
       case 'add_method':
-        return this.addMethodToAST(ast, action.data as MethodDefinition, sourceState);
+        return this.addMethodToAST(ast, action.data as MethodDefinition);
 
       case 'remove_method':
         return this.removeMethodFromAST(ast, action.methodName!);
 
       case 'update_method':
-        return this.updateMethodInAST(ast, action.methodName!, action.data as MethodDefinition, sourceState);
+        return this.updateMethodInAST(ast, action.methodName!, action.data as MethodDefinition);
 
       case 'update_constructor':
-        return this.updateConstructorInAST(ast, action.data);
+        return true;
 
       case 'update_imports':
-        return this.updateImportsInAST(ast, action.data);
+        return true;
 
       default:
         return false;
@@ -123,16 +120,16 @@ export class TargetProxyComposer {
   /**
    * 向 AST 添加方法
    */
-  private addMethodToAST(ast: ASTClassInfo, method: MethodDefinition, sourceState: IntermediateState): boolean {
+  private addMethodToAST(ast: ASTClassInfo, method: MethodDefinition): boolean {
     try {
       // 检查方法是否已存在
       const existingIndex = ast.methods.findIndex((m) => m.name === method.name);
       if (existingIndex >= 0) {
         // 如果存在，替换它
-        ast.methods[existingIndex] = this.convertMethodDefinitionToASTMethod(method, sourceState);
+        ast.methods[existingIndex] = this.convertMethodDefinitionToASTMethod(method, this.sourceState);
       } else {
         // 如果不存在，添加新方法
-        ast.methods.push(this.convertMethodDefinitionToASTMethod(method, sourceState));
+        ast.methods.push(this.convertMethodDefinitionToASTMethod(method, this.sourceState));
       }
       return true;
     } catch (error) {
@@ -161,54 +158,18 @@ export class TargetProxyComposer {
   /**
    * 更新 AST 中的方法
    */
-  private updateMethodInAST(
-    ast: ASTClassInfo,
-    methodName: string,
-    method: MethodDefinition,
-    sourceState: IntermediateState
-  ): boolean {
+  private updateMethodInAST(ast: ASTClassInfo, methodName: string, method: MethodDefinition): boolean {
     try {
       const methodIndex = ast.methods.findIndex((m) => m.name === methodName);
       if (methodIndex >= 0) {
-        ast.methods[methodIndex] = this.convertMethodDefinitionToASTMethod(method, sourceState);
+        ast.methods[methodIndex] = this.convertMethodDefinitionToASTMethod(method, this.sourceState);
         return true;
       } else {
         // 如果方法不存在，添加它
-        return this.addMethodToAST(ast, method, sourceState);
+        return this.addMethodToAST(ast, method);
       }
     } catch (error) {
       console.error('更新 AST 方法失败:', error);
-      return false;
-    }
-  }
-
-  /**
-   * 更新 AST 中的构造函数
-   */
-  private updateConstructorInAST(ast: ASTClassInfo, constructorData: any): boolean {
-    try {
-      if (constructorData && ast.constructor) {
-        // 更新构造函数参数
-        ast.constructor.parameters = constructorData.parameters || ast.constructor.parameters;
-      }
-      return true;
-    } catch (error) {
-      console.error('更新 AST 构造函数失败:', error);
-      return false;
-    }
-  }
-
-  /**
-   * 更新 AST 中的导入声明
-   */
-  private updateImportsInAST(ast: ASTClassInfo, importsData: any): boolean {
-    try {
-      if (Array.isArray(importsData)) {
-        ast.imports = importsData;
-      }
-      return true;
-    } catch (error) {
-      console.error('更新 AST 导入失败:', error);
       return false;
     }
   }
@@ -224,35 +185,26 @@ export class TargetProxyComposer {
         name: p.name,
         type: p.type,
         optional: p.optional,
-        decorators: p.decoratorArgs
-          ? [
-              {
-                name: p.decorator,
-                arguments: p.decoratorArgs.map((arg) => ({
-                  type: 'string' as const,
-                  value: arg,
-                  rawText: `'${arg}'`,
-                })),
-              },
-            ]
-          : [],
+        decorators: this.convertParameterDecorators(p),
       })),
       returnType: method.returnType.startsWith('Promise<') ? method.returnType : `Promise<${method.returnType}>`,
       bodyText: this.generateProxyMethodBody(method),
       sourceLocation: method.sourceLocation,
       methodDeclaration: null as any, // 这里需要重新生成时会被设置
+      modifiers: ['async'], // Proxy 控制器方法需要 async
     };
   }
 
   /**
-   * 转换装饰器到 AST 格式
+   * 转换装饰器到 AST 格式 - Proxy 专用
+   * 确保使用正确的装饰器名称（electron-ipc-restful）
    */
   private convertDecoratorsToAST(method: MethodDefinition) {
     const decorators = [];
 
-    // 添加 HTTP 方法装饰器
+    // 添加 HTTP 方法装饰器 - 保持 electron-ipc-restful 的大小写
     decorators.push({
-      name: method.verb,
+      name: method.verb, // Get, Post, Put, Delete 等
       arguments: [
         {
           type: 'string' as const,
@@ -262,23 +214,33 @@ export class TargetProxyComposer {
       ],
     });
 
-    // 如果有装饰器选项，添加它们
-    if (method.decoratorOptions) {
-      Object.entries(method.decoratorOptions).forEach(([key, value]) => {
-        decorators.push({
-          name: key,
-          arguments: [
-            {
-              type: 'object' as const,
-              value: JSON.stringify(value),
-              rawText: JSON.stringify(value),
-            },
-          ],
-        });
-      });
-    }
+    // Proxy 控制器不需要装饰器选项（如 description），因为它只是转发
 
     return decorators;
+  }
+
+  /**
+   * 转换参数装饰器 - Proxy 专用
+   * 确保使用正确的装饰器名称（electron-ipc-restful）
+   */
+  private convertParameterDecorators(parameter: any) {
+    if (!parameter.decorator) {
+      return [];
+    }
+
+    // 对于 Proxy 控制器，参数装饰器应该保持原样
+    const decoratorArgs = parameter.decoratorArgs || [];
+
+    return [
+      {
+        name: parameter.decorator, // Param, Query, Body 等
+        arguments: decoratorArgs.map((arg: string) => ({
+          type: 'string' as const,
+          value: arg,
+          rawText: `'${arg}'`,
+        })),
+      },
+    ];
   }
 
   /**
@@ -294,94 +256,9 @@ export class TargetProxyComposer {
    * 从 AST 生成完整代码
    */
   private generateCodeFromAST(ast: ASTClassInfo): string {
+    console.log(ast);
     return this.astComposer.generateCodeFromAST(ast, {
       preserveFormatting: false,
-      preserveComments: true,
-      indentChar: ' ',
-      indentSize: 2,
     });
-  }
-
-  /**
-   * 深拷贝 AST 对象
-   */
-  private cloneAST(ast: ASTClassInfo): ASTClassInfo {
-    return {
-      className: ast.className,
-      decorators: ast.decorators.map((d) => ({
-        name: d.name,
-        arguments: d.arguments.map((arg) => ({ ...arg })),
-      })),
-      methods: ast.methods.map((m) => ({
-        name: m.name,
-        decorators: m.decorators.map((d) => ({
-          name: d.name,
-          arguments: d.arguments.map((arg) => ({ ...arg })),
-        })),
-        parameters: m.parameters.map((p) => ({
-          name: p.name,
-          type: p.type,
-          optional: p.optional,
-          decorators: p.decorators.map((d) => ({
-            name: d.name,
-            arguments: d.arguments.map((arg) => ({ ...arg })),
-          })),
-        })),
-        returnType: m.returnType,
-        bodyText: m.bodyText,
-        sourceLocation: { ...m.sourceLocation },
-        methodDeclaration: m.methodDeclaration,
-      })),
-      constructor: ast.constructor
-        ? {
-            parameters: ast.constructor.parameters.map((p) => ({
-              name: p.name,
-              type: p.type,
-              modifiers: [...p.modifiers],
-            })),
-          }
-        : undefined,
-      imports: ast.imports.map((i) => ({
-        source: i.source,
-        specifiers: i.specifiers.map((s) => ({ ...s })),
-        importType: i.importType,
-      })),
-      sourceFile: ast.sourceFile,
-      classDeclaration: ast.classDeclaration,
-    };
-  }
-
-  /**
-   * 验证 AST 结构完整性
-   */
-  validateAST(ast: ASTClassInfo): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (!ast.className) {
-      errors.push('缺少类名');
-    }
-
-    if (!ast.methods || ast.methods.length === 0) {
-      errors.push('缺少方法定义');
-    }
-
-    // 检查方法名重复
-    const methodNames = ast.methods.map((m) => m.name);
-    const duplicates = methodNames.filter((name, index) => methodNames.indexOf(name) !== index);
-    if (duplicates.length > 0) {
-      errors.push(`方法名重复: ${duplicates.join(', ')}`);
-    }
-
-    // 检查方法体
-    ast.methods.forEach((method) => {
-      if (!method.bodyText || method.bodyText.trim() === '') {
-        errors.push(`方法 ${method.name} 缺少方法体`);
-      }
-    });
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
   }
 }

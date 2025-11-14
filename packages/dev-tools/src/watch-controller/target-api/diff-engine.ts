@@ -25,14 +25,16 @@ export class ControllerApiDiffEngine extends DiffEngine {
     const targetState = this.targetAdapter.intermediateState;
     const methodChanges = this.generateMethodChanges(sourceState, targetState);
 
-    this.diffResult = {
+    const result = {
       className: sourceState.metadata.className,
       changes: [],
       methodChanges,
       needsSync: methodChanges.length > 0,
     };
-  }
 
+    this.diffResult = result;
+    return result;
+  }
 
   getSummary(pair: { className: string; sourcePath: string; targetPath: string }): ControllerSyncStatus {
     try {
@@ -81,8 +83,6 @@ export class ControllerApiDiffEngine extends DiffEngine {
    */
   protected generateMethodChanges(sourceState: IntermediateState, targetState: IntermediateState): MethodChange[] {
     const changes: any[] = [];
-
-    console.log('================');
 
     // 检查缺失的方法（在 Server 中存在但在 API 中不存在）
     for (const [methodName, sourceMethod] of sourceState.methods) {

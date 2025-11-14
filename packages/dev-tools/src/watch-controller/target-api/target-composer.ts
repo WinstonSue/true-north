@@ -24,7 +24,7 @@ export class TargetApiComposer {
   targetState: IntermediateState;
   sourceState: IntermediateState;
 
-  constructor(targetState: IntermediateState, sourceState: IntermediateState) {
+  constructor({ targetState, sourceState }: { targetState: IntermediateState; sourceState: IntermediateState }) {
     this.astComposer = new ASTComposer();
     this.targetState = targetState;
     this.sourceState = sourceState;
@@ -111,10 +111,10 @@ export class TargetApiComposer {
         return this.updateMethodInAST(ast, action.methodName!, action.data as MethodDefinition, sourceState);
 
       case 'update_constructor':
-        return this.updateConstructorInAST(ast, action.data);
+        return true;
 
       case 'update_imports':
-        return this.updateImportsInAST(ast, action.data);
+        return true;
 
       default:
         return false;

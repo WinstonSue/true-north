@@ -33,10 +33,6 @@ export default class TodoController {
     );
   }
 
-  static async abandonWithRepeat(id: string) {
-    return request<boolean>({ method: 'put' })(`/todo/abandon-with-repeat/${id}`);
-  }
-
   static async restoreWithRepeat(id: string) {
     return request<boolean>({ method: 'put' })(`/todo/restore-with-repeat/${id}`);
   }
@@ -51,5 +47,9 @@ export default class TodoController {
 
   static async findByFilter(query?: TodoVO.TodoFilterVo) {
     return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/find-by-filter`, query);
+  }
+
+  static async abandonWithRepeat(id: string) {
+    return request<boolean>({ method: 'put' })(`/todo/abandon-with-repeat${id}`);
   }
 }

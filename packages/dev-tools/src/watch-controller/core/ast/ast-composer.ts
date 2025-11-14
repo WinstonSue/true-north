@@ -89,6 +89,15 @@ export class ASTComposer {
       return `import * as ${namespaceImport?.local} from '${source}';`;
     }
 
+    if (importType === 'type') {
+      // type import
+      const namedImports = specifiers
+        .filter((s: any) => s.imported !== 'default' && s.imported !== '*')
+        .map((s: any) => (s.imported === s.local ? s.imported : `${s.imported} as ${s.local}`))
+        .join(', ');
+      return `import type { ${namedImports} } from '${source}';`;
+    }
+
     // named imports
     const namedImports = specifiers
       .filter((s: any) => s.imported !== 'default' && s.imported !== '*')

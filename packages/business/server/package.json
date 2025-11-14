@@ -37,6 +37,7 @@
     "francis-helper-repeat": "0.0.6",
     "francis-types-repeat": "0.0.1",
     "francis-mapped-types": "0.0.1",
+    "@true-north/vo": "workspace:*",
     "@true-north/enum": "workspace:*",
     "tsup": "^7.0.0",
     "ts-mixer": "^6.0.3"

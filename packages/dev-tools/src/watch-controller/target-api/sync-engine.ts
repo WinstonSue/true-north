@@ -4,7 +4,6 @@
  */
 
 import { SyncOptions, SyncResult, generateSyncActions } from '../core/sync-engine';
-import { TargetApiParser } from './target-parser';
 import { ControllerApiDiffEngine } from './diff-engine';
 import { TargetApiComposer } from './target-composer';
 import { formatFile } from '../../utils/formatter';
@@ -28,10 +27,10 @@ export class ControllerApiSyncEngine {
 
       // 5. 执行同步（如果不是干运行模式）
       if (!options.dryRun && diffEngine.diffResult!.needsSync) {
-        const codeGenerator = new TargetApiComposer(
-          diffEngine.targetAdapter.intermediateState,
-          diffEngine.sourceAdapter.intermediateState
-        );
+        const codeGenerator = new TargetApiComposer({
+          targetState: diffEngine.targetAdapter.intermediateState,
+          sourceState: diffEngine.sourceAdapter.intermediateState,
+        });
 
         const newCode = codeGenerator.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');

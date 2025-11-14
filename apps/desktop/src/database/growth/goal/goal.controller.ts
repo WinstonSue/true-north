@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron-ipc-restful';
-import type { Goal as GoalVO , ResponseListVo, ResponsePageVo, ResponseTreeVo} from '@true-north/vo';
+import type { Goal as GoalVO, ResponseListVo, ResponsePageVo, ResponseTreeVo } from '@true-north/vo';
 import { GoalController as _GoalController } from '@true-north/business-server';
 import { goalService } from './goal.service';
 
@@ -33,12 +33,16 @@ export class GoalController {
   }
 
   @Get('/find-by-filter')
-  async findByFilter(@Query() goalListFiltersVo?: GoalVO.GoalFilterVo): Promise<ResponseListVo<GoalVO.GoalWithoutRelationsVo>> {
+  async findByFilter(
+    @Query() goalListFiltersVo?: GoalVO.GoalFilterVo
+  ): Promise<ResponseListVo<GoalVO.GoalWithoutRelationsVo>> {
     return this.controller.findByFilter(goalListFiltersVo);
   }
 
   @Get('/page')
-  async page(@Query() goalPageFilterVo?: GoalVO.GoalPageFilterVo): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
+  async page(
+    @Query() goalPageFilterVo?: GoalVO.GoalPageFilterVo
+  ): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
     return this.controller.page(goalPageFilterVo);
   }
 

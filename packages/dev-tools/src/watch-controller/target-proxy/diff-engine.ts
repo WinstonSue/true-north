@@ -4,15 +4,10 @@
  */
 
 import { MethodDefinition } from '../core/intermediate-state/types';
-import {
-  DiffEngine,
-  detectMethodChangeType,
-  generateChangeDetails,
-  generateDiffResultSummary,
-} from '../core/diff-engine';
+import { DiffEngine, generateDiffResultSummary } from '../core/diff-engine';
 import { IntermediateState } from '../core/intermediate-state/types';
 import { TargetProxyParser } from './target-parser';
-import { MethodChange, MethodInfo, ControllerSyncStatus, DiffResult, CommonChange } from '../../../types';
+import { MethodChange, MethodInfo, ControllerSyncStatus, DiffResult } from '../../../types';
 
 export class ControllerProxyDiffEngine extends DiffEngine {
   targetAdapter: TargetProxyParser;
@@ -70,28 +65,17 @@ export class ControllerProxyDiffEngine extends DiffEngine {
     const sourceState = this.sourceAdapter.intermediateState;
     const targetState = this.targetAdapter.intermediateState;
 
-    const changes: CommonChange[] = [];
-
-    // 比较构造函数（子类可以选择是否比较）
-    const constructorChanges = this.compareConstructor(sourceState.constructor, targetState.constructor);
-    if (constructorChanges) {
-      changes.push(constructorChanges);
-    }
-
-    // 比较导入（子类可以选择是否比较）
-    const importChanges = this.compareImports(sourceState.imports, targetState.imports);
-    if (importChanges) {
-      changes.push(importChanges);
-    }
+    // Proxy 控制器不需要同步构造函数和 import，只同步方法
+    // 因为 Proxy 控制器有自己固定的结构
 
     // 比较方法
     const methodChanges = this.generateMethodChanges(sourceState, targetState);
 
     return {
       className: sourceState.metadata.className,
-      changes,
+      changes: [], // 不同步构造函数和 import
       methodChanges,
-      needsSync: changes.length + methodChanges.length > 0,
+      needsSync: methodChanges.length > 0,
     };
   }
 
@@ -113,15 +97,18 @@ export class ControllerProxyDiffEngine extends DiffEngine {
         continue;
       }
 
-      // 比较方法差异
-      const changeType = detectMethodChangeType(sourceMethod, targetMethod);
-      if (changeType !== 'method_no_change') {
+      // 对于 Proxy 控制器，检查方法体是否是正确的转发代码
+      const expectedProxyBody = `return this.controller.${methodName}(${targetMethod.parameters.map(p => p.name).join(', ')});`;
+      const targetBodyText = targetMethod.bodyText?.trim() || '';
+      
+      // 只有当目标方法体不是期望的转发代码时才需要更新
+      if (targetBodyText !== expectedProxyBody) {
         changes.push({
           methodName,
-          changeType,
+          changeType: 'method_body_changed',
           sourceMethod: this.convertToMethodInfo(sourceMethod),
           targetMethod: this.convertToMethodInfo(targetMethod),
-          description: generateChangeDetails(sourceMethod, targetMethod, changeType),
+          description: `Proxy method body needs to be updated. Expected: "${expectedProxyBody}", Got: "${targetBodyText}"`,
         });
       }
     }
