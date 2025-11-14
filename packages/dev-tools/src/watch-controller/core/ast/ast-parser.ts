@@ -4,16 +4,16 @@
  */
 
 import { Project, MethodDeclaration, ParameterDeclaration, Decorator, ConstructorDeclaration } from 'ts-morph';
-import { 
-  ASTClassInfo, 
-  ASTDecorator, 
-  ASTDecoratorArgument, 
-  ASTMethod, 
-  ASTParameter, 
-  ASTConstructor, 
-  ASTImport, 
-  ASTImportSpecifier, 
-  ASTSourceLocation 
+import {
+  ASTClassInfo,
+  ASTDecorator,
+  ASTDecoratorArgument,
+  ASTMethod,
+  ASTParameter,
+  ASTConstructor,
+  ASTImport,
+  ASTImportSpecifier,
+  ASTSourceLocation,
 } from './ast-types';
 
 /**
@@ -42,7 +42,7 @@ export class ASTParser {
    */
   parse(code: string, filePath: string): ASTClassInfo {
     const sourceFile = this.project.createSourceFile(filePath, code, { overwrite: true });
-    
+
     const classDeclaration = sourceFile.getClasses()[0];
     if (!classDeclaration) {
       throw new Error(`No class found in ${filePath}`);
@@ -68,7 +68,7 @@ export class ASTParser {
    * 解析装饰器
    */
   private parseDecorators(decorators: Decorator[]): ASTDecorator[] {
-    return decorators.map(decorator => ({
+    return decorators.map((decorator) => ({
       name: decorator.getName(),
       arguments: this.parseDecoratorArguments(decorator),
     }));
@@ -78,17 +78,19 @@ export class ASTParser {
    * 解析装饰器参数
    */
   private parseDecoratorArguments(decorator: Decorator): ASTDecoratorArgument[] {
-    return decorator.getArguments().map(arg => {
+    return decorator.getArguments().map((arg) => {
       const rawText = arg.getText();
       const kind = arg.getKind();
-      
+
       let type: 'string' | 'object' | 'other' = 'other';
       let value = rawText;
 
-      if (kind === 10 || kind === 11) { // StringLiteral
+      if (kind === 10 || kind === 11) {
+        // StringLiteral
         type = 'string';
         value = rawText.slice(1, -1); // 移除引号
-      } else if (kind === 201) { // ObjectLiteralExpression
+      } else if (kind === 201) {
+        // ObjectLiteralExpression
         type = 'object';
       }
 
@@ -104,26 +106,49 @@ export class ASTParser {
    * 解析方法
    */
   private parseMethods(methods: MethodDeclaration[]): ASTMethod[] {
-    return methods.map(method => ({
-      name: method.getName(),
-      decorators: this.parseDecorators(method.getDecorators()),
-      parameters: this.parseParameters(method.getParameters()),
-      returnType: this.parseReturnType(method),
-      bodyText: method.getBodyText() || '',
-      sourceLocation: this.getSourceLocation(method),
-      methodDeclaration: method,
-    }));
+    return methods.map((method) => {
+      // 完整解析所有修饰符
+      const modifiers: string[] = [];
+
+      // 直接从 AST 节点获取所有修饰符文本
+      method.getModifiers().forEach((modifier) => {
+        modifiers.push(modifier.getText());
+      });
+
+      return {
+        name: method.getName(),
+        decorators: this.parseDecorators(method.getDecorators()),
+        parameters: this.parseParameters(method.getParameters()),
+        returnType: this.parseReturnType(method),
+        bodyText: method.getBodyText() || '',
+        sourceLocation: this.getSourceLocation(method),
+        methodDeclaration: method,
+        modifiers: this.parseMethodModifiers(method),
+      };
+    });
+  }
+
+  /**
+   * 解析返回类型
+   */
+  private parseMethodModifiers(method: MethodDeclaration): string[] {
+    const modifiers: string[] = [];
+    method.getModifiers().forEach((modifier) => {
+      modifiers.push(modifier.getText());
+    });
+    return modifiers;
   }
 
   /**
    * 解析参数
    */
   private parseParameters(parameters: ParameterDeclaration[]): ASTParameter[] {
-    return parameters.map(param => ({
+    return parameters.map((param) => ({
       name: param.getName(),
       type: param.getType().getText(),
       optional: param.hasQuestionToken(),
       decorators: this.parseDecorators(param.getDecorators()),
+      showType: Boolean(param.getTypeNode()),
     }));
   }
 
@@ -136,10 +161,10 @@ export class ASTParser {
     }
 
     return {
-      parameters: constructor.getParameters().map(param => ({
+      parameters: constructor.getParameters().map((param) => ({
         name: param.getName(),
         type: param.getType().getText(),
-        modifiers: param.getModifiers().map(m => m.getText()),
+        modifiers: param.getModifiers().map((m) => m.getText()),
       })),
     };
   }
@@ -148,7 +173,7 @@ export class ASTParser {
    * 解析导入声明
    */
   private parseImports(imports: any[]): ASTImport[] {
-    return imports.map(importDecl => {
+    return imports.map((importDecl) => {
       const source = importDecl.getModuleSpecifierValue();
       const namedImports = importDecl.getNamedImports();
       const defaultImport = importDecl.getDefaultImport()?.getText();
@@ -156,7 +181,7 @@ export class ASTParser {
 
       // 构建 specifiers
       const specifiers: ASTImportSpecifier[] = [];
-      
+
       if (defaultImport) {
         specifiers.push({
           imported: 'default',
@@ -202,7 +227,7 @@ export class ASTParser {
     if (returnType) {
       return returnType.getText();
     }
-    
+
     // 尝试从类型推断获取
     const type = method.getReturnType();
     return type.getText();

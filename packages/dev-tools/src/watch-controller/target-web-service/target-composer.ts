@@ -7,6 +7,7 @@
 import { IntermediateState, MethodDefinition } from '../core/intermediate-state/types';
 import { SyncAction } from '../core/sync-engine';
 import { ASTClassInfo, ASTMethod, ASTComposer } from '../core/ast';
+import { cloneDeep } from 'lodash-es';
 
 export interface ASTModificationResult {
   /** 修改后的 AST */
@@ -24,7 +25,7 @@ export class TargetWebServiceComposer {
   targetState: IntermediateState;
   sourceState: IntermediateState;
 
-  constructor(targetState: IntermediateState, sourceState: IntermediateState) {
+  constructor({ targetState, sourceState }: { targetState: IntermediateState; sourceState: IntermediateState }) {
     this.astComposer = new ASTComposer();
     this.targetState = targetState;
     this.sourceState = sourceState;
@@ -62,7 +63,7 @@ export class TargetWebServiceComposer {
     const targetAST = targetState.astData;
 
     // 创建 AST 的深拷贝进行修改
-    const modifiedAST = this.cloneAST(targetAST);
+    const modifiedAST = cloneDeep(targetAST);
 
     // 应用同步操作
     for (const action of actions) {
@@ -222,7 +223,9 @@ export class TargetWebServiceComposer {
       name: method.name,
       decorators: [], // Web Service 方法不需要装饰器
       parameters: this.convertParametersToAST(method),
-      returnType: 'Promise<void>', // Web Service 方法通常返回 void
+      returnType: '', // 生成时代码推断返回 Promise<void>
+      modifiers: ['static', 'async'],
+      showReturnType: false,
       bodyText: this.generateWebServiceMethodBody(method),
       sourceLocation: method.sourceLocation,
       methodDeclaration: null as any, // 这里需要重新生成时会被设置
@@ -233,44 +236,18 @@ export class TargetWebServiceComposer {
    * 转换参数到 AST 格式
    */
   private convertParametersToAST(method: MethodDefinition) {
-    const params = [];
+    const params = method.parameters.map((param) => ({
+      name: param.name,
+      type: param.type,
+      optional: param.optional,
+      decorators: [],
+    }));
 
-    for (const param of method.parameters) {
-      if (param.decorator === 'Param') {
-        // Path 参数
-        params.push({
-          name: param.name,
-          type: 'string',
-          optional: false,
-          decorators: [],
-        });
-      } else if (param.decorator === 'Body') {
-        // Body 参数
-        const voType = this.convertDtoTypeToVoType(param.type);
-        params.push({
-          name: param.name,
-          type: voType,
-          optional: false,
-          decorators: [],
-        });
-      } else if (param.decorator === 'Query') {
-        // Query 参数
-        const voType = this.convertDtoTypeToVoType(param.type);
-        params.push({
-          name: param.name,
-          type: voType,
-          optional: param.optional,
-          decorators: [],
-        });
-      }
-    }
-
-    // 添加 options 参数（如果方法需要）
-    if (this.needsOptionsParameter(method)) {
+    if (this.needsSuccessMessage(method) && !params.some((param) => param.name === 'options')) {
       params.push({
         name: 'options',
         type: 'MethodOptions',
-        optional: false,
+        optional: true,
         decorators: [],
       });
     }
@@ -292,7 +269,7 @@ export class TargetWebServiceComposer {
 
     // 生成成功消息（如果需要）
     if (this.needsSuccessMessage(method)) {
-      lines.push('  if (!options.silent) {');
+      lines.push('  if (!options?.silent) {');
       lines.push(`    Message.success('${this.getSuccessMessage(method)}');`);
       lines.push('  }');
     }
@@ -320,41 +297,11 @@ export class TargetWebServiceComposer {
   }
 
   /**
-   * 转换 DTO 类型为 VO 类型
-   */
-  private convertDtoTypeToVoType(dtoType: string): string {
-    // 移除泛型参数
-    const baseType = dtoType.replace(/<.*>/, '');
-
-    // 转换常见的 DTO 类型
-    if (baseType.includes('FilterDto')) {
-      return baseType.replace('FilterDto', 'FilterVo');
-    } else if (baseType.includes('PageFilterDto')) {
-      return baseType.replace('PageFilterDto', 'PageFilterVo');
-    } else if (baseType.includes('CreateDto')) {
-      return baseType.replace('CreateDto', 'CreateVo');
-    } else if (baseType.includes('UpdateDto')) {
-      return baseType.replace('UpdateDto', 'UpdateVo');
-    } else if (baseType.includes('Dto')) {
-      return baseType.replace('Dto', 'Vo');
-    }
-
-    return dtoType;
-  }
-
-  /**
    * 判断是否需要成功消息
    */
   private needsSuccessMessage(method: MethodDefinition): boolean {
     const mutatingVerbs = ['Post', 'Put', 'Delete', 'Patch'];
     return mutatingVerbs.includes(method.verb);
-  }
-
-  /**
-   * 判断是否需要 options 参数
-   */
-  private needsOptionsParameter(method: MethodDefinition): boolean {
-    return this.needsSuccessMessage(method);
   }
 
   /**
@@ -412,6 +359,8 @@ export class TargetWebServiceComposer {
           })),
         })),
         returnType: m.returnType,
+        modifiers: m.modifiers ? [...m.modifiers] : undefined,
+        showReturnType: m.showReturnType,
         bodyText: m.bodyText,
         sourceLocation: { ...m.sourceLocation },
         methodDeclaration: m.methodDeclaration,

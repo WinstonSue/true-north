@@ -3,15 +3,10 @@ import type { Todo as TodoVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 
-export default class TodoService {
-  /**
-   * create
-   * @param createTodoVo 请求体数据
-   * @returns 操作结果
-   */
-  static async create(createTodoVo: TodoVO.CreateTodoVo, options?: MethodOptions) {
+export class TodoService {
+  static async create(body: TodoVO.CreateTodoVo, options?: MethodOptions) {
     try {
-      const res = await TodoController.create(createTodoVo);
+      const res = await TodoController.create(body);
       if (!options?.silent) {
         Message.success('创建成功');
       }
@@ -21,11 +16,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * delete
-   * @param id idID
-   * @returns 操作结果
-   */
   static async delete(id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.delete(id);
@@ -38,15 +28,9 @@ export default class TodoService {
     }
   }
 
-  /**
-   * update
-   * @param id idID
-   * @param updateVo 请求体数据
-   * @returns 操作结果
-   */
-  static async update(id: string, updateVo: TodoVO.UpdateTodoVo, options?: MethodOptions) {
+  static async update(id: string, body: TodoVO.UpdateTodoVo, options?: MethodOptions) {
     try {
-      const res = await TodoController.update(id, updateVo);
+      const res = await TodoController.update(id, body);
       if (!options?.silent) {
         Message.success('操作成功');
       }
@@ -56,11 +40,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * find
-   * @param id idID
-   * @returns 操作结果
-   */
   static async find(id: string) {
     try {
       const res = await TodoController.find(id);
@@ -70,11 +49,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * findByFilter
-   * @param query 查询参数
-   * @returns 操作结果
-   */
   static async findByFilter(query?: TodoVO.TodoFilterVo) {
     try {
       const res = await TodoController.findByFilter(query);
@@ -84,11 +58,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * page
-   * @param query 查询参数
-   * @returns 操作结果
-   */
   static async page(query?: TodoVO.TodoPageFilterVo) {
     try {
       const res = await TodoController.page(query);
@@ -98,15 +67,9 @@ export default class TodoService {
     }
   }
 
-  /**
-   * updateWithRepeat
-   * @param id idID
-   * @param updateVo 请求体数据
-   * @returns 操作结果
-   */
-  static async updateWithRepeat(id: string, updateVo: TodoVO.UpdateTodoVo, options?: MethodOptions) {
+  static async updateWithRepeat(id: string, body: TodoVO.UpdateTodoVo, options?: MethodOptions) {
     try {
-      const res = await TodoController.updateWithRepeat(id, updateVo);
+      const res = await TodoController.updateWithRepeat(id, body);
       if (!options?.silent) {
         Message.success('操作成功');
       }
@@ -116,13 +79,7 @@ export default class TodoService {
     }
   }
 
-  /**
-   * doneWithRepeatBatch
-   * @param query 查询参数
-   * @param body 请求体数据
-   * @returns 操作结果
-   */
-  static async doneWithRepeatBatch(query: TodoVO.TodoFilterVo, body: any, options?: MethodOptions) {
+  static async doneWithRepeatBatch(query?: TodoVO.TodoFilterVo, body?: any, options?: MethodOptions) {
     try {
       const res = await TodoController.doneWithRepeatBatch(query, body);
       if (!options?.silent) {
@@ -134,11 +91,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * abandonWithRepeat
-   * @param id idID
-   * @returns 操作结果
-   */
   static async abandonWithRepeat(id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.abandonWithRepeat(id);
@@ -151,11 +103,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * restoreWithRepeat
-   * @param id idID
-   * @returns 操作结果
-   */
   static async restoreWithRepeat(id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.restoreWithRepeat(id);
@@ -168,11 +115,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * listMixRepeat
-   * @param query 查询参数
-   * @returns 操作结果
-   */
   static async listMixRepeat(query?: TodoVO.TodoFilterVo) {
     try {
       const res = await TodoController.listMixRepeat(query);
@@ -182,12 +124,6 @@ export default class TodoService {
     }
   }
 
-  /**
-   * findMixRepeat
-   * @param id idID
-   * @param query 查询参数
-   * @returns 操作结果
-   */
   static async findMixRepeat(id: string, query?: { source?: string }) {
     try {
       const res = await TodoController.findMixRepeat(id, query);

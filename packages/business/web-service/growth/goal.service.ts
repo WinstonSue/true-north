@@ -3,13 +3,8 @@ import type { Goal as GoalVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 
-export default class GoalService {
-  /**
-   * create
-   * @param body 请求体数据
-   * @returns 操作结果
-   */
-  static async create(body: GoalVO.CreateGoalVo, options?: MethodOptions) {
+export class GoalService {
+  static async create(body: GoalVO.CreateGoalVo, options?: MethodOptions): Promise<any> {
     try {
       const res = await GoalController.create(body);
       if (!options?.silent) {
@@ -21,12 +16,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * delete
-   * @param id idID
-   * @returns 操作结果
-   */
-  static async delete(id: string, options?: MethodOptions) {
+  static async delete(id: string, options?: MethodOptions): Promise<any> {
     try {
       const res = await GoalController.delete(id);
       if (!options?.silent) {
@@ -38,13 +28,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * update
-   * @param id idID
-   * @param updateGoalVo 请求体数据
-   * @returns 操作结果
-   */
-  static async update(id: string, updateGoalVo: GoalVO.UpdateGoalVo, options?: MethodOptions) {
+  static async update(id: string, updateGoalVo: GoalVO.UpdateGoalVo, options?: MethodOptions): Promise<any> {
     try {
       const res = await GoalController.update(id, updateGoalVo);
       if (!options?.silent) {
@@ -56,12 +40,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * find
-   * @param id idID
-   * @returns 操作结果
-   */
-  static async find(id: string) {
+  static async find(id: string): Promise<any> {
     try {
       const res = await GoalController.find(id);
       return res;
@@ -70,12 +49,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * findWithRelations
-   * @param id idID
-   * @returns 操作结果
-   */
-  static async findWithRelations(id: string) {
+  static async findWithRelations(id: string): Promise<any> {
     try {
       const res = await GoalController.findWithRelations(id);
       return res;
@@ -84,12 +58,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * findByFilter
-   * @param goalListFiltersVo 查询参数
-   * @returns 操作结果
-   */
-  static async findByFilter(goalListFiltersVo?: GoalVO.GoalFilterVo) {
+  static async findByFilter(goalListFiltersVo?: GoalVO.GoalFilterVo): Promise<any> {
     try {
       const res = await GoalController.findByFilter(goalListFiltersVo);
       return res;
@@ -98,12 +67,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * page
-   * @param goalPageFilterVo 查询参数
-   * @returns 操作结果
-   */
-  static async page(goalPageFilterVo?: GoalVO.GoalPageFilterVo) {
+  static async page(goalPageFilterVo?: GoalVO.GoalPageFilterVo): Promise<any> {
     try {
       const res = await GoalController.page(goalPageFilterVo);
       return res;
@@ -112,12 +76,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * getTree
-   * @param goalListFiltersVo 查询参数
-   * @returns 操作结果
-   */
-  static async getTree(goalListFiltersVo?: GoalVO.GoalFilterVo) {
+  static async getTree(goalListFiltersVo?: GoalVO.GoalFilterVo): Promise<any> {
     try {
       const res = await GoalController.getTree(goalListFiltersVo);
       return res;
@@ -126,11 +85,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * findRoots
-   * @returns 操作结果
-   */
-  static async findRoots() {
+  static async findRoots(): Promise<any> {
     try {
       const res = await GoalController.findRoots();
       return res;
@@ -139,12 +94,7 @@ export default class GoalService {
     }
   }
 
-  /**
-   * abandon
-   * @param id idID
-   * @returns 操作结果
-   */
-  static async abandon(id: string, options?: MethodOptions) {
+  static async abandon(id: string, options?: MethodOptions): Promise<any> {
     try {
       const res = await GoalController.abandon(id);
       if (!options?.silent) {
@@ -156,11 +106,6 @@ export default class GoalService {
     }
   }
 
-  /**
-   * restore
-   * @param id idID
-   * @returns 操作结果
-   */
   static async restore(id: string, options?: MethodOptions) {
     try {
       const res = await GoalController.restore(id);

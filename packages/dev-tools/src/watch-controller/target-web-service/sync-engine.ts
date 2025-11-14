@@ -17,7 +17,7 @@ export class ControllerWebServiceSyncEngine {
    */
   async syncController(sourcePath: string, targetPath: string, options: SyncOptions = {}): Promise<SyncResult> {
     try {
-      const diffEngine = new ControllerWebServiceDiffEngine(sourcePath, targetPath);
+      const diffEngine = new ControllerWebServiceDiffEngine({ sourcePath, targetPath });
 
       // 2. 比对差异
       const diff = diffEngine.compareIntermediateState();
@@ -27,10 +27,10 @@ export class ControllerWebServiceSyncEngine {
 
       // 5. 执行同步（如果不是干运行模式）
       if (!options.dryRun && diff.needsSync) {
-        const targetComposer = new TargetWebServiceComposer(
-          diffEngine.targetAdapter.intermediateState,
-          diffEngine.sourceAdapter.intermediateState
-        );
+        const targetComposer = new TargetWebServiceComposer({
+          targetState: diffEngine.targetAdapter.intermediateState,
+          sourceState: diffEngine.sourceAdapter.intermediateState,
+        });
 
         const newCode = targetComposer.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');
@@ -65,7 +65,10 @@ export class ControllerWebServiceSyncEngine {
     const results: ControllerSyncStatus[] = [];
 
     for (const pair of pairs) {
-      const diffEngine = new ControllerWebServiceDiffEngine(pair.sourcePath, pair.targetPath);
+      const diffEngine = new ControllerWebServiceDiffEngine({
+        sourcePath: pair.sourcePath,
+        targetPath: pair.targetPath,
+      });
       diffEngine.compareIntermediateState();
 
       results.push(diffEngine.getSummary(pair));

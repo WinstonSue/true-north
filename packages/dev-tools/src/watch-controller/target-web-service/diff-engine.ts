@@ -11,7 +11,7 @@ import { MethodInfo, ControllerSyncStatus } from '../../../types';
 export class ControllerWebServiceDiffEngine extends DiffEngine {
   targetAdapter: TargetWebServiceParser;
 
-  constructor(sourcePath: string, targetPath: string) {
+  constructor({ sourcePath, targetPath }: { sourcePath: string; targetPath: string }) {
     super(sourcePath);
     this.targetAdapter = new TargetWebServiceParser(targetPath);
   }
@@ -34,6 +34,7 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
     // 只比较方法，使用 Web Service 专用逻辑
     const methodChanges = this.generateMethodChanges(sourceState, targetState);
     result.changes = methodChanges;
+    result.methodChanges = methodChanges;
     result.needsSync = methodChanges.length > 0;
 
     this.diffResult = result;
