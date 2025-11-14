@@ -1,6 +1,6 @@
 import { Checkbox, DatePicker, Radio } from '@arco-design/web-react';
 import styles from './style.module.less';
-import { TodoService } from '../../service';
+import { TodoService } from '@true-north/web-service';
 import { TodoVo } from '@true-north/vo';
 import { openModal } from '@/hooks/OpenModal';
 import dayjs from 'dayjs';
@@ -13,7 +13,7 @@ export default function TriggerTodoStatus(props: {
   const { todo } = props;
 
   async function restore() {
-    await TodoService.restoreTodo(todo.id);
+    await TodoService.restoreWithRepeat(todo.id, { silent: false });
     await props.onChange();
   }
 
@@ -39,14 +39,14 @@ export default function TriggerTodoStatus(props: {
             });
             return;
           }
-          await TodoService.doneBatchTodo({
+          await TodoService.doneWithRepeatBatch(undefined, {
             todoWithRepeatList: [
               {
                 id: todo.id,
                 source: todo.source,
               },
             ],
-          });
+          }, { silent: false });
           await props.onChange();
         }}
       />

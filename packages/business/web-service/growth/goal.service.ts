@@ -1,13 +1,7 @@
 import { GoalController } from '@true-north/api';
-import type {
-  CreateGoalVo,
-  GoalPageFilterVo,
-  GoalFilterVo,
-  UpdateGoalVo,
-  GoalWithoutRelationsVo,
-} from '@true-north/vo';
-import { useState, useEffect } from 'react';
+import type { Goal as GoalVO } from '@true-north/vo';
 import { Message } from '../message';
+import { MethodOptions } from '../type';
 
 export default class GoalService {
   /**
@@ -15,10 +9,10 @@ export default class GoalService {
    * @param body 请求体数据
    * @returns 操作结果
    */
-  static async create(body: GoalVO.CreateGoalVo, options: MethodOptions) {
+  static async create(body: GoalVO.CreateGoalVo, options?: MethodOptions) {
     try {
       const res = await GoalController.create(body);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('创建成功');
       }
       return res;
@@ -32,10 +26,10 @@ export default class GoalService {
    * @param id idID
    * @returns 操作结果
    */
-  static async delete(id: string, options: MethodOptions) {
+  static async delete(id: string, options?: MethodOptions) {
     try {
       const res = await GoalController.delete(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('删除成功');
       }
       return res;
@@ -50,10 +44,10 @@ export default class GoalService {
    * @param updateGoalVo 请求体数据
    * @returns 操作结果
    */
-  static async update(id: string, updateGoalVo: GoalVO.UpdateGoalVo, options: MethodOptions) {
+  static async update(id: string, updateGoalVo: GoalVO.UpdateGoalVo, options?: MethodOptions) {
     try {
       const res = await GoalController.update(id, updateGoalVo);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -150,10 +144,10 @@ export default class GoalService {
    * @param id idID
    * @returns 操作结果
    */
-  static async abandon(id: string, options: MethodOptions) {
+  static async abandon(id: string, options?: MethodOptions) {
     try {
       const res = await GoalController.abandon(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -167,10 +161,10 @@ export default class GoalService {
    * @param id idID
    * @returns 操作结果
    */
-  static async restore(id: string, options: MethodOptions) {
+  static async restore(id: string, options?: MethodOptions) {
     try {
       const res = await GoalController.restore(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;

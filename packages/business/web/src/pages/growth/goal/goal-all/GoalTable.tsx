@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { IMPORTANCE_MAP } from '../../constants';
 import { useGoalAllContext } from './context';
 import { useEffect, useState } from 'react';
-import { GoalService } from '../../service';
+import { GoalService } from '@true-north/web-service';
 import { GoalVo } from '@true-north/vo';
 import { ColumnProps } from '@arco-design/web-react/lib/Table/interface';
 import { useGoalDetail } from '../../components/GoalDetail';
@@ -108,7 +108,7 @@ export default function GoalTable() {
                 content:
                   '删除后将无法恢复,如果目标下有子目标,将一并删除,是否继续?',
                 onOk: async () => {
-                  await GoalService.deleteGoal(record.id);
+                  await GoalService.delete(record.id, { silent: false });
                   await getGoalPage();
                 },
               })
@@ -130,7 +130,7 @@ export default function GoalTable() {
       return;
     }
     setSubGoalLoadingStatus((prev) => ({ ...prev, [record.id]: 'loading' }));
-    const todoNode = await GoalService.getDetail(record.id);
+    const todoNode = await GoalService.find(record.id);
     setExpandedData((prev) => ({
       ...prev,
       [record.id]: todoNode,

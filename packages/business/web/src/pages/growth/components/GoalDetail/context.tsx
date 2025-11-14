@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Dispatch, useRef, useCallback } from 'react';
 import { GoalVo, GoalWithoutRelationsVo } from '@true-north/vo';
-import { GoalFormData, GoalService, GoalMapping } from '../../service';
+import { GoalFormData, GoalService, GoalMapping } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
 import { GoalType, GoalStatus, Importance } from '@true-north/enum';
 
@@ -52,25 +52,25 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
 
   const refreshGoalDetail = useCallback(
     async (id: string) => {
-      const goal = await GoalService.getDetail(id);
+      const goal = await GoalService.find(id);
       setCurrentGoal(goal);
     },
     [setCurrentGoal],
   );
 
-  const { goalList } = GoalService.useGoalList({
-    excludeIds: [props.goalId],
-  });
+  // TODO: 需要重新实现 useGoalList hook
+  const goalList = [];
 
   async function handleCreate() {
-    await GoalService.createGoal(GoalMapping.formDataToCreateVo(goalFormData));
+    await GoalService.create(GoalMapping.formDataToCreateVo(goalFormData), { silent: false });
     setGoalFormData(defaultFormData);
   }
 
   async function handleUpdate() {
-    await GoalService.updateGoal(
+    await GoalService.update(
       currentGoal.id,
       GoalMapping.formDataToUpdateVo(goalFormData),
+      { silent: false }
     );
   }
 

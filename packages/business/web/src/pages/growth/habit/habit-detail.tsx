@@ -24,7 +24,7 @@ import {
   IconPlayArrow,
   IconClose,
 } from '@arco-design/web-react/icon';
-import { HabitController } from '@true-north/api';
+import { HabitService } from '@true-north/web-service';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
 import { useHabitContext } from './context';
@@ -50,7 +50,7 @@ export const HabitDetailPage: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await HabitController.getHabitDetail(id);
+      const response = await HabitService.getHabitDetail(id);
       setHabit(response);
     } catch (error) {
       console.error('获取习惯详情失败:', error);
@@ -74,11 +74,11 @@ export const HabitDetailPage: React.FC = () => {
 
         switch (action) {
           case 'complete':
-            await HabitController.doneBatchHabit({ includeIds: [habit.id] });
+            await HabitService.doneBatchHabit({ includeIds: [habit.id] });
             Message.success('习惯已完成');
             break;
           case 'abandon':
-            await HabitController.abandonHabit(habit.id);
+            await HabitService.abandonHabit(habit.id);
             Message.success('习惯已放弃');
             break;
           default:
@@ -106,7 +106,7 @@ export const HabitDetailPage: React.FC = () => {
       content: '删除后无法恢复，确定要删除这个习惯吗？',
       onOk: async () => {
         try {
-          await HabitController.deleteHabit(habit.id);
+          await HabitService.deleteHabit(habit.id);
           Message.success('习惯已删除');
           navigate('/growth/habits');
           refreshHabits();

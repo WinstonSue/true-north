@@ -4,7 +4,7 @@ import { Typography, Popover, Button } from '@arco-design/web-react';
 import { FlexibleContainer } from 'francis-component-react';
 import IconSelector from '../IconSelector';
 import { SiteIcon } from '@true-north/components-ui';
-import { GoalService } from '../../service';
+import { GoalService } from '@true-north/web-service';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { GoalVo } from '@true-north/vo';
 import clsx from 'clsx';
@@ -58,7 +58,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.abandonGoal(goal.id);
+                        GoalService.abandon(goal.id, { silent: false });
                         props.refreshGoalList();
                       }}
                     >
@@ -67,7 +67,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.deleteGoal(goal.id);
+                        GoalService.delete(goal.id, { silent: false });
                         props.refreshGoalList();
                       }}
                     >

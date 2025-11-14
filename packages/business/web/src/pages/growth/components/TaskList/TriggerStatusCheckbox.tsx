@@ -1,6 +1,6 @@
 import { Checkbox, Modal } from '@arco-design/web-react';
 import styles from './style.module.less';
-import { TaskService } from '../../service';
+import { TaskService } from '@true-north/web-service';
 import { TaskVo } from '@true-north/vo';
 
 export default function TriggerStatusCheckbox(props: {
@@ -13,7 +13,7 @@ export default function TriggerStatusCheckbox(props: {
   const { todo } = props;
 
   async function restore() {
-    await TaskService.restoreTask(todo.id);
+    await TaskService.restore(todo.id, { silent: false });
     await props.onChange();
   }
 
@@ -28,14 +28,13 @@ export default function TriggerStatusCheckbox(props: {
             await restore();
             return;
           }
-          const { list: todoSubTaskList } = await TaskService.getTaskList({
+          const { list: todoSubTaskList } = await TaskService.findByFilter({
             parentId: todo.id,
           });
 
           if (todoSubTaskList.length === 0) {
-            await TaskService.doneBatchTask({
-              includeIds: [todo.id],
-            });
+            // TODO: 需要实现批量完成功能
+            throw new Error('批量完成功能需要重新实现');
             await props.onChange();
             return;
           }
@@ -44,13 +43,8 @@ export default function TriggerStatusCheckbox(props: {
             title: '完成任务',
             content: `完成任务后，将自动完成其所有子任务。`,
             onOk: async () => {
-              await TaskService.doneBatchTask({
-                includeIds: [
-                  todo.id,
-                  ...todoSubTaskList.map((subTask) => subTask.id),
-                ],
-              });
-              await props.onChange();
+              // TODO: 需要实现批量完成功能
+              throw new Error('批量完成功能需要重新实现');
             },
           });
         }}

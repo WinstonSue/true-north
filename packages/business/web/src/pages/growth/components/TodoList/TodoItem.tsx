@@ -6,7 +6,7 @@ import { FlexibleContainer } from 'francis-component-react';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import IconSelector from '../../components/IconSelector';
 import { SiteIcon } from '@true-north/components-ui';
-import { TodoService } from '../../service';
+import { TodoService } from '@true-north/web-service';
 import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
@@ -53,7 +53,7 @@ function TodoItem(props: TodoItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TodoService.abandonTodo(todo.id);
+                        TodoService.abandonWithRepeat(todo.id);
                         props.refreshTodoList();
                       }}
                     >
@@ -62,7 +62,7 @@ function TodoItem(props: TodoItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TodoService.deleteTodo(todo.id);
+                        TodoService.delete(todo.id);
                         props.refreshTodoList();
                       }}
                     >

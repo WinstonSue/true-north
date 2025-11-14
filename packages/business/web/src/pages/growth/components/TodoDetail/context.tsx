@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, Dispatch, useRef, useCallback } from 'react';
-import { TodoFormData, TodoService } from '../../service';
+import { TodoFormData, TodoService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
-import { TodoMapping } from '../../service';
+import { TodoMapping } from '@true-north/web-service';
 import { TodoStatus } from '@true-north/enum';
 import { CreateTodoVo } from '@true-north/vo';
 
@@ -58,7 +58,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
     id: string,
     _todo: TodoVo | TodoWithoutRelationsVo,
   ) => {
-    const todo = await TodoService.getTodoDetailWithRepeat(id, _todo);
+    const todo = await TodoService.findMixRepeat(id, { source: _todo?.source });
     setCurrentTodo(todo);
     todoFormDataRef.current = TodoMapping.voToFormData(todo);
     setTodoFormData(todoFormDataRef.current);
@@ -93,7 +93,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
       };
     }
     try {
-      await TodoService.createTodo({
+      await TodoService.create({
         name: form.name,
         planDate: form.planDate,
         planStartTime: form.planTimeRange?.[0] || undefined,
@@ -104,7 +104,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
         description: form.description,
         status: TodoStatus.TODO,
         repeatConfig,
-      });
+      }, { silent: false });
       todoFormDataRef.current = defaultFormData;
       setTodoFormData(todoFormDataRef.current);
     } catch (error) {
@@ -115,7 +115,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
 
   async function handleUpdate() {
     const data = TodoMapping.formDataToUpdateVo(todoFormDataRef.current);
-    await TodoService.updateWithRepeatTodo(currentTodo.id, data);
+    await TodoService.updateWithRepeat(currentTodo.id, data, { silent: false });
   }
 
   const onSubmit = async () => {

@@ -1,13 +1,7 @@
 import { TaskController } from '@true-north/api';
-import type {
-  CreateTaskVo,
-  TaskPageFilterVo,
-  TaskFilterVo,
-  TaskWithoutRelationsVo,
-  UpdateTaskVo,
-} from '@true-north/vo';
-import { useState, useEffect } from 'react';
+import type { Task as TaskVO } from '@true-north/vo';
 import { Message } from '../message';
+import { MethodOptions } from '../type';
 
 export default class TaskService {
   /**
@@ -15,10 +9,10 @@ export default class TaskService {
    * @param createTaskVo 请求体数据
    * @returns 操作结果
    */
-  static async create(createTaskVo: TaskVO.CreateTaskVo, options: MethodOptions) {
+  static async create(createTaskVo: TaskVO.CreateTaskVo, options?: MethodOptions) {
     try {
       const res = await TaskController.create(createTaskVo);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('创建成功');
       }
       return res;
@@ -32,10 +26,10 @@ export default class TaskService {
    * @param id idID
    * @returns 操作结果
    */
-  static async delete(id: string, options: MethodOptions) {
+  static async delete(id: string, options?: MethodOptions) {
     try {
       const res = await TaskController.delete(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('删除成功');
       }
       return res;
@@ -50,10 +44,10 @@ export default class TaskService {
    * @param body 请求体数据
    * @returns 操作结果
    */
-  static async update(id: string, body: TaskVO.UpdateTaskVo, options: MethodOptions) {
+  static async update(id: string, body: TaskVO.UpdateTaskVo, options?: MethodOptions) {
     try {
       const res = await TaskController.update(id, body);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -123,10 +117,10 @@ export default class TaskService {
    * @param id idID
    * @returns 操作结果
    */
-  static async abandon(id: string, options: MethodOptions) {
+  static async abandon(id: string, options?: MethodOptions) {
     try {
       const res = await TaskController.abandon(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -140,10 +134,10 @@ export default class TaskService {
    * @param id idID
    * @returns 操作结果
    */
-  static async restore(id: string, options: MethodOptions) {
+  static async restore(id: string, options?: MethodOptions) {
     try {
       const res = await TaskController.restore(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;

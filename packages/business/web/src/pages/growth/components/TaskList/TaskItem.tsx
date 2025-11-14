@@ -6,7 +6,7 @@ import { FlexibleContainer } from 'francis-component-react';
 import IconSelector from '../../components/IconSelector';
 import { SiteIcon } from '@true-north/components-ui';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
-import { TaskService } from '../../service';
+import { TaskService } from '@true-north/web-service';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
@@ -48,7 +48,7 @@ function TaskItem(props: TaskItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TaskService.abandonTask(task.id);
+                        TaskService.abandon(task.id, { silent: false });
                         props.refreshTaskList();
                       }}
                     >
@@ -57,7 +57,7 @@ function TaskItem(props: TaskItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TaskService.deleteTask(task.id);
+                        TaskService.delete(task.id, { silent: false });
                         props.refreshTaskList();
                       }}
                     >

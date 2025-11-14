@@ -1,6 +1,7 @@
 import { HabitController } from '@true-north/api';
-import type { CreateHabitVo, UpdateHabitVo, HabitFilterVo, HabitPageFilterVo } from '@true-north/vo';
+import type { Habit as HabitVO } from '@true-north/vo';
 import { Message } from '../message';
+import { MethodOptions } from '../type';
 
 export default class HabitService {
   /**
@@ -8,10 +9,10 @@ export default class HabitService {
    * @param createHabitVo 请求体数据
    * @returns 操作结果
    */
-  static async create(createHabitVo: HabitVO.CreateHabitVo, options: MethodOptions) {
+  static async create(createHabitVo: HabitVO.CreateHabitVo, options?: MethodOptions) {
     try {
       const res = await HabitController.create(createHabitVo);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('创建成功');
       }
       return res;
@@ -25,10 +26,10 @@ export default class HabitService {
    * @param id idID
    * @returns 操作结果
    */
-  static async delete(id: string, options: MethodOptions) {
+  static async delete(id: string, options?: MethodOptions) {
     try {
       const res = await HabitController.delete(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('删除成功');
       }
       return res;
@@ -43,10 +44,10 @@ export default class HabitService {
    * @param updateHabitVo 请求体数据
    * @returns 操作结果
    */
-  static async update(id: string, updateHabitVo: HabitVO.UpdateHabitVo, options: MethodOptions) {
+  static async update(id: string, updateHabitVo: HabitVO.UpdateHabitVo, options?: MethodOptions) {
     try {
       const res = await HabitController.update(id, updateHabitVo);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -102,10 +103,10 @@ export default class HabitService {
    * @param id idID
    * @returns 操作结果
    */
-  static async abandon(id: string, options: MethodOptions) {
+  static async abandon(id: string, options?: MethodOptions) {
     try {
       const res = await HabitController.abandon(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -119,10 +120,10 @@ export default class HabitService {
    * @param id idID
    * @returns 操作结果
    */
-  static async restore(id: string, options: MethodOptions) {
+  static async restore(id: string, options?: MethodOptions) {
     try {
       const res = await HabitController.restore(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;

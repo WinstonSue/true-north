@@ -15,7 +15,7 @@ import {
   GoalWithoutRelationsVo,
   GoalPageFilterVo,
 } from '@true-north/vo';
-import { GoalService } from '../../service';
+import { GoalService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
 import { GoalType, GoalStatus } from '@true-north/enum';
 
@@ -58,7 +58,7 @@ export const [GoalAllProvider, useGoalAllContext] = createInjectState<{
   });
 
   async function getGoalPage() {
-    const { list, total } = await GoalService.getGoalPage(filtersRef.current);
+    const { list, total } = await GoalService.page(filtersRef.current);
     setGoalList(list);
   }
 

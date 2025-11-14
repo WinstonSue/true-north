@@ -13,7 +13,7 @@ import {
   TaskWithoutRelationsVo,
   TaskPageFilterVo,
 } from '@true-north/vo';
-import { TaskService } from '../../service';
+import { TaskService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
 import { TaskStatus } from '@true-north/enum';
 
@@ -61,7 +61,7 @@ export const [TaskAllProvider, useTaskAllContext] = createInjectState<{
   });
 
   async function getTaskPage() {
-    const { list, total } = await TaskService.getTaskPage(filtersRef.current);
+    const { list, total } = await TaskService.page(filtersRef.current);
     setTaskList(list);
   }
 

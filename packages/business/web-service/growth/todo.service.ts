@@ -9,10 +9,10 @@ export default class TodoService {
    * @param createTodoVo 请求体数据
    * @returns 操作结果
    */
-  static async create(createTodoVo: TodoVO.CreateTodoVo, options: MethodOptions) {
+  static async create(createTodoVo: TodoVO.CreateTodoVo, options?: MethodOptions) {
     try {
       const res = await TodoController.create(createTodoVo);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('创建成功');
       }
       return res;
@@ -26,10 +26,10 @@ export default class TodoService {
    * @param id idID
    * @returns 操作结果
    */
-  static async delete(id: string, options: MethodOptions) {
+  static async delete(id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.delete(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('删除成功');
       }
       return res;
@@ -44,10 +44,10 @@ export default class TodoService {
    * @param updateVo 请求体数据
    * @returns 操作结果
    */
-  static async update(id: string, updateVo: TodoVO.UpdateTodoVo, options: MethodOptions) {
+  static async update(id: string, updateVo: TodoVO.UpdateTodoVo, options?: MethodOptions) {
     try {
       const res = await TodoController.update(id, updateVo);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -104,10 +104,10 @@ export default class TodoService {
    * @param updateVo 请求体数据
    * @returns 操作结果
    */
-  static async updateWithRepeat(id: string, updateVo: TodoVO.UpdateTodoVo, options: MethodOptions) {
+  static async updateWithRepeat(id: string, updateVo: TodoVO.UpdateTodoVo, options?: MethodOptions) {
     try {
       const res = await TodoController.updateWithRepeat(id, updateVo);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -122,10 +122,10 @@ export default class TodoService {
    * @param body 请求体数据
    * @returns 操作结果
    */
-  static async doneWithRepeatBatch(query?: TodoVO.TodoFilterVo, body: any, options: MethodOptions) {
+  static async doneWithRepeatBatch(query: TodoVO.TodoFilterVo, body: any, options?: MethodOptions) {
     try {
       const res = await TodoController.doneWithRepeatBatch(query, body);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -139,10 +139,10 @@ export default class TodoService {
    * @param id idID
    * @returns 操作结果
    */
-  static async abandonWithRepeat(id: string, options: MethodOptions) {
+  static async abandonWithRepeat(id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.abandonWithRepeat(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -156,10 +156,10 @@ export default class TodoService {
    * @param id idID
    * @returns 操作结果
    */
-  static async restoreWithRepeat(id: string, options: MethodOptions) {
+  static async restoreWithRepeat(id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.restoreWithRepeat(id);
-      if (!options.silent) {
+      if (!options?.silent) {
         Message.success('操作成功');
       }
       return res;
@@ -188,7 +188,7 @@ export default class TodoService {
    * @param query 查询参数
    * @returns 操作结果
    */
-  static async findMixRepeat(id: string, query?: { source?: string; }) {
+  static async findMixRepeat(id: string, query?: { source?: string }) {
     try {
       const res = await TodoController.findMixRepeat(id, query);
       return res;

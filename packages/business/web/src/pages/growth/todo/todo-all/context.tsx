@@ -11,7 +11,7 @@ import {
   useEffect,
 } from 'react';
 import { TodoVo, TodoPageFilterVo } from '@true-north/vo';
-import { TodoService } from '../../service';
+import { TodoService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
 import { TodoStatus } from '@true-north/enum';
 

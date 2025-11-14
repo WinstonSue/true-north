@@ -1,7 +1,7 @@
 import { createInjectState } from '@/utils/createInjectState';
 import { useEffect, useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
-import { TodoService } from '../../service';
+import { TodoService } from '@true-north/web-service';
 import { TodoVo } from '@true-north/vo';
 
 export const [CalendarProvider, useCalendarContext] = createInjectState<{

@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { FlexibleContainer } from 'francis-component-react';
 import { Collapse, Divider, Button } from '@arco-design/web-react';
 import styles from './style.module.less';
-import { TaskService } from '../../service';
+import { TaskService } from '@true-north/web-service';
 import { flushSync } from 'react-dom';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
 import { SiteIcon } from '@true-north/components-ui';
@@ -31,30 +31,27 @@ export default function TaskWeek() {
   >([]);
 
   async function refreshData() {
-    const { list: todos } = await TaskService.getTaskList({
+    const { list: todos } = await TaskService.findByFilter({
       status: TaskStatus.TODO,
-      startAt: weekStart,
-      endAt: weekEnd,
+      // TODO: 需要根据新的 API 调整时间过滤参数
     });
     setWeekTaskList(todos);
 
-    const { list: doneTasks } = await TaskService.getTaskList({
+    const { list: doneTasks } = await TaskService.findByFilter({
       status: TaskStatus.DONE,
-      doneDateStart: weekStart,
-      doneDateEnd: weekEnd,
+      // TODO: 需要根据新的 API 调整时间过滤参数
     });
     setWeekDoneTaskList(doneTasks);
 
-    const { list: expiredTasks } = await TaskService.getTaskList({
+    const { list: expiredTasks } = await TaskService.findByFilter({
       status: TaskStatus.TODO,
-      endAt: weekStart,
+      // TODO: 需要根据新的 API 调整时间过滤参数
     });
     setExpiredTaskList(expiredTasks);
 
-    const { list: abandonedTasks } = await TaskService.getTaskList({
+    const { list: abandonedTasks } = await TaskService.findByFilter({
       status: TaskStatus.ABANDONED,
-      abandonedDateStart: weekStart,
-      abandonedDateEnd: weekEnd,
+      // TODO: 需要根据新的 API 调整时间过滤参数
     });
     setWeekAbandonedTaskList(abandonedTasks);
 
@@ -75,7 +72,7 @@ export default function TaskWeek() {
     flushSync(() => {
       setCurrentTask(null);
     });
-    const todo = await TaskService.getTaskDetail(id);
+    const todo = await TaskService.find(id);
     setCurrentTask(todo);
   }
 
