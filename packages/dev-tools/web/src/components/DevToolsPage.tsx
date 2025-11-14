@@ -7,7 +7,7 @@ import WebServiceTab from './WebServiceTab';
 const { Title, Paragraph } = Typography;
 
 const DevToolsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('method-details');
+  const [activeTab, setActiveTab] = useState('WebServiceDiff');
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -22,14 +22,14 @@ const DevToolsPage: React.FC = () => {
           setActiveTab(key);
         }}
       >
-        <Tabs.TabPane key="method-details" title="Desktop 控制器差异">
-          <DesktopControllerTab isActive={activeTab === 'method-details'} />
+        <Tabs.TabPane key="DesktopControllerDiff" title="Desktop 控制器差异">
+          <DesktopControllerTab isActive={activeTab === 'DesktopControllerDiff'} />
         </Tabs.TabPane>
-        <Tabs.TabPane key="api-method-details" title="API 控制器差异">
-          <ApiControllerTab isActive={activeTab === 'api-method-details'} />
+        <Tabs.TabPane key="ApiControllerDiff" title="API 控制器差异">
+          <ApiControllerTab isActive={activeTab === 'ApiControllerDiff'} />
         </Tabs.TabPane>
-        <Tabs.TabPane key="web-service-method-details" title="Web Service 差异">
-          <WebServiceTab isActive={activeTab === 'web-service-method-details'} />
+        <Tabs.TabPane key="WebServiceDiff" title="Web Service 差异">
+          <WebServiceTab isActive={activeTab === 'WebServiceDiff'} />
         </Tabs.TabPane>
       </Tabs>
     </div>

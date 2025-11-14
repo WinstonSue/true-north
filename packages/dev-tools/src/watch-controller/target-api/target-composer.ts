@@ -184,37 +184,6 @@ export class TargetApiComposer {
   }
 
   /**
-   * 更新 AST 中的构造函数
-   */
-  private updateConstructorInAST(ast: ASTClassInfo, constructorData: any): boolean {
-    try {
-      if (constructorData && ast.constructor) {
-        // 更新构造函数参数
-        ast.constructor.parameters = constructorData.parameters || ast.constructor.parameters;
-      }
-      return true;
-    } catch (error) {
-      console.error('更新 AST 构造函数失败:', error);
-      return false;
-    }
-  }
-
-  /**
-   * 更新 AST 中的导入声明
-   */
-  private updateImportsInAST(ast: ASTClassInfo, importsData: any): boolean {
-    try {
-      if (Array.isArray(importsData)) {
-        ast.imports = importsData;
-      }
-      return true;
-    } catch (error) {
-      console.error('更新 AST 导入失败:', error);
-      return false;
-    }
-  }
-
-  /**
    * 将 MethodDefinition 转换为 ASTMethod
    */
   private convertMethodDefinitionToASTMethod(method: MethodDefinition, sourceState: IntermediateState): ASTMethod {
@@ -236,7 +205,6 @@ export class TargetApiComposer {
       showReturnType: false, // API 控制器不显示返回类型
     };
   }
-
 
   /**
    * 生成 API 方法体 - 基于 AST 参数数据
@@ -294,9 +262,6 @@ export class TargetApiComposer {
     });
   }
 
-
-
-
   /**
    * 深拷贝 AST 对象
    */
@@ -341,40 +306,6 @@ export class TargetApiComposer {
       })),
       sourceFile: ast.sourceFile,
       classDeclaration: ast.classDeclaration,
-    };
-  }
-
-  /**
-   * 验证 AST 结构完整性
-   */
-  validateAST(ast: ASTClassInfo): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (!ast.className) {
-      errors.push('缺少类名');
-    }
-
-    if (!ast.methods || ast.methods.length === 0) {
-      errors.push('缺少方法定义');
-    }
-
-    // 检查方法名重复
-    const methodNames = ast.methods.map((m) => m.name);
-    const duplicates = methodNames.filter((name, index) => methodNames.indexOf(name) !== index);
-    if (duplicates.length > 0) {
-      errors.push(`方法名重复: ${duplicates.join(', ')}`);
-    }
-
-    // 检查方法体
-    ast.methods.forEach((method) => {
-      if (!method.bodyText || method.bodyText.trim() === '') {
-        errors.push(`方法 ${method.name} 缺少方法体`);
-      }
-    });
-
-    return {
-      isValid: errors.length === 0,
-      errors,
     };
   }
 }

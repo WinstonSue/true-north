@@ -3,8 +3,7 @@
  * 专门处理 Server Controller 到 Web Service 的同步
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { TargetWebServiceParser } from './target-parser';
+import { writeFileSync } from 'fs';
 import { ControllerWebServiceDiffEngine } from './diff-engine';
 import { TargetWebServiceComposer } from './target-composer';
 import { formatFile } from '../../utils/formatter';
@@ -19,9 +18,6 @@ export class ControllerWebServiceSyncEngine {
   async syncController(sourcePath: string, targetPath: string, options: SyncOptions = {}): Promise<SyncResult> {
     try {
       const diffEngine = new ControllerWebServiceDiffEngine(sourcePath, targetPath);
-
-      // 1. 读取源码
-      const targetCode = readFileSync(targetPath, 'utf-8');
 
       // 2. 比对差异
       const diff = diffEngine.compareIntermediateState();
@@ -38,7 +34,7 @@ export class ControllerWebServiceSyncEngine {
 
         const newCode = targetComposer.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');
-        
+
         // 格式化生成的代码
         formatFile(targetPath);
       }
