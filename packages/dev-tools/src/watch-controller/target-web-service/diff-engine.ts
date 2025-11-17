@@ -4,7 +4,12 @@
  */
 
 import { MethodDefinition } from '../core/intermediate-state/types';
-import { DiffEngine, generateDiffResultSummary } from '../core/diff-engine';
+import {
+  DiffEngine,
+  generateDiffResultSummary,
+  detectMethodChangeType,
+  generateChangeDetails,
+} from '../core/diff-engine';
 import { TargetWebServiceParser } from './target-parser';
 import { MethodInfo, ControllerSyncStatus } from '../../../types';
 
@@ -101,17 +106,22 @@ export class ControllerWebServiceDiffEngine extends DiffEngine {
           description: 'Method not found in target Web Service',
         });
       } else {
-        // 方法存在，只检查方法名是否匹配（极简检查）
-        if (sourceMethod.name !== targetMethod.name) {
+        // 方法存在，检查是否有变化
+        targetMethod.parameters = targetMethod.parameters.filter((p: any) => p.name !== 'options');
+
+        const changeType = detectMethodChangeType(sourceMethod, targetMethod, {
+          ignore: ['decorators', 'returnType'],
+        });
+
+        if (changeType !== 'method_no_change') {
           changes.push({
             methodName,
-            changeType: 'method_modified',
+            changeType,
             sourceMethod: this.convertToMethodInfo(sourceMethod),
             targetMethod: this.convertToMethodInfo(targetMethod),
-            description: `Method name changed from ${targetMethod.name} to ${sourceMethod.name}`,
+            description: generateChangeDetails(sourceMethod, targetMethod, changeType),
           });
         }
-        // 跳过所有其他检查（参数、装饰器、返回类型等）
       }
     }
 

@@ -4,10 +4,14 @@
  */
 
 import { IntermediateState, MethodDefinition } from '../core/intermediate-state/types';
-import { DiffEngine, detectMethodChangeType, generateChangeDetails } from '../core/diff-engine';
+import {
+  DiffEngine,
+  generateDiffResultSummary,
+  detectMethodChangeType,
+  generateChangeDetails,
+} from '../core/diff-engine';
 import { TargetApiParser } from './target-parser';
 import { MethodChange, MethodInfo, ControllerSyncStatus } from '../../../types';
-import { generateDiffResultSummary } from '../core/diff-engine';
 
 export class ControllerApiDiffEngine extends DiffEngine {
   targetAdapter: TargetApiParser;

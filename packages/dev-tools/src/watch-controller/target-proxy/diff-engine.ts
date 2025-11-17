@@ -4,7 +4,12 @@
  */
 
 import { MethodDefinition } from '../core/intermediate-state/types';
-import { DiffEngine, generateDiffResultSummary } from '../core/diff-engine';
+import {
+  DiffEngine,
+  generateDiffResultSummary,
+  detectMethodChangeType,
+  generateChangeDetails,
+} from '../core/diff-engine';
 import { IntermediateState } from '../core/intermediate-state/types';
 import { TargetProxyParser } from './target-parser';
 import { MethodChange, MethodInfo, ControllerSyncStatus, DiffResult } from '../../../types';
@@ -95,12 +100,24 @@ export class ControllerProxyDiffEngine extends DiffEngine {
           description: 'Method not found in target controller',
         });
         continue;
+      } else {
+        // 方法存在，检查是否有变化
+        const changeType = detectMethodChangeType(sourceMethod, targetMethod);
+        if (changeType !== 'method_no_change') {
+          changes.push({
+            methodName,
+            changeType,
+            sourceMethod: this.convertToMethodInfo(sourceMethod),
+            targetMethod: this.convertToMethodInfo(targetMethod),
+            description: generateChangeDetails(sourceMethod, targetMethod, changeType),
+          });
+        }
       }
 
       // 对于 Proxy 控制器，检查方法体是否是正确的转发代码
-      const expectedProxyBody = `return this.controller.${methodName}(${targetMethod.parameters.map(p => p.name).join(', ')});`;
+      const expectedProxyBody = `return this.controller.${methodName}(${targetMethod.parameters.map((p) => p.name).join(', ')});`;
       const targetBodyText = targetMethod.bodyText?.trim() || '';
-      
+
       // 只有当目标方法体不是期望的转发代码时才需要更新
       if (targetBodyText !== expectedProxyBody) {
         changes.push({

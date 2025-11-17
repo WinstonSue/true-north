@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron
 import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { TodoController as _TodoController } from '@true-north/business-server';
 import { todoService, todoRepeatService } from './todo.service';
+import { RelatedType } from '@true-north/enum';
 
 @Controller('/todo')
 export class TodoController {
   private readonly controller: any = new _TodoController(todoService, todoRepeatService);
 
   @Post('/create')
-  async create(@Body() createTodoVo: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
-    return this.controller.create(createTodoVo);
+  async create(@Body() body: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
+    return this.controller.create(body);
   }
 
   @Delete('/delete/:id')
@@ -18,8 +19,8 @@ export class TodoController {
   }
 
   @Put('/update/:id')
-  async update(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    return this.controller.update(id, updateVo);
+  async update(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
+    return this.controller.update(id, body);
   }
 
   @Get('/find/:id')
@@ -38,8 +39,8 @@ export class TodoController {
   }
 
   @Put('/update-with-repeat/:id')
-  async updateWithRepeat(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    return this.controller.updateWithRepeat(id, updateVo);
+  async updateWithRepeat(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
+    return this.controller.updateWithRepeat(id, body);
   }
 
   @Put('/done-with-repeat/batch')
@@ -58,7 +59,7 @@ export class TodoController {
   }
 
   @Delete('/delete-with-repeat/:id')
-  async deleteWithRepeat(@Param('id') id: string, @Query() query?: TodoVO.TodoFilterVo): Promise<boolean> {
+  async deleteWithRepeat(@Param('id') id: string, @Query() query?: { relatedType?: RelatedType }): Promise<boolean> {
     return this.controller.deleteWithRepeat(id, query);
   }
 
@@ -70,7 +71,7 @@ export class TodoController {
   }
 
   @Get('/find-mix-repeat/:id')
-  async findMixRepeat(@Param('id') id: string, @Query() query?: { relatedType?: string }): Promise<TodoVO.TodoVo> {
+  async findMixRepeat(@Param('id') id: string, @Query() query?: { relatedType?: RelatedType }): Promise<TodoVO.TodoVo> {
     return this.controller.findMixRepeat(id, query);
   }
 }

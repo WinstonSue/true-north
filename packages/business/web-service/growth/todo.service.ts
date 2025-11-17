@@ -1,5 +1,6 @@
 import { TodoController } from '@true-north/api';
 import type { Todo as TodoVO } from '@true-north/vo';
+import { RelatedType } from '@true-north/enum';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 
@@ -115,7 +116,7 @@ export default class TodoService {
     }
   }
 
-  static async findMixRepeat(id: string, query?: { relatedType?: string }) {
+  static async findMixRepeat(id: string, query?: { relatedType?: RelatedType }) {
     try {
       const res = await TodoController.findMixRepeat(id, query);
       return res;
@@ -124,7 +125,7 @@ export default class TodoService {
     }
   }
 
-  static async deleteWithRepeat(id: string, query?: TodoVO.TodoFilterVo, options?: MethodOptions) {
+  static async deleteWithRepeat(id: string, query?: { relatedType?: RelatedType }, options?: MethodOptions) {
     try {
       const res = await TodoController.deleteWithRepeat(id, query);
       if (!options?.silent) {

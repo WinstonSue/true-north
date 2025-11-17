@@ -50,7 +50,7 @@ export default class TodoController {
     return request<boolean>({ method: 'put' })(`/todo/abandon-with-repeat${id}`);
   }
 
-  static async deleteWithRepeat(id: string, query?: TodoVO.TodoFilterVo) {
+  static async deleteWithRepeat(id: string, query?: { relatedType?: RelatedType }) {
     return request<boolean>({ method: 'remove' })(`/todo/delete-with-repeat${id}`, query);
   }
 
