@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import type { RouteDef, RestHandlerCtx } from 'electron-ipc-restful';
-import { TodoStatus, TodoSource, HabitStatus, Difficulty, TaskStatus, GoalType, GoalStatus } from '@true-north/enum';
+import { TodoStatus, RelatedType, HabitStatus, Difficulty, TaskStatus, GoalType, GoalStatus } from '@true-north/enum';
 
 /**
  * 注册枚举类型相关的 IPC 处理器
@@ -24,7 +24,7 @@ export function registerEnumsIpcHandlers(): void {
   });
 
   ipcMain.handle('enums:getTodoSources', () => {
-    return Object.values(TodoSource);
+    return Object.values(RelatedType);
   });
 
   ipcMain.handle('enums:getHabitStatuses', () => {
@@ -61,7 +61,7 @@ export const enumRestRoutes: RouteDef[] = [
   {
     method: 'GET',
     path: '/enums/getTodoSources',
-    handler: (_: RestHandlerCtx) => Object.values(TodoSource),
+    handler: (_: RestHandlerCtx) => Object.values(RelatedType),
   },
   {
     method: 'GET',

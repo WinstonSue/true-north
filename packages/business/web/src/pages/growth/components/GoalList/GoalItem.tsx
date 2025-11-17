@@ -58,7 +58,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.abandon(goal.id, { silent: false });
+                        GoalService.abandon(goal.id, );
                         props.refreshGoalList();
                       }}
                     >
@@ -67,7 +67,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.delete(goal.id, { silent: false });
+                        GoalService.delete(goal.id, );
                         props.refreshGoalList();
                       }}
                     >

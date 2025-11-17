@@ -357,12 +357,18 @@ importers:
 
   packages/business/api:
     dependencies:
+      '@true-north/enum':
+        specifier: workspace:*
+        version: link:../enum
       '@true-north/share-request':
         specifier: workspace:*
         version: link:../../share-web/request
       '@true-north/share-types':
         specifier: workspace:*
         version: link:../../share/types
+      '@true-north/vo':
+        specifier: workspace:*
+        version: link:../vo
       axios:
         specifier: ^0.24.0
         version: 0.24.0
@@ -381,6 +387,9 @@ importers:
       '@true-north/enum':
         specifier: workspace:*
         version: link:../enum
+      '@true-north/vo':
+        specifier: workspace:*
+        version: link:../vo
       francis-helper-repeat:
         specifier: 0.0.6
         version: 0.0.6

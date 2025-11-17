@@ -1,7 +1,7 @@
 import { BaseEntityVo } from '../../common';
 import { TaskVo } from '../task/task-model.vo';
 import { TodoRepeatVo } from './todo-repeat-model.vo';
-import { TodoSource, TodoStatus } from '@true-north/enum';
+import { RelatedType, TodoStatus } from '@true-north/enum';
 import { HabitVo } from '../habit/habit-model.vo';
 
 export type TodoWithoutRelationsVo = {
@@ -16,7 +16,7 @@ export type TodoWithoutRelationsVo = {
   planStartTime?: string;
   planEndTime?: string;
   planDate: string;
-  source?: TodoSource;
+  relatedType?: RelatedType;
   taskId?: string;
   repeatId?: string;
   habitId?: string;

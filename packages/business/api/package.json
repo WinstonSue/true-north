@@ -6,7 +6,9 @@
   "dependencies": {
     "axios": "^0.24.0",
     "@true-north/share-types": "workspace:*",
-    "@true-north/share-request": "workspace:*"
+    "@true-north/share-request": "workspace:*",
+    "@true-north/enum": "workspace:*",
+    "@true-north/vo": "workspace:*"
   },
   "devDependencies": {}
 }

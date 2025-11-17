@@ -10,7 +10,7 @@ import { TodoService } from '@true-north/web-service';
 import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
-import { TodoSource } from '@true-north/enum';
+import { RelatedType } from '@true-north/enum';
 
 const { Paragraph } = Typography;
 
@@ -40,7 +40,7 @@ function TodoItem(props: TodoItemProps) {
             className={clsx(['flex items-center justify-between', 'leading-8'])}
           >
             <span className="text-text-1">
-              {todo.source === TodoSource.IS_REPEAT && (
+              {todo.relatedType === RelatedType.IS_REPEAT && (
                 <SiteIcon id={'repeat'} />
               )}
               {todo.name}

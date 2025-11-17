@@ -115,9 +115,21 @@ export default class TodoService {
     }
   }
 
-  static async findMixRepeat(id: string, query?: { source?: string }) {
+  static async findMixRepeat(id: string, query?: { relatedType?: string }) {
     try {
       const res = await TodoController.findMixRepeat(id, query);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  static async deleteWithRepeat(id: string, query?: TodoVO.TodoFilterVo, options?: MethodOptions) {
+    try {
+      const res = await TodoController.deleteWithRepeat(id, query);
+      if (!options?.silent) {
+        Message.success('删除成功');
+      }
       return res;
     } catch (error: unknown) {
       Message.error(error);

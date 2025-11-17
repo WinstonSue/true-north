@@ -13,7 +13,7 @@ export default class TodoMapping {
       planTimeRange:
         todoVo.planStartTime && todoVo.planEndTime ? [todoVo.planStartTime, todoVo.planEndTime] : undefined,
       repeatConfig: todoVo.repeatConfig,
-      source: todoVo.source,
+      relatedType: todoVo.relatedType,
     };
   }
 

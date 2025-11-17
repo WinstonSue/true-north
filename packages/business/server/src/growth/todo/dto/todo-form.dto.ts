@@ -1,5 +1,5 @@
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
-import { TodoSource, TodoStatus } from '@true-north/enum';
+import { RelatedType, TodoStatus } from '@true-north/enum';
 import { Todo as TodoVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoDto } from './todo-model.dto';
@@ -15,7 +15,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
   'importance',
   'urgency',
   'tags',
-  'source',
+  'relatedType',
   'repeatConfig',
   'taskId',
   'repeatId',
@@ -28,12 +28,12 @@ export class CreateTodoDto extends PickType(TodoDto, [
     this.importance = vo.importance;
     this.urgency = vo.urgency;
     this.planDate = dayjs(vo.planDate).toDate();
-    this.planStartTime = vo.planStartTime ? dayjs(vo.planStartTime, 'HH:mm:ss').format('HH:mm:ss') : undefined;
-    this.planEndTime = vo.planEndTime ? dayjs(vo.planEndTime, 'HH:mm:ss').format('HH:mm:ss') : undefined;
+    this.planStartTime = vo.planStartTime;
+    this.planEndTime = vo.planEndTime;
     this.taskId = vo.taskId;
     this.habitId = vo.habitId;
     this.repeatId = vo.repeatId;
-    this.source = vo.source;
+    this.relatedType = vo.relatedType;
     this.status = vo.status;
   }
 
@@ -52,7 +52,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
     todo.taskId = this.taskId;
     todo.repeatId = this.repeatId;
     todo.habitId = this.habitId;
-    todo.source = this.source ?? TodoSource.MANUAL;
+    todo.relatedType = this.relatedType ?? RelatedType.MANUAL;
 
     return todo;
   }

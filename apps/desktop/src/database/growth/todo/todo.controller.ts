@@ -57,15 +57,20 @@ export class TodoController {
     return this.controller.restoreWithRepeat(id);
   }
 
-  @Get('/find-mix-repeat/:id')
-  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string }): Promise<TodoVO.TodoVo> {
-    return this.controller.findMixRepeat(id, query);
+  @Delete('/delete-with-repeat/:id')
+  async deleteWithRepeat(@Param('id') id: string, @Query() query?: TodoVO.TodoFilterVo): Promise<boolean> {
+    return this.controller.deleteWithRepeat(id, query);
   }
 
-  @Get('/list-mixed-repeat')
+  @Get('/list-mixed-repeat-by-query')
   async listMixRepeatByQuery(
     @Query() query?: TodoVO.TodoFilterVo
   ): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
     return this.controller.listMixRepeatByQuery(query);
+  }
+
+  @Get('/find-mix-repeat/:id')
+  async findMixRepeat(@Param('id') id: string, @Query() query?: { relatedType?: string }): Promise<TodoVO.TodoVo> {
+    return this.controller.findMixRepeat(id, query);
   }
 }

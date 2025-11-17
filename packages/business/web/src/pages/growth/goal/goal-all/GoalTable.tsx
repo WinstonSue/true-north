@@ -108,7 +108,7 @@ export default function GoalTable() {
                 content:
                   '删除后将无法恢复,如果目标下有子目标,将一并删除,是否继续?',
                 onOk: async () => {
-                  await GoalService.delete(record.id, { silent: false });
+                  await GoalService.delete(record.id, );
                   await getGoalPage();
                 },
               })

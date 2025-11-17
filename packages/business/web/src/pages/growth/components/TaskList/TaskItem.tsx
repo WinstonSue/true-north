@@ -48,7 +48,7 @@ function TaskItem(props: TaskItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TaskService.abandon(task.id, { silent: false });
+                        TaskService.abandon(task.id, );
                         props.refreshTaskList();
                       }}
                     >
@@ -57,7 +57,7 @@ function TaskItem(props: TaskItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TaskService.delete(task.id, { silent: false });
+                        TaskService.delete(task.id, );
                         props.refreshTaskList();
                       }}
                     >

@@ -90,12 +90,12 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
     if (!taskFormData.name) {
       return;
     }
-    await TaskService.create(createTaskVo, { silent: false });
+    await TaskService.create(createTaskVo, );
     setTaskFormData(defaultFormData);
   }
 
   async function handleUpdate(data: Partial<UpdateTaskVo>) {
-    await TaskService.update(currentTask.id, data, { silent: false });
+    await TaskService.update(currentTask.id, data, );
   }
 
   const onSubmit = async () => {

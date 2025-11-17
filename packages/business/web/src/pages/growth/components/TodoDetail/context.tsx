@@ -58,7 +58,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
     id: string,
     _todo: TodoVo | TodoWithoutRelationsVo,
   ) => {
-    const todo = await TodoService.findMixRepeat(id, { source: _todo?.source });
+    const todo = await TodoService.findMixRepeat(id, { relatedType: _todo?.relatedType });
     setCurrentTodo(todo);
     todoFormDataRef.current = TodoMapping.voToFormData(todo);
     setTodoFormData(todoFormDataRef.current);
@@ -96,15 +96,15 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
       await TodoService.create({
         name: form.name,
         planDate: form.planDate,
-        planStartTime: form.planTimeRange?.[0] || undefined,
-        planEndTime: form.planTimeRange?.[1] || undefined,
         importance: form.importance,
         urgency: form.urgency,
         tags: form.tags,
         description: form.description,
+        planStartTime: form.planTimeRange?.[0] || undefined,
+        planEndTime: form.planTimeRange?.[1] || undefined,
         status: TodoStatus.TODO,
         repeatConfig,
-      }, { silent: false });
+      });
       todoFormDataRef.current = defaultFormData;
       setTodoFormData(todoFormDataRef.current);
     } catch (error) {
@@ -115,7 +115,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
 
   async function handleUpdate() {
     const data = TodoMapping.formDataToUpdateVo(todoFormDataRef.current);
-    await TodoService.updateWithRepeat(currentTodo.id, data, { silent: false });
+    await TodoService.updateWithRepeat(currentTodo.id, data);
   }
 
   const onSubmit = async () => {

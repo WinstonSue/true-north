@@ -153,12 +153,29 @@ export default function DateTimeTool(props: {
       }
     >
       <div className="px-1.5 h-7 rounded-sm hover:bg-fill-3 flex items-center gap-2 cursor-pointer">
-        <SiteIcon
-          width={16}
-          height={16}
-          id={`today-icon-${formData.date.format('D')}`}
-        />
-        {getFormattedDate(formData.date)}
+        {formData.repeatConfig ? (
+          <>
+            <SiteIcon id={`detail-date-unselected`} width={16} height={16} />
+            {`${getFormattedDate(formData.date)}, `}
+            {formData.timeRange &&
+              formData.timeRange[0] &&
+              formData.timeRange[1] &&
+              `, ${formData.timeRange[0]} - ${formData.timeRange[1]}`}
+          </>
+        ) : (
+          <>
+            <SiteIcon
+              id={`today-icon-${formData.date.format('D')}`}
+              width={16}
+              height={16}
+            />{' '}
+            {`${getFormattedDate(formData.date)}`}
+            {formData.timeRange &&
+              formData.timeRange[0] &&
+              formData.timeRange[1] &&
+              `, ${formData.timeRange[0]} - ${formData.timeRange[1]}`}
+          </>
+        )}
       </div>
     </Popover>
   );

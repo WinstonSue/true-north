@@ -51,8 +51,6 @@ export class TargetProxyComposer {
    * 根据 diff 结果和同步操作生成新代码
    */
   generateCodeFromDiff(actions: SyncAction[]): ASTModificationResult {
-    console.log('================');
-
     const errors: string[] = [];
     let appliedActions = 0;
 

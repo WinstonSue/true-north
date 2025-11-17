@@ -13,7 +13,7 @@ export default function TriggerStatusCheckbox(props: {
   const { todo } = props;
 
   async function restore() {
-    await TaskService.restore(todo.id, { silent: false });
+    await TaskService.restore(todo.id, );
     await props.onChange();
   }
 

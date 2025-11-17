@@ -327,13 +327,6 @@ app.get('/api/check/web-service-method-details', async (req, res) => {
 
     const results = await engine.checkAllDiffResults();
 
-    if (results.length > 0) {
-      console.log(
-        '控制器列表:',
-        results.map((c) => c.className)
-      );
-    }
-
     res.json({
       success: true,
       data: {

@@ -43,7 +43,6 @@ export class TargetApiComposer {
       console.warn('AST 代码生成警告:', result.errors);
     }
 
-    console.log(`AST 代码生成成功，应用了 ${result.appliedActions}/${actions.length} 个操作`);
     return result.generatedCode;
   }
 

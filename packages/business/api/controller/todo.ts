@@ -1,5 +1,6 @@
 import { request } from '@true-north/share-request';
 import { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
+import { RelatedType } from '@true-north/enum';
 
 export default class TodoController {
   static async create(body: TodoVO.CreateTodoVo) {
@@ -37,7 +38,7 @@ export default class TodoController {
     return request<boolean>({ method: 'put' })(`/todo/restore-with-repeat/${id}`);
   }
 
-  static async findMixRepeat(id: string, query?: { source?: string }) {
+  static async findMixRepeat(id: string, query?: { relatedType?: RelatedType }) {
     return request<TodoVO.TodoVo>({ method: 'get' })(`/todo/find-mix-repeat/${id}`, query);
   }
 
@@ -49,7 +50,14 @@ export default class TodoController {
     return request<boolean>({ method: 'put' })(`/todo/abandon-with-repeat${id}`);
   }
 
+  static async deleteWithRepeat(id: string, query?: TodoVO.TodoFilterVo) {
+    return request<boolean>({ method: 'remove' })(`/todo/delete-with-repeat${id}`, query);
+  }
+
   static async listMixRepeatByQuery(query?: TodoVO.TodoFilterVo) {
-    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/list-mixed-repeat`, query);
+    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(
+      `/todo/list-mixed-repeat-by-query`,
+      query
+    );
   }
 }

@@ -4,7 +4,7 @@ export enum TodoStatus {
   ABANDONED = 'abandoned',
 }
 
-export enum TodoSource {
+export enum RelatedType {
   /** 手动创建 */
   MANUAL = 'manual',
   /** 重复创建 */

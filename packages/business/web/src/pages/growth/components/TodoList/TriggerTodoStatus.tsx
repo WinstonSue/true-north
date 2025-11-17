@@ -13,7 +13,7 @@ export default function TriggerTodoStatus(props: {
   const { todo } = props;
 
   async function restore() {
-    await TodoService.restoreWithRepeat(todo.id, { silent: false });
+    await TodoService.restoreWithRepeat(todo.id, );
     await props.onChange();
   }
 
@@ -43,10 +43,10 @@ export default function TriggerTodoStatus(props: {
             todoWithRepeatList: [
               {
                 id: todo.id,
-                source: todo.source,
+                relatedType: todo.relatedType,
               },
             ],
-          }, { silent: false });
+          }, );
           await props.onChange();
         }}
       />

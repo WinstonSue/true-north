@@ -35,7 +35,7 @@ export class TodoDto extends TodoWithoutRelationsDto {
     this.urgency = entity.urgency;
     this.planDate = entity.planDate;
     this.repeatId = entity.repeatId;
-    this.source = entity.source;
+    this.relatedType = entity.relatedType;
     this.doneAt = entity.doneAt;
     this.abandonedAt = entity.abandonedAt;
     this.planStartTime = entity.planStartTime;
@@ -66,7 +66,7 @@ export class TodoDto extends TodoWithoutRelationsDto {
       planEndTime: this.planEndTime,
       doneAt: this.doneAt ? dayjs(this.doneAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
       abandonedAt: this.abandonedAt ? dayjs(this.abandonedAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
-      source: this.source,
+      relatedType: this.relatedType,
     };
   }
 

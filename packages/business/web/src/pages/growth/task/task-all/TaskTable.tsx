@@ -107,7 +107,7 @@ export default function TaskTable() {
                 title: '确定删除吗？',
                 content: '删除后将无法恢复',
                 onOk: async () => {
-                  await TaskService.delete(record.id, { silent: false });
+                  await TaskService.delete(record.id, );
                   await getTaskPage();
                 },
               })
