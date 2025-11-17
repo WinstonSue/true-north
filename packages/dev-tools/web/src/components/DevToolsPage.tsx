@@ -7,7 +7,7 @@ import WebServiceTab from './WebServiceTab';
 const { Title, Paragraph } = Typography;
 
 const DevToolsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('WebServiceDiff');
+  const [activeTab, setActiveTab] = useState('DesktopControllerDiff');
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>

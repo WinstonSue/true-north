@@ -3,13 +3,22 @@
  * 提供纯粹的 TypeScript AST 解析功能，不包含任何业务逻辑
  */
 
-import { Project, MethodDeclaration, ParameterDeclaration, Decorator, ConstructorDeclaration } from 'ts-morph';
+import {
+  Project,
+  MethodDeclaration,
+  ParameterDeclaration,
+  Decorator,
+  ConstructorDeclaration,
+  SyntaxKind,
+  PropertyDeclaration,
+} from 'ts-morph';
 import {
   ASTClassInfo,
   ASTDecorator,
   ASTDecoratorArgument,
   ASTMethod,
   ASTParameter,
+  ASTProperty,
   ASTConstructor,
   ASTImport,
   ASTImportSpecifier,
@@ -56,11 +65,13 @@ export class ASTParser {
     return {
       className,
       decorators: this.parseDecorators(classDeclaration.getDecorators()),
+      properties: this.parseProperties(classDeclaration.getProperties()),
       methods: this.parseMethods(classDeclaration.getMethods()),
       constructor: this.parseConstructor(classDeclaration.getConstructors()[0]),
       imports: this.parseImports(sourceFile.getImportDeclarations()),
       sourceFile,
       classDeclaration,
+      isDefaultExport: this.checkIsDefaultExport(classDeclaration),
     };
   }
 
@@ -85,11 +96,11 @@ export class ASTParser {
       let type: 'string' | 'object' | 'other' = 'other';
       let value = rawText;
 
-      if (kind === 10 || kind === 11) {
+      if (kind === SyntaxKind.StringLiteral || kind === SyntaxKind.NoSubstitutionTemplateLiteral) {
         // StringLiteral
         type = 'string';
         value = rawText.slice(1, -1); // 移除引号
-      } else if (kind === 201) {
+      } else if (kind === SyntaxKind.ObjectLiteralExpression) {
         // ObjectLiteralExpression
         type = 'object';
       }
@@ -103,18 +114,33 @@ export class ASTParser {
   }
 
   /**
+   * 解析类属性
+   */
+  private parseProperties(properties: PropertyDeclaration[]): ASTProperty[] {
+    return properties.map((property) => {
+      const modifiers: string[] = [];
+      property.getModifiers().forEach((modifier) => {
+        // 过滤掉装饰器，只保留修饰符
+        if (modifier.getKind() !== SyntaxKind.Decorator) {
+          modifiers.push(modifier.getText());
+        }
+      });
+
+      return {
+        name: property.getName(),
+        type: property.getType().getText(),
+        modifiers,
+        initializer: property.getInitializer()?.getText(),
+        decorators: this.parseDecorators(property.getDecorators()),
+      };
+    });
+  }
+
+  /**
    * 解析方法
    */
   private parseMethods(methods: MethodDeclaration[]): ASTMethod[] {
     return methods.map((method) => {
-      // 完整解析所有修饰符
-      const modifiers: string[] = [];
-
-      // 直接从 AST 节点获取所有修饰符文本
-      method.getModifiers().forEach((modifier) => {
-        modifiers.push(modifier.getText());
-      });
-
       return {
         name: method.getName(),
         decorators: this.parseDecorators(method.getDecorators()),
@@ -129,12 +155,16 @@ export class ASTParser {
   }
 
   /**
-   * 解析返回类型
+   * 解析方法修饰符（过滤掉装饰器）
    */
   private parseMethodModifiers(method: MethodDeclaration): string[] {
     const modifiers: string[] = [];
     method.getModifiers().forEach((modifier) => {
-      modifiers.push(modifier.getText());
+      // 通过 AST 节点类型过滤掉装饰器
+      // 只保留真正的修饰符（如 public, private, static, async 等）
+      if (modifier.getKind() !== SyntaxKind.Decorator) {
+        modifiers.push(modifier.getText());
+      }
     });
     return modifiers;
   }
@@ -224,12 +254,14 @@ export class ASTParser {
    */
   private parseReturnType(method: MethodDeclaration): string {
     const returnType = method.getReturnTypeNode();
+
     if (returnType) {
       return returnType.getText();
     }
 
     // 尝试从类型推断获取
     const type = method.getReturnType();
+
     return type.getText();
   }
 
@@ -249,5 +281,27 @@ export class ASTParser {
       endLine: endLineAndColumn.line,
       endColumn: endLineAndColumn.column,
     };
+  }
+
+  /**
+   * 检查类是否使用 export default
+   */
+  private checkIsDefaultExport(classDeclaration: any): boolean {
+    // 检查类声明是否有 export default 修饰符
+    const sourceFile = classDeclaration.getSourceFile();
+    const exportAssignments = sourceFile.getExportAssignments();
+
+    // 检查是否有 export default ClassName
+    for (const exportAssignment of exportAssignments) {
+      if (exportAssignment.isExportEquals() === false) {
+        const expression = exportAssignment.getExpression();
+        if (expression && expression.getText() === classDeclaration.getName()) {
+          return true;
+        }
+      }
+    }
+
+    // 检查类声明本身是否有 default 修饰符
+    return classDeclaration.hasModifier(SyntaxKind.DefaultKeyword);
   }
 }

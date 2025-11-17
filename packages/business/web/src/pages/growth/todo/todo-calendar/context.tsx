@@ -45,7 +45,7 @@ export const [CalendarProvider, useCalendarContext] = createInjectState<{
   }
 
   const getTodoList = async () => {
-    const { list } = await TodoService.findByFilter();
+    const { list } = await TodoService.listMixRepeatByQuery();
     setTodoList(list);
   };
 

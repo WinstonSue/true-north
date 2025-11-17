@@ -56,6 +56,11 @@ export class ASTComposer {
     const exportKeyword = astData.isDefaultExport ? 'export default class' : 'export class';
     lines.push(`${exportKeyword} ${astData.className} {`);
 
+    // 生成类属性
+    astData.properties.forEach((property) => {
+      lines.push(indent + this.generateProperty(property));
+    });
+
     // 生成构造函数
     if (astData.constructor) {
       lines.push('');
@@ -65,7 +70,8 @@ export class ASTComposer {
     // 生成方法
     astData.methods.forEach((method) => {
       lines.push('');
-      lines.push(indent + this.generateMethod(method, indent));
+      const methodCode = this.generateMethod(method, indent);
+      lines.push(indent + methodCode);
     });
 
     lines.push('}');
@@ -112,12 +118,33 @@ export class ASTComposer {
    */
   private generateDecorator(decorator: any): string {
     if (decorator.arguments.length === 0) {
-      return `@${decorator.name}`;
+      return `@${decorator.name}()`;
     }
 
     const args = decorator.arguments.map((arg: any) => arg.rawText).join(', ');
 
     return `@${decorator.name}(${args})`;
+  }
+
+  /**
+   * 生成类属性
+   */
+  private generateProperty(property: any): string {
+    const lines: string[] = [];
+
+    // 属性装饰器
+    property.decorators.forEach((decorator: any) => {
+      lines.push(this.generateDecorator(decorator));
+    });
+
+    // 属性声明
+    const modifiers = property.modifiers.length > 0 ? property.modifiers.join(' ') + ' ' : '';
+    const initializer = property.initializer ? ` = ${property.initializer}` : '';
+    const propertyDeclaration = `${modifiers}${property.name}: ${property.type}${initializer};`;
+
+    lines.push(propertyDeclaration);
+
+    return lines.join('\n  ');
   }
 
   /**
@@ -157,11 +184,12 @@ export class ASTComposer {
 
     // 生成方法修饰符
     const modifiers = method.modifiers ? method.modifiers.join(' ') + ' ' : '';
-    
+
     // 生成返回类型
     const returnTypeStr = method.showReturnType !== false ? `: ${method.returnType}` : '';
-    
+
     const methodSignature = `${modifiers}${method.name}(${params})${returnTypeStr} {`;
+
     lines.push(methodSignature);
 
     // 方法体

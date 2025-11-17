@@ -63,12 +63,13 @@ export class TargetWebServiceComposer {
     const targetAST = targetState.astData;
 
     // 创建 AST 的深拷贝进行修改
-    const modifiedAST = cloneDeep(targetAST);
+    const modifiedAST = this.cloneAst(targetAST);
 
     // 应用同步操作
     for (const action of actions) {
       try {
         const success = this.applyActionToAST(modifiedAST, action, sourceState);
+
         if (success) {
           appliedActions++;
         } else {
@@ -85,8 +86,6 @@ export class TargetWebServiceComposer {
       generatedCode = this.generateCodeFromAST(modifiedAST);
     } catch (error) {
       errors.push(`从 AST 生成代码失败: ${error}`);
-      // 如果生成失败，尝试使用原始代码
-      generatedCode = targetState.code || '';
     }
 
     return {
@@ -223,9 +222,9 @@ export class TargetWebServiceComposer {
       name: method.name,
       decorators: [], // Web Service 方法不需要装饰器
       parameters: this.convertParametersToAST(method),
-      returnType: '', // 生成时代码推断返回 Promise<void>
+      returnType: '',
       modifiers: ['static', 'async'],
-      showReturnType: false,
+      showReturnType: false, // 不生成返回类型
       bodyText: this.generateWebServiceMethodBody(method),
       sourceLocation: method.sourceLocation,
       methodDeclaration: null as any, // 这里需要重新生成时会被设置
@@ -333,88 +332,11 @@ export class TargetWebServiceComposer {
     });
   }
 
-  /**
-   * 深拷贝 AST 对象
-   */
-  private cloneAST(ast: ASTClassInfo): ASTClassInfo {
-    return {
-      className: ast.className,
-      decorators: ast.decorators.map((d) => ({
-        name: d.name,
-        arguments: d.arguments.map((arg) => ({ ...arg })),
-      })),
-      methods: ast.methods.map((m) => ({
-        name: m.name,
-        decorators: m.decorators.map((d) => ({
-          name: d.name,
-          arguments: d.arguments.map((arg) => ({ ...arg })),
-        })),
-        parameters: m.parameters.map((p) => ({
-          name: p.name,
-          type: p.type,
-          optional: p.optional,
-          decorators: p.decorators.map((d) => ({
-            name: d.name,
-            arguments: d.arguments.map((arg) => ({ ...arg })),
-          })),
-        })),
-        returnType: m.returnType,
-        modifiers: m.modifiers ? [...m.modifiers] : undefined,
-        showReturnType: m.showReturnType,
-        bodyText: m.bodyText,
-        sourceLocation: { ...m.sourceLocation },
-        methodDeclaration: m.methodDeclaration,
-      })),
-      constructor: ast.constructor
-        ? {
-            parameters: ast.constructor.parameters.map((p) => ({
-              name: p.name,
-              type: p.type,
-              modifiers: [...p.modifiers],
-            })),
-          }
-        : undefined,
-      imports: ast.imports.map((i) => ({
-        source: i.source,
-        specifiers: i.specifiers.map((s) => ({ ...s })),
-        importType: i.importType,
-      })),
-      sourceFile: ast.sourceFile,
-      classDeclaration: ast.classDeclaration,
-    };
-  }
-
-  /**
-   * 验证 AST 结构完整性
-   */
-  validateAST(ast: ASTClassInfo): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (!ast.className) {
-      errors.push('缺少类名');
-    }
-
-    if (!ast.methods || ast.methods.length === 0) {
-      errors.push('缺少方法定义');
-    }
-
-    // 检查方法名重复
-    const methodNames = ast.methods.map((m) => m.name);
-    const duplicates = methodNames.filter((name, index) => methodNames.indexOf(name) !== index);
-    if (duplicates.length > 0) {
-      errors.push(`方法名重复: ${duplicates.join(', ')}`);
-    }
-
-    // 检查方法体
-    ast.methods.forEach((method) => {
-      if (!method.bodyText || method.bodyText.trim() === '') {
-        errors.push(`方法 ${method.name} 缺少方法体`);
-      }
+  private cloneAst(ast: ASTClassInfo): ASTClassInfo {
+    const clonedAst = cloneDeep(ast);
+    clonedAst.methods.forEach((method) => {
+      method.showReturnType = false;
     });
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
+    return clonedAst;
   }
 }

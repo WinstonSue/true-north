@@ -8,6 +8,7 @@ import { SourceFile, ClassDeclaration, MethodDeclaration } from 'ts-morph';
 export interface ASTClassInfo {
   className: string;
   decorators: ASTDecorator[];
+  properties: ASTProperty[];
   methods: ASTMethod[];
   constructor?: ASTConstructor;
   imports: ASTImport[];
@@ -49,6 +50,14 @@ export interface ASTParameter {
   decorators: ASTDecorator[];
   /** 是否显示参数类型 */
   showType?: boolean;
+}
+
+export interface ASTProperty {
+  name: string;
+  type: string;
+  modifiers: string[];
+  initializer?: string;
+  decorators: ASTDecorator[];
 }
 
 export interface ASTConstructor {

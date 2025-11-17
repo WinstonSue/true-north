@@ -60,7 +60,7 @@ export class TargetProxyComposer {
     const targetAST = this.targetState.astData;
 
     // 创建 AST 的深拷贝进行修改
-    const modifiedAST = cloneDeep(targetAST);
+    const modifiedAST = this.cloneAst(targetAST);
 
     // 应用同步操作
     for (const action of actions) {
@@ -124,11 +124,13 @@ export class TargetProxyComposer {
     try {
       // 检查方法是否已存在
       const existingIndex = ast.methods.findIndex((m) => m.name === method.name);
+
       if (existingIndex >= 0) {
-        // 如果存在，替换它
-        ast.methods[existingIndex] = this.convertMethodDefinitionToASTMethod(method, this.sourceState);
+        // 如果存在，更新现有方法（保持装饰器）
+        const existingMethod = ast.methods[existingIndex];
+        ast.methods[existingIndex] = this.updateExistingASTMethod(existingMethod, method);
       } else {
-        // 如果不存在，添加新方法
+        // 如果不存在，添加新方法（生成新装饰器）
         ast.methods.push(this.convertMethodDefinitionToASTMethod(method, this.sourceState));
       }
       return true;
@@ -162,7 +164,11 @@ export class TargetProxyComposer {
     try {
       const methodIndex = ast.methods.findIndex((m) => m.name === methodName);
       if (methodIndex >= 0) {
-        ast.methods[methodIndex] = this.convertMethodDefinitionToASTMethod(method, this.sourceState);
+        // 更新现有方法（保持装饰器）
+        const existingMethod = ast.methods[methodIndex];
+        ast.methods[methodIndex] = this.updateExistingASTMethod(existingMethod, method);
+        console.log('更新 AST 方法成功:', method.name);
+        console.log('更新 AST 方法成功:', ast.methods[methodIndex]);
         return true;
       } else {
         // 如果方法不存在，添加它
@@ -172,6 +178,31 @@ export class TargetProxyComposer {
       console.error('更新 AST 方法失败:', error);
       return false;
     }
+  }
+
+  /**
+   * 更新现有 AST 方法（保持装饰器不变）
+   */
+  private updateExistingASTMethod(existingMethod: any, method: MethodDefinition): any {
+    return {
+      ...existingMethod,
+      // 保持原有的装饰器
+      decorators: existingMethod.decorators,
+      // 更新参数
+      parameters: method.parameters.map((p) => ({
+        name: p.name,
+        type: p.type,
+        optional: p.optional,
+        decorators: this.convertParameterDecorators(p),
+      })),
+      // 更新返回类型
+      returnType: method.returnType.startsWith('Promise<') ? method.returnType : `Promise<${method.returnType}>`,
+      // 更新方法体
+      bodyText: this.generateProxyMethodBody(method),
+      // 保持其他属性
+      sourceLocation: method.sourceLocation,
+      modifiers: ['async'], // Proxy 控制器方法需要 async
+    };
   }
 
   /**
@@ -197,24 +228,27 @@ export class TargetProxyComposer {
 
   /**
    * 转换装饰器到 AST 格式 - Proxy 专用
-   * 确保使用正确的装饰器名称（electron-ipc-restful）
+   * 基于 MethodDefinition 中的信息生成装饰器，避免重复创建
    */
   private convertDecoratorsToAST(method: MethodDefinition) {
     const decorators = [];
 
-    // 添加 HTTP 方法装饰器 - 保持 electron-ipc-restful 的大小写
-    decorators.push({
-      name: method.verb, // Get, Post, Put, Delete 等
-      arguments: [
-        {
-          type: 'string' as const,
-          value: method.path,
-          rawText: `'${method.path}'`,
-        },
-      ],
-    });
+    // 基于 MethodDefinition 的信息创建 HTTP 方法装饰器
+    const decoratorArgs = [
+      {
+        type: 'string' as const,
+        value: method.path,
+        rawText: `'${method.path}'`,
+      },
+    ];
 
     // Proxy 控制器不需要装饰器选项（如 description），因为它只是转发
+    // 所以这里不处理 method.decoratorOptions
+
+    decorators.push({
+      name: method.verb, // Get, Post, Put, Delete 等
+      arguments: decoratorArgs,
+    });
 
     return decorators;
   }
@@ -256,9 +290,14 @@ export class TargetProxyComposer {
    * 从 AST 生成完整代码
    */
   private generateCodeFromAST(ast: ASTClassInfo): string {
-    console.log(ast);
     return this.astComposer.generateCodeFromAST(ast, {
       preserveFormatting: false,
     });
+  }
+
+  private cloneAst(ast: ASTClassInfo): ASTClassInfo {
+    const clonedAst = cloneDeep(ast);
+
+    return clonedAst;
   }
 }

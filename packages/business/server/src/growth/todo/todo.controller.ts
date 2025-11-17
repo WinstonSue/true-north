@@ -121,7 +121,7 @@ export class TodoController {
   }
 
   @Get('/list-mixed-repeat', { description: '列表查询待办及其重复信息' })
-  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
+  async listMixRepeatByQuery(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
     const filter = new TodoFilterDto();
     if (query) filter.importListVo(query);
     const list = await this.todoService.listMixRepeat(filter);

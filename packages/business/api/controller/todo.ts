@@ -37,10 +37,6 @@ export default class TodoController {
     return request<boolean>({ method: 'put' })(`/todo/restore-with-repeat/${id}`);
   }
 
-  static async listMixRepeat(query?: TodoVO.TodoFilterVo) {
-    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/list-mixed-repeat`, query);
-  }
-
   static async findMixRepeat(id: string, query?: { source?: string }) {
     return request<TodoVO.TodoVo>({ method: 'get' })(`/todo/find-mix-repeat/${id}`, query);
   }
@@ -51,5 +47,9 @@ export default class TodoController {
 
   static async abandonWithRepeat(id: string) {
     return request<boolean>({ method: 'put' })(`/todo/abandon-with-repeat${id}`);
+  }
+
+  static async listMixRepeatByQuery(query?: TodoVO.TodoFilterVo) {
+    return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/list-mixed-repeat`, query);
   }
 }

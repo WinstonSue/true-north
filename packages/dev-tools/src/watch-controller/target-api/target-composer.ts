@@ -84,8 +84,6 @@ export class TargetApiComposer {
       generatedCode = this.generateCodeFromAST(modifiedAST);
     } catch (error) {
       errors.push(`从 AST 生成代码失败: ${error}`);
-      // 如果生成失败，尝试使用原始代码
-      generatedCode = targetState.code || '';
     }
 
     return {
@@ -272,6 +270,7 @@ export class TargetApiComposer {
         name: d.name,
         arguments: d.arguments.map((arg) => ({ ...arg })),
       })),
+      properties: [], // API 控制器不需要属性
       isDefaultExport: true, // API 控制器使用 export default
       methods: ast.methods.map((m) => ({
         name: m.name,

@@ -21,27 +21,27 @@ export default function TodoWeek() {
   );
 
   async function refreshData() {
-    const { list: todos } = await TodoService.findByFilter({
+    const { list: todos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.TODO,
       planDateStart: weekStart,
       planDateEnd: weekEnd,
     });
     setWeekTodoList(todos);
 
-    const { list: doneTodos } = await TodoService.findByFilter({
+    const { list: doneTodos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.DONE,
       doneDateStart: weekStart,
       doneDateEnd: weekEnd,
     });
     setWeekDoneTodoList(doneTodos);
 
-    const { list: expiredTodos } = await TodoService.findByFilter({
+    const { list: expiredTodos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.TODO,
       planDateEnd: weekStart,
     });
     setExpiredTodoList(expiredTodos);
 
-    const { list: abandonedTodos } = await TodoService.findByFilter({
+    const { list: abandonedTodos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.ABANDONED,
       abandonedDateStart: weekStart,
       abandonedDateEnd: weekEnd,
@@ -63,7 +63,7 @@ export default function TodoWeek() {
     flushSync(() => {
       setCurrentTodo(null);
     });
-    const todo = await TodoService.getTodoDetailWithRepeat(_todo.id, _todo);
+    const todo = await TodoService.findMixRepeat(_todo.id);
 
     setCurrentTodo(todo);
   }

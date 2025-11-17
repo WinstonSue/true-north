@@ -19,7 +19,7 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
   async function loadTodoList(params?: TodoFilterVo) {
     try {
       setLoading(true);
-      const res = await TodoService.findByFilter(params);
+      const res = await TodoService.listMixRepeatByQuery(params);
       setTodoList(res.list);
     } catch (error) {
       console.error('Failed to load todo list:', error);

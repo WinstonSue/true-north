@@ -5,7 +5,7 @@ import { todoService, todoRepeatService } from './todo.service';
 
 @Controller('/todo')
 export class TodoController {
-  private readonly controller = new _TodoController(todoService, todoRepeatService);
+  private readonly controller: any = new _TodoController(todoService, todoRepeatService);
 
   @Post('/create')
   async create(@Body() createTodoVo: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
@@ -57,13 +57,15 @@ export class TodoController {
     return this.controller.restoreWithRepeat(id);
   }
 
-  @Get('/list-mixed-repeat')
-  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
-    return this.controller.listMixRepeat(query);
+  @Get('/find-mix-repeat/:id')
+  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string }): Promise<TodoVO.TodoVo> {
+    return this.controller.findMixRepeat(id, query);
   }
 
-  @Get('/find-mix-repeat/:id')
-  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string; }): Promise<TodoVO.TodoVo> {
-    return this.controller.findMixRepeat(id, query);
+  @Get('/list-mixed-repeat')
+  async listMixRepeatByQuery(
+    @Query() query?: TodoVO.TodoFilterVo
+  ): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
+    return this.controller.listMixRepeatByQuery(query);
   }
 }

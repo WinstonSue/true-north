@@ -22,27 +22,27 @@ export default function TodoToday() {
   >([]);
 
   async function refreshData() {
-    const { list: todos } = await TodoService.findByFilter({
+    const { list: todos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.TODO,
       planDateStart: today,
       planDateEnd: today,
     });
     setTodayTodoList(todos);
 
-    const { list: doneTodos } = await TodoService.findByFilter({
+    const { list: doneTodos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.DONE,
       doneDateStart: today,
       doneDateEnd: today,
     });
     setTodayDoneTodoList(doneTodos);
 
-    const { list: expiredTodos } = await TodoService.findByFilter({
+    const { list: expiredTodos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.TODO,
       planDateEnd: yesterday,
     });
     setExpiredTodoList(expiredTodos);
 
-    const { list: abandonedTodos } = await TodoService.findByFilter({
+    const { list: abandonedTodos } = await TodoService.listMixRepeatByQuery({
       status: TodoStatus.ABANDONED,
       abandonedDateStart: today,
       abandonedDateEnd: today,

@@ -115,18 +115,18 @@ export default class TodoService {
     }
   }
 
-  static async listMixRepeat(query?: TodoVO.TodoFilterVo) {
+  static async findMixRepeat(id: string, query?: { source?: string }) {
     try {
-      const res = await TodoController.listMixRepeat(query);
+      const res = await TodoController.findMixRepeat(id, query);
       return res;
     } catch (error: unknown) {
       Message.error(error);
     }
   }
 
-  static async findMixRepeat(id: string, query?: { source?: string }) {
+  static async listMixRepeatByQuery(query?: TodoVO.TodoFilterVo) {
     try {
-      const res = await TodoController.findMixRepeat(id, query);
+      const res = await TodoController.listMixRepeatByQuery(query);
       return res;
     } catch (error: unknown) {
       Message.error(error);

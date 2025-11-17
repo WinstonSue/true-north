@@ -1,8 +1,7 @@
-import React from 'react'
-import { ConfigProvider, Layout } from '@arco-design/web-react'
-import DevToolsPage from './components/DevToolsPage'
+import { ConfigProvider, Layout } from '@arco-design/web-react';
+import DevToolsPage from './components/DevToolsPage';
 
-const { Content } = Layout
+const { Content } = Layout;
 
 function App() {
   return (
@@ -13,7 +12,7 @@ function App() {
         </Content>
       </Layout>
     </ConfigProvider>
-  )
+  );
 }
 
-export default App
+export default App;
