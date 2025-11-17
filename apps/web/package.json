@@ -1,7 +1,7 @@
 {
   "name": "true-north-web",
   "version": "1.0.0",
-  "description": "Life ToolKit Web",
+  "description": "True North Web",
   "homepage": "https://francisxihe.github.io/life-toolkit",
   "scripts": {
     "dev": "vite --mode dev",

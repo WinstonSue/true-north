@@ -1,7 +1,7 @@
 {
   "name": "@true-north/business-web",
   "version": "1.0.0",
-  "description": "Life ToolKit Web Business Package",
+  "description": "True North Web Business Package",
   "homepage": "https://francisxihe.github.io/life-toolkit",
   "main": "src/main.tsx",
   "types": "src/main.tsx",

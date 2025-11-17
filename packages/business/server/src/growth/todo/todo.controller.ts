@@ -21,19 +21,24 @@ export class TodoController {
 
   @Post('/create', { description: '创建待办' })
   async create(@Body() body: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
-    if (body.repeatConfig) {
-      const createTodoRepeatDto = new CreateTodoRepeatDto();
-      createTodoRepeatDto.importCreateVo({
-        ...body,
-        repeatConfig: body.repeatConfig,
-      });
-      const todoRepeatDto = await this.todoRepeatService.create(createTodoRepeatDto);
-      return todoRepeatDto.exportVo();
+    try {
+      if (body.repeatConfig) {
+        const createTodoRepeatDto = new CreateTodoRepeatDto();
+        createTodoRepeatDto.importCreateVo({
+          ...body,
+          repeatConfig: body.repeatConfig,
+        });
+        const todoRepeatDto = await this.todoRepeatService.create(createTodoRepeatDto);
+        return todoRepeatDto.exportVo();
+      }
+      const createTodoDto = new CreateTodoDto();
+      createTodoDto.importCreateVo(body);
+      const todoDto = await this.todoService.create(createTodoDto);
+      return todoDto.exportVo();
+    } catch (error) {
+      console.error('创建待办失败:', error);
+      throw error;
     }
-    const createTodoDto = new CreateTodoDto();
-    createTodoDto.importCreateVo(body);
-    const todoDto = await this.todoService.create(createTodoDto);
-    return todoDto.exportVo();
   }
 
   @Delete('/delete/:id', { description: '删除待办' })

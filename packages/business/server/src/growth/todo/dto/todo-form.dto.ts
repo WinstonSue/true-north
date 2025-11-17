@@ -28,9 +28,13 @@ export class CreateTodoDto extends PickType(TodoDto, [
     this.importance = vo.importance;
     this.urgency = vo.urgency;
     this.planDate = dayjs(vo.planDate).toDate();
-    this.planStartTime = vo.planStartTime ? dayjs(vo.planStartTime).format('HH:mm:ss') : undefined;
-    this.planEndTime = vo.planEndTime ? dayjs(vo.planEndTime).format('HH:mm:ss') : undefined;
+    this.planStartTime = vo.planStartTime ? dayjs(vo.planStartTime, 'HH:mm:ss').format('HH:mm:ss') : undefined;
+    this.planEndTime = vo.planEndTime ? dayjs(vo.planEndTime, 'HH:mm:ss').format('HH:mm:ss') : undefined;
     this.taskId = vo.taskId;
+    this.habitId = vo.habitId;
+    this.repeatId = vo.repeatId;
+    this.source = vo.source;
+    this.status = vo.status;
   }
 
   exportCreateEntity(): Todo {

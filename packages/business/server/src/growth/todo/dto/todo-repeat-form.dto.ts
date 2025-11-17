@@ -28,7 +28,7 @@ export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
     this.description = vo.description;
     this.importance = vo.importance;
     this.urgency = vo.urgency;
-    this.tags = vo.tags;
+    this.tags = vo.tags || [];
     this.repeatStartDate = vo.repeatConfig.repeatStartDate;
     this.currentDate = vo.repeatConfig.currentDate;
     this.repeatMode = vo.repeatConfig.repeatMode;
@@ -38,6 +38,7 @@ export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
     this.repeatTimes = vo.repeatConfig.repeatTimes;
     this.planStartTime = vo.planStartTime;
     this.planEndTime = vo.planEndTime;
+    this.status = vo.status;
   }
 
   exportCreateEntity() {

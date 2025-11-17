@@ -3,7 +3,7 @@ import type { Goal as GoalVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 
-export class GoalService {
+export default class GoalService {
   static async create(body: GoalVO.CreateGoalVo, options?: MethodOptions): Promise<any> {
     try {
       const res = await GoalController.create(body);

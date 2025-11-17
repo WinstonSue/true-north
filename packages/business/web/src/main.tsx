@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { ConfigProvider } from '@arco-design/web-react';
+import { ConfigProvider, Message } from '@arco-design/web-react';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import './style/tailwind.css';
@@ -18,6 +18,23 @@ import { generatePermission } from './router/routes';
 import 'dayjs/locale/zh-cn';
 import '@true-north/share-types';
 import dayjs from 'dayjs';
+
+import { registerMessage } from '@true-north/web-service';
+
+registerMessage({
+  error: (params: string) => {
+    Message.error(params);
+  },
+  success: (params: string) => {
+    Message.success(params);
+  },
+  warning: (params: string) => {
+    Message.warning(params);
+  },
+  info: (params: string) => {
+    Message.info(params);
+  },
+});
 
 dayjs.locale('zh-cn');
 

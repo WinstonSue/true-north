@@ -3,7 +3,7 @@ import type { Todo as TodoVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 
-export class TodoService {
+export default class TodoService {
   static async create(body: TodoVO.CreateTodoVo, options?: MethodOptions) {
     try {
       const res = await TodoController.create(body);

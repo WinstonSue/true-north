@@ -110,7 +110,7 @@ export function TodoFilters() {
             <Select.Option value={TodoStatus.ABANDONED}>已放弃</Select.Option>
           </Select>
         </Col>
-        <Col span={6}>
+        {/* <Col span={6}>
           <TagSelector
             multiple={true}
             value={filters.tags}
@@ -121,7 +121,7 @@ export function TodoFilters() {
               }));
             }}
           />
-        </Col>
+        </Col> */}
       </Row>
     </TableFilter>
   );

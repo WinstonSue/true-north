@@ -7,6 +7,8 @@ import { TodoService } from '@true-north/web-service';
 import { openModal } from '@/hooks/OpenModal';
 import { TodoEditor } from '../../components';
 import { TodoStatus } from '@true-north/enum';
+import { ColumnProps } from '@arco-design/web-react/es/Table';
+import { TodoVo } from '@true-north/vo';
 
 export default function TodoTable() {
   const { todoList, getTodoPage } = useTodoAllContext();
@@ -15,7 +17,7 @@ export default function TodoTable() {
     getTodoPage();
   }, []);
 
-  const columns = [
+  const columns: ColumnProps<TodoVo>[] = [
     { title: '待办', dataIndex: 'name', key: 'name' },
     { title: '描述', dataIndex: 'description', key: 'description' },
     {
@@ -48,10 +50,10 @@ export default function TodoTable() {
       render: (_, record) => (
         <div>
           {dayjs(record.planDate).format('YYYY-MM-DD')}
-          {record.planStart &&
-            record.planEnd &&
-            `${dayjs(record.planStart).format('YYYY-MM-DD')}
-             - ${dayjs(record.planEnd).format('YYYY-MM-DD')}`}
+          {record.planStartTime &&
+            record.planEndTime &&
+            `${dayjs(record.planStartTime).format('HH:mm')}
+             - ${dayjs(record.planEndTime).format('HH:mm')}`}
         </div>
       ),
     },
@@ -106,7 +108,7 @@ export default function TodoTable() {
                 title: '确定删除吗？',
                 content: '删除后将无法恢复',
                 onOk: async () => {
-                  await TodoService.deleteTodo(record.id);
+                  await TodoService.delete(record.id);
                   await getTodoPage();
                 },
               })
