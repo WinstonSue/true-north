@@ -1,6 +1,6 @@
 import { TodoRepository } from './todo.repository';
 import { TodoRepeatRepository } from './todo-repeat.repository';
-import { CreateTodoDto, UpdateTodoDto, TodoPageFilterDto, TodoFilterDto, TodoDto } from './dto';
+import { CreateTodoDto, UpdateTodoDto, TodoPageFilterDto, TodoFilterDto, TodoDto, UpdateTodoRepeatDto } from './dto';
 import { Todo } from './todo.entity';
 import { TodoStatus, RelatedType } from '@true-north/enum';
 import { TodoRepeatService } from './todo-repeat.service';
@@ -18,7 +18,6 @@ export class TodoService {
   }
 
   // ====== 基础 CRUD ======
-
   async create(createTodoDto: CreateTodoDto): Promise<TodoDto> {
     const entity = await this.todoRepository.create(createTodoDto.exportCreateEntity());
     const todoDto = new TodoDto();
@@ -84,7 +83,7 @@ export class TodoService {
 
   // ====== 业务逻辑编排 ======
 
-  async listMixRepeatByQuery(filter: TodoFilterDto): Promise<TodoDto[]> {
+  async listMixedRepeat(filter: TodoFilterDto): Promise<TodoDto[]> {
     const todoDtoList = await this.findByFilter(filter);
 
     const todoRepeatDtoList = await this.todoRepeatService.generateTodoByRepeat(filter);
@@ -111,24 +110,41 @@ export class TodoService {
     throw new Error('未找到待办');
   }
 
-  async deleteWithRepeat(id: string, relatedType: RelatedType): Promise<boolean> {
-    try {
-      if (relatedType === RelatedType.IS_REPEAT) {
-        await this.todoRepeatService.delete(id);
-      } else {
-        await this.todoRepository.delete(id);
-      }
-      return true;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   async deleteByTaskIds(taskIds: string[]): Promise<void> {
     if (!taskIds || taskIds.length === 0) return;
     const filter = new TodoFilterDto();
     filter.taskIds = taskIds;
     await this.todoRepository.softDeleteByFilter(filter);
+  }
+
+  async done(id: string, { doneAt, relatedType }: { doneAt?: string; relatedType?: RelatedType } = {}) {
+    if (relatedType === RelatedType.IS_REPEAT) {
+      const updateTodoRepeatDto = await this.todoRepeatService.updateToNext(id);
+      // 创建一个新的已完成 todo
+      const createTodoDto = new CreateTodoDto();
+      createTodoDto.name = updateTodoRepeatDto.name;
+      createTodoDto.description = updateTodoRepeatDto.description;
+      createTodoDto.importance = updateTodoRepeatDto.importance;
+      createTodoDto.urgency = updateTodoRepeatDto.urgency;
+      createTodoDto.tags = updateTodoRepeatDto.tags || [];
+      createTodoDto.planDate = dayjs(updateTodoRepeatDto.currentDate).toDate();
+      createTodoDto.status = TodoStatus.DONE;
+      createTodoDto.repeatId = id;
+      createTodoDto.relatedType = RelatedType.REPEAT;
+
+      const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
+
+      const updateTodoDto = new UpdateTodoDto();
+      updateTodoDto.id = newTodo.id;
+      updateTodoDto.status = TodoStatus.DONE;
+      updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
+      return await this.update(updateTodoDto);
+    }
+    const updateTodoDto = new UpdateTodoDto();
+    updateTodoDto.id = id;
+    updateTodoDto.status = TodoStatus.DONE;
+    updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
+    return await this.update(updateTodoDto);
   }
 
   async doneWithRepeatBatch(filter: TodoFilterDto): Promise<any> {
@@ -191,20 +207,20 @@ export class TodoService {
     return result;
   }
 
-  async abandonWithRepeat(id: string): Promise<any> {
+  async abandon(id: string): Promise<any> {
     const updateTodoDto = new UpdateTodoDto();
     updateTodoDto.id = id;
     updateTodoDto.status = TodoStatus.ABANDONED;
     updateTodoDto.abandonedAt = new Date();
-    await this.update(updateTodoDto);
+    return await this.update(updateTodoDto);
   }
 
-  async restoreWithRepeat(id: string): Promise<any> {
+  async restore(id: string): Promise<any> {
     const updateTodoDto = new UpdateTodoDto();
     updateTodoDto.id = id;
     updateTodoDto.status = TodoStatus.TODO;
     updateTodoDto.doneAt = undefined;
     updateTodoDto.abandonedAt = undefined;
-    await this.update(updateTodoDto);
+    return await this.update(updateTodoDto);
   }
 }

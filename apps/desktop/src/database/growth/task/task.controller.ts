@@ -27,7 +27,7 @@ export class TaskController {
     return this.controller.find(id);
   }
 
-  @Get('/find-by-filter')
+  @Get('/list')
   async findByFilter(@Query() taskListFiltersVo?: TaskVO.TaskFilterVo): Promise<ResponseListVo<TaskVO.TaskWithoutRelationsVo>> {
     return this.controller.findByFilter(taskListFiltersVo);
   }

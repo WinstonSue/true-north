@@ -17,9 +17,9 @@ export default class TodoService {
     }
   }
 
-  static async delete(id: string, options?: MethodOptions) {
+  static async delete(relatedType: RelatedType, id: string, options?: MethodOptions) {
     try {
-      const res = await TodoController.delete(id);
+      const res = await TodoController.delete(relatedType, id);
       if (!options?.silent) {
         Message.success('删除成功');
       }
@@ -41,24 +41,6 @@ export default class TodoService {
     }
   }
 
-  static async find(id: string) {
-    try {
-      const res = await TodoController.find(id);
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async findByFilter(query?: TodoVO.TodoFilterVo) {
-    try {
-      const res = await TodoController.findByFilter(query);
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
   static async page(query?: TodoVO.TodoPageFilterVo) {
     try {
       const res = await TodoController.page(query);
@@ -68,9 +50,18 @@ export default class TodoService {
     }
   }
 
-  static async updateWithRepeat(id: string, body: TodoVO.UpdateTodoVo, options?: MethodOptions) {
+  static async findMixRepeat(relatedType: RelatedType, id: string) {
     try {
-      const res = await TodoController.updateWithRepeat(id, body);
+      const res = await TodoController.findMixRepeat(relatedType, id);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  static async done(relatedType: RelatedType, id: string, body?: { doneAt?: string }, options?: MethodOptions) {
+    try {
+      const res = await TodoController.done(relatedType, id, body);
       if (!options?.silent) {
         Message.success('操作成功');
       }
@@ -80,9 +71,9 @@ export default class TodoService {
     }
   }
 
-  static async doneWithRepeatBatch(query?: TodoVO.TodoFilterVo, body?: any, options?: MethodOptions) {
+  static async abandon(relatedType: RelatedType, id: string, options?: MethodOptions) {
     try {
-      const res = await TodoController.doneWithRepeatBatch(query, body);
+      const res = await TodoController.abandon(relatedType, id);
       if (!options?.silent) {
         Message.success('操作成功');
       }
@@ -92,9 +83,9 @@ export default class TodoService {
     }
   }
 
-  static async abandonWithRepeat(id: string, options?: MethodOptions) {
+  static async restore(relatedType: RelatedType, id: string, options?: MethodOptions) {
     try {
-      const res = await TodoController.abandonWithRepeat(id);
+      const res = await TodoController.restore(relatedType, id);
       if (!options?.silent) {
         Message.success('操作成功');
       }
@@ -104,42 +95,9 @@ export default class TodoService {
     }
   }
 
-  static async restoreWithRepeat(id: string, options?: MethodOptions) {
+  static async list(query?: TodoVO.TodoFilterVo) {
     try {
-      const res = await TodoController.restoreWithRepeat(id);
-      if (!options?.silent) {
-        Message.success('操作成功');
-      }
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async findMixRepeat(id: string, query?: { relatedType?: RelatedType }) {
-    try {
-      const res = await TodoController.findMixRepeat(id, query);
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async deleteWithRepeat(id: string, query?: { relatedType?: RelatedType }, options?: MethodOptions) {
-    try {
-      const res = await TodoController.deleteWithRepeat(id, query);
-      if (!options?.silent) {
-        Message.success('删除成功');
-      }
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-    }
-  }
-
-  static async listMixRepeatByQuery(query?: TodoVO.TodoFilterVo) {
-    try {
-      const res = await TodoController.listMixRepeatByQuery(query);
+      const res = await TodoController.list(query);
       return res;
     } catch (error: unknown) {
       Message.error(error);

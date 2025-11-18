@@ -40,7 +40,7 @@ export default class GoalController {
 
   static async findByFilter(goalListFiltersVo?: GoalVO.GoalFilterVo) {
     return request<ResponseListVo<GoalVO.GoalWithoutRelationsVo>>({ method: 'get' })(
-      `/goal/find-by-filter`,
+      `/goal/list`,
       goalListFiltersVo
     );
   }

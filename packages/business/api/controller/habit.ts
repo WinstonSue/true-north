@@ -35,7 +35,7 @@ export default class HabitController {
 
   static async findByFilter(habitListFiltersVo?: HabitVO.HabitFilterVo) {
     return request<ResponseListVo<HabitVO.HabitWithoutRelationsVo>>({ method: 'get' })(
-      `/habit/find-by-filter`,
+      `/habit/list`,
       habitListFiltersVo
     );
   }

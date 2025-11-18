@@ -33,7 +33,7 @@ export class TaskController {
     return dto.exportVo();
   }
 
-  @Get('/find-by-filter', { description: '查询任务列表' })
+  @Get('/list', { description: '查询任务列表' })
   async findByFilter(
     @Query() taskListFiltersVo?: TaskVO.TaskFilterVo
   ): Promise<ResponseListVo<TaskVO.TaskWithoutRelationsVo>> {

@@ -13,7 +13,7 @@ export default function TriggerTodoStatus(props: {
   const { todo } = props;
 
   async function restore() {
-    await TodoService.restoreWithRepeat(todo.id, );
+    await TodoService.restoreWithRepeat(todo.id);
     await props.onChange();
   }
 
@@ -39,14 +39,14 @@ export default function TriggerTodoStatus(props: {
             });
             return;
           }
-          await TodoService.doneWithRepeatBatch(undefined, {
+          await TodoService.doneWithRepeatBatch({
             todoWithRepeatList: [
               {
                 id: todo.id,
                 relatedType: todo.relatedType,
               },
             ],
-          }, );
+          });
           await props.onChange();
         }}
       />

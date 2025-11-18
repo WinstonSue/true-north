@@ -13,9 +13,9 @@ export class TodoController {
     return this.controller.create(body);
   }
 
-  @Delete('/delete/:id')
-  async delete(@Param('id') id: string): Promise<boolean> {
-    return this.controller.delete(id);
+  @Delete('/delete/:relatedType/:id')
+  async delete(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    return this.controller.delete(relatedType, id);
   }
 
   @Put('/update/:id')
@@ -23,55 +23,37 @@ export class TodoController {
     return this.controller.update(id, body);
   }
 
-  @Get('/find/:id')
-  async find(@Param('id') id: string): Promise<TodoVO.TodoVo> {
-    return this.controller.find(id);
-  }
-
-  @Get('/find-by-filter')
-  async findByFilter(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
-    return this.controller.findByFilter(query);
-  }
-
   @Get('/page')
   async page(@Query() query?: TodoVO.TodoPageFilterVo): Promise<ResponsePageVo<TodoVO.TodoWithoutRelationsVo>> {
     return this.controller.page(query);
   }
 
-  @Put('/update-with-repeat/:id')
-  async updateWithRepeat(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    return this.controller.updateWithRepeat(id, body);
+  @Get('/find/:relatedType/:id')
+  async findMixRepeat(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
+    return this.controller.findMixRepeat(relatedType, id);
   }
 
-  @Put('/done-with-repeat/batch')
-  async doneWithRepeatBatch(@Query() query?: TodoVO.TodoFilterVo, @Body() body?: any): Promise<any> {
-    return this.controller.doneWithRepeatBatch(query, body);
+  @Put('/done/:relatedType/:id')
+  async done(
+    @Param('relatedType') relatedType: RelatedType,
+    @Param('id') id: string,
+    @Body() body?: { doneAt?: string }
+  ): Promise<any> {
+    return this.controller.done(relatedType, id, body);
   }
 
-  @Put('/abandon-with-repeat/:id')
-  async abandonWithRepeat(@Param('id') id: string): Promise<boolean> {
-    return this.controller.abandonWithRepeat(id);
+  @Put('/abandon/:relatedType/:id')
+  async abandon(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    return this.controller.abandon(relatedType, id);
   }
 
-  @Put('/restore-with-repeat/:id')
-  async restoreWithRepeat(@Param('id') id: string): Promise<boolean> {
-    return this.controller.restoreWithRepeat(id);
+  @Put('/restore/:relatedType/:id')
+  async restore(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    return this.controller.restore(relatedType, id);
   }
 
-  @Delete('/delete-with-repeat/:id')
-  async deleteWithRepeat(@Param('id') id: string, @Query() query?: { relatedType?: RelatedType }): Promise<boolean> {
-    return this.controller.deleteWithRepeat(id, query);
-  }
-
-  @Get('/list-mixed-repeat-by-query')
-  async listMixRepeatByQuery(
-    @Query() query?: TodoVO.TodoFilterVo
-  ): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
-    return this.controller.listMixRepeatByQuery(query);
-  }
-
-  @Get('/find-mix-repeat/:id')
-  async findMixRepeat(@Param('id') id: string, @Query() query?: { relatedType?: RelatedType }): Promise<TodoVO.TodoVo> {
-    return this.controller.findMixRepeat(id, query);
+  @Get('/list')
+  async list(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
+    return this.controller.list(query);
   }
 }

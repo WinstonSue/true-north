@@ -32,7 +32,7 @@ export class GoalController {
     return this.controller.findWithRelations(id);
   }
 
-  @Get('/find-by-filter')
+  @Get('/list')
   async findByFilter(
     @Query() goalListFiltersVo?: GoalVO.GoalFilterVo
   ): Promise<ResponseListVo<GoalVO.GoalWithoutRelationsVo>> {

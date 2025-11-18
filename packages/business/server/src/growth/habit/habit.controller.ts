@@ -35,7 +35,7 @@ export class HabitController {
     return dto.exportVo();
   }
 
-  @Get('/find-by-filter', { description: '查询习惯列表' })
+  @Get('/list', { description: '查询习惯列表' })
   async findByFilter(
     @Query() habitListFiltersVo?: HabitVO.HabitFilterVo
   ): Promise<ResponseListVo<HabitVO.HabitWithoutRelationsVo>> {

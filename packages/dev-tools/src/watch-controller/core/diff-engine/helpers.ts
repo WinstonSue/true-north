@@ -87,9 +87,19 @@ export function generateChangeDetails(
       for (let i = 0; i < Math.max(targetMethod.parameters.length, sourceMethod.parameters.length); i++) {
         const targetParam = targetMethod.parameters[i];
         const sourceParam = sourceMethod.parameters[i];
+        
+        if (targetParam === undefined) {
+          result += `\n new param: (${sourceParam.name || 'unknown'}:${sourceParam.type || 'unknown'})`;
+          continue;
+        }
+
+        if (sourceParam === undefined) {
+          result += `\n removed param: (${targetParam.name || 'unknown'}:${targetParam.type || 'unknown'})`;
+          continue;
+        }
 
         if (targetParam.name !== sourceParam.name || targetParam.type !== sourceParam.type) {
-          result += `\n${targetParam.name || 'unknown'}:${targetParam.type || 'unknown'} -> ${sourceParam.name || 'unknown'}:${sourceParam.type || 'unknown'}`;
+          result += `\n changed param: (${targetParam.name || 'unknown'}:${targetParam.type || 'unknown'}) -> (${sourceParam.name || 'unknown'}:${sourceParam.type || 'unknown'})`;
         }
       }
       return result;

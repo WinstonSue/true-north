@@ -26,7 +26,7 @@ export class HabitController {
     return this.controller.find(id);
   }
 
-  @Get('/find-by-filter')
+  @Get('/list')
   async findByFilter(@Query() habitListFiltersVo?: HabitVO.HabitFilterVo): Promise<ResponseListVo<HabitVO.HabitWithoutRelationsVo>> {
     return this.controller.findByFilter(habitListFiltersVo);
   }

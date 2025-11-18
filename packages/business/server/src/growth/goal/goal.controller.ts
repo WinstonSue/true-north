@@ -41,7 +41,7 @@ export class GoalController {
     return dto.exportVo();
   }
 
-  @Get('/find-by-filter', { description: '查询目标列表' })
+  @Get('/list', { description: '查询目标列表' })
   async findByFilter(
     @Query() goalListFiltersVo?: GoalVO.GoalFilterVo
   ): Promise<ResponseListVo<GoalVO.GoalWithoutRelationsVo>> {
