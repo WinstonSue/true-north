@@ -19,7 +19,7 @@ export default class TodoController {
     return request<ResponsePageVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/page`, query);
   }
 
-  static async findMixRepeat(relatedType: RelatedType, id: string) {
+  static async find(relatedType: RelatedType, id: string) {
     return request<TodoVO.TodoVo>({ method: 'get' })(`/todo/find/${relatedType}/${id}`);
   }
 

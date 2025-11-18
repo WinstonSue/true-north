@@ -1,7 +1,8 @@
 import { Radio, DatePicker } from '@arco-design/web-react';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TodoVo } from '@true-north/vo';
+import clsx from 'clsx';
 
 export default function DoneTimeConform(props: {
   todo: TodoVo;
@@ -12,19 +13,25 @@ export default function DoneTimeConform(props: {
     'onTime' | 'currentTime' | 'customTime'
   >('onTime');
 
+  const getPlanEndTime = () => todo.planEndTime ? ' ' + todo.planEndTime : '23:59:59';
+  useEffect(() => {
+    console.log(todo.planDate + ' ' + getPlanEndTime());
+    onChangeDoneTime(dayjs(todo.planDate + ' ' + getPlanEndTime()));
+  }, []);
+
   return (
-    <div>
-      <p>当前时间已超过计划完成时间，确认完成时间</p>
+    <div className={clsx('flex flex-col gap-2')}>
+      <div>
+        当前时间已超过<b>{todo.name}</b>的计划完成时间
+        <b>{`${todo.planDate} ${getPlanEndTime()}`}</b>
+        ，确认完成时间
+      </div>
       <Radio.Group
         value={doneType}
         onChange={(value) => {
           setDoneType(value);
           if (value === 'onTime') {
-            if (todo.planEndTime) {
-              onChangeDoneTime(dayjs(todo.planDate + ' ' + todo.planEndTime));
-            } else {
-              onChangeDoneTime(dayjs(todo.planDate));
-            }
+            onChangeDoneTime(dayjs(todo.planDate + ' ' + getPlanEndTime()));
           }
           if (value === 'currentTime') {
             onChangeDoneTime(dayjs());

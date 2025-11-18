@@ -83,31 +83,12 @@ export class TodoService {
 
   // ====== 业务逻辑编排 ======
 
-  async listMixedRepeat(filter: TodoFilterDto): Promise<TodoDto[]> {
+  async list(filter: TodoFilterDto): Promise<TodoDto[]> {
     const todoDtoList = await this.findByFilter(filter);
 
     const todoRepeatDtoList = await this.todoRepeatService.generateTodoByRepeat(filter);
 
     return [...todoDtoList, ...todoRepeatDtoList];
-  }
-
-  async findMixRepeat(id: string): Promise<TodoDto> {
-    try {
-      const entity = await this.todoRepository.find(id);
-      if (entity) {
-        const todoDto = new TodoDto();
-        todoDto.importEntity(entity);
-        return todoDto;
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    const repeatTodo = await this.todoRepeatService.findWithRelations(id);
-
-    if (repeatTodo) {
-      return this.todoRepeatService.generateTodo(repeatTodo);
-    }
-    throw new Error('未找到待办');
   }
 
   async deleteByTaskIds(taskIds: string[]): Promise<void> {
@@ -117,7 +98,7 @@ export class TodoService {
     await this.todoRepository.softDeleteByFilter(filter);
   }
 
-  async done(id: string, { doneAt, relatedType }: { doneAt?: string; relatedType?: RelatedType } = {}) {
+  async done(relatedType: RelatedType, id: string, { doneAt }: { doneAt?: string } = {}) {
     if (relatedType === RelatedType.IS_REPEAT) {
       const updateTodoRepeatDto = await this.todoRepeatService.updateToNext(id);
       // 创建一个新的已完成 todo
@@ -147,7 +128,7 @@ export class TodoService {
     return await this.update(updateTodoDto);
   }
 
-  async doneWithRepeatBatch(filter: TodoFilterDto): Promise<any> {
+  async doneBatch(filter: TodoFilterDto): Promise<any> {
     const todoIds: string[] = [];
     const todoRepeatIds: string[] = [];
 

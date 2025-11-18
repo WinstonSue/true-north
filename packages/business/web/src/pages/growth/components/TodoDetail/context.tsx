@@ -6,7 +6,7 @@ import { createInjectState } from '@/utils/createInjectState';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoMapping } from '@true-north/web-service';
-import { TodoStatus } from '@true-north/enum';
+import { TodoStatus, RelatedType } from '@true-north/enum';
 import { CreateTodoVo } from '@true-north/vo';
 
 export type TodoDetailProviderProps = {
@@ -30,6 +30,7 @@ export type CurrentTodo = {
   description?: string;
   name: string;
   status: TodoStatus;
+  relatedType: RelatedType;
 };
 
 export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
@@ -58,7 +59,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
     id: string,
     _todo: TodoVo | TodoWithoutRelationsVo,
   ) => {
-    const todo = await TodoService.findMixRepeat(id, { relatedType: _todo?.relatedType });
+    const todo = await TodoService.find(_todo.relatedType, id);
     setCurrentTodo(todo);
     todoFormDataRef.current = TodoMapping.voToFormData(todo);
     setTodoFormData(todoFormDataRef.current);
@@ -115,7 +116,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
 
   async function handleUpdate() {
     const data = TodoMapping.formDataToUpdateVo(todoFormDataRef.current);
-    await TodoService.updateWithRepeat(currentTodo.id, data);
+    await TodoService.update(currentTodo.relatedType, currentTodo.id, data);
   }
 
   const onSubmit = async () => {

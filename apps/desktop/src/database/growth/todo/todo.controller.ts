@@ -33,8 +33,8 @@ export class TodoController {
   }
 
   @Get('/find/:relatedType/:id')
-  async findMixRepeat(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
-    return this.controller.findMixRepeat(relatedType, id);
+  async find(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
+    return this.controller.find(relatedType, id);
   }
 
   @Put('/done/:relatedType/:id')

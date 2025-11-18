@@ -63,7 +63,7 @@ export default function TodoWeek() {
     flushSync(() => {
       setCurrentTodo(null);
     });
-    const todo = await TodoService.findMixRepeat(_todo.id);
+    const todo = await TodoService.find(_todo.relatedType, _todo.id);
 
     setCurrentTodo(todo);
   }

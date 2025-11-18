@@ -50,9 +50,9 @@ export default class TodoService {
     }
   }
 
-  static async findMixRepeat(relatedType: RelatedType, id: string) {
+  static async find(relatedType: RelatedType, id: string) {
     try {
-      const res = await TodoController.findMixRepeat(relatedType, id);
+      const res = await TodoController.find(relatedType, id);
       return res;
     } catch (error: unknown) {
       Message.error(error);

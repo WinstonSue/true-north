@@ -16,7 +16,7 @@ export type TodoWithoutRelationsVo = {
   planStartTime?: string;
   planEndTime?: string;
   planDate: string;
-  relatedType?: RelatedType;
+  relatedType: RelatedType;
   taskId?: string;
   repeatId?: string;
   habitId?: string;

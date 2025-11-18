@@ -3,8 +3,8 @@ import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { TodoVo } from '@true-north/vo';
 import { openModal } from '@/hooks/OpenModal';
-import dayjs from 'dayjs';
 import ConformDoneTime from './ConformDoneTime';
+import { useRef, useState } from 'react';
 
 export default function TriggerTodoStatus(props: {
   todo: TodoVo;
@@ -13,9 +13,11 @@ export default function TriggerTodoStatus(props: {
   const { todo } = props;
 
   async function restore() {
-    await TodoService.restoreWithRepeat(todo.id);
+    await TodoService.restore(todo.relatedType, todo.id);
     await props.onChange();
   }
+
+  const doneAt = useRef<string | null>(null);
 
   return (
     <div
@@ -32,21 +34,24 @@ export default function TriggerTodoStatus(props: {
             openModal({
               title: '确认完成时间',
               content: (
-                <ConformDoneTime todo={todo} onChangeDoneTime={(time) => {}} />
+                <ConformDoneTime
+                  todo={todo}
+                  onChangeDoneTime={(time) => {
+                    doneAt.current = time.format('YYYY-MM-DD HH:mm:ss');
+                  }}
+                />
               ),
               onCancel: async () => {},
-              onOk: async () => {},
+              onOk: async () => {
+                await TodoService.done(todo.relatedType, todo.id, {
+                  doneAt: doneAt.current,
+                });
+                await props.onChange();
+              },
             });
             return;
           }
-          await TodoService.doneWithRepeatBatch({
-            todoWithRepeatList: [
-              {
-                id: todo.id,
-                relatedType: todo.relatedType,
-              },
-            ],
-          });
+          await TodoService.done(todo.relatedType, todo.id);
           await props.onChange();
         }}
       />

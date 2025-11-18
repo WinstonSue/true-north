@@ -94,7 +94,7 @@ export class TodoController {
       doneAt?: string;
     }
   ): Promise<any> {
-    return await this.todoService.done(id, { ...body, relatedType: relatedType });
+    return await this.todoService.done(relatedType, id, body);
   }
 
   @Put('/abandon/:relatedType/:id', { description: '废弃待办' })
@@ -117,7 +117,7 @@ export class TodoController {
   async list(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
     const todoQueryDto = new TodoFilterDto();
     if (query) todoQueryDto.importListVo(query);
-    const list = await this.todoService.listMixedRepeat(todoQueryDto);
+    const list = await this.todoService.list(todoQueryDto);
 
     return {
       list: list.map((todo) => todo.exportVo()),
@@ -125,10 +125,18 @@ export class TodoController {
   }
 
   @Get('/find/:relatedType/:id', { description: '查询待办及其重复信息' })
-  async findMixRepeat(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
+  async find(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
     if (relatedType === RelatedType.IS_REPEAT) {
       return (await this.todoRepeatService.findWithRelations(id)).exportVo();
     }
     return (await this.todoService.findWithRelations(id)).exportVo();
+  }
+
+
+  @Put('/done/batch', { description: '批量完成待办' })
+  doneBatch(@Body() body: TodoVO.TodoFilterVo): Promise<any> {
+    const todoFilterDto = new TodoFilterDto();
+    if (body) todoFilterDto.importListVo(body);
+    return this.todoService.doneBatch(todoFilterDto);
   }
 }
