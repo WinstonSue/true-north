@@ -62,9 +62,13 @@ export class TodoController {
     return await this.todoService.delete(id);
   }
 
-  @Put('/update/:id', { description: '更新待办' })
-  async update(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    if (body.relatedType === RelatedType.IS_REPEAT) {
+  @Put('/update/:relatedType/:id', { description: '更新待办' })
+  async update(
+    @Param('relatedType') relatedType: RelatedType,
+    @Param('id') id: string,
+    @Body() body: TodoVO.UpdateTodoVo
+  ): Promise<TodoVO.TodoVo> {
+    if (relatedType === RelatedType.IS_REPEAT) {
       const updateTodoRepeatDto = new UpdateTodoRepeatDto();
       updateTodoRepeatDto.importUpdateVo({
         ...body,

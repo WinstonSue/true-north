@@ -18,9 +18,13 @@ export class TodoController {
     return this.controller.delete(relatedType, id);
   }
 
-  @Put('/update/:id')
-  async update(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    return this.controller.update(id, body);
+  @Put('/update/:relatedType/:id')
+  async update(
+    @Param('relatedType') relatedType: RelatedType,
+    @Param('id') id: string,
+    @Body() body: TodoVO.UpdateTodoVo
+  ): Promise<TodoVO.TodoVo> {
+    return this.controller.update(relatedType, id, body);
   }
 
   @Get('/page')

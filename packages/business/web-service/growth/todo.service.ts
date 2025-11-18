@@ -29,9 +29,9 @@ export default class TodoService {
     }
   }
 
-  static async update(id: string, body: TodoVO.UpdateTodoVo, options?: MethodOptions) {
+  static async update(relatedType: RelatedType, id: string, body: TodoVO.UpdateTodoVo, options?: MethodOptions) {
     try {
-      const res = await TodoController.update(id, body);
+      const res = await TodoController.update(relatedType, id, body);
       if (!options?.silent) {
         Message.success('操作成功');
       }

@@ -11,8 +11,8 @@ export default class TodoController {
     return request<boolean>({ method: 'remove' })(`/todo/delete/${relatedType}/${id}`);
   }
 
-  static async update(id: string, body: TodoVO.UpdateTodoVo) {
-    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update/${id}`, body);
+  static async update(relatedType: RelatedType, id: string, body: TodoVO.UpdateTodoVo) {
+    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/update/${relatedType}/${id}`, body);
   }
 
   static async page(query?: TodoVO.TodoPageFilterVo) {

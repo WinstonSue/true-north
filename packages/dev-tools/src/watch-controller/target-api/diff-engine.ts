@@ -101,7 +101,8 @@ export class ControllerApiDiffEngine extends DiffEngine {
         });
       } else {
         // 方法存在，检查是否有变化
-        const changeType = detectMethodChangeType(sourceMethod, targetMethod, { ignore: ['decorators', 'returnType'] });
+        // API 控制器需要检查路径变化，所以不忽略装饰器
+        const changeType = detectMethodChangeType(sourceMethod, targetMethod, { ignore: ['returnType'] });
         if (changeType !== 'method_no_change') {
           changes.push({
             methodName,

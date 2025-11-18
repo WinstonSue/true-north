@@ -225,12 +225,13 @@ export class TargetApiComposer {
     let bodyParam = '';
 
     // 基于实际参数名生成方法体，而不是硬编码
-    const idParam = method.parameters.find((p) => p.decorator === 'Param' && p.name === 'id');
+    const paramParams = method.parameters.filter((p) => p.decorator === 'Param');
     const bodyParam_obj = method.parameters.find((p) => p.decorator === 'Body');
     const queryParam = method.parameters.find((p) => p.decorator === 'Query');
 
-    if (idParam) {
-      pathStr = pathStr.replace('/:id', `\${${idParam.name}}`);
+    // 处理路径参数替换 - 通用处理所有 Param 参数
+    for (const param of paramParams) {
+      pathStr = pathStr.replace(`:${param.name}`, `\${${param.name}}`);
     }
 
     if (bodyParam_obj) {

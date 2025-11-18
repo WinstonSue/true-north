@@ -179,13 +179,13 @@ export class TargetProxyComposer {
   }
 
   /**
-   * 更新现有 AST 方法（保持装饰器不变）
+   * 更新现有 AST 方法（同步装饰器变化）
    */
   private updateExistingASTMethod(existingMethod: any, method: MethodDefinition): any {
     return {
       ...existingMethod,
-      // 保持原有的装饰器
-      decorators: existingMethod.decorators,
+      // 同步装饰器变化
+      decorators: this.convertDecoratorsToAST(method),
       // 更新参数
       parameters: method.parameters.map((p) => ({
         name: p.name,
