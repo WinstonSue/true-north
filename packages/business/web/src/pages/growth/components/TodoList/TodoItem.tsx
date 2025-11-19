@@ -39,11 +39,11 @@ function TodoItem(props: TodoItemProps) {
           <div
             className={clsx(['flex items-center justify-between', 'leading-8'])}
           >
-            <span className="text-text-1">
-              {todo.relatedType === RelatedType.IS_REPEAT && (
-                <SiteIcon id={'repeat'} />
-              )}
+            <span className="text-text-1 flex items-center">
               {todo.name}
+              {todo.relatedType === RelatedType.IS_REPEAT && (
+                <SiteIcon id={'repeat'} className={"text-danger"} width={20} height={20}/>
+              )}
             </span>
             <div className="h-8 flex items-center">
               <Popover
@@ -53,7 +53,7 @@ function TodoItem(props: TodoItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TodoService.abandonWithRepeat(todo.id);
+                        TodoService.abandon(todo.relatedType, todo.id);
                         props.refreshTodoList();
                       }}
                     >
@@ -62,7 +62,7 @@ function TodoItem(props: TodoItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TodoService.delete(todo.id);
+                        TodoService.delete(todo.relatedType, todo.id);
                         props.refreshTodoList();
                       }}
                     >

@@ -1,10 +1,10 @@
-import { Checkbox, DatePicker, Radio } from '@arco-design/web-react';
+import { Checkbox } from '@arco-design/web-react';
 import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { TodoVo } from '@true-north/vo';
 import { openModal } from '@/hooks/OpenModal';
-import ConformDoneTime from './ConformDoneTime';
-import { useRef, useState } from 'react';
+import DoneTimeConform from './DoneTimeConform';
+import { useRef } from 'react';
 
 export default function TriggerTodoStatus(props: {
   todo: TodoVo;
@@ -30,11 +30,14 @@ export default function TriggerTodoStatus(props: {
             await restore();
             return;
           }
-          if (new Date(todo.planDate) < new Date()) {
+          if (
+            new Date(todo.planDate + ' ' + (todo.planEndTime || '23:59:59')) <
+            new Date()
+          ) {
             openModal({
               title: '确认完成时间',
               content: (
-                <ConformDoneTime
+                <DoneTimeConform
                   todo={todo}
                   onChangeDoneTime={(time) => {
                     doneAt.current = time.format('YYYY-MM-DD HH:mm:ss');
