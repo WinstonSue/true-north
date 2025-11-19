@@ -6,7 +6,7 @@
 import { SyncEngine } from '../core/sync-engine';
 import { IntermediateState } from '../core/intermediate-state';
 import { TargetModelComposer } from './target-composer';
-import { Logger } from '../helpers/Logger';
+import { Logger } from '../../helpers/Logger';
 
 export class ModelSyncEngine extends SyncEngine {
   private composer: TargetModelComposer;

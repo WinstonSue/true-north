@@ -4,7 +4,7 @@
  */
 
 import { IntermediateState } from '../core/intermediate-state';
-import { filterNonRelationFields } from '../helpers/FieldParser';
+import { filterNonRelationFields } from '../utils/field-utils';
 
 export class TargetFormComposer {
   /**

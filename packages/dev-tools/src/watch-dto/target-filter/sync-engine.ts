@@ -5,7 +5,7 @@
 import { SyncEngine } from '../core/sync-engine';
 import { IntermediateState } from '../core/intermediate-state';
 import { TargetFilterComposer } from './target-composer';
-import { Logger } from '../helpers/Logger';
+import { Logger } from '../../helpers/Logger';
 
 export class FilterSyncEngine extends SyncEngine {
   private composer: TargetFilterComposer;

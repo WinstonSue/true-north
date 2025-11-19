@@ -5,7 +5,7 @@
 import { SyncEngine } from '../core/sync-engine';
 import { IntermediateState } from '../core/intermediate-state';
 import { TargetFormComposer } from './target-composer';
-import { Logger } from '../helpers/Logger';
+import { Logger } from '../../helpers/Logger';
 
 export class FormSyncEngine extends SyncEngine {
   private composer: TargetFormComposer;
