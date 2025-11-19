@@ -93,8 +93,6 @@ export default function LifeToolkitApp() {
   useEffect(() => {
     if (checkLogin()) {
       fetchUserInfo();
-    } else if (window.location.pathname.replace(/\//g, '') !== 'login') {
-      window.location.pathname = `/login`;
     }
   }, []);
 

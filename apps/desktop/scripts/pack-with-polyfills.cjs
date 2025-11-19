@@ -80,7 +80,7 @@ function pack(platform) {
 
 function installDependenciesInApp(platform) {
   const appPaths = {
-    mac: 'release/mac-arm64/life toolkit.app/Contents/Resources/app',
+    mac: 'release/mac-arm64/知止.app/Contents/Resources/app',
     win: 'release/win-unpacked/resources/app',
     linux: 'release/linux-unpacked/resources/app'
   };

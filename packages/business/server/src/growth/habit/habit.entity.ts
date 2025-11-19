@@ -16,7 +16,7 @@ export class HabitWithoutRelations extends BaseEntity {
   @Column({
     type: 'simple-enum',
     enum: HabitStatus,
-    default: HabitStatus.ACTIVE,
+    default: HabitStatus.TODO,
   })
   status!: HabitStatus;
 

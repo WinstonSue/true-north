@@ -2,7 +2,7 @@
   "name": "@true-north/dev-tools",
   "private": true,
   "version": "0.1.0",
-  "description": "Life Toolkit 开发辅助工具",
+  "description": "True North 开发辅助工具",
   "main": "src/watch-controllers.ts",
   "scripts": {
     "watch:dto": "tsx ./src/watch-dto/index.ts",

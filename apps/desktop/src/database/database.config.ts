@@ -14,9 +14,9 @@ const getDatabasePath = () => {
   } else {
     // 生产环境使用用户数据目录
     try {
-      return path.join(app.getPath('userData'), 'life-toolkit.db');
+      return path.join(app.getPath('userData'), 'true-north.db');
     } catch (error) {
-      return path.join(process.cwd(), 'life-toolkit.db');
+      return path.join(process.cwd(), 'true-north.db');
     }
   }
 };

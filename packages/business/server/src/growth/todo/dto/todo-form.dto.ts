@@ -33,7 +33,6 @@ export class CreateTodoDto extends PickType(TodoDto, [
     this.taskId = vo.taskId;
     this.habitId = vo.habitId;
     this.repeatId = vo.repeatId;
-    this.relatedType = vo.relatedType;
     this.status = vo.status;
   }
 

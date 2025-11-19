@@ -11,7 +11,7 @@ const DevToolsPage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <Title heading={2}>Life Toolkit 开发工具</Title>
+      <Title heading={2}>True North 开发工具</Title>
       <Paragraph>通过此页面可以查看控制器差异状态，并执行同步操作。</Paragraph>
 
       <Divider />

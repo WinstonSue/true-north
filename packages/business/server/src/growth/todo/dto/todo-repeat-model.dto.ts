@@ -4,6 +4,7 @@ import { IntersectionType } from 'francis-mapped-types';
 import { TodoRepeat, TodoRepeatWithoutRelations } from '../todo-repeat.entity';
 import { Todo } from '../../todo/todo.entity';
 import type { Todo as TodoVO } from '@true-north/vo';
+import { RelatedType } from '@true-north/enum';
 
 export class TodoRepeatWithoutRelationsDto extends TodoRepeatWithoutRelations {}
 
@@ -45,6 +46,7 @@ export class TodoRepeatDto extends IntersectionType(BaseModelDto, TodoRepeatWith
       createdAt: dayjs(this.createdAt).format('YYYY-MM-DD HH:mm:ss'),
       updatedAt: dayjs(this.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
       planDate: dayjs(this.currentDate).format('YYYY-MM-DD'),
+      relatedType: RelatedType.IS_REPEAT,
 
       repeatConfig: {
         currentDate: dayjs(this.currentDate).format('YYYY-MM-DD'),
