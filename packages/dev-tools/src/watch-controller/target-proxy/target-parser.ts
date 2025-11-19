@@ -17,7 +17,7 @@ import {
   ASTSourceLocation,
 } from '../core/ast';
 import { BaseParser } from '../core/intermediate-state';
-import { ObjectParser } from '../helpers';
+import { ObjectParser } from '../../helpers';
 
 export class TargetProxyParser extends BaseParser {
   constructor(filePath: string) {

@@ -8,7 +8,7 @@ import { ControllerProxyDiffEngine } from './diff-engine';
 import { TargetProxyComposer } from './target-composer';
 import { formatFile } from '../../utils/formatter';
 import { generateSyncActions, SyncOptions, SyncResult } from '../core/sync-engine';
-import { ErrorHandler } from '../helpers';
+import { ErrorHandler } from '../../helpers';
 import { findAllControllerPairs } from './helpers';
 import { ControllerSyncStatus } from '../../../types';
 

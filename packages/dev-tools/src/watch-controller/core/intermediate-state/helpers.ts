@@ -1,4 +1,4 @@
-import { ObjectParser } from '../../helpers';
+import { ObjectParser } from '../../../helpers';
 import {
   ControllerMetadata,
   MethodDefinition,

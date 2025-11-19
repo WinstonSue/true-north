@@ -1,17 +1,15 @@
 /**
- * 适配器基类
+ * DTO Parser 基类
  * 提供通用的错误处理和工具方法
  */
 
 import { ASTParser } from '../ast/ast-parser';
 import { IntermediateState } from './types';
 import { ASTClassInfo } from '../ast/ast-types';
-import { ErrorHandler, Logger, ValidationUtils } from '../../../helpers';
 import { readFileSync } from 'fs';
 
 export abstract class BaseParser {
   protected astParser: ASTParser;
-  protected logger = Logger.createContextLogger(this.constructor.name);
   protected filePath: string;
   intermediateState: IntermediateState;
 
@@ -25,13 +23,6 @@ export abstract class BaseParser {
    * 安全解析代码为中间态
    */
   parseToIntermediateState(code: string, filePath: string): IntermediateState {
-    // 输入验证
-    const validationResult = ValidationUtils.validateInput(code, filePath);
-    if (!ErrorHandler.isSuccess(validationResult)) {
-      this.logger.error('输入验证失败', validationResult.error);
-      throw new Error(validationResult.error);
-    }
-
     try {
       const astInfo = this.astParser.parse(code, filePath);
       const intermediateState = this.astToIntermediateState(astInfo, filePath);
@@ -42,9 +33,7 @@ export abstract class BaseParser {
 
       return intermediateState;
     } catch (error) {
-      const errorResult = ErrorHandler.handleASTError(error, filePath);
-      this.logger.error('AST 解析失败', errorResult.error);
-      throw new Error(errorResult.error);
+      throw new Error(`Failed to parse ${filePath}: ${(error as Error).message}`);
     }
   }
 
@@ -52,21 +41,23 @@ export abstract class BaseParser {
    * 验证类名
    */
   protected validateClassName(className: string): void {
-    const error = ValidationUtils.validateClassName(className);
-    if (error) {
-      this.logger.error('类名验证失败', error.error);
-      throw new Error(error.error);
+    if (!className || className.trim().length === 0) {
+      throw new Error('Class name is required');
+    }
+    if (!/^[A-Z][a-zA-Z0-9]*$/.test(className)) {
+      throw new Error(`Invalid class name: ${className}`);
     }
   }
 
   /**
-   * 验证方法名
+   * 验证字段名
    */
-  protected validateMethodName(methodName: string): void {
-    const error = ValidationUtils.validateMethodName(methodName);
-    if (error) {
-      this.logger.error('方法名验证失败', error.error);
-      throw new Error(error.error);
+  protected validateFieldName(fieldName: string): void {
+    if (!fieldName || fieldName.trim().length === 0) {
+      throw new Error('Field name is required');
+    }
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(fieldName)) {
+      throw new Error(`Invalid field name: ${fieldName}`);
     }
   }
 
