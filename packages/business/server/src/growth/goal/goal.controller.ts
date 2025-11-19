@@ -31,12 +31,6 @@ export class GoalController {
 
   @Get('/find/:id', { description: '根据ID查询目标详情' })
   async find(@Param('id') id: string): Promise<GoalVO.GoalVo> {
-    const dto = await this.goalService.find(id);
-    return dto.exportVo();
-  }
-
-  @Get('/find-with-relations/:id', { description: '根据ID查询目标及关联信息' })
-  async findWithRelations(@Param('id') id: string): Promise<GoalVO.GoalVo> {
     const dto = await this.goalService.findWithRelations(id);
     return dto.exportVo();
   }
@@ -56,7 +50,7 @@ export class GoalController {
     @Query() goalPageFilterVo?: GoalVO.GoalPageFilterVo
   ): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
     const goalPageFilterDto = new GoalPageFilterDto();
-    goalPageFilterDto.importPageVo(goalPageFilterVo ?? {});
+    goalPageFilterDto.importPageVo(goalPageFilterVo ?? { pageNum: 1, pageSize: 10 });
     const { list, total, pageNum, pageSize } = await this.goalService.page(goalPageFilterDto);
     return GoalDto.dtoListToPageVo(list, total, pageNum, pageSize);
   }

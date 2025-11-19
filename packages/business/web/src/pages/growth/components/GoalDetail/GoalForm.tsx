@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import { GoalMapping } from '@true-north/web-service';
 import { GoalType, Importance, Difficulty } from '@true-north/enum';
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
+import GoalTreeSelector from '../GoalTreeSelector';
 
 const { Row, Col } = Grid;
 const RangePicker = DatePicker.RangePicker;
@@ -77,14 +78,10 @@ export default function GoalForm() {
         </Item>
 
         <Item span={24} label="父级目标" name="parentId">
-          <Select
-            allowClear
+          <GoalTreeSelector
             placeholder="请选择父级目标"
-            options={goalList.map((goal) => ({
-              label: goal.name,
-              value: goal.id,
-            }))}
-          ></Select>
+            excludeId={currentGoal?.id}
+          />
         </Item>
 
         <Item span={24} label="描述" name="description">

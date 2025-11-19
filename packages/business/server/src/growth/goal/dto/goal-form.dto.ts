@@ -68,22 +68,6 @@ export class UpdateGoalDto extends IntersectionType(
     }
   }
 
-  /** 修改UpdateEntity */
-  exportUpdateEntity(entity: Goal) {
-    if (!entity.id) entity.id = this.id;
-    else if (entity.id !== this.id) throw new Error('ID不匹配');
-    if (this.name !== undefined) entity.name = this.name;
-    if (this.type !== undefined) entity.type = this.type;
-    if (this.startAt !== undefined) entity.startAt = this.startAt;
-    if (this.endAt !== undefined) entity.endAt = this.endAt;
-    if (this.description !== undefined) entity.description = this.description;
-    if (this.importance !== undefined) entity.importance = this.importance;
-    if (this.difficulty !== undefined) entity.difficulty = this.difficulty;
-    if (this.status !== undefined) entity.status = this.status;
-    if (this.doneAt !== undefined) entity.doneAt = this.doneAt;
-    if (this.abandonedAt !== undefined) entity.abandonedAt = this.abandonedAt;
-  }
-
   /** 导出更新UpdateEntity */
   exportUpdateEntity() {
     const goal = new Goal();

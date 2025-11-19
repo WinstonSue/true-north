@@ -435,6 +435,9 @@ importers:
       '@true-north/api':
         specifier: workspace:*
         version: link:../api
+      '@true-north/common-web-utils':
+        specifier: workspace:*
+        version: link:../../common-web/utils
       '@true-north/components-mind':
         specifier: workspace:*
         version: link:../../components/mind
