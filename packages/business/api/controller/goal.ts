@@ -11,7 +11,7 @@ export default class GoalController {
   }
 
   static async update(id: string, updateGoalVo: GoalVO.UpdateGoalVo) {
-    return request<GoalVO.GoalVo>({ method: 'put' })(`/goal/update${id}`, updateGoalVo);
+    return request<GoalVO.GoalVo>({ method: 'put' })(`/goal/update/${id}`, updateGoalVo);
   }
 
   static async find(id: string) {

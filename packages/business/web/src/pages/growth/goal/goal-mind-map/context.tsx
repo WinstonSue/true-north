@@ -4,6 +4,7 @@ import { GoalService } from '@true-north/web-service';
 import { Message } from '@arco-design/web-react';
 import { GoalType, GoalStatus } from '@true-north/enum';
 import { createInjectState } from '@true-north/common-web-utils';
+import { Modal } from '@arco-design/web-react';
 
 export const [GoalMindMapContextProvider, useGoalMindMapContext] =
   createInjectState<{

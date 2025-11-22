@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ReactShape } from '@antv/x6-react-shape';
 import { ENodeType } from '@true-north/components-mind/src/types';
-import { IconPlusCircle, IconMinusCircle } from '@arco-design/web-react/icon';
+import {
+  IconPlusCircle,
+  IconMinusCircle,
+  IconMore,
+} from '@arco-design/web-react/icon';
 import GoalEditor from '../../../components/GoalDetail/GoalEditor';
 import { openDrawer } from '@/layout/Drawer';
 import styles from './style.module.less';
+import clsx from 'clsx';
+import { handleEditNode } from '../helpers';
 
 interface CustomNodeProps {
   node?: ReactShape; // X6 React Shape 自动注入的 node 属性
+  onShowMenu?: (
+    nodeId: string,
+    nodeType: string,
+    position: { x: number; y: number },
+  ) => void;
   [key: string]: any; // 允许其他 props
 }
 
@@ -17,15 +28,24 @@ interface NodeData {
   type: ENodeType;
   hasChildren?: boolean;
   isCollapsed?: boolean;
+  isSelected?: boolean;
 }
+
+const prefixClassName = 'mind-map-node';
+
+const getClassName = (type?: string) => {
+  return styles[`${prefixClassName}${type || ''}`];
+};
 
 const MindMapNode: React.FC<CustomNodeProps> = ({
   node,
   isNodeCollapsed,
   toggleNodeCollapse,
   fetchGoalTree,
+  onShowMenu,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [currentNodeData, setCurrentNodeData] = useState<NodeData | null>(null);
 
   // 获取图形实例
   const graph = node?.model?.graph;
@@ -45,17 +65,41 @@ const MindMapNode: React.FC<CustomNodeProps> = ({
     );
   }
 
-  const nodeData = node.getData() as NodeData;
   const {
     id,
     label,
     type,
     hasChildren = false,
-  } = nodeData || { id: '', label: 'Unknown', type: 'topic' as const };
+    isSelected = false,
+  } = currentNodeData ||
+    (node?.getData() as NodeData) || {
+      id: '',
+      label: 'Unknown',
+      type: 'topic' as const,
+    };
 
   const updateCollapsedState = useCallback(() => {
     setIsCollapsed(isNodeCollapsed(id));
   }, [id, isNodeCollapsed]);
+
+  // 监听节点数据变化
+  useEffect(() => {
+    if (node) {
+      const updateNodeData = () => {
+        setCurrentNodeData(node.getData() as NodeData);
+      };
+
+      // 初始化节点数据
+      updateNodeData();
+
+      // 监听节点数据变化
+      node.on('change:data', updateNodeData);
+
+      return () => {
+        node.off('change:data', updateNodeData);
+      };
+    }
+  }, [node]);
 
   // 监听节点折叠状态变化
   useEffect(() => {
@@ -71,47 +115,6 @@ const MindMapNode: React.FC<CustomNodeProps> = ({
     }
   }, [graph, updateCollapsedState]);
 
-  // 根据节点类型获取样式
-  const getNodeStyle = () => {
-    switch (type) {
-      case ENodeType.topic:
-        return {
-          backgroundColor: '#E9F2FF',
-          border: '1.5px solid #4E86E4',
-          borderRadius: '8px',
-          padding: '12px 16px',
-          fontSize: '16px',
-          fontWeight: '500',
-          color: '#333333',
-          boxShadow: '0px 2px 3px rgba(0,0,0,0.1)',
-        };
-      case ENodeType.topicBranch:
-        return {
-          backgroundColor: '#F1F8FF',
-          border: '1.5px solid #69B1FF',
-          borderRadius: '6px',
-          padding: '10px 14px',
-          fontSize: '15px',
-          fontWeight: '400',
-          color: '#444444',
-          boxShadow: '0px 1.5px 2.5px rgba(0,0,0,0.08)',
-        };
-      case ENodeType.topicChild:
-        return {
-          backgroundColor: '#F9FCFF',
-          border: '1px solid #91D5FF',
-          borderRadius: '4px',
-          padding: '8px 12px',
-          fontSize: '14px',
-          fontWeight: '400',
-          color: '#555555',
-          boxShadow: '0px 1px 2px rgba(0,0,0,0.06)',
-        };
-      default:
-        return {};
-    }
-  };
-
   // 处理折叠/展开点击
   const onClickCollapsedButton = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -120,42 +123,30 @@ const MindMapNode: React.FC<CustomNodeProps> = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    // openDrawer({
-    //   title: '编辑目标',
-    //   width: 800,
-    //   content: (props) => {
-    //     return (
-    //       <GoalEditor
-    //         goalId={id}
-    //         onClose={props.onClose}
-    //         afterSubmit={async () => {
-    //           fetchGoalTree();
-    //         }}
-    //       />
-    //     );
-    //   },
-    // });
+    // 点击事件会被 X6 的 node:click 事件处理，这里不需要额外处理
   };
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
+  const handleDoubleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    openDrawer({
-      title: '编辑目标',
-      width: 800,
-      content: (props) => {
-        return (
-          <GoalEditor
-            goalId={id}
-            onClose={props.onClose}
-            afterSubmit={async () => {
-              fetchGoalTree();
-            }}
-          />
-        );
-      },
-    });
+    await handleEditNode(id);
+    await fetchGoalTree();
+  };
+
+  // 处理菜单按钮点击
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!onShowMenu || !nodeRef.current) return;
+
+    // 获取节点在页面中的位置
+    const rect = nodeRef.current.getBoundingClientRect();
+    const position = {
+      x: rect.right + 8, // 菜单显示在节点右侧
+      y: rect.top,
+    };
+
+    onShowMenu(id, type, position);
   };
 
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -169,17 +160,31 @@ const MindMapNode: React.FC<CustomNodeProps> = ({
   return (
     <div
       ref={nodeRef}
-      className={styles['mind-map-node']}
-      style={getNodeStyle()}
+      className={clsx(
+        getClassName(),
+        type === ENodeType.topic && getClassName(`-topic`),
+        type === ENodeType.topicBranch && getClassName(`-topic-branch`),
+        type === ENodeType.topicChild && getClassName(`-topic-child`),
+        isSelected && getClassName(`--selected`),
+      )}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
     >
-      <span className={styles['mind-map-node-label']}>{label}</span>
+      <span className={getClassName(`__label`)}>{label}</span>
+
+      {/* 菜单按钮 */}
+      <div
+        className={getClassName(`__menu-button`)}
+        onClick={handleMenuClick}
+        title="更多操作"
+      >
+        <IconMore style={{ fontSize: '14px' }} />
+      </div>
 
       {/* 折叠/展开指示器 */}
       {hasChildren && (
         <div
-          className={styles['mind-map-node-collapsed-button']}
+          className={getClassName(`__collapsed-button`)}
           style={{
             color: type === ENodeType.topic ? '#4E86E4' : '#69B1FF',
           }}

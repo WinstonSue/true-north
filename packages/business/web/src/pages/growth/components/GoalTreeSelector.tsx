@@ -37,7 +37,7 @@ export default function GoalTreeSelector(props: GoalTreeSelectorProps) {
 
   useEffect(() => {
     fetchGoalTree();
-  }, []);
+  }, [excludeId]);
 
   const fetchGoalTree = async () => {
     setLoading(true);

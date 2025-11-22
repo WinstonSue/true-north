@@ -1,5 +1,4 @@
 import { FlexibleContainer } from 'francis-component-react';
-import { GoalVo } from '@true-north/vo';
 import {
   GoalDetailProvider,
   GoalDetailContextProps,
@@ -9,7 +8,8 @@ import GoalForm from './GoalForm';
 import GoalChildren from './GoalChildren';
 import { Button, Spin } from '@arco-design/web-react';
 import TaskList from './TaskList';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import clsx from 'clsx';
 
 const { Shrink, Fixed } = FlexibleContainer;
 
@@ -47,24 +47,54 @@ function GoalEditorMain(props: { goalId: string }) {
     init();
   }, [refreshGoalDetail, goalId]);
 
+  const [activeTab, setActiveTab] = useState<'children' | 'taskList'>(
+    'children',
+  );
+  const tabs = [
+    {
+      label: '子目标',
+      value: 'children',
+    },
+    {
+      label: '任务列表',
+      value: 'taskList',
+    },
+  ] as const;
+
   if (loading) {
     return <Spin dot />;
   }
 
   return (
-    <FlexibleContainer>
+    <FlexibleContainer className="gap-2">
       <Fixed>
         <GoalForm />
       </Fixed>
+      <Fixed className="flex gap-2">
+        {tabs.map((item) => (
+          <div
+            key={item.value}
+            className={clsx(
+              'px-3 py-2',
+              'rounded-lg',
+              'font-[500]',
+              'cursor-pointer',
+              'hover:bg-gray-100',
+              activeTab === item.value
+                ? ['bg-gray-100', 'text-text-1']
+                : ['text-text-2'],
+            )}
+            onClick={() => {
+              setActiveTab(item.value);
+            }}
+          >
+            {item.label}
+          </div>
+        ))}
+      </Fixed>
       <Shrink>
-        <Shrink absolute>
-          <div className="h-1/2 overflow-hidden">
-            <GoalChildren />
-          </div>
-          <div className="h-1/2 overflow-hidden">
-            <TaskList />
-          </div>
-        </Shrink>
+        {activeTab === 'children' && <GoalChildren />}
+        {activeTab === 'taskList' && <TaskList />}
       </Shrink>
       <Fixed>
         <GoalEditorFooter />

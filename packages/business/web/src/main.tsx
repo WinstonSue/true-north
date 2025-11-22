@@ -40,6 +40,12 @@ dayjs.locale('zh-cn');
 
 const store = createStore(rootReducer);
 
+if (process.env.NODE_ENV === 'development') {
+  document.title = '知止 True North - Development';
+} else {
+  document.title = '知止 True North';
+}
+
 export default function LifeToolkitApp() {
   const [lang, setLang] = useStorage('arco-lang', 'en-US');
   const [theme, setTheme] = useStorage('arco-theme', 'light');
