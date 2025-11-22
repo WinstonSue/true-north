@@ -72,17 +72,11 @@ export class TaskDto extends IntersectionType(BaseModelDto, TaskWithoutRelations
   exportVo(): TaskVO.TaskVo {
     return {
       ...BaseMapper.dtoToVo(this),
-      name: this.name,
-      status: this.status,
-      startAt: this.startAt ? dayjs(this.startAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
-      endAt: this.endAt ? dayjs(this.endAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
-      doneAt: this.doneAt ? dayjs(this.doneAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
-      abandonedAt: this.abandonedAt ? dayjs(this.abandonedAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
+      ...this.exportWithoutRelationsVo(),
       children: this.children?.map((child) => child.exportVo()) || [],
       parent: this.parent?.exportVo(),
       goal: this.goal?.exportVo(),
       todoList: this.todoList?.map((todo) => todo.exportVo()),
-      tags: [],
     };
   }
 
@@ -100,6 +94,7 @@ export class TaskDto extends IntersectionType(BaseModelDto, TaskWithoutRelations
       importance: this.importance,
       urgency: this.urgency,
       tags: this.tags,
+      trackTimeIds: this.trackTimeIds,
     };
   }
 

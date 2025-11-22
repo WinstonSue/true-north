@@ -33,6 +33,7 @@
     "@true-north/tabs": "workspace:*",
     "@true-north/share-types": "workspace:*",
     "@true-north/web-service": "workspace:*",
+    "@true-north/common-web-utils": "workspace:*",
     "@loadable/component": "^5.13.2",
     "@nanostores/react": "^0.8.4",
     "@turf/turf": "^6.5.0",

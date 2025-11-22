@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Card, Button, Message, Spin, Space } from '@arco-design/web-react';
+import React, { useEffect } from 'react';
+import { Spin } from '@arco-design/web-react';
 import X6MindMap from './X6MindMap';
 import clsx from 'clsx';
 import { GoalMindMapContextProvider, useGoalMindMapContext } from './context';

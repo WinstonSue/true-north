@@ -6,15 +6,19 @@ import {
   exportUtils,
   MindMapData,
 } from '@true-north/components-mind/src/index';
-import {
-  Button,
-  Space,
-  Tooltip,
-  Message,
-  Switch,
-} from '@arco-design/web-react';
+import { Message } from '@arco-design/web-react';
 import MindMapNode from './MindMapNode';
+import MenuManager, { MenuManagerRef } from './NodeMenu/MenuManager';
+import { openDrawer } from '@/layout/Drawer';
+import GoalEditor from '../../components/GoalDetail/GoalEditor';
 import { useGoalMindMapContext } from './context';
+import {
+  handleAddChild,
+  handleAddSibling,
+  handleCopyNode,
+  handleDeleteNode,
+  handleEditNode,
+} from './helpers';
 
 interface X6MindMapProps {
   goalTree: GoalVo[];
@@ -32,13 +36,13 @@ const X6MindMap: React.FC<X6MindMapProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<any>(null);
   const initializedRef = useRef<boolean>(false);
+  const menuManagerRef = useRef<MenuManagerRef>(null);
 
   // 当goalTree变化时转换数据
   useEffect(() => {
     if (goalTree && goalTree.length > 0) {
       const converter = createGoalConverter();
       const data = converter.convert(goalTree);
-      console.log('Converted mind map data:', data); // 调试日志
       setMindMapData(data);
     } else {
       setMindMapData(null);
@@ -77,6 +81,17 @@ const X6MindMap: React.FC<X6MindMapProps> = ({
     }
   };
 
+  // 显示节点菜单
+  const handleShowMenu = (
+    nodeId: string,
+    nodeType: string,
+    position: { x: number; y: number },
+  ) => {
+    menuManagerRef.current?.showMenu(nodeId, nodeType, position);
+  };
+
+  // 菜单操作处理函数已移至 helpers.tsx
+
   return (
     <div
       ref={containerRef}
@@ -97,7 +112,13 @@ const X6MindMap: React.FC<X6MindMapProps> = ({
           showToolbar={showToolbar}
           onGraphReady={handleGraphInstance}
           MindMapNode={(props: any) => {
-            return <MindMapNode {...props} fetchGoalTree={fetchGoalTree} />;
+            return (
+              <MindMapNode
+                {...props}
+                fetchGoalTree={fetchGoalTree}
+                onShowMenu={handleShowMenu}
+              />
+            );
           }}
         />
       ) : (
@@ -105,6 +126,31 @@ const X6MindMap: React.FC<X6MindMapProps> = ({
           暂无目标数据
         </div>
       )}
+
+      {/* 节点菜单管理器 */}
+      <MenuManager
+        ref={menuManagerRef}
+        onEdit={async (nodeId: string) => {
+          await handleEditNode(nodeId);
+          fetchGoalTree();
+        }}
+        onDelete={async (nodeId: string) => {
+          await handleDeleteNode(nodeId);
+          fetchGoalTree();
+        }}
+        onAddChild={async (nodeId: string) => {
+          await handleAddChild(nodeId);
+          fetchGoalTree();
+        }}
+        onAddSibling={async (nodeId: string) => {
+          await handleAddSibling(nodeId);
+          fetchGoalTree();
+        }}
+        onCopy={async (nodeId: string) => {
+          await handleCopyNode(nodeId);
+          fetchGoalTree();
+        }}
+      />
     </div>
   );
 };

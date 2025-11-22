@@ -27,11 +27,6 @@ export class GoalController {
     return this.controller.find(id);
   }
 
-  @Get('/find-with-relations/:id')
-  async findWithRelations(@Param('id') id: string): Promise<GoalVO.GoalVo> {
-    return this.controller.findWithRelations(id);
-  }
-
   @Get('/list')
   async findByFilter(
     @Query() goalListFiltersVo?: GoalVO.GoalFilterVo

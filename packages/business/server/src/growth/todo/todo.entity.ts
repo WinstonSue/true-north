@@ -73,7 +73,7 @@ export class TodoWithoutRelations extends BaseEntity {
   @IsISO8601()
   planDate!: Date;
 
-  /** 来源 */
+  /** 关联类型 */
   @Column({
     type: 'varchar',
     length: 20,
@@ -81,6 +81,12 @@ export class TodoWithoutRelations extends BaseEntity {
   })
   @IsOptional()
   relatedType?: RelatedType;
+
+  /** 关联ID */
+  @Column('varchar', { nullable: true })
+  @IsString()
+  @IsOptional()
+  relatedId?: string;
 
   /** 任务ID */
   @Column('varchar', { nullable: true })

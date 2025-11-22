@@ -18,7 +18,6 @@ export default function GoalChildren() {
           'flex justify-between items-center',
         ])}
       >
-        子目标
         <CreateGoalPopover
           creatorProps={{
             initialFormData: {

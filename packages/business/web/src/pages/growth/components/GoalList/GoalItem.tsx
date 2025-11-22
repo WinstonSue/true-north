@@ -5,10 +5,11 @@ import { FlexibleContainer } from 'francis-component-react';
 import IconSelector from '../IconSelector';
 import { SiteIcon } from '@true-north/components-ui';
 import { GoalService } from '@true-north/web-service';
-import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
+import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 import { GoalVo } from '@true-north/vo';
 import clsx from 'clsx';
-import { GoalType, GoalStatus } from '@true-north/enum';
+import dayjs from 'dayjs';
+import { GoalStatus } from '@true-north/enum';
 
 const { Paragraph } = Typography;
 
@@ -19,7 +20,7 @@ export type GoalItemProps = {
     description?: GoalVo['description'];
     status?: GoalVo['status'];
     importance?: GoalVo['importance'];
-    urgency?: GoalVo['urgency'];
+    difficulty?: GoalVo['difficulty'];
     startAt?: GoalVo['startAt'];
     endAt?: GoalVo['endAt'];
     doneAt?: GoalVo['doneAt'];
@@ -49,7 +50,6 @@ function GoalItem(props: GoalItemProps) {
             className={clsx(['flex items-center justify-between', 'leading-8'])}
           >
             <span className="text-text-1">{goal.name}</span>
-
             <div className="h-8 flex items-center">
               <Popover
                 trigger="click"
@@ -58,7 +58,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.abandon(goal.id, );
+                        GoalService.abandon(goal.id);
                         props.refreshGoalList();
                       }}
                     >
@@ -67,7 +67,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.delete(goal.id, );
+                        GoalService.delete(goal.id);
                         props.refreshGoalList();
                       }}
                     >
@@ -111,14 +111,20 @@ function GoalItem(props: GoalItemProps) {
               />
             )}
 
-            {goal.urgency && (
+            {goal.difficulty && (
               <IconSelector
-                map={URGENCY_MAP}
+                map={DIFFICULTY_MAP}
                 iconName="urgency"
-                value={goal.urgency}
+                value={goal.difficulty}
                 readonly
               />
             )}
+            <span className="text-text-1">
+              {dayjs(goal.startAt).format('YYYY-MM-DD')}
+            </span>
+            <span className="text-text-1">
+              {dayjs(goal.endAt).format('YYYY-MM-DD')}
+            </span>
           </div>
         </FlexibleContainer.Shrink>
       </FlexibleContainer>

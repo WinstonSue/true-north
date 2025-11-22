@@ -1,8 +1,8 @@
-import { Table, Button, Modal, Card, Divider } from '@arco-design/web-react';
+import { Table, Button, Modal } from '@arco-design/web-react';
 import dayjs from 'dayjs';
 import { IMPORTANCE_MAP } from '../../constants';
 import { useGoalAllContext } from './context';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { GoalService } from '@true-north/web-service';
 import { GoalVo } from '@true-north/vo';
 import { ColumnProps } from '@arco-design/web-react/lib/Table/interface';
@@ -16,12 +16,6 @@ export default function GoalTable() {
   useEffect(() => {
     async function initData() {
       await getGoalPage();
-      goalList.forEach((item) => {
-        setSubGoalLoadingStatus((prev) => ({
-          ...prev,
-          [item.id]: 'unLoading',
-        }));
-      });
     }
     initData();
   }, []);
@@ -108,7 +102,7 @@ export default function GoalTable() {
                 content:
                   '删除后将无法恢复,如果目标下有子目标,将一并删除,是否继续?',
                 onOk: async () => {
-                  await GoalService.delete(record.id, );
+                  await GoalService.delete(record.id);
                   await getGoalPage();
                 },
               })
@@ -121,23 +115,6 @@ export default function GoalTable() {
     },
   ];
 
-  const [expandedData, setExpandedData] = useState<Record<string, GoalVo>>({});
-  const [subGoalLoadingStatus, setSubGoalLoadingStatus] = useState<
-    Record<string, 'unLoading' | 'loading' | 'loaded' | 'error'>
-  >({});
-  const onExpandTable = async (record: GoalVo, expanded: boolean) => {
-    if (!expanded) {
-      return;
-    }
-    setSubGoalLoadingStatus((prev) => ({ ...prev, [record.id]: 'loading' }));
-    const todoNode = await GoalService.find(record.id);
-    setExpandedData((prev) => ({
-      ...prev,
-      [record.id]: todoNode,
-    }));
-    setSubGoalLoadingStatus((prev) => ({ ...prev, [record.id]: 'loaded' }));
-  };
-
   return (
     <Table
       className="w-full"
@@ -145,26 +122,6 @@ export default function GoalTable() {
       data={goalList}
       pagination={false}
       rowKey="id"
-      onExpand={onExpandTable}
-      expandedRowRender={(record) => {
-        if (subGoalLoadingStatus[record.id] === 'unLoading') return true;
-        if (subGoalLoadingStatus[record.id] === 'loading') {
-          return (
-            <Card
-              loading={subGoalLoadingStatus[record.id] === 'loading'}
-            ></Card>
-          );
-        }
-        if (subGoalLoadingStatus[record.id] === 'loaded') {
-          return expandedData[record.id]?.children?.length ? (
-            <Card>
-              {expandedData[record.id]?.children
-                .map((item) => item.name)
-                .join(',')}
-            </Card>
-          ) : null;
-        }
-      }}
     />
   );
 }

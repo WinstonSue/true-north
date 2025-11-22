@@ -1,9 +1,10 @@
-import { createInjectState } from '@true-north/common-web-utils';
 import { useState } from 'react';
 import { GoalVo } from '@true-north/vo';
 import { GoalService } from '@true-north/web-service';
 import { Message } from '@arco-design/web-react';
 import { GoalType, GoalStatus } from '@true-north/enum';
+import { createInjectState } from '@true-north/common-web-utils';
+import { Modal } from '@arco-design/web-react';
 
 export const [GoalMindMapContextProvider, useGoalMindMapContext] =
   createInjectState<{
@@ -27,7 +28,6 @@ export const [GoalMindMapContextProvider, useGoalMindMapContext] =
           status: GoalStatus.TODO,
         });
         setGoalTree(data);
-        Message.success('目标数据加载成功');
       } catch (error) {
         console.error('获取目标数据失败:', error);
         Message.error('获取目标数据失败');

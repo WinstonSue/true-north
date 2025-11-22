@@ -1,7 +1,7 @@
 {
   "name": "true-north-desktop",
   "version": "1.0.0",
-  "description": "life toolkit",
+  "description": "知止",
   "type": "module",
   "main": "dist/main/index.js",
   "author": "francisxihe",
@@ -58,7 +58,7 @@
   },
   "build": {
     "appId": "com.lifetoolkit.app",
-    "productName": "life toolkit",
+    "productName": "知止",
     "electronVersion": "36.0.0",
     "files": [
       "dist/**/*"

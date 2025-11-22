@@ -11,19 +11,15 @@ import { useTaskDetailContext } from './context';
 import TrackTime from '../TrackTime';
 import { Select, Form } from '@arco-design/web-react';
 import { useComponentLoad } from '@/hooks/lifecycle';
+import GoalTreeSelector from '../GoalTreeSelector';
+
 const { Row, Col } = Grid;
 const RangePicker = DatePicker.RangePicker;
 const TextArea = Input.TextArea;
 
 export default function TaskForm() {
-  const {
-    loading,
-    goalList,
-    currentTask,
-    taskList,
-    taskFormData,
-    setTaskFormData,
-  } = useTaskDetailContext();
+  const { loading, currentTask, taskList, taskFormData, setTaskFormData } =
+    useTaskDetailContext();
 
   const [form] = Form.useForm();
 
@@ -64,11 +60,9 @@ export default function TaskForm() {
           </Item>
         ) : (
           <Item span={24} label="目标" name="goalId">
-            <Select
-              options={goalList.map((goal) => ({
-                label: goal.name,
-                value: goal.id,
-              }))}
+            <GoalTreeSelector
+              placeholder="请选择父级目标"
+              excludeId={currentTask?.goalId}
             />
           </Item>
         )}

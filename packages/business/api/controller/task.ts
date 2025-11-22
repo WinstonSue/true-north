@@ -2,9 +2,8 @@ import { request } from '@true-north/share-request';
 import { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
 
 export default class TaskController {
-
   static async create(createTaskVo: TaskVO.CreateTaskVo) {
-    return request<TaskVO.TaskVo>({ method: "post" })(`/task/create`, createTaskVo);
+    return request<TaskVO.TaskVo>({ method: 'post' })(`/task/create`, createTaskVo);
   }
 
   static async delete(id: string) {
@@ -20,7 +19,7 @@ export default class TaskController {
   }
 
   static async page(taskPageFilterVo?: TaskVO.TaskPageFilterVo) {
-    return request<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/page`, taskPageFilterVo);
+    return request<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>>({ method: 'get' })(`/task/page`, taskPageFilterVo);
   }
 
   static async taskWithRelations(id: string) {
@@ -36,6 +35,6 @@ export default class TaskController {
   }
 
   static async findByFilter(taskListFiltersVo?: TaskVO.TaskFilterVo) {
-    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/list`, taskListFiltersVo);
+    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: 'get' })(`/task/list`, taskListFiltersVo);
   }
 }

@@ -21,7 +21,6 @@ export default function TaskDetailTodoList() {
             'flex justify-between items-center',
           ])}
         >
-          任务列表
           <CreateTaskPopover
             creatorProps={{
               initialFormData: {

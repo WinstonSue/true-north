@@ -82,11 +82,30 @@ const InternalMindMapGraph: React.FC<MindMapGraphProps> = ({
       // 注册节点点击事件
       newGraph.on('node:click', ({ node }) => {
         const nodeId = node.id.toString();
+        
+        // 清除所有节点的选中状态
+        newGraph.getNodes().forEach(n => {
+          n.setData({ ...n.getData(), isSelected: false });
+        });
+        
+        // 设置当前节点为选中状态
+        node.setData({ ...node.getData(), isSelected: true });
+        
         setSelectedNodeId(nodeId);
 
         if (onNodeClick) {
           onNodeClick(nodeId);
         }
+      });
+
+      // 注册空白区域点击事件，取消选中
+      newGraph.on('blank:click', () => {
+        // 清除所有节点的选中状态
+        newGraph.getNodes().forEach(n => {
+          n.setData({ ...n.getData(), isSelected: false });
+        });
+        
+        setSelectedNodeId(null);
       });
 
       // 监听容器大小变化
@@ -206,13 +225,17 @@ const InternalMindMapGraph: React.FC<MindMapGraphProps> = ({
     try {
       // 保存当前的折叠状态
       const collapsedStates = new Map<string, boolean>();
-      graph.getNodes().forEach(node => {
+      const existingNodes = graph.getNodes();
+      existingNodes.forEach(node => {
         const nodeId = node.id.toString();
         const isCollapsed = node.getAttrByPath('collapsed') || false;
         if (isCollapsed) {
           collapsedStates.set(nodeId, true);
         }
       });
+
+      // 清空画布，避免渲染冲突
+      graph.clearCells();
 
       const result: HierarchyResult = Hierarchy.mindmap(mindMapData, {
         direction: mergedOptions.direction === 'V' ? 'V' : 'H',
@@ -252,6 +275,7 @@ const InternalMindMapGraph: React.FC<MindMapGraphProps> = ({
               type: data.type,
               hasChildren: children && children.length > 0,
               isCollapsed: collapsedStates.has(data.id),
+              isSelected: false, // 初始化选中状态为 false
             },
           });
 
