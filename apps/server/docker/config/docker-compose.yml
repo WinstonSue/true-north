@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  life-toolkit-server:
+  true-north-server:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: life-toolkit-server
+    container_name: true-north-server
     ports:
       - "3000:3000"
     env_file:

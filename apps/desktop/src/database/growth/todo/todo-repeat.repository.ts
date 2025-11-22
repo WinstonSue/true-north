@@ -1,6 +1,6 @@
 import { AppDataSource } from '../../database.config';
-import { TodoRepeatFilterDto, TodoRepeat } from '@life-toolkit/business-server';
-import { TodoRepeatRepository as _TodoRepeatRepository } from '@life-toolkit/business-server';
+import { TodoRepeatFilterDto, TodoRepeat } from '@true-north/business-server';
+import { TodoRepeatRepository as _TodoRepeatRepository } from '@true-north/business-server';
 import { BaseRepository } from '../../common/base';
 
 export class TodoRepeatRepository

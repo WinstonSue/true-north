@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'life-toolkit-server',
+  displayName: 'true-north-server',
   preset: 'ts-jest',
   testEnvironment: 'node',
   rootDir: '.',
@@ -20,7 +20,7 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@life-toolkit/vo$': '<rootDir>/../../packages/vo/src/index.ts',
+    '^@true-north/vo$': '<rootDir>/../../packages/vo/src/index.ts',
   },
   moduleFileExtensions: ['js', 'json', 'ts'],
   testTimeout: 30000,

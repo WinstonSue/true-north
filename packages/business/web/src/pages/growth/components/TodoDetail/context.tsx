@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, Dispatch, useRef, useCallback } from 'react';
-import { TodoFormData, TodoService } from '../../service';
+import { TodoFormData, TodoService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
-import { TodoVo, TodoWithoutRelationsVo } from '@life-toolkit/vo';
+import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
-import { TodoMapping } from '../../service';
-import { TodoStatus } from '@life-toolkit/enum';
-import { CreateTodoVo } from '@life-toolkit/vo';
+import { TodoMapping } from '@true-north/web-service';
+import { TodoStatus, RelatedType } from '@true-north/enum';
+import { CreateTodoVo } from '@true-north/vo';
 
 export type TodoDetailProviderProps = {
   children: React.ReactNode;
@@ -30,6 +30,7 @@ export type CurrentTodo = {
   description?: string;
   name: string;
   status: TodoStatus;
+  relatedType: RelatedType;
 };
 
 export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
@@ -58,7 +59,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
     id: string,
     _todo: TodoVo | TodoWithoutRelationsVo,
   ) => {
-    const todo = await TodoService.getTodoDetailWithRepeat(id, _todo);
+    const todo = await TodoService.find(_todo.relatedType, id);
     setCurrentTodo(todo);
     todoFormDataRef.current = TodoMapping.voToFormData(todo);
     setTodoFormData(todoFormDataRef.current);
@@ -93,15 +94,15 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
       };
     }
     try {
-      await TodoService.createTodo({
+      await TodoService.create({
         name: form.name,
         planDate: form.planDate,
-        planStartTime: form.planTimeRange?.[0] || undefined,
-        planEndTime: form.planTimeRange?.[1] || undefined,
         importance: form.importance,
         urgency: form.urgency,
         tags: form.tags,
         description: form.description,
+        planStartTime: form.planTimeRange?.[0] || undefined,
+        planEndTime: form.planTimeRange?.[1] || undefined,
         status: TodoStatus.TODO,
         repeatConfig,
       });
@@ -115,7 +116,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
 
   async function handleUpdate() {
     const data = TodoMapping.formDataToUpdateVo(todoFormDataRef.current);
-    await TodoService.updateWithRepeatTodo(currentTodo.id, data);
+    await TodoService.update(currentTodo.relatedType, currentTodo.id, data);
   }
 
   const onSubmit = async () => {

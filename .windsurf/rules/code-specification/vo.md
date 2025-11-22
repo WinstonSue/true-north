@@ -58,7 +58,7 @@ packages/vo/example/module/
 - **项目模型**: `[Module]ModelVo` (继承BaseModelVo)
 - **完整模型**: `[Module]Vo` (包含关联数据)
 - **表单VO**: `Create[Module]Vo`, `Update[Module]Vo`
-- **过滤VO**: `[Module]ListFiltersVo`, `[Module]PageFiltersVo`
+- **过滤VO**: `[Module]ListFiltersVo`, `[Module]PageFilterVo`
 - **结果VO**: `[Module]ListVo`, `[Module]ResponsePageVo`
 
 ## 🎯 标准VO类型定义
@@ -210,7 +210,7 @@ export type ModuleListFiltersVo = Partial<
 >;
 
 // 分页过滤VO
-export type ModulePageFiltersVo = ModuleListFiltersVo & {
+export type ModulePageFilterVo = ModuleListFiltersVo & {
   pageNum?: number;
   pageSize?: number;
 };
@@ -250,7 +250,7 @@ export type ModuleListFiltersVo = Partial<
 >;
 
 // 分页过滤VO
-export type ModulePageFiltersVo = ModuleListFiltersVo & {
+export type ModulePageFilterVo = ModuleListFiltersVo & {
   pageNum?: number;
   pageSize?: number;
 };
@@ -704,7 +704,7 @@ export type ModuleListFiltersVo = Partial<
   }
 >;
 
-export type ModulePageFiltersVo = ModuleListFiltersVo & {
+export type ModulePageFilterVo = ModuleListFiltersVo & {
   pageNum?: number;
   pageSize?: number;
 };

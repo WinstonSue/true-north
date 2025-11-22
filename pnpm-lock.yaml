@@ -12,7 +12,7 @@ importers:
 
   .:
     devDependencies:
-      '@life-toolkit/vo':
+      '@true-north/vo':
         specifier: workspace:*
         version: link:packages/business/vo
       '@types/jest':
@@ -66,45 +66,30 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@life-toolkit/business-server':
+      '@true-north/business-server':
         specifier: workspace:*
         version: link:../../packages/business/server
-      '@life-toolkit/business-web':
+      '@true-north/business-web':
         specifier: workspace:*
         version: link:../../packages/business/web
-      '@life-toolkit/common-web-utils':
+      '@true-north/common-web-utils':
         specifier: workspace:*
         version: link:../../packages/common-web/utils
-      '@life-toolkit/enum':
+      '@true-north/enum':
         specifier: workspace:*
         version: link:../../packages/business/enum
-      '@life-toolkit/share-types':
+      '@true-north/share-types':
         specifier: workspace:*
         version: link:../../packages/share/types
-      balanced-match:
-        specifier: ^1.0.2
-        version: 1.0.2
-      brace-expansion:
-        specifier: ^1.1.11
-        version: 1.1.12
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
       class-validator:
         specifier: ^0.14.0
         version: 0.14.2
-      concat-map:
-        specifier: ^0.0.1
-        version: 0.0.1
-      define-data-property:
-        specifier: ^1.1.4
-        version: 1.1.4
       electron-ipc-restful:
         specifier: 0.0.1
         version: 0.0.1(electron@36.0.0)
-      es-errors:
-        specifier: ^1.3.0
-        version: 1.3.0
       francis-helper-repeat:
         specifier: 0.0.6
         version: 0.0.6
@@ -114,51 +99,9 @@ importers:
       francis-types-repeat:
         specifier: 0.0.1
         version: 0.0.1
-      fs.realpath:
-        specifier: ^1.0.0
-        version: 1.0.0
-      function-bind:
-        specifier: ^1.1.2
-        version: 1.1.2
-      get-intrinsic:
-        specifier: ^1.2.4
-        version: 1.3.0
-      glob:
-        specifier: ^7.2.3
-        version: 7.2.3
-      gopd:
-        specifier: ^1.0.1
-        version: 1.2.0
-      has-property-descriptors:
-        specifier: ^1.0.2
-        version: 1.0.2
-      has-proto:
-        specifier: ^1.0.3
-        version: 1.2.0
-      has-symbols:
-        specifier: ^1.0.3
-        version: 1.1.0
-      inflight:
-        specifier: ^1.0.6
-        version: 1.0.6
-      inherits:
-        specifier: ^2.0.4
-        version: 2.0.4
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
-      minimatch:
-        specifier: ^3.1.2
-        version: 3.1.2
-      once:
-        specifier: ^1.4.0
-        version: 1.4.0
-      path-is-absolute:
-        specifier: ^1.0.1
-        version: 1.0.1
-      path-scurry:
-        specifier: ^1.10.1
-        version: 1.11.1
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -168,27 +111,9 @@ importers:
       reflect-metadata:
         specifier: ^0.1.13
         version: 0.1.14
-      safe-buffer:
-        specifier: ^5.2.1
-        version: 5.2.1
       sqlite3:
         specifier: ^5.1.6
         version: 5.1.7
-      to-buffer:
-        specifier: ^1.1.1
-        version: 1.2.1
-      tslib:
-        specifier: ^2.6.2
-        version: 2.8.1
-      typed-array-buffer:
-        specifier: ^1.0.3
-        version: 1.0.3
-      typed-array-byte-length:
-        specifier: ^1.0.1
-        version: 1.0.3
-      typed-array-byte-offset:
-        specifier: ^1.0.2
-        version: 1.0.4
       typeorm:
         specifier: ^0.3.17
         version: 0.3.26(mysql2@3.15.0)(reflect-metadata@0.1.14)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.13.5)(@types/node@22.13.0)(typescript@5.9.2))
@@ -198,12 +123,6 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
-      which-typed-array:
-        specifier: ^1.1.15
-        version: 1.1.19
-      wrappy:
-        specifier: ^1.0.2
-        version: 1.0.2
     devDependencies:
       '@arco-plugins/vite-plugin-svgr':
         specifier: ^0.7.2
@@ -262,9 +181,6 @@ importers:
 
   apps/server:
     dependencies:
-      '@life-toolkit/business-server':
-        specifier: workspace:*
-        version: link:../../packages/business/server
       '@nestjs/common':
         specifier: ^10.0.0
         version: 10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2)
@@ -289,6 +205,9 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.1
         version: 10.0.2(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/platform-express@10.4.20)(encoding@0.1.13)(reflect-metadata@0.1.14)(rxjs@7.8.2))(reflect-metadata@0.1.14)(rxjs@7.8.2)(typeorm@0.3.26(mysql2@3.15.0)(reflect-metadata@0.1.14)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.13.5)(@types/node@22.13.0)(typescript@5.7.2)))
+      '@true-north/business-server':
+        specifier: workspace:*
+        version: link:../../packages/business/server
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1(encoding@0.1.13)
@@ -368,7 +287,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@life-toolkit/business-web':
+      '@true-north/business-web':
         specifier: workspace:*
         version: link:../../packages/business/web
       react:
@@ -438,12 +357,18 @@ importers:
 
   packages/business/api:
     dependencies:
-      '@life-toolkit/share-request':
+      '@true-north/enum':
+        specifier: workspace:*
+        version: link:../enum
+      '@true-north/share-request':
         specifier: workspace:*
         version: link:../../share-web/request
-      '@life-toolkit/share-types':
+      '@true-north/share-types':
         specifier: workspace:*
         version: link:../../share/types
+      '@true-north/vo':
+        specifier: workspace:*
+        version: link:../vo
       axios:
         specifier: ^0.24.0
         version: 0.24.0
@@ -459,9 +384,12 @@ importers:
         specifier: ^0.3.20
         version: 0.3.26(mysql2@3.15.0)(reflect-metadata@0.1.14)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.13.5)(@types/node@22.13.0)(typescript@5.9.2))
     devDependencies:
-      '@life-toolkit/enum':
+      '@true-north/enum':
         specifier: workspace:*
         version: link:../enum
+      '@true-north/vo':
+        specifier: workspace:*
+        version: link:../vo
       francis-helper-repeat:
         specifier: 0.0.6
         version: 0.0.6
@@ -480,7 +408,7 @@ importers:
 
   packages/business/vo:
     dependencies:
-      '@life-toolkit/enum':
+      '@true-north/enum':
         specifier: workspace:*
         version: link:../enum
       francis-helper-repeat:
@@ -498,30 +426,33 @@ importers:
       '@arco-themes/react-francis':
         specifier: ^0.0.1
         version: 0.0.1(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
-      '@life-toolkit/api':
-        specifier: workspace:*
-        version: link:../api
-      '@life-toolkit/components-mind':
-        specifier: workspace:*
-        version: link:../../components/mind
-      '@life-toolkit/components-ui':
-        specifier: workspace:*
-        version: link:../../components/ui
-      '@life-toolkit/enum':
-        specifier: workspace:*
-        version: link:../enum
-      '@life-toolkit/share-types':
-        specifier: workspace:*
-        version: link:../../share/types
-      '@life-toolkit/tabs':
-        specifier: workspace:*
-        version: link:../../components/tabs
       '@loadable/component':
         specifier: ^5.13.2
         version: 5.16.7(react@18.3.1)
       '@nanostores/react':
         specifier: ^0.8.4
         version: 0.8.4(nanostores@0.11.4)(react@18.3.1)
+      '@true-north/api':
+        specifier: workspace:*
+        version: link:../api
+      '@true-north/components-mind':
+        specifier: workspace:*
+        version: link:../../components/mind
+      '@true-north/components-ui':
+        specifier: workspace:*
+        version: link:../../components/ui
+      '@true-north/enum':
+        specifier: workspace:*
+        version: link:../enum
+      '@true-north/share-types':
+        specifier: workspace:*
+        version: link:../../share/types
+      '@true-north/tabs':
+        specifier: workspace:*
+        version: link:../../components/tabs
+      '@true-north/web-service':
+        specifier: workspace:*
+        version: link:../web-service
       '@turf/turf':
         specifier: ^6.5.0
         version: 6.5.0
@@ -671,6 +602,21 @@ importers:
         specifier: ^3.2.2
         version: 3.2.2(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
 
+  packages/business/web-service:
+    dependencies:
+      '@true-north/api':
+        specifier: workspace:*
+        version: link:../api
+      '@true-north/enum':
+        specifier: workspace:*
+        version: link:../enum
+      '@true-north/share-types':
+        specifier: workspace:*
+        version: link:../../share/types
+      '@true-north/vo':
+        specifier: workspace:*
+        version: link:../vo
+
   packages/common-web/utils:
     dependencies:
       react:
@@ -706,7 +652,7 @@ importers:
       '@arco-design/web-react':
         specifier: ^2.66.0
         version: 2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@life-toolkit/common-web-utils':
+      '@true-north/common-web-utils':
         specifier: workspace:*
         version: link:../../common-web/utils
       react:
@@ -765,18 +711,57 @@ importers:
 
   packages/dev-tools:
     dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.54.0
+        version: 2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/express':
+        specifier: ^4.17.0
+        version: 4.17.23
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.3.24
+      '@types/react-dom':
+        specifier: ^18.2.0
+        version: 18.3.7(@types/react@18.3.24)
+      '@vitejs/plugin-react':
+        specifier: ^4.2.0
+        version: 4.7.0(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
       chokidar:
         specifier: ^3.6.0
         version: 3.6.0
+      commander:
+        specifier: ^11.0.0
+        version: 11.1.0
+      concurrently:
+        specifier: ^8.2.0
+        version: 8.2.2
+      express:
+        specifier: ^4.18.0
+        version: 4.21.2
       fast-glob:
         specifier: ^3.3.2
         version: 3.3.3
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
       ts-morph:
         specifier: ^26.0.0
         version: 26.0.0
       tsx:
         specifier: ^4.16.2
         version: 4.20.5
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.2
+      vite:
+        specifier: 5.4.15
+        version: 5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0)
 
   packages/share-web/helpers:
     dependencies:
@@ -796,7 +781,7 @@ importers:
 
   packages/share-web/request:
     dependencies:
-      '@life-toolkit/share-types':
+      '@true-north/share-types':
         specifier: workspace:*
         version: link:../../share/types
       axios:
@@ -4591,6 +4576,10 @@ packages:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
 
+  commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
+
   commander@14.0.1:
     resolution: {integrity: sha512-2JkV3gUZUVrbNA+1sjBOYLsMZ5cEEl8GTFP2a4AVz5hvasAMCQ1D2l2le/cX+pV4N6ZU17zjUahLpIXRrnWL8A==}
     engines: {node: '>=20'}
@@ -4640,6 +4629,11 @@ packages:
 
   concaveman@2.0.0:
     resolution: {integrity: sha512-3a9C//4G44/boNehBPZMRh8XxrwBvTXlhENUim+GMm207WoDie/Vq89U5lkhLn3kKA+vxwmwfdQPWIRwjQWoLA==}
+
+  concurrently@8.2.2:
+    resolution: {integrity: sha512-1dP4gpXFhei8IOtlXRE/T/4H88ElHgTiUzh71YUmtjTEHMSRS2Z/fgOxHSxxusGHogsRfxNq1vyAwxSC+EVyDg==}
+    engines: {node: ^14.13.0 || >=16.0.0}
+    hasBin: true
 
   config-file-ts@0.2.8-rc1:
     resolution: {integrity: sha512-GtNECbVI82bT4RiDIzBSVuTKoSHufnU7Ce7/42bkWZJZFLjmDF2WBpVsvRkhKCfKBnTBb3qZrBwPpFBU/Myvhg==}
@@ -4875,6 +4869,10 @@ packages:
   data-view-byte-offset@1.0.1:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
+
+  date-fns@2.30.0:
+    resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
+    engines: {node: '>=0.11'}
 
   date-fns@3.6.0:
     resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
@@ -8290,6 +8288,10 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
+  shell-quote@1.8.3:
+    resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
+    engines: {node: '>= 0.4'}
+
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
     engines: {node: '>= 0.4'}
@@ -8407,6 +8409,9 @@ packages:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
     deprecated: The work that was done in this beta branch won't be included in future versions
+
+  spawn-command@0.0.2:
+    resolution: {integrity: sha512-zC8zGoGkmc8J9ndvml8Xksr1Amk9qBujgbF0JAIWO7kXr43w0h/0GJNM/Vustixu+YE8N/MTrQ7N31FvHUACxQ==}
 
   spdx-correct@3.2.0:
     resolution: {integrity: sha512-kN9dJbvnySHULIluDHy32WHRUu3Og7B9sbY7tsFLctQkIqnMh3hErYgdMjTYuqmcXX+lK5T1lnUt3G7zNswmZA==}
@@ -8893,7 +8898,7 @@ packages:
       '@swc/core': '>=1.2.50'
       '@swc/wasm': '>=1.2.50'
       '@types/node': 22.13.0
-      typescript: '>=2.7'
+      typescript: 4.6.4
     peerDependenciesMeta:
       '@swc/core':
         optional: true
@@ -14344,6 +14349,8 @@ snapshots:
     dependencies:
       delayed-stream: 1.0.0
 
+  commander@11.1.0: {}
+
   commander@14.0.1: {}
 
   commander@2.20.3: {}
@@ -14388,6 +14395,18 @@ snapshots:
       rbush: 4.0.1
       robust-predicates: 3.0.2
       tinyqueue: 3.0.0
+
+  concurrently@8.2.2:
+    dependencies:
+      chalk: 4.1.2
+      date-fns: 2.30.0
+      lodash: 4.17.21
+      rxjs: 7.8.2
+      shell-quote: 1.8.3
+      spawn-command: 0.0.2
+      supports-color: 8.1.1
+      tree-kill: 1.2.2
+      yargs: 17.7.2
 
   config-file-ts@0.2.8-rc1:
     dependencies:
@@ -14639,6 +14658,10 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-data-view: 1.0.2
+
+  date-fns@2.30.0:
+    dependencies:
+      '@babel/runtime': 7.28.4
 
   date-fns@3.6.0: {}
 
@@ -18776,6 +18799,8 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
+  shell-quote@1.8.3: {}
+
   side-channel-list@1.0.0:
     dependencies:
       es-errors: 1.3.0
@@ -18904,6 +18929,8 @@ snapshots:
   source-map@0.8.0-beta.0:
     dependencies:
       whatwg-url: 7.1.0
+
+  spawn-command@0.0.2: {}
 
   spdx-correct@3.2.0:
     dependencies:

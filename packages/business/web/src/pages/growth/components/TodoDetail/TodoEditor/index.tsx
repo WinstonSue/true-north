@@ -1,5 +1,5 @@
 import { FlexibleContainer } from 'francis-component-react';
-import { TodoVo } from '@life-toolkit/vo';
+import { TodoVo } from '@true-north/vo';
 import { TodoDetailProvider, useTodoDetailContext } from '../context';
 import TodoEditorMain from './TodoEditorMain';
 import TodoEditorHeader from './TodoEditorHeader';

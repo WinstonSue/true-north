@@ -12,7 +12,6 @@ export type CreateTodoVo = Pick<
   | 'importance'
   | 'urgency'
   | 'tags'
-  | 'source'
   | 'repeatConfig'
   | 'taskId'
   | 'repeatId'

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { BaseEntity } from '@business/common';
-import { TaskStatus } from '@life-toolkit/enum';
+import { TaskStatus } from '@true-north/enum';
 import { Goal } from '../goal/goal.entity';
 import { Todo } from '../todo/todo.entity';
 import { Entity, Column, TreeChildren, TreeParent, Tree, ManyToOne, OneToMany } from 'typeorm';

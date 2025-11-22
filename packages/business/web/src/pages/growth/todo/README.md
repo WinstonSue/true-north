@@ -183,8 +183,8 @@ function MyComponent() {
 
 ### 内部依赖
 
-- `@life-toolkit/vo`: 数据模型定义
-- `@life-toolkit/tabs`: 自定义标签组件
+- `@true-north/vo`: 数据模型定义
+- `@true-north/tabs`: 自定义标签组件
 - `../../components`: 共享组件
 - `../../service`: 数据服务层
 

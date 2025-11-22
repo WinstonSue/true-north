@@ -1,6 +1,6 @@
 import { HabitRepository } from './habit.repository';
 import { TodoRepository } from '../todo/todo.repository';
-import { HabitService as _HabitService } from '@life-toolkit/business-server';
+import { HabitService as _HabitService } from '@true-north/business-server';
 
 export class HabitService extends _HabitService {
   constructor() {

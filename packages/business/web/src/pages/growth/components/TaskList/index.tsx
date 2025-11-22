@@ -1,6 +1,6 @@
 'use client';
 
-import { TaskWithoutRelationsVo } from '@life-toolkit/vo';
+import { TaskWithoutRelationsVo } from '@true-north/vo';
 import TriggerStatusCheckbox from './TriggerStatusCheckbox';
 import TaskItem from './TaskItem';
 
@@ -20,7 +20,6 @@ function TaskList(props: {
           TriggerCheckbox={
             <TriggerStatusCheckbox
               todo={task}
-              type="todo"
               onChange={props.refreshTaskList}
             />
           }

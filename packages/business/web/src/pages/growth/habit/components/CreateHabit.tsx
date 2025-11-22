@@ -12,9 +12,9 @@ import {
   Divider,
   Typography,
 } from '@arco-design/web-react';
-import { HabitController } from '@life-toolkit/api';
-import { CreateHabitVo, GoalVo } from '@life-toolkit/vo';
-import { Difficulty } from '@life-toolkit/enum';
+import { HabitController } from '@true-north/api';
+import { CreateHabitVo, GoalVo } from '@true-north/vo';
+import { Difficulty } from '@true-north/enum';
 import dayjs from 'dayjs';
 import { DIFFICULTY_MAP, IMPORTANCE_MAP } from '../../constants';
 

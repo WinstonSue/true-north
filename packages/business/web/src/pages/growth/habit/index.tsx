@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { HabitContext } from './context';
-import { HabitVo } from '@life-toolkit/vo';
+import { HabitVo } from '@true-north/vo';
 
 const HabitPage: React.FC = () => {
   const [selectedHabit, setSelectedHabit] = React.useState<HabitVo | null>(

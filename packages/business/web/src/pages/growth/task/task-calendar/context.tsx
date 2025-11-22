@@ -1,8 +1,8 @@
 import { createInjectState } from '@/utils/createInjectState';
 import { useEffect, useState } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
-import { TaskService } from '../../service';
-import { TaskVo } from '@life-toolkit/vo';
+import { TaskService } from '@true-north/web-service';
+import { TaskVo } from '@true-north/vo';
 
 export const [CalendarProvider, useCalendarContext] = createInjectState<{
   ContextType: {
@@ -43,7 +43,7 @@ export const [CalendarProvider, useCalendarContext] = createInjectState<{
   }
 
   const getTaskList = async () => {
-    const { list } = await TaskService.getTaskList();
+    const { list } = await TaskService.findByFilter();
     setTaskList(list);
   };
 

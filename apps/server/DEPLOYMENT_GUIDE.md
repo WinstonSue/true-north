@@ -85,14 +85,14 @@ make prod-deploy        # 部署到远程
 make prod-save
 
 # 2. 手动上传文件
-scp life-toolkit-server-production.tar root@112.124.21.126:/root/project/life-toolkit-server/
-scp .env.production.local root@112.124.21.126:/root/project/life-toolkit-server/
+scp true-north-server-production.tar root@112.124.21.126:/root/project/true-north-server/
+scp .env.production.local root@112.124.21.126:/root/project/true-north-server/
 
 # 3. 在远程服务器执行
 ssh root@112.124.21.126
-cd /root/project/life-toolkit-server
-docker load -i life-toolkit-server-production.tar
-docker run -d --name life-toolkit-server-prod -p 3000:3000 --env-file .env.production.local --restart unless-stopped life-toolkit-server:production
+cd /root/project/true-north-server
+docker load -i true-north-server-production.tar
+docker run -d --name true-north-server-prod -p 3000:3000 --env-file .env.production.local --restart unless-stopped true-north-server:production
 ```
 
 ## 🛠️ 远程服务器管理
@@ -104,7 +104,7 @@ docker run -d --name life-toolkit-server-prod -p 3000:3000 --env-file .env.produ
 make prod-remote-status
 
 # 等价命令
-ssh root@112.124.21.126 "docker ps --filter 'name=life-toolkit-server-prod'"
+ssh root@112.124.21.126 "docker ps --filter 'name=true-north-server-prod'"
 ```
 
 ### 查看日志
@@ -114,7 +114,7 @@ ssh root@112.124.21.126 "docker ps --filter 'name=life-toolkit-server-prod'"
 make prod-remote-logs
 
 # 等价命令
-ssh root@112.124.21.126 "docker logs -f life-toolkit-server-prod"
+ssh root@112.124.21.126 "docker logs -f true-north-server-prod"
 ```
 
 ### 停止服务
@@ -124,7 +124,7 @@ ssh root@112.124.21.126 "docker logs -f life-toolkit-server-prod"
 make prod-remote-stop
 
 # 等价命令
-ssh root@112.124.21.126 "docker stop life-toolkit-server-prod"
+ssh root@112.124.21.126 "docker stop true-north-server-prod"
 ```
 
 ### 重新部署
@@ -164,10 +164,10 @@ ssh root@112.124.21.126 "df -h"
 
 ```bash
 # 查看容器日志
-ssh root@112.124.21.126 "docker logs life-toolkit-server-prod"
+ssh root@112.124.21.126 "docker logs true-north-server-prod"
 
 # 检查环境变量配置
-ssh root@112.124.21.126 "cat /root/project/life-toolkit-server/.env.production.local"
+ssh root@112.124.21.126 "cat /root/project/true-north-server/.env.production.local"
 ```
 
 **4. 数据库连接失败**
@@ -184,9 +184,9 @@ make clean-image
 
 # 清理远程容器（如果需要完全重置）
 ssh root@112.124.21.126 "
-  docker stop life-toolkit-server-prod 2>/dev/null || true
-  docker rm life-toolkit-server-prod 2>/dev/null || true
-  docker rmi life-toolkit-server:production 2>/dev/null || true
+  docker stop true-north-server-prod 2>/dev/null || true
+  docker rm true-north-server-prod 2>/dev/null || true
+  docker rmi true-north-server:production 2>/dev/null || true
 "
 ```
 

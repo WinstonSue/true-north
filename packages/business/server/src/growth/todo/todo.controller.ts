@@ -1,4 +1,4 @@
-import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
+import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
 import {
   TodoFilterDto,
@@ -10,7 +10,7 @@ import {
 } from './dto';
 import { TodoService } from './todo.service';
 import { TodoRepeatService } from './todo-repeat.service';
-import { TodoSource } from '@life-toolkit/enum';
+import { RelatedType } from '@true-north/enum';
 
 @Controller('/todo')
 export class TodoController {
@@ -18,53 +18,6 @@ export class TodoController {
     private readonly todoService: TodoService,
     private readonly todoRepeatService: TodoRepeatService
   ) {}
-
-  @Post('/create', { description: '创建待办' })
-  async create(@Body() createTodoVo: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
-    if (createTodoVo.repeatConfig) {
-      const createTodoRepeatDto = new CreateTodoRepeatDto();
-      createTodoRepeatDto.importCreateVo({
-        ...createTodoVo,
-        repeatConfig: createTodoVo.repeatConfig,
-      });
-      const todoRepeatDto = await this.todoRepeatService.create(createTodoRepeatDto);
-      return todoRepeatDto.exportVo();
-    }
-    const createTodoDto = new CreateTodoDto();
-    createTodoDto.importCreateVo(createTodoVo);
-    const todoDto = await this.todoService.create(createTodoDto);
-    return todoDto.exportVo();
-  }
-
-  @Delete('/delete/:id', { description: '删除待办' })
-  async delete(@Param('id') id: string): Promise<boolean> {
-    return await this.todoService.delete(id);
-  }
-
-  @Put('/update/:id', { description: '更新待办' })
-  async update(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    const updateDto = new UpdateTodoDto();
-    updateDto.importUpdateVo(updateVo);
-    updateDto.id = id;
-    const dto = await this.todoService.update(updateDto);
-    return dto.exportVo();
-  }
-
-  @Get('/find/:id', { description: '根据ID查询待办详情' })
-  async find(@Param('id') id: string): Promise<TodoVO.TodoVo> {
-    const dto = await this.todoService.find(id);
-    return dto.exportVo();
-  }
-
-  @Get('/find-by-filter', { description: '列表查询待办' })
-  async findByFilter(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
-    const filter = new TodoFilterDto();
-    if (query) filter.importListVo(query);
-    const list = await this.todoService.findByFilter(filter);
-    return {
-      list: list.map((todo) => todo.exportVo()),
-    };
-  }
 
   @Get('/page', { description: '分页查询待办' })
   async page(@Query() query?: TodoVO.TodoPageFilterVo): Promise<ResponsePageVo<TodoVO.TodoWithoutRelationsVo>> {
@@ -79,59 +32,111 @@ export class TodoController {
     };
   }
 
-  @Put('/update-with-repeat/:id', { description: '更新待办' })
-  async updateWithRepeat(@Param('id') id: string, @Body() updateVo: TodoVO.UpdateTodoVo): Promise<TodoVO.TodoVo> {
-    if (updateVo.source === TodoSource.IS_REPEAT) {
+  @Post('/create', { description: '创建待办' })
+  async create(@Body() body: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
+    try {
+      if (body.repeatConfig) {
+        const createTodoRepeatDto = new CreateTodoRepeatDto();
+        createTodoRepeatDto.importCreateVo({
+          ...body,
+          repeatConfig: body.repeatConfig,
+        });
+        const todoRepeatDto = await this.todoRepeatService.create(createTodoRepeatDto);
+        return todoRepeatDto.exportVo();
+      }
+      const createTodoDto = new CreateTodoDto();
+      createTodoDto.importCreateVo(body);
+      const todoDto = await this.todoService.create(createTodoDto);
+      return todoDto.exportVo();
+    } catch (error) {
+      console.error('创建待办失败:', error);
+      throw error;
+    }
+  }
+
+  @Delete('/delete/:relatedType/:id', { description: '删除待办' })
+  async delete(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    if (relatedType === RelatedType.IS_REPEAT) {
+      return await this.todoRepeatService.delete(id);
+    }
+    return await this.todoService.delete(id);
+  }
+
+  @Put('/update/:relatedType/:id', { description: '更新待办' })
+  async update(
+    @Param('relatedType') relatedType: RelatedType,
+    @Param('id') id: string,
+    @Body() body: TodoVO.UpdateTodoVo
+  ): Promise<TodoVO.TodoVo> {
+    if (relatedType === RelatedType.IS_REPEAT) {
       const updateTodoRepeatDto = new UpdateTodoRepeatDto();
       updateTodoRepeatDto.importUpdateVo({
-        ...updateVo,
-        repeatConfig: updateVo.repeatConfig,
+        ...body,
+        repeatConfig: body.repeatConfig,
       });
       updateTodoRepeatDto.id = id;
       const dto = await this.todoRepeatService.update(updateTodoRepeatDto);
       return dto.exportVo();
     }
     const updateDto = new UpdateTodoDto();
-    updateDto.importUpdateVo(updateVo);
+    updateDto.importUpdateVo(body);
     updateDto.id = id;
     const dto = await this.todoService.update(updateDto);
     return dto.exportVo();
   }
 
-  @Put('/done-with-repeat/batch', { description: '批量完成待办' })
-  async doneWithRepeatBatch(@Body() body: TodoVO.TodoFilterVo): Promise<any> {
-    const filter = new TodoFilterDto();
-    filter.importListVo(body);
-    return await this.todoService.doneWithRepeatBatch(filter);
+  @Put('/done/:relatedType/:id', { description: '完成待办' })
+  async done(
+    @Param('relatedType') relatedType: RelatedType,
+    @Param('id') id: string,
+    @Body()
+    body?: {
+      doneAt?: string;
+    }
+  ): Promise<any> {
+    return await this.todoService.done(relatedType, id, body);
   }
 
-  @Put('/abandon-with-repeat/:id', { description: '废弃待办' })
-  async abandonWithRepeat(@Param('id') id: string): Promise<boolean> {
-    return await this.todoService.abandonWithRepeat(id);
+  @Put('/abandon/:relatedType/:id', { description: '废弃待办' })
+  async abandon(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    if (relatedType === RelatedType.IS_REPEAT) {
+      return await this.todoRepeatService.abandon(id);
+    }
+    return await this.todoService.abandon(id);
   }
 
-  @Put('/restore-with-repeat/:id', { description: '恢复待办' })
-  async restoreWithRepeat(@Param('id') id: string): Promise<boolean> {
-    return await this.todoService.restoreWithRepeat(id);
+  @Put('/restore/:relatedType/:id', { description: '恢复待办' })
+  async restore(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    if (relatedType === RelatedType.IS_REPEAT) {
+      return await this.todoRepeatService.restore(id);
+    }
+    return await this.todoService.restore(id);
   }
 
-  @Get('/list-mixed-repeat', { description: '列表查询待办及其重复信息' })
-  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
-    const filter = new TodoFilterDto();
-    if (query) filter.importListVo(query);
-    const list = await this.todoService.listMixRepeat(filter);
+  @Get('/list', { description: '列表查询待办及其重复信息' })
+  async list(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
+    const todoQueryDto = new TodoFilterDto();
+    if (query) todoQueryDto.importListVo(query);
+    const list = await this.todoService.list(todoQueryDto);
 
     return {
       list: list.map((todo) => todo.exportVo()),
     };
   }
 
-  @Get('/find-mix-repeat/:id', { description: '查询待办及其重复信息' })
-  async findMixRepeat(@Param('id') id: string, @Query() query?: { source?: string }): Promise<TodoVO.TodoVo> {
-    const source = query?.source;
-    if (source === TodoSource.IS_REPEAT) {
+  @Get('/find/:relatedType/:id', { description: '查询待办及其重复信息' })
+  async find(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
+    if (relatedType === RelatedType.IS_REPEAT) {
       return (await this.todoRepeatService.findWithRelations(id)).exportVo();
     }
     return (await this.todoService.findWithRelations(id)).exportVo();
+  }
+
+
+  @Put('/done/batch', { description: '批量完成待办' })
+  doneBatch(@Body() body: TodoVO.TodoFilterVo): Promise<any> {
+    const todoFilterDto = new TodoFilterDto();
+    if (body) todoFilterDto.importListVo(body);
+    return this.todoService.doneBatch(todoFilterDto);
   }
 }

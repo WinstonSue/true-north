@@ -1,69 +1,63 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron-ipc-restful';
-import type { Todo as TodoVO } from '@life-toolkit/vo';
-import { TodoController as _TodoController } from '@life-toolkit/business-server';
+import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
+import { TodoController as _TodoController } from '@true-north/business-server';
 import { todoService, todoRepeatService } from './todo.service';
+import { RelatedType } from '@true-north/enum';
 
 @Controller('/todo')
 export class TodoController {
-  private readonly controller = new _TodoController(todoService, todoRepeatService);
+  private readonly controller: any = new _TodoController(todoService, todoRepeatService);
 
   @Post('/create')
-  async create(@Body() body: TodoVO.CreateTodoVo) {
+  async create(@Body() body: TodoVO.CreateTodoVo): Promise<TodoVO.TodoVo> {
     return this.controller.create(body);
   }
 
-  @Delete('/delete/:id')
-  async delete(@Param('id') id: string) {
-    return this.controller.delete(id);
+  @Delete('/delete/:relatedType/:id')
+  async delete(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    return this.controller.delete(relatedType, id);
   }
 
-  @Put('/update/:id')
-  async update(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo) {
-    return this.controller.update(id, body);
-  }
-
-  @Get('/find/:id')
-  async find(@Param('id') id: string) {
-    return this.controller.find(id);
-  }
-
-  @Get('/find-by-filter')
-  async findByFilter(@Query() query?: TodoVO.TodoFilterVo) {
-    return this.controller.findByFilter(query);
+  @Put('/update/:relatedType/:id')
+  async update(
+    @Param('relatedType') relatedType: RelatedType,
+    @Param('id') id: string,
+    @Body() body: TodoVO.UpdateTodoVo
+  ): Promise<TodoVO.TodoVo> {
+    return this.controller.update(relatedType, id, body);
   }
 
   @Get('/page')
-  async page(@Query() query?: TodoVO.TodoPageFilterVo) {
+  async page(@Query() query?: TodoVO.TodoPageFilterVo): Promise<ResponsePageVo<TodoVO.TodoWithoutRelationsVo>> {
     return this.controller.page(query);
   }
 
-  @Get('/list-mixed-repeat')
-  async listMixRepeat(@Query() query?: TodoVO.TodoFilterVo) {
-    return this.controller.listMixRepeat(query);
+  @Get('/find/:relatedType/:id')
+  async find(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
+    return this.controller.find(relatedType, id);
   }
 
-  @Put('/done-with-repeat/batch')
-  async doneWithRepeatBatch(@Body() body: TodoVO.TodoFilterVo) {
-    return this.controller.doneWithRepeatBatch(body);
+  @Put('/done/:relatedType/:id')
+  async done(
+    @Param('relatedType') relatedType: RelatedType,
+    @Param('id') id: string,
+    @Body() body?: { doneAt?: string }
+  ): Promise<any> {
+    return this.controller.done(relatedType, id, body);
   }
 
-  @Put('/abandon-with-repeat/:id')
-  async abandonWithRepeat(@Param('id') id: string) {
-    return this.controller.abandonWithRepeat(id);
+  @Put('/abandon/:relatedType/:id')
+  async abandon(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    return this.controller.abandon(relatedType, id);
   }
 
-  @Put('/restore-with-repeat/:id')
-  async restoreWithRepeat(@Param('id') id: string) {
-    return this.controller.restoreWithRepeat(id);
+  @Put('/restore/:relatedType/:id')
+  async restore(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+    return this.controller.restore(relatedType, id);
   }
 
-  @Put('/update-with-repeat/:id')
-  async updateWithRepeat(@Param('id') id: string, @Body() body: TodoVO.UpdateTodoVo) {
-    return this.controller.updateWithRepeat(id, body);
-  }
-
-  @Get("/find-mix-repeat/:id")
-  async findMixRepeat(@Param("id") id: string, @Body() body: any) {
-    return this.controller.findMixRepeat(id, body);
+  @Get('/list')
+  async list(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
+    return this.controller.list(query);
   }
 }

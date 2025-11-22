@@ -3,12 +3,12 @@
 import { Typography, Popover, Button } from '@arco-design/web-react';
 import { FlexibleContainer } from 'francis-component-react';
 import IconSelector from '../IconSelector';
-import { SiteIcon } from '@life-toolkit/components-ui';
-import { GoalService } from '../../service';
+import { SiteIcon } from '@true-north/components-ui';
+import { GoalService } from '@true-north/web-service';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
-import { GoalVo } from '@life-toolkit/vo';
+import { GoalVo } from '@true-north/vo';
 import clsx from 'clsx';
-import { GoalType, GoalStatus } from '@life-toolkit/enum';
+import { GoalType, GoalStatus } from '@true-north/enum';
 
 const { Paragraph } = Typography;
 
@@ -58,7 +58,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.abandonGoal(goal.id);
+                        GoalService.abandon(goal.id, );
                         props.refreshGoalList();
                       }}
                     >
@@ -67,7 +67,7 @@ function GoalItem(props: GoalItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        GoalService.deleteGoal(goal.id);
+                        GoalService.delete(goal.id, );
                         props.refreshGoalList();
                       }}
                     >

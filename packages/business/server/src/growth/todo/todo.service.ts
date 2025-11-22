@@ -1,8 +1,8 @@
 import { TodoRepository } from './todo.repository';
 import { TodoRepeatRepository } from './todo-repeat.repository';
-import { CreateTodoDto, UpdateTodoDto, TodoPageFilterDto, TodoFilterDto, TodoDto } from './dto';
+import { CreateTodoDto, UpdateTodoDto, TodoPageFilterDto, TodoFilterDto, TodoDto, UpdateTodoRepeatDto } from './dto';
 import { Todo } from './todo.entity';
-import { TodoStatus, TodoSource } from '@life-toolkit/enum';
+import { TodoStatus, RelatedType } from '@true-north/enum';
 import { TodoRepeatService } from './todo-repeat.service';
 import dayjs from 'dayjs';
 
@@ -18,7 +18,6 @@ export class TodoService {
   }
 
   // ====== 基础 CRUD ======
-
   async create(createTodoDto: CreateTodoDto): Promise<TodoDto> {
     const entity = await this.todoRepository.create(createTodoDto.exportCreateEntity());
     const todoDto = new TodoDto();
@@ -28,7 +27,7 @@ export class TodoService {
 
   async delete(id: string): Promise<boolean> {
     try {
-      await this.todoRepeatRepository.delete(id);
+      await this.todoRepository.delete(id);
       return true;
     } catch (error) {
       throw error;
@@ -84,31 +83,12 @@ export class TodoService {
 
   // ====== 业务逻辑编排 ======
 
-  async listMixRepeat(filter: TodoFilterDto): Promise<TodoDto[]> {
+  async list(filter: TodoFilterDto): Promise<TodoDto[]> {
     const todoDtoList = await this.findByFilter(filter);
 
     const todoRepeatDtoList = await this.todoRepeatService.generateTodoByRepeat(filter);
 
     return [...todoDtoList, ...todoRepeatDtoList];
-  }
-
-  async findMixRepeat(id: string): Promise<TodoDto> {
-    try {
-      const entity = await this.todoRepository.find(id);
-      if (entity) {
-        const todoDto = new TodoDto();
-        todoDto.importEntity(entity);
-        return todoDto;
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    const repeatTodo = await this.todoRepeatService.findWithRelations(id);
-
-    if (repeatTodo) {
-      return this.todoRepeatService.generateTodo(repeatTodo);
-    }
-    throw new Error('未找到待办');
   }
 
   async deleteByTaskIds(taskIds: string[]): Promise<void> {
@@ -118,12 +98,42 @@ export class TodoService {
     await this.todoRepository.softDeleteByFilter(filter);
   }
 
-  async doneWithRepeatBatch(filter: TodoFilterDto): Promise<any> {
+  async done(relatedType: RelatedType, id: string, { doneAt }: { doneAt?: string } = {}) {
+    if (relatedType === RelatedType.IS_REPEAT) {
+      const updateTodoRepeatDto = await this.todoRepeatService.updateToNext(id);
+      // 创建一个新的已完成 todo
+      const createTodoDto = new CreateTodoDto();
+      createTodoDto.name = updateTodoRepeatDto.name;
+      createTodoDto.description = updateTodoRepeatDto.description;
+      createTodoDto.importance = updateTodoRepeatDto.importance;
+      createTodoDto.urgency = updateTodoRepeatDto.urgency;
+      createTodoDto.tags = updateTodoRepeatDto.tags || [];
+      createTodoDto.planDate = dayjs(updateTodoRepeatDto.currentDate).toDate();
+      createTodoDto.status = TodoStatus.DONE;
+      createTodoDto.repeatId = id;
+      createTodoDto.relatedType = RelatedType.REPEAT;
+
+      const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
+
+      const updateTodoDto = new UpdateTodoDto();
+      updateTodoDto.id = newTodo.id;
+      updateTodoDto.status = TodoStatus.DONE;
+      updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
+      return await this.update(updateTodoDto);
+    }
+    const updateTodoDto = new UpdateTodoDto();
+    updateTodoDto.id = id;
+    updateTodoDto.status = TodoStatus.DONE;
+    updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
+    return await this.update(updateTodoDto);
+  }
+
+  async doneBatch(filter: TodoFilterDto): Promise<any> {
     const todoIds: string[] = [];
     const todoRepeatIds: string[] = [];
 
     filter.todoWithRepeatList?.forEach((todoWithRepeat) => {
-      if (todoWithRepeat.source === TodoSource.IS_REPEAT) {
+      if (todoWithRepeat.relatedType === RelatedType.IS_REPEAT) {
         todoRepeatIds.push(todoWithRepeat.id);
       } else {
         todoIds.push(todoWithRepeat.id);
@@ -157,7 +167,7 @@ export class TodoService {
         createTodoDto.planDate = dayjs(updateTodoRepeatDto.currentDate).toDate();
         createTodoDto.status = TodoStatus.DONE;
         createTodoDto.repeatId = id;
-        createTodoDto.source = TodoSource.REPEAT;
+        createTodoDto.relatedType = RelatedType.REPEAT;
 
         const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
 
@@ -178,20 +188,20 @@ export class TodoService {
     return result;
   }
 
-  async abandonWithRepeat(id: string): Promise<any> {
+  async abandon(id: string): Promise<any> {
     const updateTodoDto = new UpdateTodoDto();
     updateTodoDto.id = id;
     updateTodoDto.status = TodoStatus.ABANDONED;
     updateTodoDto.abandonedAt = new Date();
-    await this.update(updateTodoDto);
+    return await this.update(updateTodoDto);
   }
 
-  async restoreWithRepeat(id: string): Promise<any> {
+  async restore(id: string): Promise<any> {
     const updateTodoDto = new UpdateTodoDto();
     updateTodoDto.id = id;
     updateTodoDto.status = TodoStatus.TODO;
     updateTodoDto.doneAt = undefined;
     updateTodoDto.abandonedAt = undefined;
-    await this.update(updateTodoDto);
+    return await this.update(updateTodoDto);
   }
 }

@@ -28,8 +28,8 @@
 **特点：**
 
 - 使用 `.env.development.local` 环境变量
-- 构建镜像标签：`life-toolkit-server:dev`
-- 容器名称：`life-toolkit-server-dev`
+- 构建镜像标签：`true-north-server:dev`
+- 容器名称：`true-north-server-dev`
 - 端口映射：`3000:3000`
 - 自动检测并配置宿主机数据库连接（macOS/Linux 兼容）
 
@@ -61,8 +61,8 @@ JWT_SECRET=your-jwt-secret
 **特点：**
 
 - 使用 `.env.production.local` 环境变量
-- 构建镜像标签：`life-toolkit-server:prod`
-- 容器名称：`life-toolkit-server-prod`
+- 构建镜像标签：`true-north-server:prod`
+- 容器名称：`true-north-server-prod`
 - 端口映射：`3000:3000`
 - 生产环境配置，隐藏敏感信息显示
 
@@ -92,7 +92,7 @@ JWT_SECRET=your-production-jwt-secret
 - 构建 `linux/amd64` 架构镜像（支持跨架构）
 - 自动上传到 `112.124.21.126` 服务器
 - 部署到 `/root/project` 目录
-- 容器名称：`life-toolkit-server-remote`
+- 容器名称：`true-north-server-remote`
 - 自动清理本地和远程临时文件
 
 **部署流程：**
@@ -109,35 +109,35 @@ JWT_SECRET=your-production-jwt-secret
 
 ```bash
 # 查看开发容器状态
-docker ps | grep life-toolkit-server-dev
+docker ps | grep true-north-server-dev
 
 # 查看开发容器日志
-docker logs -f life-toolkit-server-dev
+docker logs -f true-north-server-dev
 
 # 停止开发容器
-docker stop life-toolkit-server-dev
+docker stop true-north-server-dev
 
 # 删除开发容器
-docker rm life-toolkit-server-dev
+docker rm true-north-server-dev
 
 # 进入开发容器
-docker exec -it life-toolkit-server-dev sh
+docker exec -it true-north-server-dev sh
 ```
 
 ### 生产环境管理
 
 ```bash
 # 查看生产容器状态
-docker ps | grep life-toolkit-server-prod
+docker ps | grep true-north-server-prod
 
 # 查看生产容器日志
-docker logs -f life-toolkit-server-prod
+docker logs -f true-north-server-prod
 
 # 停止生产容器
-docker stop life-toolkit-server-prod
+docker stop true-north-server-prod
 
 # 删除生产容器
-docker rm life-toolkit-server-prod
+docker rm true-north-server-prod
 ```
 
 ### 远程服务器管理
@@ -147,13 +147,13 @@ docker rm life-toolkit-server-prod
 ssh root@112.124.21.126 'docker ps | grep life-toolkit'
 
 # 查看远程容器日志
-ssh root@112.124.21.126 'docker logs -f life-toolkit-server-remote'
+ssh root@112.124.21.126 'docker logs -f true-north-server-remote'
 
 # 停止远程容器
-ssh root@112.124.21.126 'docker stop life-toolkit-server-remote'
+ssh root@112.124.21.126 'docker stop true-north-server-remote'
 
 # 删除远程容器
-ssh root@112.124.21.126 'docker rm life-toolkit-server-remote'
+ssh root@112.124.21.126 'docker rm true-north-server-remote'
 ```
 
 ## 🐛 故障排除
@@ -261,7 +261,7 @@ docker/
 - 保存镜像为压缩文件，便于传输
 - 适合需要离线部署或批量部署的场景
 
-**输出**: `docker/dist/life-toolkit-server_remote_amd64_TIMESTAMP.tar.gz`
+**输出**: `docker/dist/true-north-server_remote_amd64_TIMESTAMP.tar.gz`
 
 ### 2. `publish-remote.sh` - 远程发布脚本
 
@@ -331,7 +331,7 @@ docker/
 REMOTE_HOST="112.124.21.126"    # 远程服务器地址
 REMOTE_USER="root"              # SSH 用户名
 REMOTE_PATH="/root/project"     # 远程部署路径
-IMAGE_NAME="life-toolkit-server" # 镜像名称
+IMAGE_NAME="true-north-server" # 镜像名称
 PROD_IMAGE_TAG="remote"         # 镜像标签
 ```
 
@@ -371,8 +371,8 @@ chmod +x docker/scripts/*.sh
 ssh root@112.124.21.126 'docker ps | grep life-toolkit'
 
 # 查看远程容器日志
-ssh root@112.124.21.126 'docker logs -f life-toolkit-server-remote'
+ssh root@112.124.21.126 'docker logs -f true-north-server-remote'
 
 # 停止远程容器
-ssh root@112.124.21.126 'docker stop life-toolkit-server-remote'
+ssh root@112.124.21.126 'docker stop true-north-server-remote'
 ```

@@ -1,19 +1,10 @@
 'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  Dispatch,
-  SetStateAction,
-  useRef,
-  useEffect,
-} from 'react';
-import { TodoVo, TodoPageFilterVo } from '@life-toolkit/vo';
-import { TodoService } from '../../service';
+import { useState, Dispatch, SetStateAction, useRef, useEffect } from 'react';
+import { TodoVo, TodoPageFilterVo } from '@true-north/vo';
+import { TodoService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoStatus } from '@true-north/enum';
 
 function useSyncState<T>(
   initialValue: T,
@@ -55,11 +46,12 @@ export const [TodoAllProvider, useTodoAllContext] = createInjectState<{
     doneDateEnd: undefined,
     abandonedDateStart: undefined,
     abandonedDateEnd: undefined,
-    tags: [],
+    pageNum: 1,
+    pageSize: 10,
   });
 
   async function getTodoPage() {
-    const { list, total } = await TodoService.getTodoPage(filtersRef.current);
+    const { list, total } = await TodoService.page(filtersRef.current);
     setTodoList(list);
   }
 
@@ -75,7 +67,8 @@ export const [TodoAllProvider, useTodoAllContext] = createInjectState<{
       doneDateEnd: undefined,
       abandonedDateStart: undefined,
       abandonedDateEnd: undefined,
-      tags: [],
+      pageNum: 1,
+      pageSize: 10,
     });
     await getTodoPage();
   };

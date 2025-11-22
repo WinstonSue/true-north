@@ -1,7 +1,7 @@
 {
-  "name": "life-toolkit-web",
+  "name": "true-north-web",
   "version": "1.0.0",
-  "description": "Life ToolKit Web",
+  "description": "True North Web",
   "homepage": "https://francisxihe.github.io/life-toolkit",
   "scripts": {
     "dev": "vite --mode dev",
@@ -17,7 +17,7 @@
     "deploy": "./deploy.sh"
   },
   "dependencies": {
-    "@life-toolkit/business-web": "workspace:*",
+    "@true-north/business-web": "workspace:*",
     "react": "^18.0.2",
     "react-dom": "^18.0.2"
   },

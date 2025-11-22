@@ -1,5 +1,6 @@
 {
-  "name": "life-toolkit",
+  "name": "true-north",
+  "description": "知止",
   "private": true,
   "packageManager": "pnpm@9.7.0",
   "engines": {
@@ -10,20 +11,20 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --filter=life-toolkit-server & turbo run dev --filter=life-toolkit-web",
+    "dev": "turbo run dev --filter=true-north-server & turbo run dev --filter=true-north-web",
     "build": "turbo run build",
-    "build:desktop": "turbo run build --filter=life-toolkit-desktop",
+    "build:desktop": "turbo run build --filter=true-north-desktop",
     "clean": "turbo run clean",
     "predeploy": "npm run build",
     "pre-commit": "turbo run pre-commit",
-    "dev:server": "turbo run dev --filter=life-toolkit-server",
-    "dev:web": "turbo run dev --filter=life-toolkit-web",
-    "dev:desktop": "turbo run dev --filter=life-toolkit-desktop",
-    "deploy:server": "turbo run deploy --filter=life-toolkit-server",
-    "deploy:web": "turbo run deploy --filter=life-toolkit-web"
+    "dev:server": "turbo run dev --filter=true-north-server",
+    "dev:web": "turbo run dev --filter=true-north-web",
+    "dev:desktop": "turbo run dev --filter=true-north-desktop",
+    "deploy:server": "turbo run deploy --filter=true-north-server",
+    "deploy:web": "turbo run deploy --filter=true-north-web"
   },
   "devDependencies": {
-    "@life-toolkit/vo": "workspace:*",
+    "@true-north/vo": "workspace:*",
     "@types/jest": "^29.5.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "22.13.0",

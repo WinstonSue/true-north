@@ -10,10 +10,10 @@ import {
   Message,
   Empty,
 } from '@arco-design/web-react';
-import { HabitController } from '@life-toolkit/api';
-import { HabitVo } from '@life-toolkit/vo';
+import { HabitController } from '@true-north/api';
+import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
-import { HabitStatus } from '@life-toolkit/enum';
+import { HabitStatus } from '@true-north/enum';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

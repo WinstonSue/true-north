@@ -8,8 +8,8 @@ import {
 } from '@arco-design/web-react';
 import { useGoalDetailContext } from './context';
 import { useEffect } from 'react';
-import { GoalMapping } from '../../service';
-import { GoalType, Importance, Difficulty } from '@life-toolkit/enum';
+import { GoalMapping } from '@true-north/web-service';
+import { GoalType, Importance, Difficulty } from '@true-north/enum';
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 
 const { Row, Col } = Grid;

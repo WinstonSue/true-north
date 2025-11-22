@@ -12,10 +12,10 @@ import {
   TaskVo,
   TaskWithoutRelationsVo,
   TaskPageFilterVo,
-} from '@life-toolkit/vo';
-import { TaskService } from '../../service';
+} from '@true-north/vo';
+import { TaskService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
-import { TaskStatus } from '@life-toolkit/enum';
+import { TaskStatus } from '@true-north/enum';
 
 function useSyncState<T>(
   initialValue: T,
@@ -61,7 +61,7 @@ export const [TaskAllProvider, useTaskAllContext] = createInjectState<{
   });
 
   async function getTaskPage() {
-    const { list, total } = await TaskService.getTaskPage(filtersRef.current);
+    const { list, total } = await TaskService.page(filtersRef.current);
     setTaskList(list);
   }
 

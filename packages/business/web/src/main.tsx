@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { ConfigProvider } from '@arco-design/web-react';
+import { ConfigProvider, Message } from '@arco-design/web-react';
 import zhCN from '@arco-design/web-react/es/locale/zh-CN';
 import enUS from '@arco-design/web-react/es/locale/en-US';
 import './style/tailwind.css';
@@ -16,8 +16,25 @@ import './mock';
 import Router from './router';
 import { generatePermission } from './router/routes';
 import 'dayjs/locale/zh-cn';
-import '@life-toolkit/share-types';
+import '@true-north/share-types';
 import dayjs from 'dayjs';
+
+import { registerMessage } from '@true-north/web-service';
+
+registerMessage({
+  error: (params: string) => {
+    Message.error(params);
+  },
+  success: (params: string) => {
+    Message.success(params);
+  },
+  warning: (params: string) => {
+    Message.warning(params);
+  },
+  info: (params: string) => {
+    Message.info(params);
+  },
+});
 
 dayjs.locale('zh-cn');
 
@@ -116,6 +133,22 @@ export default function LifeToolkitApp() {
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
             <Router />
+            {process.env.NODE_ENV === 'development' && (
+              <div
+                style={{
+                  position: 'fixed',
+                  bottom: 0,
+                  right: 0,
+                  backgroundColor: 'rgba(255, 0, 0, 0.7)',
+                  color: 'white',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  zIndex: 9999,
+                }}
+              >
+                测试环境
+              </div>
+            )}
           </GlobalContext.Provider>
         </Provider>
       </ConfigProvider>

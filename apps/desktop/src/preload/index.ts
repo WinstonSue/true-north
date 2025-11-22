@@ -1,6 +1,6 @@
 // 导入模块
 const { contextBridge, ipcRenderer } = require('electron');
-import type { ElectronAPI } from '@life-toolkit/share-types';
+import type { ElectronAPI } from '@true-north/share-types';
 
 // 检查当前环境是否为Electron
 const isElectron = () => {

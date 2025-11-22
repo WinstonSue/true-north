@@ -1,0 +1,27 @@
+import type { TodoVo, UpdateTodoVo } from '@true-north/vo';
+import type { TodoFormData } from './todo.types';
+
+export default class TodoMapping {
+  static voToFormData(todoVo: TodoVo): TodoFormData {
+    return {
+      name: todoVo.name,
+      description: todoVo.description,
+      tags: todoVo.tags,
+      importance: todoVo.importance,
+      urgency: todoVo.urgency,
+      planDate: todoVo.planDate,
+      planTimeRange:
+        todoVo.planStartTime && todoVo.planEndTime ? [todoVo.planStartTime, todoVo.planEndTime] : undefined,
+      repeatConfig: todoVo.repeatConfig,
+      relatedType: todoVo.relatedType,
+    };
+  }
+
+  static formDataToUpdateVo(formData: TodoFormData): UpdateTodoVo {
+    return {
+      ...formData,
+      planStartTime: formData.planTimeRange?.[0],
+      planEndTime: formData.planTimeRange?.[1],
+    };
+  }
+}

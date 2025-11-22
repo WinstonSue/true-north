@@ -1,5 +1,5 @@
 {
-  "name": "@life-toolkit/business-server",
+  "name": "@true-north/business-server",
   "version": "0.0.2",
   "description": "业务服务器",
   "type": "module",
@@ -37,7 +37,8 @@
     "francis-helper-repeat": "0.0.6",
     "francis-types-repeat": "0.0.1",
     "francis-mapped-types": "0.0.1",
-    "@life-toolkit/enum": "workspace:*",
+    "@true-north/vo": "workspace:*",
+    "@true-north/enum": "workspace:*",
     "tsup": "^7.0.0",
     "ts-mixer": "^6.0.3"
   },

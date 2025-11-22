@@ -1,7 +1,7 @@
 import { GoalDto, CreateGoalDto, UpdateGoalDto, GoalFilterDto, GoalPageFilterDto } from './dto';
 import { GoalRepository, GoalTreeRepository } from './goal.repository';
 import { Goal } from './goal.entity';
-import { GoalStatus } from '@life-toolkit/enum';
+import { GoalStatus } from '@true-north/enum';
 
 export class GoalService {
   goalRepository: GoalRepository;

@@ -1,5 +1,5 @@
 import { AppDataSource } from '../../database.config';
-import { TaskFilterDto, Task, TaskRepository as _TaskRepository } from '@life-toolkit/business-server';
+import { TaskFilterDto, Task, TaskRepository as _TaskRepository } from '@true-north/business-server';
 import { BaseRepository } from '../../common/base';
 
 export class TaskRepository extends BaseRepository<Task, TaskFilterDto> implements _TaskRepository {

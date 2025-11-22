@@ -1,9 +1,9 @@
-import { createInjectState } from '@life-toolkit/common-web-utils';
+import { createInjectState } from '@true-north/common-web-utils';
 import { useState } from 'react';
-import { GoalVo } from '@life-toolkit/vo';
-import { GoalService } from '../../service';
+import { GoalVo } from '@true-north/vo';
+import { GoalService } from '@true-north/web-service';
 import { Message } from '@arco-design/web-react';
-import { GoalType, GoalStatus } from '@life-toolkit/enum';
+import { GoalType, GoalStatus } from '@true-north/enum';
 
 export const [GoalMindMapContextProvider, useGoalMindMapContext] =
   createInjectState<{
@@ -23,7 +23,7 @@ export const [GoalMindMapContextProvider, useGoalMindMapContext] =
     const fetchGoalTree = async () => {
       setLoading(true);
       try {
-        const data = await GoalService.getGoalTree({
+        const data = await GoalService.getTree({
           status: GoalStatus.TODO,
         });
         setGoalTree(data);

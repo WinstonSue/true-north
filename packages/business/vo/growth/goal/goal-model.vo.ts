@@ -1,6 +1,6 @@
 import { BaseEntityVo } from '../../common';
 import { TaskVo } from '../task/task-model.vo';
-import { GoalType, GoalStatus, Importance, Difficulty } from '@life-toolkit/enum';
+import { GoalType, GoalStatus, Importance, Difficulty } from '@true-north/enum';
 
 export type GoalWithoutRelationsVo = {
   name: string;

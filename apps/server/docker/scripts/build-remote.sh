@@ -6,7 +6,7 @@
 set -e
 
 # 配置
-IMAGE_NAME="life-toolkit-server"
+IMAGE_NAME="true-north-server"
 PROD_IMAGE_TAG="remote"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LOCAL_IMAGE_FILE="${IMAGE_NAME}_${PROD_IMAGE_TAG}_amd64_${TIMESTAMP}.tar.gz"

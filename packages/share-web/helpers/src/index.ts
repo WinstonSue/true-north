@@ -1,5 +1,5 @@
 /**
- * @life-toolkit/helpers
+ * @true-north/helpers
  *
  * 共享工具函数库
  */

@@ -1,4 +1,4 @@
-import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@life-toolkit/vo';
+import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { CreateHabitDto, UpdateHabitDto, HabitDto, HabitFilterDto, HabitPageFilterDto } from './dto';
 import { HabitService } from './habit.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
@@ -35,7 +35,7 @@ export class HabitController {
     return dto.exportVo();
   }
 
-  @Get('/find-by-filter', { description: '查询习惯列表' })
+  @Get('/list', { description: '查询习惯列表' })
   async findByFilter(
     @Query() habitListFiltersVo?: HabitVO.HabitFilterVo
   ): Promise<ResponseListVo<HabitVO.HabitWithoutRelationsVo>> {
@@ -47,10 +47,10 @@ export class HabitController {
 
   @Get('/page', { description: '分页查询习惯列表' })
   async page(
-    @Query() habitPageFiltersVo?: HabitVO.HabitPageFilterVo
+    @Query() habitPageFilterVo?: HabitVO.HabitPageFilterVo
   ): Promise<ResponsePageVo<HabitVO.HabitWithoutRelationsVo>> {
     const filter = new HabitPageFilterDto();
-    if (habitPageFiltersVo) filter.importPageVo(habitPageFiltersVo);
+    if (habitPageFilterVo) filter.importPageVo(habitPageFilterVo);
     const { list, total, pageNum, pageSize } = await this.habitService.page(filter);
     return HabitDto.dtoListToPageVo(list, total, pageNum, pageSize);
   }

@@ -7,8 +7,8 @@ import {
   Goal,
   Todo,
   Habit,
-} from '@life-toolkit/business-server';
-import { HabitStatus, Difficulty } from '@life-toolkit/enum';
+} from '@true-north/business-server';
+import { HabitStatus, Difficulty } from '@true-north/enum';
 import { BaseRepository } from '../../common/base';
 
 export class HabitRepository extends BaseRepository<Habit, HabitFilterDto> implements _HabitRepository {

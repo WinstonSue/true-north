@@ -11,7 +11,7 @@ import {
 import { TodoRepeat } from './todo-repeat.entity';
 import { calculateNextDate, isValidDate } from 'francis-helper-repeat';
 import { RepeatEndMode } from 'francis-types-repeat';
-import { TodoStatus, TodoSource } from '@life-toolkit/enum';
+import { TodoStatus, RelatedType } from '@true-north/enum';
 import dayjs from 'dayjs';
 
 export class TodoRepeatService {
@@ -228,7 +228,7 @@ export class TodoRepeatService {
       createdAt: new Date(),
       updatedAt: new Date(),
       repeat: todoRepeat,
-      source: TodoSource.IS_REPEAT,
+      relatedType: RelatedType.IS_REPEAT,
       status: TodoStatus.TODO,
     });
     return todoDto;

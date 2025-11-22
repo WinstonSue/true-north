@@ -1,8 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { TodoVo, TodoFilterVo } from '@life-toolkit/vo';
-import { TodoService } from '../../service';
+import { TodoVo, TodoFilterVo } from '@true-north/vo';
+import { TodoService } from '@true-north/web-service';
 
 interface TodoContextType {
   todoList: TodoVo[];
@@ -19,7 +19,7 @@ export function TodoProvider({ children }: { children: React.ReactNode }) {
   async function loadTodoList(params?: TodoFilterVo) {
     try {
       setLoading(true);
-      const res = await TodoService.getTodoListWithRepeat(params);
+      const res = await TodoService.list(params);
       setTodoList(res.list);
     } catch (error) {
       console.error('Failed to load todo list:', error);

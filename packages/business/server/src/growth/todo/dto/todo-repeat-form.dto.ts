@@ -1,7 +1,7 @@
 import { TodoRepeatDto } from './todo-repeat-model.dto';
 import { PickType, IntersectionType, PartialType, OmitType } from 'francis-mapped-types';
 import { TodoRepeat } from '../todo-repeat.entity';
-import type { Todo as TodoVO } from '@life-toolkit/vo';
+import type { Todo as TodoVO } from '@true-north/vo';
 
 export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
   'name',
@@ -28,7 +28,7 @@ export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
     this.description = vo.description;
     this.importance = vo.importance;
     this.urgency = vo.urgency;
-    this.tags = vo.tags;
+    this.tags = vo.tags || [];
     this.repeatStartDate = vo.repeatConfig.repeatStartDate;
     this.currentDate = vo.repeatConfig.currentDate;
     this.repeatMode = vo.repeatConfig.repeatMode;
@@ -38,6 +38,7 @@ export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
     this.repeatTimes = vo.repeatConfig.repeatTimes;
     this.planStartTime = vo.planStartTime;
     this.planEndTime = vo.planEndTime;
+    this.status = vo.status;
   }
 
   exportCreateEntity() {

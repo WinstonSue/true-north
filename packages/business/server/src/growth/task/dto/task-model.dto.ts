@@ -6,7 +6,7 @@ import { TrackTimeDto } from '../../track-time';
 import { TodoDto } from '../../todo';
 import dayjs from 'dayjs';
 import { BaseMapper } from '@business/common/base.mapper';
-import type { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@life-toolkit/vo';
+import type { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
 
 export class TaskWithoutRelationsDto extends TaskWithoutRelations {}
 

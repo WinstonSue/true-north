@@ -1,6 +1,6 @@
 import { BaseEntity } from './base.entity';
 import { BaseModelDto } from './base-model.dto';
-import { BaseModelVo } from '@life-toolkit/vo';
+import { BaseModelVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 export class BaseMapper {
   static entityToDto(entity: BaseEntity): BaseModelDto {

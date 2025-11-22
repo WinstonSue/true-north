@@ -18,7 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@life-toolkit/business-web": ["../../packages/business/web/src/main.tsx"]
+      "@true-north/business-web": ["../../packages/business/web/src/main.tsx"]
     },
     "experimentalDecorators": true,
     "useDefineForClassFields": true

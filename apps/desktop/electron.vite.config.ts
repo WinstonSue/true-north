@@ -17,8 +17,8 @@ export default defineConfig({
         '@business': path.resolve(currentDirPath, '../../packages/business/server/src'),
         '@database': path.resolve(currentDirPath, 'src/database'),
         '@': path.resolve(currentDirPath, 'src/main'),
-        '@life-toolkit/enum': path.resolve(currentDirPath, '../../packages/business/enum/index.ts'),
-        '@life-toolkit/vo': path.resolve(currentDirPath, '../../packages/business/vo/index.ts'),
+        '@true-north/enum': path.resolve(currentDirPath, '../../packages/business/enum/index.ts'),
+        '@true-north/vo': path.resolve(currentDirPath, '../../packages/business/vo/index.ts'),
       },
       extensions: ['.ts', '.js', '.json'],
     },
@@ -44,8 +44,8 @@ export default defineConfig({
           /^dnd-core/,
           /^immutability-helper/,
           'chinese-holiday-calendar',
-          // 只保留必要的外部依赖，让 @life-toolkit 包被正确打包
-          '@life-toolkit/electron-typeorm',
+          // 只保留必要的外部依赖，让 @true-north 包被正确打包
+          '@true-north/electron-typeorm',
         ],
       },
       minify: false, // 禁用压缩以保留 TypeORM 装饰器元数据
@@ -134,15 +134,15 @@ export default defineConfig({
           replacement: path.resolve(currentDirPath, 'src/render'),
         },
         {
-          find: '@life-toolkit/enum',
+          find: '@true-north/enum',
           replacement: path.resolve(currentDirPath, '../../packages/business/enum/index.ts'),
         },
         {
-          find: '@life-toolkit/vo',
+          find: '@true-north/vo',
           replacement: path.resolve(currentDirPath, '../../packages/business/vo/index.ts'),
         },
         {
-          find: '@life-toolkit/common-web-utils',
+          find: '@true-north/common-web-utils',
           replacement: path.resolve(currentDirPath, '../../packages/common-web/utils/src/index.ts'),
         },
         // TODO 临时处理，后续需要修改
@@ -163,7 +163,7 @@ export default defineConfig({
     },
     optimizeDeps: {
       include: ['react', 'react-dom', 'react-dnd', 'react-dnd-html5-backend', 'mitt', 'lodash-es'],
-      exclude: ['@life-toolkit/common-web-utils', 'chinese-holiday-calendar', 'francis-helper-repeat'],
+      exclude: ['@true-north/common-web-utils', 'chinese-holiday-calendar', 'francis-helper-repeat'],
     },
   },
 });

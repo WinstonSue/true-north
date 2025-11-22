@@ -49,7 +49,7 @@ cd apps/server
 
 ```
 docker-images/
-└── life-toolkit-server_production_YYYYMMDD_HHMMSS.tar.gz
+└── true-north-server_production_YYYYMMDD_HHMMSS.tar.gz
 ```
 
 ### 2. 容器保存 (`load-and-run-docker.sh`)
@@ -61,7 +61,7 @@ docker-images/
 ./load-and-run-docker.sh container_id_or_name
 
 # 保存指定容器
-./load-and-run-docker.sh life-toolkit-server-prod
+./load-and-run-docker.sh true-north-server-prod
 ```
 
 #### 高级选项
@@ -92,10 +92,10 @@ docker-images/
 
 ```bash
 # 上传镜像文件到服务端
-scp docker-images/life-toolkit-server_production_*.tar.gz user@server:/path/to/server/
+scp docker-images/true-north-server_production_*.tar.gz user@server:/path/to/server/
 
 # 在服务端运行部署脚本
-./load-image-and-run.sh life-toolkit-server_production_*.tar.gz
+./load-image-and-run.sh true-north-server_production_*.tar.gz
 ```
 
 #### 高级选项
@@ -108,7 +108,7 @@ scp docker-images/life-toolkit-server_production_*.tar.gz user@server:/path/to/s
 ./load-image-and-run.sh image.tar.gz -e .env.custom
 
 # 指定镜像标签
-./load-image-and-run.sh image.tar.gz -t life-toolkit-server:v1.0
+./load-image-and-run.sh image.tar.gz -t true-north-server:v1.0
 
 # 查看帮助
 ./load-image-and-run.sh -h
@@ -199,17 +199,17 @@ pnpm build
 
 ```bash
 # 保存运行中的容器
-./load-and-run-docker.sh life-toolkit-server-prod
+./load-and-run-docker.sh true-north-server-prod
 
 # 或者保存为特定标签
-./load-and-run-docker.sh life-toolkit-server-prod -t my-app:latest
+./load-and-run-docker.sh true-north-server-prod -t my-app:latest
 ```
 
 ### 步骤 3: 上传到服务端
 
 ```bash
 # 上传镜像文件
-scp docker-images/life-toolkit-server_production_*.tar.gz user@server:/opt/life-toolkit/
+scp docker-images/true-north-server_production_*.tar.gz user@server:/opt/life-toolkit/
 
 # 上传环境配置文件
 scp .env.production.local user@server:/opt/life-toolkit/
@@ -228,7 +228,7 @@ ssh user@server
 cd /opt/life-toolkit
 
 # 运行部署脚本
-./load-image-and-run.sh life-toolkit-server_production_*.tar.gz
+./load-image-and-run.sh true-north-server_production_*.tar.gz
 ```
 
 ## 🐳 Docker Compose 部署 (推荐)
@@ -239,9 +239,9 @@ cd /opt/life-toolkit
 version: '3.8'
 
 services:
-  life-toolkit-server:
-    image: life-toolkit-server:production
-    container_name: life-toolkit-server-prod
+  true-north-server:
+    image: true-north-server:production
+    container_name: true-north-server-prod
     ports:
       - '3000:3000'
     env_file:
@@ -272,7 +272,7 @@ volumes:
 
 ```bash
 # 加载镜像
-docker load -i life-toolkit-server_production_*.tar.gz
+docker load -i true-north-server_production_*.tar.gz
 
 # 启动服务
 docker-compose up -d
@@ -302,10 +302,10 @@ docker-compose down
 
    ```bash
    # 查看容器日志
-   docker logs life-toolkit-server-prod
+   docker logs true-north-server-prod
 
    # 检查环境变量
-   docker exec life-toolkit-server-prod env
+   docker exec true-north-server-prod env
    ```
 
 3. **数据库连接失败**
@@ -322,13 +322,13 @@ docker-compose down
 
 ```bash
 # 实时查看日志
-docker logs -f life-toolkit-server-prod
+docker logs -f true-north-server-prod
 
 # 查看最近的日志
-docker logs --tail 100 life-toolkit-server-prod
+docker logs --tail 100 true-north-server-prod
 
 # 查看特定时间的日志
-docker logs --since "2024-01-01T00:00:00" life-toolkit-server-prod
+docker logs --since "2024-01-01T00:00:00" true-north-server-prod
 ```
 
 ## 📊 监控和维护
@@ -340,11 +340,11 @@ docker logs --since "2024-01-01T00:00:00" life-toolkit-server-prod
 docker ps | grep life-toolkit
 
 # 重启容器
-docker restart life-toolkit-server-prod
+docker restart true-north-server-prod
 
 # 更新容器
-docker stop life-toolkit-server-prod
-docker rm life-toolkit-server-prod
+docker stop true-north-server-prod
+docker rm true-north-server-prod
 # 重新运行 load-and-run-docker.sh
 ```
 
@@ -352,10 +352,10 @@ docker rm life-toolkit-server-prod
 
 ```bash
 # 查看容器资源使用
-docker stats life-toolkit-server-prod
+docker stats true-north-server-prod
 
 # 查看镜像大小
-docker images | grep life-toolkit-server
+docker images | grep true-north-server
 ```
 
 ## 🔐 安全建议

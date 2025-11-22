@@ -24,7 +24,7 @@ import { Type } from "class-transformer";
 import { PageFilterDto } from "../../../common/filter";
 import { {Module}Dto } from "./{module}-model.dto";
 import { PickType, IntersectionType, PartialType } from "francis-mapped-types";
-import { {Module}ListFiltersVo, {Module}PageFiltersVo } from "@life-toolkit/vo";
+import { {Module}ListFiltersVo, {Module}PageFilterVo } from "@true-north/vo";
 
 // 列表过滤DTO - 选择可过滤的字段
 export class {Module}ListFilterDto extends PartialType(
@@ -66,12 +66,12 @@ export class {Module}ListFilterDto extends PartialType(
 }
 
 // 分页过滤DTO - 继承列表过滤 + 分页
-export class {Module}PageFiltersDto extends IntersectionType(
+export class {Module}PageFilterDto extends IntersectionType(
   PageFilterDto,
   {Module}ListFilterDto
 ) {
   /** 从VO导入数据的辅助方法（可选） */
-  importPageVo(filterVo: {Module}PageFiltersVo) {
+  importPageVo(filterVo: {Module}PageFilterVo) {
     importListVo(filterVo, this);
     this.pageNum = filterVo.pageNum;
     this.pageSize = filterVo.pageSize;
@@ -100,7 +100,7 @@ import { Type } from 'class-transformer';
 import { PageFilterDto } from '../../../common/filter';
 import { EntityDto } from './entity-model.dto';
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
-import { EntityListFiltersVo, EntityPageFiltersVo } from '@life-toolkit/vo';
+import { EntityListFiltersVo, EntityPageFilterVo } from '@true-north/vo';
 import { EntityStatus, EntityType } from '../entity.entity';
 
 // 列表过滤DTO
@@ -139,8 +139,8 @@ export class EntityListFilterDto extends PartialType(
 }
 
 // 分页过滤DTO
-export class EntityPageFiltersDto extends IntersectionType(PageFilterDto, EntityListFilterDto) {
-  importPageVo(filterVo: EntityPageFiltersVo) {
+export class EntityPageFilterDto extends IntersectionType(PageFilterDto, EntityListFilterDto) {
+  importPageVo(filterVo: EntityPageFilterVo) {
     importListVo(filterVo, this);
     this.pageNum = filterVo.pageNum;
     this.pageSize = filterVo.pageSize;
@@ -269,7 +269,7 @@ export class ItemListFilterDto extends PartialType(PickType(ItemDto, ['status', 
 }
 
 // 分页过滤
-export class ItemPageFiltersDto extends IntersectionType(PageFilterDto, ItemListFilterDto) {}
+export class ItemPageFilterDto extends IntersectionType(PageFilterDto, ItemListFilterDto) {}
 ```
 
 ### 2. 复杂过滤模式
@@ -422,9 +422,9 @@ export class EntityListFilterDto {
 }
 
 // 分页过滤DTO的VO导入
-export class EntityPageFiltersDto extends IntersectionType(PageFilterDto, EntityListFilterDto) {
+export class EntityPageFilterDto extends IntersectionType(PageFilterDto, EntityListFilterDto) {
   /** 从VO导入数据 */
-  importPageVo(filterVo: EntityPageFiltersVo) {
+  importPageVo(filterVo: EntityPageFilterVo) {
     importListVo(filterVo, this);
     this.pageNum = filterVo.pageNum;
     this.pageSize = filterVo.pageSize;
@@ -547,7 +547,7 @@ export class OptimizedFilterDto {
 
 ```typescript
 // 合理的分页参数
-export class EntityPageFiltersDto extends IntersectionType(PageFilterDto, EntityListFilterDto) {
+export class EntityPageFilterDto extends IntersectionType(PageFilterDto, EntityListFilterDto) {
   /** 重写分页参数以添加限制 */
   @IsNumber()
   @Type(() => Number)
@@ -579,7 +579,7 @@ export class EntityPageFiltersDto extends IntersectionType(PageFilterDto, Entity
 ### 基础结构
 
 - [ ] 文件命名符合规范 (`{module}-filter.dto.ts`)
-- [ ] 类命名符合规范 (`{Module}ListFilterDto`, `{Module}PageFiltersDto`)
+- [ ] 类命名符合规范 (`{Module}ListFilterDto`, `{Module}PageFilterDto`)
 - [ ] 使用了合适的 Mapped Types (`francis-mapped-types`)
 - [ ] 导入了必要的验证装饰器
 

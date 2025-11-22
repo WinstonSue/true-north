@@ -1,7 +1,7 @@
 import { BaseEntityVo } from '../../common';
 import { TodoVo } from '../todo/todo-model.vo';
 import { RepeatMode, RepeatConfig, RepeatEndMode } from 'francis-types-repeat';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoStatus } from '@true-north/enum';
 
 export type TodoRepeatWithoutRelationsVo = {
   repeatMode: RepeatMode;

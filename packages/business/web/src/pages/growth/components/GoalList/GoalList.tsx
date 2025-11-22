@@ -1,6 +1,6 @@
 'use client';
 
-import { GoalVo } from '@life-toolkit/vo';
+import { GoalVo } from '@true-north/vo';
 import TriggerStatusCheckbox from './TriggerStatusCheckbox';
 import GoalItem from './GoalItem';
 

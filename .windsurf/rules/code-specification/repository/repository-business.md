@@ -23,7 +23,7 @@ packages/business/server/src/{module}/
 
 ```typescript
 // 1. 导入相关的 DTO/VO 类型
-import { CreateModuleDto, UpdateModuleDto, ModulePageFiltersDto, ModuleListFilterDto, ModuleDto } from './dto';
+import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from './dto';
 
 // 2. 导入相关实体（可选，用于类型定义）
 import { Module } from './entities';
@@ -41,7 +41,7 @@ export interface ModuleRepository {
 
   // 查询操作
   findByFilter(filter: ModuleListFilterDto): Promise<ModuleDto[]>;
-  page(filter: ModulePageFiltersDto): Promise<{
+  page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;
@@ -56,7 +56,7 @@ export interface ModuleRepository {
 
   // 删除操作
   delete(id: string): Promise<boolean>;
-  deleteByFilter(filter: ModulePageFiltersDto): Promise<void>;
+  deleteByFilter(filter: ModulePageFilterDto): Promise<void>;
   softDeleteByRelatedIds(relatedIds: string[]): Promise<void>;
 
   // 特殊业务操作
@@ -120,7 +120,7 @@ createWithExtras(
 findByFilter(filter: ModuleListFilterDto): Promise<ModuleDto[]>;
 
 // 分页查询
-page(filter: ModulePageFiltersDto): Promise<{
+page(filter: ModulePageFilterDto): Promise<{
   list: ModuleDto[];
   total: number;
   pageNum: number;
@@ -154,7 +154,7 @@ batchUpdate(
 delete(id: string): Promise<boolean>;
 
 // 条件删除
-deleteByFilter(filter: ModulePageFiltersDto): Promise<void>;
+deleteByFilter(filter: ModulePageFilterDto): Promise<void>;
 
 // 软删除（业务删除）
 softDeleteByRelatedIds(relatedIds: string[]): Promise<void>;
@@ -166,7 +166,7 @@ softDeleteByRelatedIds(relatedIds: string[]): Promise<void>;
 
 ```typescript
 // 分页过滤器接口
-export interface ModulePageFiltersDto extends ModuleListFilterDto {
+export interface ModulePageFilterDto extends ModuleListFilterDto {
   pageNum?: number;
   pageSize?: number;
   orderBy?: string;
@@ -320,7 +320,7 @@ export interface BadModuleRepository {
 ```typescript
 // packages/business/server/src/module/module.repository.ts
 
-import { CreateModuleDto, UpdateModuleDto, ModulePageFiltersDto, ModuleListFilterDto, ModuleDto } from './dto';
+import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from './dto';
 import { Module } from './entities';
 
 export interface ModuleRepository {
@@ -330,7 +330,7 @@ export interface ModuleRepository {
 
   // 查询操作
   findByFilter(filter: ModuleListFilterDto): Promise<ModuleDto[]>;
-  page(filter: ModulePageFiltersDto): Promise<{
+  page(filter: ModulePageFilterDto): Promise<{
     list: ModuleDto[];
     total: number;
     pageNum: number;
@@ -345,7 +345,7 @@ export interface ModuleRepository {
 
   // 删除操作
   delete(id: string): Promise<boolean>;
-  deleteByFilter(filter: ModulePageFiltersDto): Promise<void>;
+  deleteByFilter(filter: ModulePageFilterDto): Promise<void>;
   softDeleteByRelatedIds(relatedIds: string[]): Promise<void>;
 
   // 业务特殊操作

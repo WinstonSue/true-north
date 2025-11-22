@@ -115,8 +115,8 @@ BaseModelDto → {Module}Dto → {Module}ModelDto
                           → Create{Module}Dto → Update{Module}Dto
 
 // 过滤继承链
-PageFilterDto → {Module}PageFiltersDto
-{Module}Dto → {Module}ListFilterDto → {Module}PageFiltersDto
+PageFilterDto → {Module}PageFilterDto
+{Module}Dto → {Module}ListFilterDto → {Module}PageFilterDto
 ```
 
 ### 3. 验证装饰器

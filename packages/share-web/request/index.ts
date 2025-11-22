@@ -2,7 +2,7 @@ import { getElectronAPI, isElectronEnvironment } from './electron';
 import { get, post, put, remove } from './server';
 
 /**
- * 适配器装饰器 - 简化控制器方法的适配逻辑
+ * 适配器装饰器
  */
 export function request<T>({
   method,
@@ -14,7 +14,8 @@ export function request<T>({
     if (electronAPI) {
       // 重写
       return async function (path: string, params?: Record<string, any>): Promise<T> {
-        console.log(`%cElectron API调用: ${method.toUpperCase()} ${path}`, 'color: rgb(22, 93, 255); font-size: 14px;');
+        console.log(`%c===========${method.toUpperCase()} ${path}===========`, 'color: rgba(245, 63, 63, 0.7); font-size: 16px;');
+        console.log(`%cElectron API调用: `, 'color: rgb(22, 93, 255); font-size: 12px;');
         if (params) {
           console.log(
             Object.keys(params)
@@ -26,8 +27,8 @@ export function request<T>({
         try {
           const res = await electronAPI[method](path, params);
           console.log(
-            `%cElectron API返回: ${method.toUpperCase()} ${path}`,
-            'color: rgb(0, 180, 42); font-size: 14px;'
+            `%cElectron API返回: `,
+            'color: rgb(0, 180, 42); font-size: 12px;'
           );
           console.log(res.data);
           if (res.code !== 200) {

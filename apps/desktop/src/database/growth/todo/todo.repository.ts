@@ -1,5 +1,5 @@
 import { AppDataSource } from '../../database.config';
-import { TodoFilterDto, Todo, TodoRepository as _TodoRepository } from '@life-toolkit/business-server';
+import { TodoFilterDto, Todo, TodoRepository as _TodoRepository } from '@true-north/business-server';
 import { BaseRepository } from '../../common/base';
 import dayjs from 'dayjs';
 

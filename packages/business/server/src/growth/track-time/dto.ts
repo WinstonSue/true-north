@@ -1,7 +1,7 @@
 import { TrackTime } from './entity';
 import { BaseModelDto, BaseModelDtoKeys, BaseMapper } from '@business/common';
 import { OmitType, PartialType, IntersectionType, PickType } from 'francis-mapped-types';
-import { TrackTime as TrackTimeVO } from '@life-toolkit/vo';
+import { TrackTime as TrackTimeVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 
 export class TrackTimeDto extends IntersectionType(

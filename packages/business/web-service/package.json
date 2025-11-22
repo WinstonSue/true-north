@@ -1,0 +1,31 @@
+{
+  "name": "@true-north/web-service",
+  "type": "module",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "require": "./index.ts"
+    }
+  },
+  "scripts": {
+    "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache",
+    "stylelint": "stylelint 'src/**/*.less' 'src/**/*.css' --fix --cache",
+    "lint": "npm run eslint && npm run stylelint"
+  },
+  "dependencies": {
+    "@true-north/api": "workspace:*",
+    "@true-north/vo": "workspace:*",
+    "@true-north/enum": "workspace:*",
+    "@true-north/share-types": "workspace:*"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix --cache"
+    ],
+    "*.{css, less}": [
+      "stylelint --fix"
+    ]
+  }
+}

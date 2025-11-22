@@ -5,9 +5,9 @@ import { IconSearch } from '@arco-design/web-react/icon';
 import { IMPORTANCE_MAP, URGENCY_MAP } from '../../constants';
 import { TagSelector } from '../../../../components/TagSelector';
 import { useTodoAllContext } from './context';
-import { TodoPageFilterVo } from '@life-toolkit/vo';
+import { TodoPageFilterVo } from '@true-north/vo';
 import { TableFilter } from '@/components/Layout/TableFilter';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoStatus } from '@true-north/enum';
 
 const DatePickerRange = DatePicker.RangePicker;
 const { Row, Col } = Grid;
@@ -110,7 +110,7 @@ export function TodoFilters() {
             <Select.Option value={TodoStatus.ABANDONED}>已放弃</Select.Option>
           </Select>
         </Col>
-        <Col span={6}>
+        {/* <Col span={6}>
           <TagSelector
             multiple={true}
             value={filters.tags}
@@ -121,7 +121,7 @@ export function TodoFilters() {
               }));
             }}
           />
-        </Col>
+        </Col> */}
       </Row>
     </TableFilter>
   );

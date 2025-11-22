@@ -1,11 +1,11 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { useCalendarContext } from './context';
-import { TodoVo } from '@life-toolkit/vo';
-import { TodoStatus } from '@life-toolkit/enum';
+import { TodoVo } from '@true-north/vo';
+import { TodoStatus } from '@true-north/enum';
 import { useState, useMemo } from 'react';
 import clsx from 'clsx';
 import { useTodoDetail } from '../../components';
-import { SiteIcon } from '@life-toolkit/components-ui';
+import { SiteIcon } from '@true-north/components-ui';
 
 function TodoItem({ todo }: { todo: TodoVo }) {
   const { getTodoList } = useCalendarContext();

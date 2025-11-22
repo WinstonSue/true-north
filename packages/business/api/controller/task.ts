@@ -1,9 +1,10 @@
-import { request } from '@life-toolkit/share-request';
-import { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@life-toolkit/vo';
+import { request } from '@true-north/share-request';
+import { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
 
 export default class TaskController {
-  static async create(body: TaskVO.CreateTaskVo) {
-    return request<TaskVO.TaskVo>({ method: 'post' })(`/task/create`, body);
+
+  static async create(createTaskVo: TaskVO.CreateTaskVo) {
+    return request<TaskVO.TaskVo>({ method: "post" })(`/task/create`, createTaskVo);
   }
 
   static async delete(id: string) {
@@ -18,12 +19,8 @@ export default class TaskController {
     return request<TaskVO.TaskVo>({ method: 'get' })(`/task/find/${id}`);
   }
 
-  static async findByFilter(body: TaskVO.TaskFilterVo) {
-    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: 'get' })(`/task/find-by-filter`, body);
-  }
-
-  static async page(body: TaskVO.TaskPageFilterVo) {
-    return request<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>>({ method: 'get' })(`/task/page`, body);
+  static async page(taskPageFilterVo?: TaskVO.TaskPageFilterVo) {
+    return request<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/page`, taskPageFilterVo);
   }
 
   static async taskWithRelations(id: string) {
@@ -36,5 +33,9 @@ export default class TaskController {
 
   static async restore(id: string) {
     return request<boolean>({ method: 'put' })(`/task/restore/${id}`);
+  }
+
+  static async findByFilter(taskListFiltersVo?: TaskVO.TaskFilterVo) {
+    return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: "get" })(`/task/list`, taskListFiltersVo);
   }
 }

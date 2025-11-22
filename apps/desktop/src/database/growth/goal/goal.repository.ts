@@ -4,7 +4,7 @@ import {
   GoalFilterDto,
   Goal,
   GoalRepository as _GoalRepository,
-} from '@life-toolkit/business-server';
+} from '@true-north/business-server';
 import { AppDataSource } from '../../database.config';
 import { BaseRepository } from '../../common/base';
 

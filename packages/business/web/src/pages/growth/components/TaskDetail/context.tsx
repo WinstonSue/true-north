@@ -7,13 +7,13 @@ import type {
   GoalWithoutRelationsVo,
   TaskWithoutRelationsVo,
   CreateTaskVo,
-} from '@life-toolkit/vo';
+} from '@true-north/vo';
 import {
   TaskFormData,
   TaskService,
   TaskMapping,
   GoalService,
-} from '../../service';
+} from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
 
 export type TaskDetailContextProps = {
@@ -55,18 +55,18 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
   const [taskFormData, setTaskFormData] =
     useState<TaskFormData>(defaultFormData);
 
-  const { taskList } = TaskService.useTaskList({
-    excludeIds: [props.task?.id],
-  });
+  // TODO: 需要重新实现 useTaskList hook
+  const taskList = [];
 
-  const { goalList } = GoalService.useGoalList();
+  // TODO: 需要重新实现 useGoalList hook
+  const goalList = [];
 
   const showSubTask = async (id: string) => {
     await refreshTaskDetail(id);
   };
 
   const refreshTaskDetail = async (id: string) => {
-    const task = await TaskService.getTaskDetail(id);
+    const task = await TaskService.find(id);
     setCurrentTask(task);
     setTaskFormData(TaskMapping.voToFormData(task));
   };
@@ -90,12 +90,12 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
     if (!taskFormData.name) {
       return;
     }
-    await TaskService.createTask(createTaskVo);
+    await TaskService.create(createTaskVo, );
     setTaskFormData(defaultFormData);
   }
 
   async function handleUpdate(data: Partial<UpdateTaskVo>) {
-    await TaskService.updateTask(currentTask.id, data);
+    await TaskService.update(currentTask.id, data, );
   }
 
   const onSubmit = async () => {

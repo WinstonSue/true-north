@@ -3,10 +3,10 @@ import dayjs from 'dayjs';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { useTaskAllContext } from './context';
 import { useEffect, useState } from 'react';
-import { TaskService } from '../../service';
-import { TaskVo } from '@life-toolkit/vo';
+import { TaskService } from '@true-north/web-service';
+import { TaskVo } from '@true-north/vo';
 import { useTaskDetail } from '../../components';
-import { TaskStatus } from '@life-toolkit/enum';
+import { TaskStatus } from '@true-north/enum';
 
 export default function TaskTable() {
   const { taskList, getTaskPage } = useTaskAllContext();
@@ -107,7 +107,7 @@ export default function TaskTable() {
                 title: '确定删除吗？',
                 content: '删除后将无法恢复',
                 onOk: async () => {
-                  await TaskService.deleteTask(record.id);
+                  await TaskService.delete(record.id, );
                   await getTaskPage();
                 },
               })
@@ -129,7 +129,7 @@ export default function TaskTable() {
       return;
     }
     setSubTaskLoadingStatus((prev) => ({ ...prev, [record.id]: 'loading' }));
-    const todoNode = await TaskService.getTaskDetail(record.id);
+    const todoNode = await TaskService.find(record.id);
     setExpandedData((prev) => ({
       ...prev,
       [record.id]: todoNode,

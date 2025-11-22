@@ -2,7 +2,7 @@ import { Goal } from '../goal.entity';
 import { PartialType, PickType, IntersectionType } from 'francis-mapped-types';
 import { IsOptional, IsString } from 'class-validator';
 import { GoalWithoutRelationsDto, GoalDto } from './goal-model.dto';
-import type { Goal as GoalVO } from '@life-toolkit/vo';
+import type { Goal as GoalVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 
 // 创建DTO - 选择需要的字段

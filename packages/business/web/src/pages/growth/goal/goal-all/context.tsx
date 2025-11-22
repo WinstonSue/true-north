@@ -14,10 +14,10 @@ import {
   GoalVo,
   GoalWithoutRelationsVo,
   GoalPageFilterVo,
-} from '@life-toolkit/vo';
-import { GoalService } from '../../service';
+} from '@true-north/vo';
+import { GoalService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
-import { GoalType, GoalStatus } from '@life-toolkit/enum';
+import { GoalType, GoalStatus } from '@true-north/enum';
 
 function useSyncState<T>(
   initialValue: T,
@@ -58,7 +58,7 @@ export const [GoalAllProvider, useGoalAllContext] = createInjectState<{
   });
 
   async function getGoalPage() {
-    const { list, total } = await GoalService.getGoalPage(filtersRef.current);
+    const { list, total } = await GoalService.page(filtersRef.current);
     setGoalList(list);
   }
 

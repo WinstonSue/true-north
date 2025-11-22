@@ -3,17 +3,17 @@
 # 定义函数来启动各个应用
 start_server() {
   echo "启动服务端..."
-  turbo run dev --filter=life-toolkit-server
+  turbo run dev --filter=true-north-server
 }
 
 start_web() {
   echo "启动桌面端..."
-  turbo run dev --filter=life-toolkit-web
+  turbo run dev --filter=true-north-web
 }
 
 start_pc() {
   echo "启动移动端..."
-  turbo run dev --filter=life-toolkit-desktop
+  turbo run dev --filter=true-north-desktop
 }
 
 # 询问用户要启动哪个应用

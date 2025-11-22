@@ -1,7 +1,7 @@
-import { TodoService as _TodoService } from '@life-toolkit/business-server';
+import { TodoService as _TodoService } from '@true-north/business-server';
 import { TodoRepository } from './todo.repository';
 import { TodoRepeatRepository } from './todo-repeat.repository';
-import { TodoRepeatService as _TodoRepeatService } from '@life-toolkit/business-server';
+import { TodoRepeatService as _TodoRepeatService } from '@true-north/business-server';
 
 export class TodoRepeatService extends _TodoRepeatService {
   constructor() {

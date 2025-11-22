@@ -1,6 +1,6 @@
 import { Controller, Post, Put, Get, Delete, Body, Param, Query } from '@business/decorators';
-import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@life-toolkit/vo';
-import { GoalFilterDto, GoalPageFilterDto, CreateGoalDto, UpdateGoalDto, GoalDto } from '@life-toolkit/business-server';
+import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@true-north/vo';
+import { GoalFilterDto, GoalPageFilterDto, CreateGoalDto, UpdateGoalDto, GoalDto } from './dto';
 import { GoalService } from './goal.service';
 
 @Controller('/goal')
@@ -41,7 +41,7 @@ export class GoalController {
     return dto.exportVo();
   }
 
-  @Get('/find-by-filter', { description: '查询目标列表' })
+  @Get('/list', { description: '查询目标列表' })
   async findByFilter(
     @Query() goalListFiltersVo?: GoalVO.GoalFilterVo
   ): Promise<ResponseListVo<GoalVO.GoalWithoutRelationsVo>> {
@@ -53,10 +53,10 @@ export class GoalController {
 
   @Get('/page', { description: '分页查询目标列表' })
   async page(
-    @Query() goalPageFiltersVo?: GoalVO.GoalPageFilterVo
+    @Query() goalPageFilterVo?: GoalVO.GoalPageFilterVo
   ): Promise<ResponsePageVo<GoalVO.GoalWithoutRelationsVo>> {
     const goalPageFilterDto = new GoalPageFilterDto();
-    goalPageFilterDto.importPageVo(goalPageFiltersVo ?? {});
+    goalPageFilterDto.importPageVo(goalPageFilterVo ?? {});
     const { list, total, pageNum, pageSize } = await this.goalService.page(goalPageFilterDto);
     return GoalDto.dtoListToPageVo(list, total, pageNum, pageSize);
   }

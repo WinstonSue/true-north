@@ -1,12 +1,14 @@
 {
-  "name": "@life-toolkit/api",
+  "name": "@true-north/api",
   "version": "0.0.1",
   "main": "index.ts",
   "types": "index.ts",
   "dependencies": {
     "axios": "^0.24.0",
-    "@life-toolkit/share-types": "workspace:*",
-    "@life-toolkit/share-request": "workspace:*"
+    "@true-north/share-types": "workspace:*",
+    "@true-north/share-request": "workspace:*",
+    "@true-north/enum": "workspace:*",
+    "@true-north/vo": "workspace:*"
   },
   "devDependencies": {}
 }

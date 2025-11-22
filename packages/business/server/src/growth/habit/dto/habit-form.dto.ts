@@ -2,7 +2,7 @@ import { PartialType, IntersectionType, PickType } from 'francis-mapped-types';
 import { IsOptional, IsArray, IsString } from 'class-validator';
 import { HabitDto } from './habit-model.dto';
 import { Habit } from '../habit.entity';
-import type { Habit as HabitVO } from '@life-toolkit/vo';
+import type { Habit as HabitVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 
 export class CreateHabitDto extends PickType(HabitDto, [

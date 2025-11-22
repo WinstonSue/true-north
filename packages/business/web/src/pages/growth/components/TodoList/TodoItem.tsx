@@ -5,12 +5,12 @@ import { isToday } from 'date-fns';
 import { FlexibleContainer } from 'francis-component-react';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import IconSelector from '../../components/IconSelector';
-import { SiteIcon } from '@life-toolkit/components-ui';
-import { TodoService } from '../../service';
-import { TodoWithoutRelationsVo } from '@life-toolkit/vo';
+import { SiteIcon } from '@true-north/components-ui';
+import { TodoService } from '@true-north/web-service';
+import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
-import { TodoSource } from '@life-toolkit/enum';
+import { RelatedType } from '@true-north/enum';
 
 const { Paragraph } = Typography;
 
@@ -39,11 +39,11 @@ function TodoItem(props: TodoItemProps) {
           <div
             className={clsx(['flex items-center justify-between', 'leading-8'])}
           >
-            <span className="text-text-1">
-              {todo.source === TodoSource.IS_REPEAT && (
-                <SiteIcon id={'repeat'} />
-              )}
+            <span className="text-text-1 flex items-center">
               {todo.name}
+              {todo.relatedType === RelatedType.IS_REPEAT && (
+                <SiteIcon id={'repeat'} className={"text-danger"} width={20} height={20}/>
+              )}
             </span>
             <div className="h-8 flex items-center">
               <Popover
@@ -53,7 +53,7 @@ function TodoItem(props: TodoItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TodoService.abandonTodo(todo.id);
+                        TodoService.abandon(todo.relatedType, todo.id);
                         props.refreshTodoList();
                       }}
                     >
@@ -62,7 +62,7 @@ function TodoItem(props: TodoItemProps) {
                     <div
                       className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
                       onClick={() => {
-                        TodoService.deleteTodo(todo.id);
+                        TodoService.delete(todo.relatedType, todo.id);
                         props.refreshTodoList();
                       }}
                     >

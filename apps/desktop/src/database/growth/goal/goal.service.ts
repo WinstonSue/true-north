@@ -1,4 +1,4 @@
-import { GoalService as _GoalService } from '@life-toolkit/business-server';
+import { GoalService as _GoalService } from '@true-north/business-server';
 import { GoalRepository } from './goal.repository';
 import { GoalTreeRepository } from './goal-tree.repository';
 

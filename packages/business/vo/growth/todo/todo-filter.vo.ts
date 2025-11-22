@@ -1,6 +1,6 @@
 import { TodoVo, TodoWithoutRelationsVo } from './todo-model.vo';
 import { BaseFilterVo } from '../../common';
-import { TodoSource } from '@life-toolkit/enum';
+import { RelatedType } from '@true-north/enum';
 
 export type TodoFilterVo = {
   planDateStart?: string;
@@ -10,9 +10,9 @@ export type TodoFilterVo = {
   abandonedDateStart?: string;
   abandonedDateEnd?: string;
   taskIds?: string[];
-  todoWithRepeatList?: { id: string; source: TodoSource }[];
+  todoWithRepeatList?: { id: string; relatedType: RelatedType }[];
 } & BaseFilterVo &
-  Partial<Pick<TodoVo, 'importance' | 'urgency' | 'status' | 'taskId'>>;
+  Partial<Pick<TodoVo, 'importance' | 'urgency' | 'status' | 'taskId' | 'relatedType'>>;
 
 export type TodoPageFilterVo = TodoFilterVo & {
   pageNum: number;

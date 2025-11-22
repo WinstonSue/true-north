@@ -2,7 +2,7 @@ import { Goal, GoalWithoutRelations } from '../goal.entity';
 import { BaseModelDto, BaseMapper } from '@business/common';
 import { OmitType, IntersectionType } from 'francis-mapped-types';
 import dayjs from 'dayjs';
-import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@life-toolkit/vo';
+import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@true-north/vo';
 import { TaskDto } from '../../task';
 
 // 没有关联字段的DTO
