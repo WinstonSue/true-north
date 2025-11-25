@@ -1,3 +1,4 @@
+import { useEffect, useState, useMemo } from 'react';
 import {
   Input,
   Grid,
@@ -5,12 +6,13 @@ import {
   Select,
   Form,
   Radio,
+  RulesProps,
 } from '@arco-design/web-react';
+import clsx from 'clsx';
 import dayjs from 'dayjs';
-import { useGoalDetailContext } from './context';
-import { useEffect, useState, useMemo } from 'react';
-import { GoalMapping, GoalService } from '@true-north/web-service';
+import { GoalService } from '@true-north/web-service';
 import { GoalType, Importance, Difficulty } from '@true-north/enum';
+import { useGoalDetailContext } from './context';
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 import GoalTreeSelector from '../GoalTreeSelector';
 
@@ -19,27 +21,19 @@ const RangePicker = DatePicker.RangePicker;
 const TextArea = Input.TextArea;
 
 export default function GoalForm() {
-  const { goalList, currentGoal, goalFormData, setGoalFormData } =
+  const { currentGoal, initialFormData, goalFormData, setGoalFormData } =
     useGoalDetailContext();
 
   const [form] = Form.useForm();
   const [parentGoal, setParentGoal] = useState(null);
 
-  useEffect(() => {
-    if (currentGoal?.id) {
-      const formData = GoalMapping.voToGoalFormData(currentGoal);
-      setGoalFormData(formData);
-      form.setFieldsValue(formData);
-    }
-  }, [currentGoal, form, setGoalFormData]);
-
   // 确保 initialFormData 中的 parentId 能正确显示
   useEffect(() => {
-    if (goalFormData && !currentGoal?.id) {
+    if (initialFormData) {
       // 对于新建目标，直接设置所有字段值
-      form.setFieldsValue(goalFormData);
+      form.setFieldsValue(initialFormData);
     }
-  }, [goalFormData, currentGoal?.id, form]);
+  }, [initialFormData, form]);
 
   // 获取父目标信息
   useEffect(() => {
@@ -58,7 +52,7 @@ export default function GoalForm() {
     };
 
     fetchParentGoal();
-  }, [goalFormData?.parentId]);
+  }, [goalFormData.parentId]);
 
   // 当父目标变化时，检查并调整当前值
   useEffect(() => {
@@ -140,8 +134,6 @@ export default function GoalForm() {
     };
   }, [parentGoal]);
 
-  if (!goalFormData) return null;
-
   return (
     <Form
       form={form}
@@ -151,7 +143,12 @@ export default function GoalForm() {
       }}
     >
       <Row gutter={[16, 16]} className="p-2">
-        <Item span={24} label="目标名称" name="name">
+        <Item
+          span={24}
+          label="目标名称"
+          name="name"
+          rules={[{ required: true }]}
+        >
           <Input placeholder="准备做什么?" />
         </Item>
         <Item span={24} label="父级目标" name="parentId">
@@ -187,7 +184,8 @@ export default function GoalForm() {
           {parentGoal && constraints.dateRange && (
             <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
               <span>
-                父目标日期范围限制：{constraints.dateRange[0]} ~ {constraints.dateRange[1]}
+                父目标日期范围限制：{constraints.dateRange[0]} ~{' '}
+                {constraints.dateRange[1]}
               </span>
             </div>
           )}
@@ -230,7 +228,8 @@ export default function GoalForm() {
               <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
                 <span>⚠️</span>
                 <span>
-                  重要程度不能低于父目标：{IMPORTANCE_MAP.get(parentGoal.importance)?.label}
+                  重要程度不能低于父目标：
+                  {IMPORTANCE_MAP.get(parentGoal.importance)?.label}
                 </span>
               </div>
             )}
@@ -257,6 +256,7 @@ function Item(props: {
   label: string;
   children: React.ReactNode;
   name: string;
+  rules?: RulesProps[];
 }) {
   const { size } = useGoalDetailContext();
 
@@ -272,6 +272,13 @@ function Item(props: {
         labelAlign="left"
         labelCol={{ span: labelCol }}
         wrapperCol={{ span: wrapperCol }}
+        rules={props.rules}
+        requiredSymbol={{ position: 'end' }}
+        className={clsx(
+          '[&_.arco-form-label-item>label]:flex',
+          '[&_.arco-form-label-item>label]:items-center',
+          '[&_.arco-form-label-item>label]:gap-1',
+        )}
       >
         {props.children}
       </Form.Item>

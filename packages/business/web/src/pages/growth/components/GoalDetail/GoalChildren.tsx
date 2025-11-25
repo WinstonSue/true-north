@@ -5,8 +5,7 @@ import { CreateButton } from '@/components/Button/CreateButton';
 import clsx from 'clsx';
 
 export default function GoalChildren() {
-  const { currentGoal, showGoalChildren, refreshGoalDetail } =
-    useGoalDetailContext();
+  const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
 
   const { CreatePopover: CreateGoalPopover } = useGoalDetail();
 
@@ -37,7 +36,7 @@ export default function GoalChildren() {
         <GoalList
           goalList={currentGoal.children}
           onClickGoal={async (id) => {
-            await showGoalChildren(id);
+            await refreshGoalDetail(id);
           }}
           refreshGoalList={async () => {
             await refreshGoalDetail(currentGoal.id);

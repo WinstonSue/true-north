@@ -71,26 +71,7 @@ const MindMapToolbar: React.FC<MindMapToolbarProps> = ({
   className,
 }) => {
   // 业务数据和操作
-  const { selectedNodeId, addChild, addSibling, deleteNode, minimapVisible, setMinimapVisible } =
-    useMindMapContext();
-
-  // 添加子节点
-  const handleAddChild = () => {
-    if (!selectedNodeId) return;
-    addChild(selectedNodeId, '新节点');
-  };
-
-  // 添加兄弟节点
-  const handleAddSibling = () => {
-    if (!selectedNodeId) return;
-    addSibling(selectedNodeId, '新节点');
-  };
-
-  // 删除节点
-  const handleDeleteNode = () => {
-    if (!selectedNodeId) return;
-    deleteNode(selectedNodeId);
-  };
+  const { selectedNodeId, minimapVisible, setMinimapVisible } = useMindMapContext();
 
   // 全屏
   const handleFullscreen = () => {
@@ -180,31 +161,6 @@ const MindMapToolbar: React.FC<MindMapToolbarProps> = ({
     );
   };
 
-  // 节点操作按钮组
-  const NodeControls = () => (
-    <>
-      <ToolButton
-        icon={<IconPlus />}
-        content="添加子节点 (Tab)"
-        onClick={handleAddChild}
-        disabled={!selectedNodeId}
-      />
-      <ToolButton
-        icon={<IconPlus />}
-        content="添加兄弟节点 (Enter)"
-        onClick={handleAddSibling}
-        disabled={!selectedNodeId}
-      />
-      <ToolButton
-        icon={<IconDelete />}
-        content="删除节点 (Delete)"
-        onClick={handleDeleteNode}
-        disabled={!selectedNodeId}
-        status="danger"
-      />
-    </>
-  );
-
   // 编辑操作按钮组
   const EditControls = () => (
     <>
@@ -223,9 +179,6 @@ const MindMapToolbar: React.FC<MindMapToolbarProps> = ({
   // 完整模式渲染
   return (
     <div className={`mind-map-toolbar p-2 bg-white border-b border-gray-200 ${className || ''}`}>
-      {/* 操作节点 */}
-      <NodeControls />
-
       {/* 编辑操作 */}
       <EditControls />
 

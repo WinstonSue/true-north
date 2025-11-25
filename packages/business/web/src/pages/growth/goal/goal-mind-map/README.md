@@ -69,7 +69,7 @@ import GoalMindMap from './goal-mind-map';
 根据目标状态显示不同的颜色：
 
 - **待办** (TODO): 蓝紫色 (`#667eea`)
-- **进行中** (IN_PROGRESS): 绿色 (`#11998e`)
+- **进行中** (DOING): 绿色 (`#11998e`)
 - **已完成** (DONE): 灰色 (`#bdc3c7`)
 - **已放弃** (ABANDONED): 红色 (`#ff6b6b`)
 

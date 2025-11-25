@@ -10,6 +10,7 @@ import { Button, Spin } from '@arco-design/web-react';
 import TaskList from './TaskList';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
+import { GoalService, GoalMapping } from '@true-north/web-service';
 
 const { Shrink, Fixed } = FlexibleContainer;
 
@@ -104,7 +105,16 @@ function GoalEditorMain(props: { goalId: string }) {
 }
 
 function GoalEditorFooter() {
-  const { onSubmit, onClose, handleUpdate } = useGoalDetailContext();
+  const { onSubmit, onClose, currentGoal, goalFormData } =
+    useGoalDetailContext();
+
+  async function handleUpdate() {
+    await GoalService.update(
+      currentGoal.id,
+      GoalMapping.formDataToUpdateVo(goalFormData),
+    );
+  }
+
   return (
     <div className="flex justify-end gap-2">
       <Button onClick={() => onClose?.()}>取消</Button>

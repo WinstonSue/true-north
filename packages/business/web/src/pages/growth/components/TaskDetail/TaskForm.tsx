@@ -1,15 +1,15 @@
 import {
   Input,
-  Button,
-  Popover,
   Grid,
   DatePicker,
   Switch,
   Spin,
+  Select,
+  Form,
+  RulesProps,
 } from '@arco-design/web-react';
 import { useTaskDetailContext } from './context';
 import TrackTime from '../TrackTime';
-import { Select, Form } from '@arco-design/web-react';
 import { useComponentLoad } from '@/hooks/lifecycle';
 import GoalTreeSelector from '../GoalTreeSelector';
 
@@ -43,7 +43,12 @@ export default function TaskForm() {
       }}
     >
       <Row gutter={[16, 16]} className="p-2">
-        <Item span={24} label="任务名称" name="name">
+        <Item
+          span={24}
+          label="任务名称"
+          name="name"
+          rules={[{ required: true }]}
+        >
           <Input placeholder="准备做什么?" />
         </Item>
         <Item span={24} label="是否子任务" name="isSubTask">
@@ -88,6 +93,7 @@ function Item(props: {
   label: string;
   children: React.ReactNode;
   name: string;
+  rules?: RulesProps[];
 }) {
   const { size } = useTaskDetailContext();
   const labelCol =

@@ -178,7 +178,7 @@ const MindMapNode: React.FC<CustomNodeProps> = ({
         onClick={handleMenuClick}
         title="更多操作"
       >
-        <IconMore style={{ fontSize: '14px' }} />
+        <IconMore style={{ fontSize: '16px' }} />
       </div>
 
       {/* 折叠/展开指示器 */}

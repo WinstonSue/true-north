@@ -19,7 +19,7 @@ export default function TabsPage(props: {
 
   return (
     <FlexibleContainer className="bg-bg-2 rounded-lg w-full h-full">
-      <Fixed className="px-5 flex items-center border-b gap-4">
+      <Fixed className="px-4 flex items-center border-b gap-4">
         {props.tabs.map((tab) => (
           <div
             key={tab.path}
@@ -43,7 +43,7 @@ export default function TabsPage(props: {
 
       <Shrink
         className={clsx(
-          'px-5 w-full h-full',
+          'px-4 w-full h-full',
           'flex flex-col gap-3',
           'overflow-y-auto',
         )}

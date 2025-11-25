@@ -68,7 +68,7 @@ const NodeMenu: React.FC<NodeMenuProps> = ({
   const menuItems = [
     {
       key: 'edit',
-      icon: <IconEdit />,
+      icon: <IconEdit fontSize={16} />,
       label: '编辑目标',
       onClick: () => {
         onEdit?.(nodeId);
@@ -77,7 +77,7 @@ const NodeMenu: React.FC<NodeMenuProps> = ({
     },
     {
       key: 'addChild',
-      icon: <IconPlus />,
+      icon: <IconPlus fontSize={16} />,
       label: '添加子目标',
       onClick: () => {
         onAddChild?.(nodeId);
@@ -86,7 +86,7 @@ const NodeMenu: React.FC<NodeMenuProps> = ({
     },
     {
       key: 'addSibling',
-      icon: <IconPlus />,
+      icon: <IconPlus fontSize={16} />,
       label: '添加同级目标',
       onClick: () => {
         onAddSibling?.(nodeId);
@@ -95,7 +95,7 @@ const NodeMenu: React.FC<NodeMenuProps> = ({
     },
     {
       key: 'copy',
-      icon: <IconCopy />,
+      icon: <IconCopy fontSize={16} />,
       label: '复制目标',
       onClick: () => {
         onCopy?.(nodeId);
@@ -103,12 +103,8 @@ const NodeMenu: React.FC<NodeMenuProps> = ({
       },
     },
     {
-      key: 'divider',
-      type: 'divider',
-    },
-    {
       key: 'delete',
-      icon: <IconDelete />,
+      icon: <IconDelete fontSize={16} />,
       label: '删除节点',
       className: styles['menu-item-danger'],
       onClick: () => {
@@ -126,17 +122,12 @@ const NodeMenu: React.FC<NodeMenuProps> = ({
       ref={menuRef}
       className={styles['node-menu']}
       style={{
-        position: 'fixed',
         left: position.x,
         top: position.y,
-        zIndex: 9999,
       }}
     >
       <Menu>
         {menuItems.map((item) => {
-          if (item.type === 'divider') {
-            return <Menu.Item key={item.key} style={{ height: '1px', margin: '4px 0' }} />;
-          }
           return (
             <Menu.Item
               key={item.key}

@@ -13,18 +13,12 @@ function GoalAll() {
   const { openCreateDrawer } = useGoalDetail();
 
   return (
-    <FlexibleContainer className="bg-bg-2 rounded-lg w-full h-full">
-      <FlexibleContainer.Fixed className="px-5 py-2 flex justify-between items-center border-b">
-        <div className="text-text-1 text-title-2 font-medium py-1">
-          全部目标
-        </div>
-      </FlexibleContainer.Fixed>
-
-      <FlexibleContainer.Fixed className="px-5 flex border-b">
+    <FlexibleContainer className="bg-bg-2 rounded-lg gap-3">
+      <FlexibleContainer.Fixed className="flex border-b">
         <GoalFilters />
       </FlexibleContainer.Fixed>
 
-      <FlexibleContainer.Fixed className="px-5 flex my-3">
+      <FlexibleContainer.Fixed className="flex">
         <CreateButton
           onClick={() =>
             openCreateDrawer({
@@ -40,7 +34,7 @@ function GoalAll() {
         </CreateButton>
       </FlexibleContainer.Fixed>
 
-      <FlexibleContainer.Shrink className="px-5 w-full h-full flex">
+      <FlexibleContainer.Shrink>
         <GoalTable />
       </FlexibleContainer.Shrink>
     </FlexibleContainer>

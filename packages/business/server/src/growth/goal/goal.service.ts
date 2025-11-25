@@ -111,7 +111,7 @@ export class GoalService {
   async done(id: string): Promise<boolean> {
     const entity = await this.goalRepository.find(id);
     const dto = GoalDto.importEntity(entity);
-    if (dto.status === GoalStatus.TODO || dto.status === GoalStatus.IN_PROGRESS) {
+    if (dto.status === GoalStatus.TODO || dto.status === GoalStatus.DOING) {
       throw new Error('当前状态不允许标记为完成');
     }
     const goalUpdate = new Goal();

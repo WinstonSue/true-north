@@ -6,6 +6,7 @@ import {
 } from './context';
 import GoalForm from './GoalForm';
 import { Button } from '@arco-design/web-react';
+import { GoalService, GoalMapping } from '@true-north/web-service';
 
 const { Shrink, Fixed } = FlexibleContainer;
 
@@ -37,8 +38,12 @@ export default function GoalCreator(props: GoalCreatorProps) {
 }
 
 function Footer() {
-  const { onSubmit, goalFormData, handleCreate, onClose } =
-    useGoalDetailContext();
+  const { goalFormData, onSubmit, onClose } = useGoalDetailContext();
+
+  async function handleCreate() {
+    await GoalService.create(GoalMapping.formDataToCreateVo(goalFormData));
+  }
+
   return (
     <div className="flex justify-end gap-2">
       <Button onClick={() => onClose?.()}>取消</Button>
