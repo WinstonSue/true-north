@@ -1,0 +1,67 @@
+import type { TrackTime as TrackTimeVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
+import { CreateTrackTimeDto, UpdateTrackTimeDto, TrackTimeDto, TrackTimeFilterDto } from './dto';
+import { TrackTimeService } from './track-time.service';
+import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
+
+@Controller('/trackTime')
+export class TrackTimeController {
+  constructor(private readonly trackTimeService: TrackTimeService) {}
+
+  @Post('/create', { description: '创建时间记录' })
+  async create(@Body() createTrackTimeVo: TrackTimeVO.CreateTrackTimeVo): Promise<TrackTimeVO.TrackTimeVo> {
+    const createDto = new CreateTrackTimeDto();
+    createDto.importCreateVo(createTrackTimeVo);
+    const dto = await this.trackTimeService.create(createDto);
+    return dto.exportVo();
+  }
+
+  @Delete('/delete/:id', { description: '删除时间记录' })
+  async delete(@Param('id') id: string): Promise<void> {
+    return await this.trackTimeService.delete(id);
+  }
+
+  @Put('/update/:id', { description: '更新时间记录' })
+  async update(
+    @Param('id') id: string,
+    @Body() updateTrackTimeVo: TrackTimeVO.UpdateTrackTimeVo
+  ): Promise<TrackTimeVO.TrackTimeVo> {
+    const updateDto = new UpdateTrackTimeDto();
+    updateDto.id = id;
+    updateDto.importUpdateVo(updateTrackTimeVo);
+    const dto = await this.trackTimeService.update(updateDto);
+    return dto.exportVo();
+  }
+
+  @Get('/list', { description: '查询时间记录列表' })
+  async findByFilter(
+    @Query() trackTimeListFiltersVo?: TrackTimeVO.TrackTimeFilterVo
+  ): Promise<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>> {
+    const filter = new TrackTimeFilterDto();
+    if (trackTimeListFiltersVo) filter.importListVo(trackTimeListFiltersVo);
+    const list = await this.trackTimeService.findByFilter(filter);
+    return TrackTimeDto.dtoListToListVo(list);
+  }
+
+  @Get('/detail/:id', { description: '查询时间记录详情' })
+  async findOne(@Param('id') id: string): Promise<TrackTimeVO.TrackTimeVo | null> {
+    const dto = await this.trackTimeService.findOne(id);
+    return dto ? dto.exportVo() : null;
+  }
+
+  @Get('/related/:relatedType/:relatedId', { description: '根据关联对象查询时间记录' })
+  async findByRelatedId(
+    @Param('relatedType') relatedType: string,
+    @Param('relatedId') relatedId: string
+  ): Promise<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>> {
+    const list = await this.trackTimeService.findByRelatedId(relatedType, relatedId);
+    return TrackTimeDto.dtoListToListVo(list);
+  }
+
+  @Delete('/related/:relatedType/:relatedId', { description: '删除关联对象的所有时间记录' })
+  async deleteByRelatedId(
+    @Param('relatedType') relatedType: string,
+    @Param('relatedId') relatedId: string
+  ): Promise<void> {
+    return await this.trackTimeService.deleteByRelatedId(relatedType, relatedId);
+  }
+}

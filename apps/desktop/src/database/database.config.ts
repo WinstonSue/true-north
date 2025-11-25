@@ -4,7 +4,7 @@ import { app } from 'electron';
 import path from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { User } from './users/user.entity';
-import { Goal, Habit, Task, Todo, TodoRepeat } from '@true-north/business-server';
+import { Goal, Habit, Task, Todo, TodoRepeat, TrackTime } from '@true-north/business-server';
 
 // 开发环境使用项目数据库
 const getDatabasePath = () => {
@@ -28,7 +28,7 @@ export const AppDataSource = new DataSource({
   database: databasePath,
   synchronize: true, // 开发环境自动同步表结构
   logging: process.env.NODE_ENV === 'development' ? ['error'] : undefined,
-  entities: [User, Goal, Task, Todo, TodoRepeat, Habit],
+  entities: [User, Goal, Task, Todo, TodoRepeat, Habit, TrackTime],
   migrations: [],
   subscribers: [],
   namingStrategy: new SnakeNamingStrategy(),

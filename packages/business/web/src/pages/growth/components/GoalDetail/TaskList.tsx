@@ -1,22 +1,27 @@
-import { useGoalDetailContext } from './context';
+import { Empty } from '@arco-design/web-react';
 import clsx from 'clsx';
 import { CreateButton } from '@/components/Button/CreateButton';
+import { useGoalDetailContext } from './context';
 import { useTaskDetail } from '..';
 import TaskList from '../TaskList';
 
 export function GoalTaskList() {
   const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
 
-  return (
-    currentGoal?.taskList && (
-      <TaskList
-        taskList={currentGoal.taskList}
-        onClickTask={async (id) => {}}
-        refreshTaskList={async () => {
-          await refreshGoalDetail(currentGoal.id);
-        }}
-      />
-    )
+  return currentGoal.taskList?.length > 0 ? (
+    <TaskList
+      taskList={currentGoal.taskList}
+      onClickTask={async (id) => {}}
+      refreshTaskList={async () => {
+        await refreshGoalDetail(currentGoal.id);
+      }}
+    />
+  ) : (
+    <div
+      className={clsx(['w-full h-full', 'flex items-center justify-center'])}
+    >
+      <Empty description="暂无任务" />
+    </div>
   );
 }
 

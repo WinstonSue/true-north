@@ -1,27 +1,30 @@
+import clsx from 'clsx';
+import { Empty } from '@arco-design/web-react';
 import { useGoalDetailContext } from './context';
 import GoalList from '../GoalList/GoalList';
 import { useGoalDetail } from '.';
 import { CreateButton } from '@/components/Button/CreateButton';
-import clsx from 'clsx';
 
 export function GoalChildren() {
   const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
 
-  return currentGoal ? (
-    <div className="w-full flex flex-col gap-2">
-      {currentGoal.children && (
-        <GoalList
-          goalList={currentGoal.children}
-          onClickGoal={async (id) => {
-            await refreshGoalDetail(id);
-          }}
-          refreshGoalList={async () => {
-            await refreshGoalDetail(currentGoal.id);
-          }}
-        />
-      )}
+  return currentGoal?.children?.length > 0 ? (
+    <GoalList
+      goalList={currentGoal.children}
+      onClickGoal={async (id) => {
+        await refreshGoalDetail(id);
+      }}
+      refreshGoalList={async () => {
+        await refreshGoalDetail(currentGoal.id);
+      }}
+    />
+  ) : (
+    <div
+      className={clsx(['w-full h-full', 'flex items-center justify-center'])}
+    >
+      <Empty description="暂无子目标" />
     </div>
-  ) : null;
+  );
 }
 
 export function CreateGoal() {

@@ -1,28 +1,50 @@
 import { Popover } from '@arco-design/web-react';
 import clsx from 'clsx';
 import { SiteIcon } from '@true-north/components-ui';
+import TimeTracker from './TimeTracker';
+import { TimeEntry, TrackTimeProps } from './types';
 
-function TrackTime(props: {
-  trackTimeList: {
-    duration?: number;
-    startAt?: string;
-    endAt?: string;
-    note?: string;
-  }[];
-}) {
+function TrackTime(props: TrackTimeProps) {
+
+  // 格式化持续时间显示
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  // 计算总时间
+  const totalTime = props.trackTimeList.reduce((acc, trackTime) => {
+    let duration = 0;
+    if (trackTime.duration) {
+      duration = trackTime.duration;
+    } else if (trackTime.startAt && trackTime.endAt) {
+      duration =
+        new Date(trackTime.endAt).getTime() / 1000 -
+        new Date(trackTime.startAt).getTime() / 1000;
+    }
+    return acc + duration;
+  }, 0);
+
+  const handleSave = (entries: TimeEntry[]) => {
+    props.onChange?.(entries);
+  };
+
   return (
     <Popover
       trigger="click"
+      position="bottom"
       content={
-        <div>
-          {props.trackTimeList.map((trackTime) => (
-            <div key={trackTime.startAt}>
-              <div>{trackTime.startAt}</div>
-              <div>{trackTime.endAt}</div>
-              <div>{trackTime.note}</div>
-              <div>{trackTime.duration}</div>
-            </div>
-          ))}
+        <div style={{ width: 500 }}>
+          <TimeTracker
+            onSave={handleSave}
+            initialEntries={props.trackTimeList}
+            taskName={props.taskName}
+          />
         </div>
       }
     >
@@ -36,17 +58,7 @@ function TrackTime(props: {
       >
         <div className="flex items-center gap-1">
           <SiteIcon className="w-4 h-4 text-text-3" id={'cute-play'} />
-          {props.trackTimeList.reduce((acc, trackTime) => {
-            let duration = 0;
-            if (trackTime.duration) {
-              duration = trackTime.duration;
-            } else if (trackTime.startAt && trackTime.endAt) {
-              duration =
-                new Date(trackTime.endAt).getTime() / 1000 -
-                new Date(trackTime.startAt).getTime() / 1000;
-            }
-            return acc + duration;
-          }, 0)}
+          <span>{formatDuration(totalTime)}</span>
         </div>
       </div>
     </Popover>
