@@ -34,7 +34,7 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
 }>((props) => {
   const [currentGoal, setCurrentGoal] = useState<GoalVo>();
 
-  const defaultFormData: GoalFormData = {
+  const [initialFormData, setInitialFormData] = useState<GoalFormData>({
     name: '',
     type: props.initialFormData?.type || GoalType.KEY_RESULT,
     status: props.initialFormData?.status || GoalStatus.TODO,
@@ -43,10 +43,6 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
     planTimeRange: [undefined, undefined],
     children: [],
     ...props.initialFormData,
-  };
-
-  const [initialFormData, setInitialFormData] = useState<GoalFormData>({
-    ...defaultFormData,
   });
 
   const [goalFormData, setGoalFormData] =

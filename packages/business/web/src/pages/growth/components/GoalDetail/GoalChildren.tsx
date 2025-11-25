@@ -4,34 +4,11 @@ import { useGoalDetail } from '.';
 import { CreateButton } from '@/components/Button/CreateButton';
 import clsx from 'clsx';
 
-export default function GoalChildren() {
+export function GoalChildren() {
   const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
-
-  const { CreatePopover: CreateGoalPopover } = useGoalDetail();
 
   return currentGoal ? (
     <div className="w-full flex flex-col gap-2">
-      <div
-        className={clsx([
-          'text-title-1 text-text-1 font-medium p-2',
-          'flex justify-between items-center',
-        ])}
-      >
-        <CreateGoalPopover
-          creatorProps={{
-            initialFormData: {
-              parentId: currentGoal.id,
-            },
-            afterSubmit: async () => {
-              await refreshGoalDetail(currentGoal.id);
-            },
-          }}
-        >
-          <CreateButton className="!px-2" type="text" size="small">
-            添加子目标
-          </CreateButton>
-        </CreateGoalPopover>
-      </div>
       {currentGoal.children && (
         <GoalList
           goalList={currentGoal.children}
@@ -43,6 +20,35 @@ export default function GoalChildren() {
           }}
         />
       )}
+    </div>
+  ) : null;
+}
+
+export function CreateGoal() {
+  const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
+  const { CreatePopover: CreateGoalPopover } = useGoalDetail();
+
+  return currentGoal ? (
+    <div
+      className={clsx([
+        'text-title-1 text-text-1 font-medium p-2',
+        'flex justify-between items-center',
+      ])}
+    >
+      <CreateGoalPopover
+        creatorProps={{
+          initialFormData: {
+            parentId: currentGoal?.id,
+          },
+          afterSubmit: async () => {
+            await refreshGoalDetail(currentGoal?.id);
+          },
+        }}
+      >
+        <CreateButton className="!px-2" type="text" size="small">
+          添加子目标
+        </CreateButton>
+      </CreateGoalPopover>
     </div>
   ) : null;
 }

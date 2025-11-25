@@ -32,6 +32,7 @@ export class GoalController {
   @Get('/find/:id', { description: '根据ID查询目标详情' })
   async find(@Param('id') id: string): Promise<GoalVO.GoalVo> {
     const dto = await this.goalService.findWithRelations(id);
+    console.log('dto',  dto.exportVo());
     return dto.exportVo();
   }
 

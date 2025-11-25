@@ -142,7 +142,7 @@ export default function LifeToolkitApp() {
                 style={{
                   position: 'fixed',
                   bottom: 0,
-                  right: 0,
+                  left: 0,
                   backgroundColor: 'rgba(255, 0, 0, 0.7)',
                   color: 'white',
                   padding: '8px 12px',

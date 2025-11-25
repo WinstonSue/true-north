@@ -11,10 +11,11 @@ import {
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { GoalService } from '@true-north/web-service';
-import { GoalType, Importance, Difficulty } from '@true-north/enum';
+import { GoalType } from '@true-north/enum';
 import { useGoalDetailContext } from './context';
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 import GoalTreeSelector from '../GoalTreeSelector';
+import { useGoalFormConstraints } from './hooks';
 
 const { Row, Col } = Grid;
 const RangePicker = DatePicker.RangePicker;
@@ -54,85 +55,20 @@ export default function GoalForm() {
     fetchParentGoal();
   }, [goalFormData.parentId]);
 
+  const {
+    allowedDateRange,
+    allowedTypes,
+    allowedImportance,
+    updateByConstraints,
+  } = useGoalFormConstraints(parentGoal);
+
   // 当父目标变化时，检查并调整当前值
   useEffect(() => {
-    if (parentGoal && goalFormData) {
-      const updates: Partial<typeof goalFormData> = {};
-
-      // 检查目标类型是否符合约束
-      if (
-        parentGoal.type === GoalType.KEY_RESULT &&
-        goalFormData.type !== GoalType.KEY_RESULT
-      ) {
-        updates.type = GoalType.KEY_RESULT;
-      }
-
-      // 检查重要程度是否符合约束（子目标重要程度不能低于父目标）
-      const parentImportanceLevel = Object.values(Importance).indexOf(
-        parentGoal.importance,
-      );
-      const currentImportanceLevel = Object.values(Importance).indexOf(
-        goalFormData.importance,
-      );
-      if (currentImportanceLevel > parentImportanceLevel) {
-        updates.importance = parentGoal.importance;
-      }
-
-      // 如果有需要更新的字段，则更新
-      if (Object.keys(updates).length > 0) {
-        setGoalFormData((prev) => ({ ...prev, ...updates }));
-        form.setFieldsValue(updates);
-      }
+    if (parentGoal) {
+      const updates = updateByConstraints(goalFormData);
+      form.setFieldsValue(updates);
     }
-  }, [
-    parentGoal?.id,
-    goalFormData?.type,
-    goalFormData?.importance,
-    form,
-    setGoalFormData,
-  ]);
-
-  // 计算约束条件
-  const constraints = useMemo(() => {
-    if (!parentGoal) {
-      return {
-        allowedTypes: [GoalType.OBJECTIVE, GoalType.KEY_RESULT],
-        allowedImportance: [...IMPORTANCE_MAP.keys()],
-        allowedDifficulty: [...DIFFICULTY_MAP.keys()],
-        dateRange: null,
-      };
-    }
-
-    // 1. 目标类型约束：如果父目标是成果指标，子目标只能是成果指标
-    const allowedTypes =
-      parentGoal.type === GoalType.KEY_RESULT
-        ? [GoalType.KEY_RESULT]
-        : [GoalType.OBJECTIVE, GoalType.KEY_RESULT];
-
-    // 2. 重要程度约束：子目标重要程度不能低于父目标
-    const parentImportanceLevel = Object.values(Importance).indexOf(
-      parentGoal.importance,
-    );
-    const allowedImportance = [...IMPORTANCE_MAP.keys()].filter(
-      (importance) => {
-        const currentLevel = Object.values(Importance).indexOf(importance);
-        return currentLevel <= parentImportanceLevel; // 数值越小，重要程度越高
-      },
-    );
-
-    // 3. 日期范围约束：不能超过父目标的日期范围
-    const dateRange =
-      parentGoal.startAt && parentGoal.endAt
-        ? [parentGoal.startAt, parentGoal.endAt]
-        : null;
-
-    return {
-      allowedTypes,
-      allowedImportance,
-      allowedDifficulty: [...DIFFICULTY_MAP.keys()], // 难度不受父目标限制
-      dateRange,
-    };
-  }, [parentGoal]);
+  }, [parentGoal, goalFormData, form]);
 
   return (
     <Form
@@ -158,49 +94,59 @@ export default function GoalForm() {
             allowClear
           />
         </Item>
-
-        <Item span={24} label="时间范围" name="planTimeRange">
+        <Item
+          span={24}
+          label="时间范围"
+          name="planTimeRange"
+          rules={[{ required: true }]}
+        >
           <RangePicker
+            value={goalFormData.planTimeRange}
             className="w-full rounded-md"
             allowClear
             format="YYYY-MM-DD"
             disabledDate={(current) => {
-              if (!constraints.dateRange) return false;
-              const [minDate, maxDate] = constraints.dateRange;
+              if (!allowedDateRange) return false;
+              const [minDate, maxDate] = allowedDateRange;
               return (
                 current.isBefore(dayjs(minDate)) ||
                 current.isAfter(dayjs(maxDate))
               );
             }}
             placeholder={
-              constraints.dateRange
+              allowedDateRange
                 ? [
-                    `最早: ${constraints.dateRange[0]}`,
-                    `最晚: ${constraints.dateRange[1]}`,
+                    `最早: ${allowedDateRange[0]}`,
+                    `最晚: ${allowedDateRange[1]}`,
                   ]
                 : ['开始日期', '结束日期']
             }
           />
-          {parentGoal && constraints.dateRange && (
+          {parentGoal && allowedDateRange && (
             <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
               <span>
-                父目标日期范围限制：{constraints.dateRange[0]} ~{' '}
-                {constraints.dateRange[1]}
+                父目标日期范围限制：{allowedDateRange[0]} ~{' '}
+                {allowedDateRange[1]}
               </span>
             </div>
           )}
         </Item>
-        <Item span={24} label="目标类型" name="type">
-          <Radio.Group>
+        <Item
+          span={24}
+          label="目标类型"
+          name="type"
+          rules={[{ required: true }]}
+        >
+          <Radio.Group value={goalFormData.type}>
             <Radio
               value={GoalType.OBJECTIVE}
-              disabled={!constraints.allowedTypes.includes(GoalType.OBJECTIVE)}
+              disabled={!allowedTypes.includes(GoalType.OBJECTIVE)}
             >
               战略规划
             </Radio>
             <Radio
               value={GoalType.KEY_RESULT}
-              disabled={!constraints.allowedTypes.includes(GoalType.KEY_RESULT)}
+              disabled={!allowedTypes.includes(GoalType.KEY_RESULT)}
             >
               成果指标
             </Radio>
@@ -211,32 +157,39 @@ export default function GoalForm() {
             </div>
           )}
         </Item>
-        <Item span={24} label="重要程度" name="importance">
+        <Item
+          span={24}
+          label="重要程度"
+          name="importance"
+          rules={[{ required: true }]}
+        >
           <Select
-            defaultValue={Importance.Helpful}
-            options={[...IMPORTANCE_MAP.entries()]
-              .filter(([key]) => constraints.allowedImportance.includes(key))
-              .map(([key, value]) => ({
-                label: value.label,
-                value: key,
-                disabled: !constraints.allowedImportance.includes(key),
-              }))}
+            value={goalFormData.importance}
+            options={[...IMPORTANCE_MAP.entries()].map(([key, value]) => ({
+              label: value.label,
+              value: key,
+              disabled: !allowedImportance.includes(key),
+            }))}
           />
           {parentGoal &&
-            constraints.allowedImportance.length <
-              [...IMPORTANCE_MAP.keys()].length && (
+            allowedImportance.length < [...IMPORTANCE_MAP.keys()].length && (
               <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
                 <span>⚠️</span>
                 <span>
-                  重要程度不能低于父目标：
+                  重要程度不能高于父目标：
                   {IMPORTANCE_MAP.get(parentGoal.importance)?.label}
                 </span>
               </div>
             )}
         </Item>
-        <Item span={24} label="难度" name="difficulty">
+        <Item
+          span={24}
+          label="难度"
+          name="difficulty"
+          rules={[{ required: true }]}
+        >
           <Select
-            defaultValue={Difficulty.Skilled}
+            value={goalFormData.difficulty}
             options={[...DIFFICULTY_MAP.entries()].map(([key, value]) => ({
               label: value.label,
               value: key,

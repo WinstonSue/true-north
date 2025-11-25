@@ -60,7 +60,7 @@ export function useGoalDetail() {
           maxWidth: 'unset',
         }}
         content={
-          <div className="w-[600px] p-4">
+          <div className="w-[720px] p-4">
             <GoalCreator
               size="small"
               {...creatorProps}
