@@ -49,13 +49,13 @@ export function TaskFilters() {
         <Col span={12}>
           <DatePickerRange
             placeholder={['计划开始日期', '计划结束日期']}
-            value={[filters.planDateStart, filters.planDateEnd]}
+            value={[filters.startDateStart, filters.startDateEnd]}
             className="w-full"
             onChange={(value) => {
               setFilters((prev: TaskPageFilterVo) => ({
                 ...prev,
-                planDateStart: value[0],
-                planDateEnd: value[1],
+                startDateStart: value[0],
+                startDateEnd: value[1],
               }));
             }}
           />

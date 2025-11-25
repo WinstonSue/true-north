@@ -94,7 +94,7 @@ export function GoalFilters() {
               },
               {
                 label: '进行中',
-                value: GoalStatus.IN_PROGRESS,
+                value: GoalStatus.DOING,
               },
               {
                 label: '已完成',

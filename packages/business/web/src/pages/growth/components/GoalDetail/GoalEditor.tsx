@@ -5,11 +5,12 @@ import {
   useGoalDetailContext,
 } from './context';
 import GoalForm from './GoalForm';
-import GoalChildren from './GoalChildren';
 import { Button, Spin } from '@arco-design/web-react';
-import TaskList from './TaskList';
+import { GoalTaskList, CreateTask } from './TaskList';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
+import { GoalService, GoalMapping } from '@true-north/web-service';
+import { CreateGoal, GoalChildren } from './GoalChildren';
 
 const { Shrink, Fixed } = FlexibleContainer;
 
@@ -70,31 +71,43 @@ function GoalEditorMain(props: { goalId: string }) {
       <Fixed>
         <GoalForm />
       </Fixed>
-      <Fixed className="flex gap-2">
-        {tabs.map((item) => (
-          <div
-            key={item.value}
-            className={clsx(
-              'px-3 py-2',
-              'rounded-lg',
-              'font-[500]',
-              'cursor-pointer',
-              'hover:bg-gray-100',
-              activeTab === item.value
-                ? ['bg-gray-100', 'text-text-1']
-                : ['text-text-2'],
-            )}
-            onClick={() => {
-              setActiveTab(item.value);
-            }}
-          >
-            {item.label}
-          </div>
-        ))}
+      <Fixed className="flex items-center justify-between">
+        <div className="flex gap-2 items-center">
+          {tabs.map((item) => (
+            <div
+              key={item.value}
+              className={clsx(
+                'px-3 py-2',
+                'rounded-lg',
+                'font-[500]',
+                'cursor-pointer',
+                'hover:bg-gray-100',
+                activeTab === item.value
+                  ? ['bg-gray-100', 'text-text-1']
+                  : ['text-text-2'],
+              )}
+              onClick={() => {
+                setActiveTab(item.value);
+              }}
+            >
+              {item.label}
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={clsx([
+            'text-title-1 text-text-1 font-medium p-2',
+            'flex justify-between items-center',
+          ])}
+        >
+          {activeTab === 'children' && <CreateGoal />}
+          {activeTab === 'taskList' && <CreateTask />}
+        </div>
       </Fixed>
       <Shrink>
         {activeTab === 'children' && <GoalChildren />}
-        {activeTab === 'taskList' && <TaskList />}
+        {activeTab === 'taskList' && <GoalTaskList />}
       </Shrink>
       <Fixed>
         <GoalEditorFooter />
@@ -104,7 +117,16 @@ function GoalEditorMain(props: { goalId: string }) {
 }
 
 function GoalEditorFooter() {
-  const { onSubmit, onClose, handleUpdate } = useGoalDetailContext();
+  const { onSubmit, onClose, currentGoal, goalFormData } =
+    useGoalDetailContext();
+
+  async function handleUpdate() {
+    await GoalService.update(
+      currentGoal.id,
+      GoalMapping.formDataToUpdateVo(goalFormData),
+    );
+  }
+
   return (
     <div className="flex justify-end gap-2">
       <Button onClick={() => onClose?.()}>取消</Button>

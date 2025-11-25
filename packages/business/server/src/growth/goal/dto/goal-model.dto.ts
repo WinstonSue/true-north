@@ -30,6 +30,7 @@ export class GoalDto extends IntersectionType(BaseModelDto, GoalWithoutRelations
     this.endAt = entity.endAt;
     this.doneAt = entity.doneAt;
     this.abandonedAt = entity.abandonedAt;
+    this.parentId = entity.parentId;
 
     // 关联对象映射（浅拷贝，避免循环引用）
     if (entity.parent) this.parent = GoalDto.importEntity(entity.parent);
@@ -57,6 +58,7 @@ export class GoalDto extends IntersectionType(BaseModelDto, GoalWithoutRelations
       endAt: this.endAt ? dayjs(this.endAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
       doneAt: this.doneAt ? dayjs(this.doneAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
       abandonedAt: this.abandonedAt ? dayjs(this.abandonedAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
+      parentId: this.parentId,
     } as GoalVO.GoalWithoutRelationsVo;
   }
 

@@ -1,56 +1,56 @@
-import { useGoalDetailContext } from './context';
+import { Empty } from '@arco-design/web-react';
 import clsx from 'clsx';
-import { FlexibleContainer } from 'francis-component-react';
 import { CreateButton } from '@/components/Button/CreateButton';
+import { useGoalDetailContext } from './context';
 import { useTaskDetail } from '..';
 import TaskList from '../TaskList';
 
-const { Shrink, Fixed } = FlexibleContainer;
-
-export default function TaskDetailTodoList() {
+export function GoalTaskList() {
   const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
 
+  return currentGoal.taskList?.length > 0 ? (
+    <TaskList
+      taskList={currentGoal.taskList}
+      onClickTask={async (id) => {}}
+      refreshTaskList={async () => {
+        await refreshGoalDetail(currentGoal.id);
+      }}
+    />
+  ) : (
+    <div
+      className={clsx(['w-full h-full', 'flex items-center justify-center'])}
+    >
+      <Empty description="暂无任务" />
+    </div>
+  );
+}
+
+export function CreateTask() {
+  const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
   const { CreatePopover: CreateTaskPopover } = useTaskDetail();
 
   return (
-    currentGoal && (
-      <FlexibleContainer className="gap-2">
-        <Fixed
-          className={clsx([
-            'text-title-1 text-text-1 font-medium p-2',
-            'flex justify-between items-center',
-          ])}
-        >
-          <CreateTaskPopover
-            creatorProps={{
-              initialFormData: {
-                goalId: currentGoal.id,
-                planTimeRange: [currentGoal.startAt, currentGoal.endAt],
-              },
-              afterSubmit: async () => {
-                await refreshGoalDetail(currentGoal.id);
-              },
-            }}
-          >
-            <CreateButton className="!px-2" type="text" size="small">
-              添加任务
-            </CreateButton>
-          </CreateTaskPopover>
-        </Fixed>
-        <Shrink className="overflow-auto">
-          {currentGoal?.taskList && (
-            <TaskList
-              taskList={currentGoal.taskList}
-              onClickTask={async (id) => {
-                //
-              }}
-              refreshTaskList={async () => {
-                await refreshGoalDetail(currentGoal.id);
-              }}
-            />
-          )}
-        </Shrink>
-      </FlexibleContainer>
-    )
+    <div
+      className={clsx([
+        'text-title-1 text-text-1 font-medium p-2',
+        'flex justify-between items-center',
+      ])}
+    >
+      <CreateTaskPopover
+        creatorProps={{
+          initialFormData: {
+            goalId: currentGoal.id,
+            planTimeRange: [currentGoal.startAt, currentGoal.endAt],
+          },
+          afterSubmit: async () => {
+            await refreshGoalDetail(currentGoal.id);
+          },
+        }}
+      >
+        <CreateButton className="!px-2" type="text" size="small">
+          添加任务
+        </CreateButton>
+      </CreateTaskPopover>
+    </div>
   );
 }

@@ -67,6 +67,6 @@ export class HabitService {
   }
 
   async restore(id: string): Promise<void> {
-    await this.update(Object.assign(new UpdateHabitDto(), { status: HabitStatus.IN_PROGRESS }));
+    await this.update(Object.assign(new UpdateHabitDto(), { status: HabitStatus.DOING }));
   }
 }

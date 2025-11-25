@@ -11,7 +11,7 @@ export default function GoalPage() {
         tabs={[
           {
             path: '/growth/goal/goal-all',
-            name: '目标',
+            name: '目标列表',
           },
           {
             path: '/growth/goal/goal-mind-map',
