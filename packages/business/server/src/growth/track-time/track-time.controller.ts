@@ -2,6 +2,7 @@ import type { TrackTime as TrackTimeVO, ResponseListVo, ResponsePageVo } from '@
 import { CreateTrackTimeDto, UpdateTrackTimeDto, TrackTimeDto, TrackTimeFilterDto } from './dto';
 import { TrackTimeService } from './track-time.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
+import { TrackTimeRelatedType } from '@true-north/enum';
 
 @Controller('/trackTime')
 export class TrackTimeController {
@@ -32,25 +33,15 @@ export class TrackTimeController {
     return dto.exportVo();
   }
 
-  @Get('/list', { description: '查询时间记录列表' })
-  async findByFilter(
-    @Query() trackTimeListFiltersVo?: TrackTimeVO.TrackTimeFilterVo
-  ): Promise<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>> {
-    const filter = new TrackTimeFilterDto();
-    if (trackTimeListFiltersVo) filter.importListVo(trackTimeListFiltersVo);
-    const list = await this.trackTimeService.findByFilter(filter);
-    return TrackTimeDto.dtoListToListVo(list);
-  }
-
-  @Get('/detail/:id', { description: '查询时间记录详情' })
-  async findOne(@Param('id') id: string): Promise<TrackTimeVO.TrackTimeVo | null> {
-    const dto = await this.trackTimeService.findOne(id);
+  @Get('/find/:id', { description: '查询时间记录详情' })
+  async find(@Param('id') id: string): Promise<TrackTimeVO.TrackTimeVo | null> {
+    const dto = await this.trackTimeService.find(id);
     return dto ? dto.exportVo() : null;
   }
 
   @Get('/related/:relatedType/:relatedId', { description: '根据关联对象查询时间记录' })
   async findByRelatedId(
-    @Param('relatedType') relatedType: string,
+    @Param('relatedType') relatedType: TrackTimeRelatedType,
     @Param('relatedId') relatedId: string
   ): Promise<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>> {
     const list = await this.trackTimeService.findByRelatedId(relatedType, relatedId);
@@ -59,7 +50,7 @@ export class TrackTimeController {
 
   @Delete('/related/:relatedType/:relatedId', { description: '删除关联对象的所有时间记录' })
   async deleteByRelatedId(
-    @Param('relatedType') relatedType: string,
+    @Param('relatedType') relatedType: TrackTimeRelatedType,
     @Param('relatedId') relatedId: string
   ): Promise<void> {
     return await this.trackTimeService.deleteByRelatedId(relatedType, relatedId);

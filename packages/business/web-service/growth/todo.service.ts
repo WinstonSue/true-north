@@ -1,6 +1,6 @@
 import { TodoController } from '@true-north/api';
 import type { Todo as TodoVO } from '@true-north/vo';
-import { RelatedType } from '@true-north/enum';
+import { TodoRelatedType } from '@true-north/enum';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
 
@@ -17,7 +17,7 @@ export default class TodoService {
     }
   }
 
-  static async delete(relatedType: RelatedType, id: string, options?: MethodOptions) {
+  static async delete(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.delete(relatedType, id);
       if (!options?.silent) {
@@ -29,7 +29,7 @@ export default class TodoService {
     }
   }
 
-  static async update(relatedType: RelatedType, id: string, body: TodoVO.UpdateTodoVo, options?: MethodOptions) {
+  static async update(relatedType: TodoRelatedType, id: string, body: TodoVO.UpdateTodoVo, options?: MethodOptions) {
     try {
       const res = await TodoController.update(relatedType, id, body);
       if (!options?.silent) {
@@ -50,7 +50,7 @@ export default class TodoService {
     }
   }
 
-  static async find(relatedType: RelatedType, id: string) {
+  static async find(relatedType: TodoRelatedType, id: string) {
     try {
       const res = await TodoController.find(relatedType, id);
       return res;
@@ -59,7 +59,7 @@ export default class TodoService {
     }
   }
 
-  static async done(relatedType: RelatedType, id: string, body?: { doneAt?: string }, options?: MethodOptions) {
+  static async done(relatedType: TodoRelatedType, id: string, body?: { doneAt?: string }, options?: MethodOptions) {
     try {
       const res = await TodoController.done(relatedType, id, body);
       if (!options?.silent) {
@@ -71,7 +71,7 @@ export default class TodoService {
     }
   }
 
-  static async abandon(relatedType: RelatedType, id: string, options?: MethodOptions) {
+  static async abandon(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.abandon(relatedType, id);
       if (!options?.silent) {
@@ -83,7 +83,7 @@ export default class TodoService {
     }
   }
 
-  static async restore(relatedType: RelatedType, id: string, options?: MethodOptions) {
+  static async restore(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.restore(relatedType, id);
       if (!options?.silent) {

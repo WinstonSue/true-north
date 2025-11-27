@@ -4,7 +4,7 @@ description: 编写需求文档时
 globs:
 ---
 
-# Life Toolkit AI友好型产品需求文档(PRD)规范
+# True North AI友好型产品需求文档(PRD)规范
 
 ## 📋 适用场景
 

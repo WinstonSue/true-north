@@ -3,17 +3,17 @@ description:
 globs: 
 alwaysApply: true
 ---
-# Life Toolkit 系统架构规则
+# True North 系统架构规则
 
 ## 🏗️ 项目概述
 
-Life Toolkit 是一个基于 **Monorepo** 架构的全栈生活管理工具套件，采用现代化技术栈构建，旨在提供个人成长、任务管理、习惯追踪、财务管理等功能的一站式解决方案。
+True North 是一个基于 **Monorepo** 架构的全栈生活管理工具套件，采用现代化技术栈构建，旨在提供个人成长、任务管理、习惯追踪、财务管理等功能的一站式解决方案。
 
 ## 📁 项目结构
 
 ### 根目录架构
 ```
-life-toolkit/
+true-north/
 ├── apps/                    # 应用层
 │   ├── server/             # NestJS 后端服务
 │   ├── web/                # React Web 应用

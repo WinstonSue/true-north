@@ -2,7 +2,7 @@ import { TodoRepository } from './todo.repository';
 import { TodoRepeatRepository } from './todo-repeat.repository';
 import { CreateTodoDto, UpdateTodoDto, TodoPageFilterDto, TodoFilterDto, TodoDto, UpdateTodoRepeatDto } from './dto';
 import { Todo } from './todo.entity';
-import { TodoStatus, RelatedType } from '@true-north/enum';
+import { TodoStatus, TodoRelatedType } from '@true-north/enum';
 import { TodoRepeatService } from './todo-repeat.service';
 import dayjs from 'dayjs';
 
@@ -98,8 +98,8 @@ export class TodoService {
     await this.todoRepository.softDeleteByFilter(filter);
   }
 
-  async done(relatedType: RelatedType, id: string, { doneAt }: { doneAt?: string } = {}) {
-    if (relatedType === RelatedType.IS_REPEAT) {
+  async done(relatedType: TodoRelatedType, id: string, { doneAt }: { doneAt?: string } = {}) {
+    if (relatedType === TodoRelatedType.IS_REPEAT) {
       const updateTodoRepeatDto = await this.todoRepeatService.updateToNext(id);
       // 创建一个新的已完成 todo
       const createTodoDto = new CreateTodoDto();
@@ -111,7 +111,7 @@ export class TodoService {
       createTodoDto.planDate = dayjs(updateTodoRepeatDto.currentDate).toDate();
       createTodoDto.status = TodoStatus.DONE;
       createTodoDto.repeatId = id;
-      createTodoDto.relatedType = RelatedType.REPEAT;
+      createTodoDto.relatedType = TodoRelatedType.REPEAT;
 
       const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
 
@@ -133,7 +133,7 @@ export class TodoService {
     const todoRepeatIds: string[] = [];
 
     filter.todoWithRepeatList?.forEach((todoWithRepeat) => {
-      if (todoWithRepeat.relatedType === RelatedType.IS_REPEAT) {
+      if (todoWithRepeat.relatedType === TodoRelatedType.IS_REPEAT) {
         todoRepeatIds.push(todoWithRepeat.id);
       } else {
         todoIds.push(todoWithRepeat.id);
@@ -167,7 +167,7 @@ export class TodoService {
         createTodoDto.planDate = dayjs(updateTodoRepeatDto.currentDate).toDate();
         createTodoDto.status = TodoStatus.DONE;
         createTodoDto.repeatId = id;
-        createTodoDto.relatedType = RelatedType.REPEAT;
+        createTodoDto.relatedType = TodoRelatedType.REPEAT;
 
         const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
 

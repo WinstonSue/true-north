@@ -10,7 +10,7 @@ import {
 } from './dto';
 import { TodoService } from './todo.service';
 import { TodoRepeatService } from './todo-repeat.service';
-import { RelatedType } from '@true-north/enum';
+import { TodoRelatedType } from '@true-north/enum';
 
 @Controller('/todo')
 export class TodoController {
@@ -55,8 +55,8 @@ export class TodoController {
   }
 
   @Delete('/delete/:relatedType/:id', { description: '删除待办' })
-  async delete(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
-    if (relatedType === RelatedType.IS_REPEAT) {
+  async delete(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<boolean> {
+    if (relatedType === TodoRelatedType.IS_REPEAT) {
       return await this.todoRepeatService.delete(id);
     }
     return await this.todoService.delete(id);
@@ -64,11 +64,11 @@ export class TodoController {
 
   @Put('/update/:relatedType/:id', { description: '更新待办' })
   async update(
-    @Param('relatedType') relatedType: RelatedType,
+    @Param('relatedType') relatedType: TodoRelatedType,
     @Param('id') id: string,
     @Body() body: TodoVO.UpdateTodoVo
   ): Promise<TodoVO.TodoVo> {
-    if (relatedType === RelatedType.IS_REPEAT) {
+    if (relatedType === TodoRelatedType.IS_REPEAT) {
       const updateTodoRepeatDto = new UpdateTodoRepeatDto();
       updateTodoRepeatDto.importUpdateVo({
         ...body,
@@ -87,7 +87,7 @@ export class TodoController {
 
   @Put('/done/:relatedType/:id', { description: '完成待办' })
   async done(
-    @Param('relatedType') relatedType: RelatedType,
+    @Param('relatedType') relatedType: TodoRelatedType,
     @Param('id') id: string,
     @Body()
     body?: {
@@ -98,16 +98,16 @@ export class TodoController {
   }
 
   @Put('/abandon/:relatedType/:id', { description: '废弃待办' })
-  async abandon(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
-    if (relatedType === RelatedType.IS_REPEAT) {
+  async abandon(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<boolean> {
+    if (relatedType === TodoRelatedType.IS_REPEAT) {
       return await this.todoRepeatService.abandon(id);
     }
     return await this.todoService.abandon(id);
   }
 
   @Put('/restore/:relatedType/:id', { description: '恢复待办' })
-  async restore(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
-    if (relatedType === RelatedType.IS_REPEAT) {
+  async restore(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<boolean> {
+    if (relatedType === TodoRelatedType.IS_REPEAT) {
       return await this.todoRepeatService.restore(id);
     }
     return await this.todoService.restore(id);
@@ -125,8 +125,8 @@ export class TodoController {
   }
 
   @Get('/find/:relatedType/:id', { description: '查询待办及其重复信息' })
-  async find(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
-    if (relatedType === RelatedType.IS_REPEAT) {
+  async find(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
+    if (relatedType === TodoRelatedType.IS_REPEAT) {
       return (await this.todoRepeatService.findWithRelations(id)).exportVo();
     }
     return (await this.todoService.findWithRelations(id)).exportVo();

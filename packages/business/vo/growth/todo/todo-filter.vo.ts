@@ -1,6 +1,6 @@
 import { TodoVo, TodoWithoutRelationsVo } from './todo-model.vo';
 import { BaseFilterVo } from '../../common';
-import { RelatedType } from '@true-north/enum';
+import { TodoRelatedType } from '@true-north/enum';
 
 export type TodoFilterVo = {
   planDateStart?: string;
@@ -10,7 +10,7 @@ export type TodoFilterVo = {
   abandonedDateStart?: string;
   abandonedDateEnd?: string;
   taskIds?: string[];
-  todoWithRepeatList?: { id: string; relatedType: RelatedType }[];
+  todoWithRepeatList?: { id: string; relatedType: TodoRelatedType }[];
 } & BaseFilterVo &
   Partial<Pick<TodoVo, 'importance' | 'urgency' | 'status' | 'taskId' | 'relatedType'>>;
 

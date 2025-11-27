@@ -54,8 +54,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/life-toolkit/life-toolkit.git",
+    "url": "https://github.com/francisxihe/true-north",
     "directory": "packages/common/calendar"
-  },
-  "homepage": "https://github.com/life-toolkit/life-toolkit/tree/main/packages/common/calendar"
+  }
 }

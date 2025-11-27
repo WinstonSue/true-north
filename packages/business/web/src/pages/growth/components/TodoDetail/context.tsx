@@ -6,7 +6,7 @@ import { createInjectState } from '@/utils/createInjectState';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoMapping } from '@true-north/web-service';
-import { TodoStatus, RelatedType } from '@true-north/enum';
+import { TodoStatus, TodoRelatedType } from '@true-north/enum';
 import { CreateTodoVo } from '@true-north/vo';
 
 export type TodoDetailProviderProps = {
@@ -30,7 +30,7 @@ export type CurrentTodo = {
   description?: string;
   name: string;
   status: TodoStatus;
-  relatedType: RelatedType;
+  relatedType: TodoRelatedType;
 };
 
 export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{

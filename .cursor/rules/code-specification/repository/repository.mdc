@@ -7,7 +7,7 @@ alwaysApply: false
 
 ## 📋 概述
 
-Repository 模式是数据访问层的核心设计模式，Life Toolkit 项目采用分层架构：
+Repository 模式是数据访问层的核心设计模式，True North 项目采用分层架构：
 
 - **Business Layer** (`packages/business/server/`): 定义 Repository Interface
 - **Server Layer** (`apps/server/`): 实现 Repository Interface，处理复杂业务逻辑

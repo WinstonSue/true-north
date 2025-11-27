@@ -3,7 +3,7 @@ import { TodoDto } from './todo-model.dto';
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
 import { TodoFilterVo, TodoPageFilterVo } from '@true-north/vo';
 import { BaseFilterDto, importBaseVo } from '@business/common';
-import { RelatedType } from '@true-north/enum';
+import { TodoRelatedType } from '@true-north/enum';
 
 export class TodoFilterDto extends IntersectionType(
   BaseFilterDto,
@@ -25,7 +25,7 @@ export class TodoFilterDto extends IntersectionType(
 
   todoWithRepeatList?: {
     id: string;
-    relatedType: RelatedType;
+    relatedType: TodoRelatedType;
   }[];
 
   importListVo(filterVo: TodoFilterVo) {

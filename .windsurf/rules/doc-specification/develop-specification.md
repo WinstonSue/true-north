@@ -4,7 +4,7 @@ description: 编写开发文档时
 globs:
 ---
 
-# Life Toolkit AI友好型技术开发文档规范
+# True North AI友好型技术开发文档规范
 
 ## 📋 适用场景
 
@@ -380,7 +380,7 @@ ai_instructions:
 
   # 执行上下文
   execution_context:
-    project_structure: 'Life Toolkit Monorepo'
+    project_structure: 'True North Monorepo'
     architecture_pattern: '分层架构 + 模块化'
     naming_convention: 'camelCase + PascalCase'
     code_standards: ['ESLint', 'Prettier', 'TypeScript strict']

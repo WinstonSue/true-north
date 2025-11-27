@@ -7,7 +7,7 @@ document_meta:
   status: 'draft'
   created_date: '2024-01-01'
   last_updated: '2024-01-01'
-  owner: 'Life Toolkit 开发团队'
+  owner: 'True North 开发团队'
   reviewers: ['backend_developer', 'frontend_developer']
   target_audience: ['backend_developer', 'frontend_developer', 'ai_assistant']
   related_documents: ['doc/growth/todo/prd.md']
@@ -1215,6 +1215,6 @@ success_criteria:
 **文档状态**: ✅ 已完善  
 **版本**: v1.0.0  
 **最后更新**: 2024-01-01  
-**维护者**: Life Toolkit 开发团队
+**维护者**: True North 开发团队
 
 本文档基于PRD需求和现有代码结构，提供了Todo模块的完整技术开发指南，涵盖了架构设计、数据模型、API接口、服务层实现、前端组件设计等各个方面，为开发团队提供了详细的技术实现参考。

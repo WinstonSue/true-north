@@ -18,6 +18,15 @@ const port = 3002;
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'dist')));
 
+// 辅助函数：生成控制器类名
+function generateControllerClassName(name: string): string {
+  // 将 kebab-case 转换为 PascalCase
+  return name
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('') + 'Controller';
+}
+
 // 辅助函数：查找 Desktop 控制器对
 function findDesktopControllerPairs() {
   const pairs = [];
@@ -28,10 +37,11 @@ function findDesktopControllerPairs() {
     { name: 'goal', path: 'growth/goal' },
     { name: 'habit', path: 'growth/habit' },
     { name: 'task', path: 'growth/task' },
+    { name: 'track-time', path: 'growth/track-time' },
   ];
 
   for (const controller of controllers) {
-    const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
+    const className = generateControllerClassName(controller.name);
     const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
     const targetPath = path.join(CONTROLLER_PROXY_TARGET_PATH, controller.path, `${controller.name}.controller.ts`);
 
@@ -58,10 +68,11 @@ function findApiControllerPairs() {
     { name: 'goal', path: 'growth/goal' },
     { name: 'habit', path: 'growth/habit' },
     { name: 'task', path: 'growth/task' },
+    { name: 'track-time', path: 'growth/track-time' },
   ];
 
   for (const controller of controllers) {
-    const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Controller';
+    const className = generateControllerClassName(controller.name);
     const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
     // API 控制器文件直接在 controller 目录下，不按模块分组
     const targetPath = path.join(CONTROLLER_API_TARGET_PATH, `${controller.name}.ts`);
@@ -89,10 +100,11 @@ function findWebServiceControllerPairs() {
     { name: 'goal', path: 'growth/goal' },
     { name: 'habit', path: 'growth/habit' },
     { name: 'task', path: 'growth/task' },
+    { name: 'track-time', path: 'growth/track-time' },
   ];
 
   for (const controller of controllers) {
-    const className = controller.name.charAt(0).toUpperCase() + controller.name.slice(1) + 'Service';
+    const className = generateControllerClassName(controller.name).replace('Controller', 'Service');
     const sourcePath = path.join(CONTROLLER_SOURCE_PATH, controller.path, `${controller.name}.controller.ts`);
     // Web Service 文件按模块分组
     const targetPath = path.join(

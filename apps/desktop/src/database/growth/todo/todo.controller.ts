@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query } from 'electron
 import type { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { TodoController as _TodoController } from '@true-north/business-server';
 import { todoService, todoRepeatService } from './todo.service';
-import { RelatedType } from '@true-north/enum';
+import { TodoRelatedType } from '@true-north/enum';
 
 @Controller('/todo')
 export class TodoController {
@@ -14,13 +14,13 @@ export class TodoController {
   }
 
   @Delete('/delete/:relatedType/:id')
-  async delete(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+  async delete(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<boolean> {
     return this.controller.delete(relatedType, id);
   }
 
   @Put('/update/:relatedType/:id')
   async update(
-    @Param('relatedType') relatedType: RelatedType,
+    @Param('relatedType') relatedType: TodoRelatedType,
     @Param('id') id: string,
     @Body() body: TodoVO.UpdateTodoVo
   ): Promise<TodoVO.TodoVo> {
@@ -33,13 +33,13 @@ export class TodoController {
   }
 
   @Get('/find/:relatedType/:id')
-  async find(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
+  async find(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
     return this.controller.find(relatedType, id);
   }
 
   @Put('/done/:relatedType/:id')
   async done(
-    @Param('relatedType') relatedType: RelatedType,
+    @Param('relatedType') relatedType: TodoRelatedType,
     @Param('id') id: string,
     @Body() body?: { doneAt?: string }
   ): Promise<any> {
@@ -47,17 +47,22 @@ export class TodoController {
   }
 
   @Put('/abandon/:relatedType/:id')
-  async abandon(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+  async abandon(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<boolean> {
     return this.controller.abandon(relatedType, id);
   }
 
   @Put('/restore/:relatedType/:id')
-  async restore(@Param('relatedType') relatedType: RelatedType, @Param('id') id: string): Promise<boolean> {
+  async restore(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<boolean> {
     return this.controller.restore(relatedType, id);
   }
 
   @Get('/list')
   async list(@Query() query?: TodoVO.TodoFilterVo): Promise<ResponseListVo<TodoVO.TodoWithoutRelationsVo>> {
     return this.controller.list(query);
+  }
+
+  @Put('/done/batch')
+  async doneBatch(@Body() body: TodoVO.TodoFilterVo): Promise<any> {
+    return this.controller.doneBatch(body);
   }
 }

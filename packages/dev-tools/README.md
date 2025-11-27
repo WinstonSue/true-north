@@ -1,6 +1,6 @@
-# Life Toolkit Dev Tools
+# True North Dev Tools
 
-Life Toolkit 开发辅助工具，提供了命令行和 Web 界面两种方式来执行代码同步操作。
+True North 开发辅助工具，提供了命令行和 Web 界面两种方式来执行代码同步操作。
 
 ## 功能特性
 

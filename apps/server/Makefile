@@ -1,4 +1,4 @@
-# Life Toolkit Server - 简化 Docker 管理
+# True North Server - 简化 Docker 管理
 
 .PHONY: help build run stop clean logs status check-env prod-run prod-stop prod-logs prod-status prod-save prod-deploy
 
@@ -11,7 +11,7 @@ PROD_IMAGE_TAG = production
 
 # 默认目标
 help:
-	@echo "Life Toolkit Server - Docker 管理命令"
+	@echo "True North Server - Docker 管理命令"
 	@echo "===================================="
 	@echo "开发环境:"
 	@echo "  make build      - 构建应用镜像"

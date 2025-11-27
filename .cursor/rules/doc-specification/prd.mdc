@@ -3,7 +3,7 @@ description: 编写需求文档时
 globs: 
 alwaysApply: false
 ---
-# Life Toolkit AI友好型产品需求文档(PRD)规范
+# True North AI友好型产品需求文档(PRD)规范
 
 ## 📋 适用场景
 当需要编写面向AI的产品需求文档(PRD)时，遵循此规范确保需求描述结构化、可解析、面向业务。AI友好型PRD专注于提供明确的业务需求、用户场景和产品功能定义，为后续的技术开发提供清晰的产品指导。

@@ -3,7 +3,7 @@ description: 编写开发文档时
 globs: 
 alwaysApply: false
 ---
-# Life Toolkit AI友好型技术开发文档规范
+# True North AI友好型技术开发文档规范
 
 ## 📋 适用场景
 当需要编写面向AI的技术开发文档时，遵循此规范确保文档结构化、可解析、可执行。AI友好型开发文档专注于提供明确的技术实现指导、可执行的代码生成指令和标准化的开发流程。
@@ -364,7 +364,7 @@ ai_instructions:
 
   # 执行上下文
   execution_context:
-    project_structure: "Life Toolkit Monorepo"
+    project_structure: "True North Monorepo"
     architecture_pattern: "分层架构 + 模块化"
     naming_convention: "camelCase + PascalCase"
     code_standards: ["ESLint", "Prettier", "TypeScript strict"]

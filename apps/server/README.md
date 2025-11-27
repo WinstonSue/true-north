@@ -1,4 +1,4 @@
-# Life Toolkit Server
+# True North Server
 
 基于 NestJS 的后端服务，提供个人成长、任务管理、习惯追踪、财务管理等功能的API接口。
 

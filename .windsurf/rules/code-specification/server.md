@@ -1,14 +1,14 @@
 ---
 trigger: model_decision
-description: Life Toolkit 完整开发流程规范
+description: True North 完整开发流程规范
 globs:
 ---
 
-# Life Toolkit 完整开发流程规范
+# True North 完整开发流程规范
 
 ## 📋 概述
 
-本规范定义了 Life Toolkit 项目从数据格式定义到控制器实现的完整开发流程，确保各层级代码规范统一、接口一致、流程连贯。
+本规范定义了 True North 项目从数据格式定义到控制器实现的完整开发流程，确保各层级代码规范统一、接口一致、流程连贯。
 
 ## 🏗️ 系统架构总览
 
@@ -798,4 +798,4 @@ export function registerModuleIpcHandlers(moduleController: ModuleDesktopControl
 
 ---
 
-_此文档为 Life Toolkit 完整开发流程规范总览，确保从数据定义到控制器实现的各个环节规范统一、流程连贯。_
+_此文档为 True North 完整开发流程规范总览，确保从数据定义到控制器实现的各个环节规范统一、流程连贯。_

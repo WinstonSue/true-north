@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { BaseEntity } from '@business/common';
-import { TodoStatus, RelatedType } from '@true-north/enum';
+import { TodoStatus, TodoRelatedType } from '@true-north/enum';
 import { Task } from '../task';
 import { TodoRepeat } from './todo-repeat.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
@@ -80,7 +80,7 @@ export class TodoWithoutRelations extends BaseEntity {
     nullable: true,
   })
   @IsOptional()
-  relatedType?: RelatedType;
+  relatedType?: TodoRelatedType;
 
   /** 关联ID */
   @Column('varchar', { nullable: true })

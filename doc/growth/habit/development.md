@@ -1172,7 +1172,7 @@ ai_instructions:
     api_template: 'code-specification/api-specification'
 
   execution_context:
-    project_structure: 'Life Toolkit Monorepo'
+    project_structure: 'True North Monorepo'
     architecture_pattern: '分层架构 + 模块化'
     naming_convention: 'camelCase + PascalCase'
     code_standards: ['ESLint', 'Prettier', 'TypeScript strict']

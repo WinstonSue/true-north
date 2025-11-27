@@ -7,7 +7,7 @@ import { Todo as TodoVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoStatus } from '@true-north/enum';
 import { TodoRepeatDto } from './todo-repeat-model.dto';
-import { RelatedType } from '@true-north/enum';
+import { TodoRelatedType } from '@true-north/enum';
 
 export class TodoWithoutRelationsDto extends IntersectionType(BaseModelDto, TodoWithoutRelations) {}
 
@@ -67,7 +67,7 @@ export class TodoDto extends TodoWithoutRelationsDto {
       planEndTime: this.planEndTime,
       doneAt: this.doneAt ? dayjs(this.doneAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
       abandonedAt: this.abandonedAt ? dayjs(this.abandonedAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
-      relatedType: this.relatedType || RelatedType.MANUAL,
+      relatedType: this.relatedType || TodoRelatedType.MANUAL,
     };
   }
 

@@ -10,7 +10,7 @@ import { TodoService } from '@true-north/web-service';
 import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
-import { RelatedType } from '@true-north/enum';
+import { TodoRelatedType } from '@true-north/enum';
 
 const { Paragraph } = Typography;
 
@@ -41,7 +41,7 @@ function TodoItem(props: TodoItemProps) {
           >
             <span className="text-text-1 flex items-center">
               {todo.name}
-              {todo.relatedType === RelatedType.IS_REPEAT && (
+              {todo.relatedType === TodoRelatedType.IS_REPEAT && (
                 <SiteIcon id={'repeat'} className={"text-danger"} width={20} height={20}/>
               )}
             </span>

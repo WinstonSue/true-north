@@ -1,5 +1,5 @@
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
-import { RelatedType, TodoStatus } from '@true-north/enum';
+import { TodoRelatedType, TodoStatus } from '@true-north/enum';
 import { Todo as TodoVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoDto } from './todo-model.dto';
@@ -51,7 +51,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
     todo.taskId = this.taskId;
     todo.repeatId = this.repeatId;
     todo.habitId = this.habitId;
-    todo.relatedType = this.relatedType ?? RelatedType.MANUAL;
+    todo.relatedType = this.relatedType ?? TodoRelatedType.MANUAL;
 
     return todo;
   }

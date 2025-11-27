@@ -1,8 +1,8 @@
-# Life Toolkit Server - 部署指南
+# True North Server - 部署指南
 
 ## 🚀 远程服务器部署指南
 
-本指南将帮助你将 Life Toolkit Server 部署到远程服务器 `112.124.21.126`。
+本指南将帮助你将 True North Server 部署到远程服务器 `112.124.21.126`。
 
 ## 📋 部署前准备
 

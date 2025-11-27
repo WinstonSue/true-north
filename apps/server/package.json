@@ -1,7 +1,7 @@
 {
   "name": "true-north-server",
   "version": "1.0.0",
-  "description": "Life Toolkit Server",
+  "description": "True North Server",
   "private": true,
   "scripts": {
     "build": "nest build",

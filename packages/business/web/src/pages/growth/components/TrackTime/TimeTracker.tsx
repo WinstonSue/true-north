@@ -4,13 +4,17 @@ import {
   Button,
   Input,
   DatePicker,
-  Tag,
   Avatar,
   Typography,
   Space,
   Divider,
 } from '@arco-design/web-react';
-import { IconPlayArrow, IconPause, IconStop, IconPlus } from '@arco-design/web-react/icon';
+import {
+  IconPlayArrow,
+  IconPause,
+  IconStop,
+  IconPlus,
+} from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
 
@@ -29,9 +33,9 @@ export default function TimeTracker({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(initialEntries);
   const [note, setNote] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
-  const [timeRange, setTimeRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
+  const [timeRange, setTimeRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(
+    null,
+  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // 格式化时间显示
@@ -39,7 +43,7 @@ export default function TimeTracker({
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -50,7 +54,7 @@ export default function TimeTracker({
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -63,9 +67,9 @@ export default function TimeTracker({
     setStartTime(now);
     setIsRunning(true);
     setCurrentTime(0);
-    
+
     intervalRef.current = setInterval(() => {
-      setCurrentTime(prev => prev + 1);
+      setCurrentTime((prev) => prev + 1);
     }, 1000);
   };
 
@@ -88,20 +92,17 @@ export default function TimeTracker({
         startAt: startTime.toISOString(),
         endAt: endTime.toISOString(),
         notes: note.trim() || undefined,
-        tags: tags.length > 0 ? tags : undefined,
-        user: 'Xihe Francis', // 可以从用户上下文获取
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
-      setTimeEntries(prev => [entry, ...prev]);
+
+      setTimeEntries((prev) => [entry, ...prev]);
     }
-    
+
     pauseTimer();
     setCurrentTime(0);
     setStartTime(null);
     setNote('');
-    setTags([]);
   };
 
   // 添加时间范围记录
@@ -109,37 +110,22 @@ export default function TimeTracker({
     if (timeRange) {
       const [start, end] = timeRange;
       const duration = end.diff(start, 'second');
-      
+
       const entry: TimeEntry = {
         id: Date.now().toString(),
         duration,
         startAt: start.toISOString(),
         endAt: end.toISOString(),
         notes: note.trim() || undefined,
-        tags: tags.length > 0 ? tags : undefined,
         user: 'Xihe Francis',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
-      setTimeEntries(prev => [entry, ...prev]);
+
+      setTimeEntries((prev) => [entry, ...prev]);
       setTimeRange(null);
       setNote('');
-      setTags([]);
     }
-  };
-
-  // 添加标签
-  const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags(prev => [...prev, newTag.trim()]);
-      setNewTag('');
-    }
-  };
-
-  // 移除标签
-  const removeTag = (tagToRemove: string) => {
-    setTags(prev => prev.filter(tag => tag !== tagToRemove));
   };
 
   // 计算总时间
@@ -160,207 +146,129 @@ export default function TimeTracker({
   };
 
   return (
-      <div className="space-y-4">
-        {/* 实时计时器 */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <Avatar size={24} style={{ backgroundColor: '#6366f1' }}>
-                X
-              </Avatar>
-              <Text>Xihe Francis</Text>
-            </div>
-            <div className="text-2xl font-mono">
-              {formatTime(currentTime)}
-            </div>
+    <div className="space-y-4">
+      {/* 实时计时器 */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Avatar size={24} style={{ backgroundColor: '#6366f1' }}>
+              X
+            </Avatar>
+            <Text>Xihe Francis</Text>
           </div>
-          
-          <div className="flex items-center space-x-2 mb-3">
-            {!isRunning ? (
-              <Button
-                type="primary"
-                icon={<IconPlayArrow />}
-                onClick={startTimer}
-                size="small"
-              >
-                开始计时
+          <div className="text-2xl font-mono">{formatTime(currentTime)}</div>
+        </div>
+
+        <div className="flex items-center space-x-2 mb-3">
+          {!isRunning ? (
+            <Button
+              type="primary"
+              icon={<IconPlayArrow />}
+              onClick={startTimer}
+              size="small"
+            >
+              开始计时
+            </Button>
+          ) : (
+            <>
+              <Button icon={<IconPause />} onClick={pauseTimer} size="small">
+                暂停
               </Button>
-            ) : (
-              <>
-                <Button
-                  icon={<IconPause />}
-                  onClick={pauseTimer}
-                  size="small"
-                >
-                  暂停
-                </Button>
-                <Button
-                  icon={<IconStop />}
-                  onClick={stopTimer}
-                  size="small"
-                  type="primary"
-                  status="success"
-                >
-                  停止并保存
-                </Button>
-              </>
-            )}
-          </div>
+              <Button
+                icon={<IconStop />}
+                onClick={stopTimer}
+                size="small"
+                type="primary"
+                status="success"
+              >
+                停止并保存
+              </Button>
+            </>
+          )}
+        </div>
+
+      </div>
+
+      {/* 时间范围选择 */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <Typography.Title heading={6} className="mb-3">
+          或选择时间范围
+        </Typography.Title>
+
+        <div className="space-y-3">
+          <RangePicker
+            showTime
+            value={timeRange}
+            onChange={(dateString, date) =>
+              setTimeRange(date as [dayjs.Dayjs, dayjs.Dayjs])
+            }
+            style={{ width: '100%' }}
+            placeholder={['开始时间', '结束时间']}
+          />
 
           <Input.TextArea
             placeholder="备注..."
             value={note}
             onChange={setNote}
             autoSize={{ minRows: 2, maxRows: 3 }}
-            className="mb-2"
           />
 
-          <div className="flex flex-wrap gap-1 mb-2">
-            {tags.map(tag => (
-              <Tag
-                key={tag}
-                closable
-                onClose={() => removeTag(tag)}
-                size="small"
-              >
-                {tag}
-              </Tag>
-            ))}
-          </div>
-
           <div className="flex space-x-2">
-            <Input
-              placeholder="添加标签"
-              value={newTag}
-              onChange={setNewTag}
-              onPressEnter={addTag}
-              size="small"
-              style={{ width: 120 }}
-            />
             <Button
-              icon={<IconPlus />}
-              onClick={addTag}
+              type="primary"
+              onClick={addTimeRange}
+              disabled={!timeRange}
               size="small"
-            />
-          </div>
-        </div>
-
-        {/* 时间范围选择 */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <Typography.Title heading={6} className="mb-3">
-            或选择时间范围
-          </Typography.Title>
-          
-          <div className="space-y-3">
-            <RangePicker
-              showTime
-              value={timeRange}
-              onChange={(dateString, date) => setTimeRange(date as [dayjs.Dayjs, dayjs.Dayjs])}
-              style={{ width: '100%' }}
-              placeholder={['开始时间', '结束时间']}
-            />
-            
-            <Input.TextArea
-              placeholder="备注..."
-              value={note}
-              onChange={setNote}
-              autoSize={{ minRows: 2, maxRows: 3 }}
-            />
-
-            <div className="flex flex-wrap gap-1 mb-2">
-              {tags.map(tag => (
-                <Tag
-                  key={tag}
-                  closable
-                  onClose={() => removeTag(tag)}
-                  size="small"
-                >
-                  {tag}
-                </Tag>
-              ))}
-            </div>
-
-            <div className="flex space-x-2">
-              <Input
-                placeholder="添加标签"
-                value={newTag}
-                onChange={setNewTag}
-                onPressEnter={addTag}
-                size="small"
-                style={{ width: 120 }}
-              />
-              <Button
-                icon={<IconPlus />}
-                onClick={addTag}
-                size="small"
-              />
-              <Button
-                type="primary"
-                onClick={addTimeRange}
-                disabled={!timeRange}
-                size="small"
-              >
-                添加时间记录
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* 时间记录列表 */}
-        <div>
-          <div className="flex justify-between items-center mb-3">
-            <Typography.Title heading={6}>时间记录</Typography.Title>
-            <div className="text-sm text-gray-500">
-              总计: {formatDuration(totalTime)}
-            </div>
-          </div>
-
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {timeEntries.map(entry => (
-              <div
-                key={entry.id}
-                className="flex items-center justify-between p-3 bg-white rounded border"
-              >
-                <div className="flex items-center space-x-3">
-                  <Avatar size={20} style={{ backgroundColor: '#6366f1' }}>
-                    X
-                  </Avatar>
-                  <div>
-                    <div className="text-sm font-medium">
-                      {entry.user}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {dayjs(entry.startAt).format('MM-DD HH:mm')} - {dayjs(entry.endAt).format('HH:mm')}
-                    </div>
-                    {entry.notes && (
-                      <div className="text-xs text-gray-600 mt-1">
-                        {entry.notes}
-                      </div>
-                    )}
-                    {entry.tags && entry.tags.length > 0 && (
-                      <div className="flex gap-1 mt-1">
-                        {entry.tags.map(tag => (
-                          <Tag key={tag} size="small">
-                            {tag}
-                          </Tag>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="text-sm font-medium">
-                  {formatDuration(entry.duration)}
-                </div>
-              </div>
-            ))}
-            
-            {timeEntries.length === 0 && (
-              <div className="text-center text-gray-500 py-8">
-                暂无时间记录
-              </div>
-            )}
+            >
+              添加时间记录
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* 时间记录列表 */}
+      <div>
+        <div className="flex justify-between items-center mb-3">
+          <Typography.Title heading={6}>时间记录</Typography.Title>
+          <div className="text-sm text-gray-500">
+            总计: {formatDuration(totalTime)}
+          </div>
+        </div>
+
+        <div className="space-y-2 max-h-60 overflow-y-auto">
+          {timeEntries.map((entry) => (
+            <div
+              key={entry.id}
+              className="flex items-center justify-between p-3 bg-white rounded border"
+            >
+              <div className="flex items-center space-x-3">
+                <Avatar size={20} style={{ backgroundColor: '#6366f1' }}>
+                  X
+                </Avatar>
+                <div>
+                  <div className="text-sm font-medium">{entry.user}</div>
+                  <div className="text-xs text-gray-500">
+                    {dayjs(entry.startAt).format('MM-DD HH:mm')} -{' '}
+                    {dayjs(entry.endAt).format('HH:mm')}
+                  </div>
+                  {entry.notes && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      {entry.notes}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="text-sm font-medium">
+                {formatDuration(entry.duration)}
+              </div>
+            </div>
+          ))}
+
+          {timeEntries.length === 0 && (
+            <div className="text-center text-gray-500 py-8">暂无时间记录</div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
