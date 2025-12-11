@@ -2,20 +2,9 @@ import { Menu } from '@arco-design/web-react';
 import qs from 'query-string';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  IconDashboard,
-  IconList,
-  IconSettings,
-  IconFile,
-  IconApps,
-  IconCheckCircle,
-  IconExclamationCircle,
-  IconUser,
-} from '@arco-design/web-react/icon';
-import styles from '../layout.module.less';
 import { IRoute } from '@/router/routes';
 import useRouter from '@/router/useRouter';
-import { SiteIcon } from '@true-north/components-ui';
+import { getIconFromKey } from './helpers';
 
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -41,15 +30,16 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
     if (pathname === '/') {
       return defaultRoute;
     }
-    
+
     // 遍历所有路由，找到最匹配的菜单项
     const findInRoutes = (routes: any[], parentPath = ''): string | null => {
       let bestMatch: string | null = null;
       let bestMatchLength = 0;
-      
+
       for (const route of routes) {
-        const routePath = route.fullPath || `${parentPath}/${route.key}`.replace(/\/+/g, '/');
-        
+        const routePath =
+          route.fullPath || `${parentPath}/${route.key}`.replace(/\/+/g, '/');
+
         // 精确匹配
         if (pathname === routePath) {
           // 如果当前路由是 ignore 的，返回父路由的 fullPath
@@ -58,16 +48,21 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
           }
           return routePath;
         }
-        
+
         // 如果当前路径以路由路径开头
-        if (pathname.startsWith(routePath + '/') || pathname.startsWith(routePath)) {
+        if (
+          pathname.startsWith(routePath + '/') ||
+          pathname.startsWith(routePath)
+        ) {
           if (route.children) {
             const childMatch = findInRoutes(route.children, routePath);
             if (childMatch) {
               return childMatch;
             }
             // 如果子路由都是 ignore 的，返回父路由的 fullPath
-            const hasVisibleChildren = route.children.some(child => !child.ignore);
+            const hasVisibleChildren = route.children.some(
+              (child) => !child.ignore,
+            );
             if (!hasVisibleChildren && routePath.length > bestMatchLength) {
               bestMatch = routePath;
               bestMatchLength = routePath.length;
@@ -79,7 +74,7 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
           }
         }
       }
-      
+
       return bestMatch;
     };
 
@@ -89,22 +84,22 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
 
   const matchingKey = findMatchingMenuKey(pathname);
   const defaultSelectedKeys = [matchingKey];
-  
+
   // 构建默认展开的父级菜单
   const buildDefaultOpenKeys = (key: string) => {
     const openKeys: string[] = [];
     const parts = key.replace(/^\//, '').split('/');
-    
+
     for (let i = 1; i < parts.length; i++) {
       const parentPath = '/' + parts.slice(0, i).join('/');
       if (menuMap.current.get(parentPath)?.subMenu) {
         openKeys.push(parentPath);
       }
     }
-    
+
     return openKeys;
   };
-  
+
   const defaultOpenKeys = buildDefaultOpenKeys(matchingKey);
 
   const [selectedKeys, setSelectedKeys] =
@@ -116,10 +111,11 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
     const travel = (_routes: IRoute[], level, parentNode = []) => {
       return _routes.map((route) => {
         const { breadcrumb = true, ignore } = route;
-        const iconDom = getIconFromKey(route.fullPath);
         const titleDom = (
           <span className="inline-flex items-center gap-2">
-            {iconDom} {locale[route.name] || route.name}
+            {getIconFromKey(route.fullPath)}
+
+            {collapsed && level === 1 ? null : locale[route.name] || route.name}
           </span>
         );
 
@@ -148,7 +144,11 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
           menuMap.current.set(route.fullPath, { subMenu: true });
           return (
             route.fullPath && (
-              <SubMenu key={route.fullPath} title={titleDom}>
+              <SubMenu
+                key={route.fullPath}
+                title={titleDom}
+                className={collapsed && level === 1 ? '!pr-3' : ''}
+              >
                 {travel(visibleChildren, level + 1, [
                   ...parentNode,
                   route.name,
@@ -160,7 +160,14 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
 
         menuMap.current.set(route.fullPath, { menuItem: true });
 
-        return <MenuItem key={route.fullPath}>{titleDom}</MenuItem>;
+        return (
+          <MenuItem
+            className={collapsed && level === 1 ? '!pr-3' : ''}
+            key={route.fullPath}
+          >
+            {titleDom}
+          </MenuItem>
+        );
       });
     };
     return travel;
@@ -169,10 +176,10 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
   function updateMenuStatus() {
     const matchingKey = findMatchingMenuKey(pathname);
     const newSelectedKeys = [matchingKey];
-    
+
     // 构建需要展开的父级菜单
     const newOpenKeys = buildDefaultOpenKeys(matchingKey);
-    
+
     setSelectedKeys(newSelectedKeys);
     setOpenKeys([...new Set([...openKeys, ...newOpenKeys])]);
   }
@@ -199,30 +206,5 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
     </Menu>
   );
 };
-
-function getIconFromKey(key) {
-  switch (key) {
-    case '/todo':
-      return <SiteIcon id="list-sidebar" className={styles.icon} />;
-    case '/dashboard':
-      return <IconDashboard className={styles.icon} />;
-    case '/list':
-      return <IconList className={styles.icon} />;
-    case '/form':
-      return <IconSettings className={styles.icon} />;
-    case '/profile':
-      return <IconFile className={styles.icon} />;
-    case '/visualization':
-      return <IconApps className={styles.icon} />;
-    case '/result':
-      return <IconCheckCircle className={styles.icon} />;
-    case '/exception':
-      return <IconExclamationCircle className={styles.icon} />;
-    case '/user':
-      return <IconUser className={styles.icon} />;
-    default:
-      return <div className={styles['icon-empty']} />;
-  }
-}
 
 export default Navigate;
