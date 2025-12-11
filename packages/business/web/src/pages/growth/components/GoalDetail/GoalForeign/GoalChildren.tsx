@@ -1,11 +1,13 @@
 import clsx from 'clsx';
 import { Empty } from '@arco-design/web-react';
-import { useGoalDetailContext } from './context';
-import GoalList from '../GoalList/GoalList';
-import { useGoalDetail } from '.';
+import { useGoalDetailContext } from '../context';
+import GoalList from '../../GoalList/GoalList';
+import { useGoalDetail } from '..';
 import { CreateButton } from '@/components/Button/CreateButton';
 
-export function GoalChildren() {
+export function GoalChildren(props: {
+  onChangeGoal?: (id: string) => Promise<void>;
+}) {
   const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
 
   return currentGoal?.children?.length > 0 ? (
@@ -13,6 +15,7 @@ export function GoalChildren() {
       goalList={currentGoal.children}
       onClickGoal={async (id) => {
         await refreshGoalDetail(id);
+        props.onChangeGoal?.(id);
       }}
       refreshGoalList={async () => {
         await refreshGoalDetail(currentGoal.id);
@@ -34,7 +37,7 @@ export function CreateGoal() {
   return currentGoal ? (
     <div
       className={clsx([
-        'text-title-1 text-text-1 font-medium p-2',
+        'text-title-1 text-text-1 font-medium',
         'flex justify-between items-center',
       ])}
     >

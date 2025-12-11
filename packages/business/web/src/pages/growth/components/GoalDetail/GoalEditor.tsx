@@ -5,18 +5,16 @@ import {
   useGoalDetailContext,
 } from './context';
 import GoalForm from './GoalForm';
-import { Button, Spin } from '@arco-design/web-react';
-import { GoalTaskList, CreateTask } from './TaskList';
-import { useEffect, useState } from 'react';
-import clsx from 'clsx';
+import { Button } from '@arco-design/web-react';
 import { GoalService, GoalMapping } from '@true-north/web-service';
-import { CreateGoal, GoalChildren } from './GoalChildren';
+import GoalForeign from './GoalForeign';
 
 const { Shrink, Fixed } = FlexibleContainer;
 
 export type GoalEditorProps = {
   goalId: string;
   size?: GoalDetailContextProps['size'];
+  readonly?: boolean;
   onClose?: () => Promise<void>;
   afterSubmit?: GoalDetailContextProps['afterSubmit'];
 };
@@ -26,97 +24,24 @@ export default function GoalEditor(props: GoalEditorProps) {
     <GoalDetailProvider
       size={props.size}
       goalId={props.goalId}
+      readonly={props.readonly}
       onClose={props.onClose}
       afterSubmit={props.afterSubmit}
     >
-      <GoalEditorMain goalId={props.goalId} />
+      <FlexibleContainer className="gap-2">
+        <Fixed className="border-b border-border-2">
+          <GoalForm />
+        </Fixed>
+        <GoalForeign goalId={props.goalId} />
+        <Fixed>
+          <GoalEditorFooter />
+        </Fixed>
+      </FlexibleContainer>
     </GoalDetailProvider>
   );
 }
 
-function GoalEditorMain(props: { goalId: string }) {
-  const [loading, setLoading] = useState(false);
-  const { goalId } = props;
-  const { refreshGoalDetail } = useGoalDetailContext();
-
-  useEffect(() => {
-    async function init() {
-      setLoading(true);
-      await refreshGoalDetail(goalId);
-      setLoading(false);
-    }
-    init();
-  }, [refreshGoalDetail, goalId]);
-
-  const [activeTab, setActiveTab] = useState<'children' | 'taskList'>(
-    'children',
-  );
-  const tabs = [
-    {
-      label: '子目标',
-      value: 'children',
-    },
-    {
-      label: '任务列表',
-      value: 'taskList',
-    },
-  ] as const;
-
-  if (loading) {
-    return <Spin dot />;
-  }
-
-  return (
-    <FlexibleContainer className="gap-2">
-      <Fixed>
-        <GoalForm />
-      </Fixed>
-      <Fixed className="flex items-center justify-between">
-        <div className="flex gap-2 items-center">
-          {tabs.map((item) => (
-            <div
-              key={item.value}
-              className={clsx(
-                'px-3 py-2',
-                'rounded-lg',
-                'font-[500]',
-                'cursor-pointer',
-                'hover:bg-gray-100',
-                activeTab === item.value
-                  ? ['bg-gray-100', 'text-text-1']
-                  : ['text-text-2'],
-              )}
-              onClick={() => {
-                setActiveTab(item.value);
-              }}
-            >
-              {item.label}
-            </div>
-          ))}
-        </div>
-
-        <div
-          className={clsx([
-            'text-title-1 text-text-1 font-medium p-2',
-            'flex justify-between items-center',
-          ])}
-        >
-          {activeTab === 'children' && <CreateGoal />}
-          {activeTab === 'taskList' && <CreateTask />}
-        </div>
-      </Fixed>
-      <Shrink>
-        {activeTab === 'children' && <GoalChildren />}
-        {activeTab === 'taskList' && <GoalTaskList />}
-      </Shrink>
-      <Fixed>
-        <GoalEditorFooter />
-      </Fixed>
-    </FlexibleContainer>
-  );
-}
-
-function GoalEditorFooter() {
+export function GoalEditorFooter() {
   const { onSubmit, onClose, currentGoal, goalFormData } =
     useGoalDetailContext();
 

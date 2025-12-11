@@ -1,8 +1,8 @@
 'use client';
 
 import { GoalVo } from '@true-north/vo';
-import TriggerStatusCheckbox from './TriggerStatusCheckbox';
 import GoalItem from './GoalItem';
+import clsx from 'clsx';
 
 function GoalList(props: {
   goalList: GoalVo[];
@@ -10,19 +10,13 @@ function GoalList(props: {
   refreshGoalList: () => Promise<void>;
 }) {
   return (
-    <div className="w-full mt-[-8px]">
+    <div className={clsx('w-full mt-[-8px]', 'flex flex-col gap-2')}>
       {props.goalList.map((goal) => (
         <GoalItem
           key={goal.id}
           goal={goal}
           onClickGoal={props.onClickGoal}
           refreshGoalList={props.refreshGoalList}
-          TriggerCheckbox={
-            <TriggerStatusCheckbox
-              goal={goal}
-              onChange={props.refreshGoalList}
-            />
-          }
         />
       ))}
     </div>

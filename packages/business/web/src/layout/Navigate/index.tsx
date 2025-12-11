@@ -1,6 +1,7 @@
 import { Menu } from '@arco-design/web-react';
 import qs from 'query-string';
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   IconDashboard,
   IconList,
@@ -30,13 +31,81 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
     Map<string, { menuItem?: boolean; subMenu?: boolean }>
   >(new Map());
 
+  const location = useLocation();
   const pathname = location.pathname;
-  const currentComponent = qs.parseUrl(pathname).url.slice(1);
   const { fullPathRoutes, to, defaultRoute } = useRouter();
 
-  const defaultSelectedKeys = [currentComponent || defaultRoute];
-  const paths = (currentComponent || defaultRoute).split('/');
-  const defaultOpenKeys = paths.slice(0, paths.length - 1);
+  // 根据当前路径找到匹配的菜单项
+  const findMatchingMenuKey = (pathname: string) => {
+    // 如果是根路径，直接返回默认路由
+    if (pathname === '/') {
+      return defaultRoute;
+    }
+    
+    // 遍历所有路由，找到最匹配的菜单项
+    const findInRoutes = (routes: any[], parentPath = ''): string | null => {
+      let bestMatch: string | null = null;
+      let bestMatchLength = 0;
+      
+      for (const route of routes) {
+        const routePath = route.fullPath || `${parentPath}/${route.key}`.replace(/\/+/g, '/');
+        
+        // 精确匹配
+        if (pathname === routePath) {
+          // 如果当前路由是 ignore 的，返回父路由的 fullPath
+          if (route.ignore && parentPath) {
+            return parentPath;
+          }
+          return routePath;
+        }
+        
+        // 如果当前路径以路由路径开头
+        if (pathname.startsWith(routePath + '/') || pathname.startsWith(routePath)) {
+          if (route.children) {
+            const childMatch = findInRoutes(route.children, routePath);
+            if (childMatch) {
+              return childMatch;
+            }
+            // 如果子路由都是 ignore 的，返回父路由的 fullPath
+            const hasVisibleChildren = route.children.some(child => !child.ignore);
+            if (!hasVisibleChildren && routePath.length > bestMatchLength) {
+              bestMatch = routePath;
+              bestMatchLength = routePath.length;
+            }
+          } else if (routePath.length > bestMatchLength) {
+            // 没有子路由的情况下，记录最长匹配
+            bestMatch = routePath;
+            bestMatchLength = routePath.length;
+          }
+        }
+      }
+      
+      return bestMatch;
+    };
+
+    const result = findInRoutes(fullPathRoutes);
+    return result || defaultRoute;
+  };
+
+  const matchingKey = findMatchingMenuKey(pathname);
+  const defaultSelectedKeys = [matchingKey];
+  
+  // 构建默认展开的父级菜单
+  const buildDefaultOpenKeys = (key: string) => {
+    const openKeys: string[] = [];
+    const parts = key.replace(/^\//, '').split('/');
+    
+    for (let i = 1; i < parts.length; i++) {
+      const parentPath = '/' + parts.slice(0, i).join('/');
+      if (menuMap.current.get(parentPath)?.subMenu) {
+        openKeys.push(parentPath);
+      }
+    }
+    
+    return openKeys;
+  };
+  
+  const defaultOpenKeys = buildDefaultOpenKeys(matchingKey);
 
   const [selectedKeys, setSelectedKeys] =
     useState<string[]>(defaultSelectedKeys);
@@ -98,28 +167,21 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
   }
 
   function updateMenuStatus() {
-    const pathKeys = pathname.split('/');
-    const newSelectedKeys: string[] = [];
-    const newOpenKeys: string[] = [...openKeys];
-    while (pathKeys.length > 0) {
-      const currentRouteKey = pathKeys.join('/');
-      const menuKey = currentRouteKey.replace(/^\//, '');
-      const menuType = menuMap.current.get(menuKey);
-      if (menuType && menuType.menuItem) {
-        newSelectedKeys.push(menuKey);
-      }
-      if (menuType && menuType.subMenu && !openKeys.includes(menuKey)) {
-        newOpenKeys.push(menuKey);
-      }
-      pathKeys.pop();
-    }
+    const matchingKey = findMatchingMenuKey(pathname);
+    const newSelectedKeys = [matchingKey];
+    
+    // 构建需要展开的父级菜单
+    const newOpenKeys = buildDefaultOpenKeys(matchingKey);
+    
     setSelectedKeys(newSelectedKeys);
-    setOpenKeys(newOpenKeys);
+    setOpenKeys([...new Set([...openKeys, ...newOpenKeys])]);
   }
 
   useEffect(() => {
-    updateMenuStatus();
-  }, [pathname]);
+    if (fullPathRoutes.length > 0) {
+      updateMenuStatus();
+    }
+  }, [pathname, fullPathRoutes.length]);
 
   return (
     <Menu

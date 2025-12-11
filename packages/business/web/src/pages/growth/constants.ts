@@ -11,28 +11,28 @@ export const IMPORTANCE_MAP = new Map([
   [
     Importance.Helpful,
     {
-      color: 'success',
+      color: 'green',
       label: '略有裨益',
     },
   ],
   [
     Importance.Core,
     {
-      color: 'primary',
+      color: 'blue',
       label: '重要',
     },
   ],
   [
     Importance.Key,
     {
-      color: 'warning',
+      color: 'orange',
       label: '举足轻重',
     },
   ],
   [
     Importance.Essential,
     {
-      color: 'danger',
+      color: 'red',
       label: '不容或缺',
     },
   ],
@@ -49,28 +49,28 @@ export const DIFFICULTY_MAP = new Map([
   [
     Difficulty.Skilled,
     {
-      color: 'success',
+      color: 'green',
       label: '略费手脚',
     },
   ],
   [
     Difficulty.Challenger,
     {
-      color: 'primary',
+      color: 'blue',
       label: '颇费周章',
     },
   ],
   [
     Difficulty.Master,
     {
-      color: 'warning',
+      color: 'orange',
       label: '千回百转',
     },
   ],
   [
     Difficulty.Legendary,
     {
-      color: 'danger',
+      color: 'red',
       label: '登峰造极',
     },
   ],
@@ -87,28 +87,28 @@ export const URGENCY_MAP = new Map([
   [
     Urgency.Later,
     {
-      color: 'success',
+      color: 'green',
       label: '按部就班',
     },
   ],
   [
     Urgency.Soon,
     {
-      color: 'primary',
+      color: 'blue',
       label: '事不宜迟',
     },
   ],
   [
     Urgency.Now,
     {
-      color: 'warning',
+      color: 'orange',
       label: '刻不容缓',
     },
   ],
   [
     Urgency.ASAP,
     {
-      color: 'danger',
+      color: 'red',
       label: '十万火急',
     },
   ],

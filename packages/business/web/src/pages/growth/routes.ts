@@ -70,7 +70,7 @@ export const goalRoutes: IRoute = {
   name: 'menu.goal',
   key: '/growth/goal',
   breadcrumb: true,
-  redirect: '/growth/goal/goal-all',
+  redirect: '/growth/goal/goal-tree-view',
   children: [
     {
       name: 'menu.goal.all',
@@ -81,6 +81,12 @@ export const goalRoutes: IRoute = {
     {
       name: 'menu.goal.mindmap',
       key: 'goal-mind-map',
+      breadcrumb: true,
+      ignore: true,
+    },
+    {
+      name: 'menu.goal.tree',
+      key: 'goal-tree-view',
       breadcrumb: true,
       ignore: true,
     },

@@ -15,6 +15,7 @@ export type GoalDetailContextProps = {
   children: React.ReactNode;
   initialFormData?: Partial<GoalFormData>;
   size?: 'small' | 'default';
+  readonly?: boolean;
   onClose?: () => Promise<void>;
   afterSubmit?: () => Promise<void>;
 };
@@ -26,6 +27,7 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
     goalFormData: GoalFormData;
     initialFormData: GoalFormData;
     size: 'small' | 'default';
+    readonly?: boolean;
     setGoalFormData: Dispatch<React.SetStateAction<GoalFormData>>;
     onSubmit: () => Promise<void>;
     onClose?: () => Promise<void>;
@@ -71,6 +73,7 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
     goalFormData,
     initialFormData,
     size: props.size || 'default',
+    readonly: props.readonly,
     setGoalFormData,
     onSubmit,
     refreshGoalDetail,

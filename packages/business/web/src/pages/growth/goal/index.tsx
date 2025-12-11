@@ -7,20 +7,7 @@ import TabsPage from '@/components/Layout/TabsPage';
 export default function GoalPage() {
   return (
     <GoalProvider>
-      <TabsPage
-        tabs={[
-          {
-            path: '/growth/goal/goal-all',
-            name: '目标列表',
-          },
-          {
-            path: '/growth/goal/goal-mind-map',
-            name: '思维导图',
-          },
-        ]}
-      >
-        <Outlet></Outlet>
-      </TabsPage>
+      <Outlet></Outlet>
     </GoalProvider>
   );
 }

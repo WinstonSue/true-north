@@ -1,7 +1,6 @@
 'use client';
 
 import { TaskWithoutRelationsVo } from '@true-north/vo';
-import TriggerStatusCheckbox from './TriggerStatusCheckbox';
 import TaskItem from './TaskItem';
 
 function TaskList(props: {
@@ -17,12 +16,6 @@ function TaskList(props: {
           task={task}
           onClickTask={props.onClickTask}
           refreshTaskList={props.refreshTaskList}
-          TriggerCheckbox={
-            <TriggerStatusCheckbox
-              todo={task}
-              onChange={props.refreshTaskList}
-            />
-          }
         />
       ))}
     </div>

@@ -1,10 +1,23 @@
 import { Popover } from '@arco-design/web-react';
 import { useState } from 'react';
-import GoalEditor, { GoalEditorProps } from './GoalEditor';
+import GoalEditor, {
+  GoalEditorFooter,
+  GoalEditorProps,
+} from './GoalEditor';
+import GoalForeign from './GoalForeign';
+import GoalForm from './GoalForm';
 import GoalCreator, { GoalCreatorProps } from './GoalCreator';
 import { openDrawer, IDrawerOption } from '@/layout/Drawer';
+import { GoalDetailProvider } from './context';
 
-export { GoalEditor, GoalCreator };
+export {
+  GoalDetailProvider,
+  GoalCreator,
+  GoalEditor,
+  GoalEditorFooter,
+  GoalForeign,
+  GoalForm,
+};
 
 export function useGoalDetail() {
   const openEditDrawer = (

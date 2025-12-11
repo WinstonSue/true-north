@@ -1,9 +1,9 @@
 import { Empty } from '@arco-design/web-react';
 import clsx from 'clsx';
 import { CreateButton } from '@/components/Button/CreateButton';
-import { useGoalDetailContext } from './context';
-import { useTaskDetail } from '..';
-import TaskList from '../TaskList';
+import { useGoalDetailContext } from '../context';
+import { useTaskDetail } from '../..';
+import TaskList from '../../TaskList';
 
 export function GoalTaskList() {
   const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
@@ -32,7 +32,7 @@ export function CreateTask() {
   return (
     <div
       className={clsx([
-        'text-title-1 text-text-1 font-medium p-2',
+        'text-title-1 text-text-1 font-medium',
         'flex justify-between items-center',
       ])}
     >
