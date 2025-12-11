@@ -10,12 +10,13 @@ import {
 } from '@arco-design/web-react/icon';
 import styles from '../layout.module.less';
 import { SiteIcon } from '@true-north/components-ui';
-import { Menu } from '@arco-design/web-react';
 
 export function getIconFromKey(key: string): React.ReactNode {
   switch (key) {
     case '/growth':
       return <SiteIcon id="calendar-sidebar" className={styles.icon} />;
+    case '/growth/todo':
+      return <SiteIcon id="list-sidebar" className={styles.icon} />;
     case '/dashboard':
       return <IconDashboard className={styles.icon} />;
     case '/list':

@@ -1,5 +1,4 @@
 import { Menu } from '@arco-design/web-react';
-import qs from 'query-string';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { IRoute } from '@/router/routes';

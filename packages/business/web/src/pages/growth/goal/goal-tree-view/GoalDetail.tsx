@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FlexibleContainer } from 'francis-component-react';
 import { Modal, Message } from '@arco-design/web-react';
-import { Empty, Spin, Button, Breadcrumb } from '@arco-design/web-react';
+import {
+  Empty,
+  Spin,
+  Button,
+  Breadcrumb,
+  Divider,
+} from '@arco-design/web-react';
 import { IconEdit, IconDelete, IconRight } from '@arco-design/web-react/icon';
 import { GoalService } from '@true-north/web-service';
 import { useGoalTreeViewContext } from './context';
@@ -10,6 +16,7 @@ import {
   GoalForm,
   GoalForeign,
 } from '../../components/GoalDetail';
+import GoalStatusTransition from './GoalStatusTransition';
 import clsx from 'clsx';
 
 const { Fixed, Shrink } = FlexibleContainer;
@@ -59,6 +66,11 @@ const GoalDetailPanel: React.FC = () => {
   // 编辑完成后的回调
   const handleEditComplete = async () => {
     setIsEditing(false);
+    await refreshData();
+  };
+
+  // 状态变更后的回调
+  const handleStatusChange = async () => {
     await refreshData();
   };
 
@@ -116,30 +128,39 @@ const GoalDetailPanel: React.FC = () => {
           className={clsx('px-4 !h-14 border-b border-border-2')}
         >
           <Shrink direction="vertical" className={clsx('items-center gap-2')}>
-            {/* 面包屑导航 */}
-            <Breadcrumb
-              className="flex-1"
-              separator={<IconRight className="text-xs text-gray-400" />}
-            >
-              {breadcrumbPath.map((item, index) => (
-                <Breadcrumb.Item
-                  key={item.id}
-                  className={clsx(
-                    'cursor-pointer transition-colors',
-                    index === breadcrumbPath.length - 1
-                      ? 'text-gray-900 font-medium'
-                      : 'text-gray-600 hover:text-blue-600',
-                  )}
-                  onClick={() => {
-                    if (index < breadcrumbPath.length - 1) {
-                      setSelectedGoalId(item.id);
-                    }
-                  }}
-                >
-                  {item.name}
-                </Breadcrumb.Item>
-              ))}
-            </Breadcrumb>
+            <div className="flex items-center gap-3 w-full">
+              {/* 面包屑导航 */}
+              <Breadcrumb
+                className="flex-1"
+                separator={<IconRight className="text-xs text-gray-400" />}
+              >
+                {breadcrumbPath.map((item, index) => (
+                  <Breadcrumb.Item
+                    key={item.id}
+                    className={clsx(
+                      'cursor-pointer transition-colors',
+                      index === breadcrumbPath.length - 1
+                        ? 'text-gray-900 font-medium'
+                        : 'text-gray-600 hover:text-blue-600',
+                    )}
+                    onClick={() => {
+                      if (index < breadcrumbPath.length - 1) {
+                        setSelectedGoalId(item.id);
+                      }
+                    }}
+                  >
+                    {item.name}
+                  </Breadcrumb.Item>
+                ))}
+              </Breadcrumb>
+              
+              {/* 状态流转组件 */}
+              <GoalStatusTransition
+                goal={selectedGoal}
+                onStatusChange={handleStatusChange}
+                size="small"
+              />
+            </div>
           </Shrink>
           <Fixed className={'flex items-center gap-2'}>
             {!isEditing ? (
@@ -175,9 +196,9 @@ const GoalDetailPanel: React.FC = () => {
             ></Button>
           </Fixed>
         </Fixed>
-
         <Shrink className={clsx('flex flex-col gap-4 p-4 overflow-auto')}>
           <GoalForm />
+          <Divider className="!m-0" />
           <GoalForeign
             goalId={selectedGoal.id}
             onChangeGoal={async (id) => {
