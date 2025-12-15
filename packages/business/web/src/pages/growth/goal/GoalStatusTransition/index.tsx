@@ -17,25 +17,21 @@ const STATUS_CONFIG = {
   [GoalStatus.TODO]: {
     label: '待开始',
     color: 'gray',
-    icon: <IconClose />,
     nextStates: [GoalStatus.DOING, GoalStatus.ABANDONED],
   },
   [GoalStatus.DOING]: {
     label: '进行中',
     color: 'blue',
-    icon: <IconRefresh />,
     nextStates: [GoalStatus.DONE, GoalStatus.TODO, GoalStatus.ABANDONED],
   },
   [GoalStatus.DONE]: {
     label: '已完成',
     color: 'green',
-    icon: <IconCheck />,
     nextStates: [GoalStatus.TODO, GoalStatus.DOING],
   },
   [GoalStatus.ABANDONED]: {
     label: '已放弃',
     color: 'red',
-    icon: <IconClose />,
     nextStates: [GoalStatus.TODO],
   },
 };
@@ -131,7 +127,6 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
             onClick={() => handleStatusChange(status)}
           >
             <div className="flex items-center gap-2">
-              {config.icon}
               <Tag color={config.color} size="small">
                 {config.label}
               </Tag>

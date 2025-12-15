@@ -18,8 +18,8 @@ import {
 } from '@arco-design/web-react/icon';
 import { GoalVo } from '@true-north/vo';
 import { GoalStatus } from '@true-north/enum';
-import { useGoalTreeViewContext } from '../context';
-import { useGoalDetail } from '../../../components/GoalDetail';
+import { useGoalContext } from '../context';
+import { useGoalDetail } from '../../components/GoalDetail';
 import { GoalService } from '@true-north/web-service';
 import { Modal, Message, Tag } from '@arco-design/web-react';
 import styles from './style.module.less';
@@ -48,7 +48,7 @@ const GoalTreePanel: React.FC = ({}) => {
     refreshData,
     selectedGoalId,
     setSelectedGoalId,
-  } = useGoalTreeViewContext();
+  } = useGoalContext();
   const { openCreateDrawer, openEditDrawer } = useGoalDetail();
   const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);

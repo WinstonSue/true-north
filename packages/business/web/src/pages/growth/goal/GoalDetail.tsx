@@ -10,12 +10,12 @@ import {
 } from '@arco-design/web-react';
 import { IconEdit, IconDelete, IconRight } from '@arco-design/web-react/icon';
 import { GoalService } from '@true-north/web-service';
-import { useGoalTreeViewContext } from './context';
+import { useGoalContext } from './context';
 import {
   GoalDetailProvider,
   GoalForm,
   GoalForeign,
-} from '../../components/GoalDetail';
+} from '../components/GoalDetail';
 import GoalStatusTransition from './GoalStatusTransition';
 import clsx from 'clsx';
 
@@ -28,7 +28,7 @@ const GoalDetailPanel: React.FC = () => {
     refreshData,
     selectedGoalId,
     setSelectedGoalId,
-  } = useGoalTreeViewContext();
+  } = useGoalContext();
 
   // 编辑状态管理
   const [isEditing, setIsEditing] = useState(false);
@@ -157,7 +157,6 @@ const GoalDetailPanel: React.FC = () => {
             <GoalStatusTransition
               goal={selectedGoal}
               onStatusChange={handleStatusChange}
-              size="small"
             />
           </Fixed>
           <Fixed className={'flex items-center gap-2'}>
