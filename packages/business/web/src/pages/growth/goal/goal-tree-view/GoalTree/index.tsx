@@ -17,13 +17,18 @@ import {
   IconCopy,
 } from '@arco-design/web-react/icon';
 import { GoalVo } from '@true-north/vo';
+import { GoalStatus } from '@true-north/enum';
 import { useGoalTreeViewContext } from '../context';
 import { useGoalDetail } from '../../../components/GoalDetail';
 import { GoalService } from '@true-north/web-service';
-import { Modal, Message } from '@arco-design/web-react';
+import { Modal, Message, Tag } from '@arco-design/web-react';
 import styles from './style.module.less';
 import clsx from 'clsx';
-import { FlexibleContainer } from 'francis-component-react';
+import {
+  FlexibleContainer,
+  TextEllipsis,
+  ContextMenu,
+} from 'francis-component-react';
 
 const { Fixed, Shrink } = FlexibleContainer;
 
@@ -85,27 +90,86 @@ const GoalTreePanel: React.FC = ({}) => {
     </Menu>
   );
 
+  // 获取状态标签
+  const getStatusTag = (status: GoalStatus) => {
+    const statusConfig = {
+      [GoalStatus.TODO]: { color: 'gray', text: '待开始' },
+      [GoalStatus.DOING]: { color: 'blue', text: '进行中' },
+      [GoalStatus.DONE]: { color: 'green', text: '已完成' },
+      [GoalStatus.ABANDONED]: { color: 'red', text: '已放弃' },
+    };
+
+    const config = statusConfig[status];
+    return (
+      <Tag color={config.color} size="small">
+        {config.text}
+      </Tag>
+    );
+  };
+
   // 转换目标数据为树形结构
   const convertToTreeData = (goals: GoalVo[]): TreeNodeData[] => {
     return goals.map((goal) => ({
       key: goal.id,
       title: (
-        <div className={clsx(styles['tree-node'])}>
-          <span>{goal.name}</span>
-          <Dropdown
-            droplist={renderNodeMenu(goal)}
-            trigger="click"
-            position="br"
+        <ContextMenu
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+          }}
+          items={[
+            {
+              key: 'edit',
+              label: '编辑',
+              icon: <IconEdit />,
+              onClick: () => handleEdit(goal),
+            },
+            {
+              key: 'addChild',
+              label: '添加子目标',
+              icon: <IconPlus />,
+              onClick: () => handleAddChild(goal),
+            },
+            {
+              key: 'addSibling',
+              label: '添加同级目标',
+              icon: <IconPlus />,
+              onClick: () => handleAddSibling(goal),
+            },
+            {
+              key: 'copy',
+              label: '复制',
+              icon: <IconCopy />,
+              onClick: () => handleCopy(goal),
+            },
+            {
+              key: 'divider',
+              label: '',
+              divider: true,
+            },
+            {
+              key: 'delete',
+              label: '删除',
+              icon: <IconDelete />,
+              onClick: () => handleDelete(goal),
+            },
+          ]}
+        >
+          <FlexibleContainer
+            className={clsx(styles['tree-node'], 'gap-2')}
+            direction="vertical"
           >
-            <Button
-              type="text"
-              size="mini"
-              icon={<IconMore />}
-              className={styles['node-action']}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </Dropdown>
-        </div>
+            <Fixed>{getStatusTag(goal.status)}</Fixed>
+            <Shrink absolute>
+              <TextEllipsis
+                tooltip={true}
+                width="100%"
+                text={goal.name}
+              ></TextEllipsis>
+            </Shrink>
+          </FlexibleContainer>
+        </ContextMenu>
       ),
       goalData: goal,
       goalName: goal.name,
@@ -264,7 +328,7 @@ const GoalTreePanel: React.FC = ({}) => {
   };
 
   return (
-    <FlexibleContainer className={clsx()}>
+    <FlexibleContainer>
       {/* 头部工具栏 */}
       <Fixed
         className={clsx(
@@ -309,7 +373,13 @@ const GoalTreePanel: React.FC = ({}) => {
               onExpand={handleExpand}
               showLine
               blockNode
-              className={clsx('w-full')}
+              className={clsx(
+                'w-full',
+                '[&_.arco-tree-node]:w-full',
+                '[&_.arco-tree-node-title]:w-full',
+                '[&_.arco-tree-node-title-text]:w-full',
+                '[&_.arco-tree-node-title-text]:block',
+              )}
             />
           ) : (
             <Empty description="暂无目标数据" />

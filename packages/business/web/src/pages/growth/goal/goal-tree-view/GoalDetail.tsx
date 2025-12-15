@@ -125,43 +125,41 @@ const GoalDetailPanel: React.FC = () => {
       <FlexibleContainer>
         <Fixed
           direction="vertical"
-          className={clsx('px-4 !h-14 border-b border-border-2')}
+          className={clsx('px-4 !h-14', 'border-b border-border-2', 'gap-2')}
         >
           <Shrink direction="vertical" className={clsx('items-center gap-2')}>
-            <div className="flex items-center gap-3 w-full">
-              {/* 面包屑导航 */}
-              <Breadcrumb
-                className="flex-1"
-                separator={<IconRight className="text-xs text-gray-400" />}
-              >
-                {breadcrumbPath.map((item, index) => (
-                  <Breadcrumb.Item
-                    key={item.id}
-                    className={clsx(
-                      'cursor-pointer transition-colors',
-                      index === breadcrumbPath.length - 1
-                        ? 'text-gray-900 font-medium'
-                        : 'text-gray-600 hover:text-blue-600',
-                    )}
-                    onClick={() => {
-                      if (index < breadcrumbPath.length - 1) {
-                        setSelectedGoalId(item.id);
-                      }
-                    }}
-                  >
-                    {item.name}
-                  </Breadcrumb.Item>
-                ))}
-              </Breadcrumb>
-              
-              {/* 状态流转组件 */}
-              <GoalStatusTransition
-                goal={selectedGoal}
-                onStatusChange={handleStatusChange}
-                size="small"
-              />
-            </div>
+            {/* 面包屑导航 */}
+            <Breadcrumb
+              className="flex-1"
+              separator={<IconRight className="text-xs text-gray-400" />}
+            >
+              {breadcrumbPath.map((item, index) => (
+                <Breadcrumb.Item
+                  key={item.id}
+                  className={clsx(
+                    'cursor-pointer transition-colors',
+                    index === breadcrumbPath.length - 1
+                      ? 'text-gray-900 font-medium'
+                      : 'text-gray-600 hover:text-blue-600',
+                  )}
+                  onClick={() => {
+                    if (index < breadcrumbPath.length - 1) {
+                      setSelectedGoalId(item.id);
+                    }
+                  }}
+                >
+                  {item.name}
+                </Breadcrumb.Item>
+              ))}
+            </Breadcrumb>
           </Shrink>
+          <Fixed className={'flex items-center'}>
+            <GoalStatusTransition
+              goal={selectedGoal}
+              onStatusChange={handleStatusChange}
+              size="small"
+            />
+          </Fixed>
           <Fixed className={'flex items-center gap-2'}>
             {!isEditing ? (
               <Button

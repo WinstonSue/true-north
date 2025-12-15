@@ -202,8 +202,12 @@ export class GoalService {
     for (const r of roots) {
       const full = await treeRepo.findDescendantsTree(r);
       const traverse = (n: Goal) => {
+        // 检查状态过滤 - 支持单个值或数组
+        const statusMatch = !filter.status || 
+          (Array.isArray(filter.status) ? filter.status.includes(n.status) : n.status === filter.status);
+        
         if (
-          (!filter.status || n.status === filter.status) &&
+          statusMatch &&
           (!filter.keyword || n.name.includes(filter.keyword) || (n.description || '').includes(filter.keyword)) &&
           (!filter.importance || n.importance === filter.importance)
         ) {

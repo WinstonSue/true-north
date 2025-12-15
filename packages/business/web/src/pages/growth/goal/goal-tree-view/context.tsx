@@ -38,7 +38,7 @@ export const [GoalTreeViewProvider, useGoalTreeViewContext] =
       setLoading(true);
       try {
         const data = await GoalService.getTree({
-          status: GoalStatus.TODO,
+          status: [GoalStatus.TODO, GoalStatus.DOING],
         });
         setGoalTree(data);
       } catch (error) {

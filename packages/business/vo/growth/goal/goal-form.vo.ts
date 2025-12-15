@@ -5,4 +5,7 @@ export type CreateGoalVo = Pick<
   'name' | 'type' | 'startAt' | 'endAt' | 'description' | 'importance' | 'difficulty' | 'status' | 'parentId'
 >;
 
-export type UpdateGoalVo = Partial<CreateGoalVo>;
+export type UpdateGoalVo = Partial<CreateGoalVo> & {
+  doneAt?: string;
+  abandonedAt?: string;
+};

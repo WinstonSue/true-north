@@ -58,6 +58,7 @@ export class UpdateGoalDto extends IntersectionType(
     if (vo.importance !== undefined) this.importance = vo.importance;
     if (vo.difficulty !== undefined) this.difficulty = vo.difficulty;
     if (vo.parentId !== undefined) this.parentId = vo.parentId;
+    if (vo.status !== undefined) this.status = vo.status;
 
     // 日期字段转换 (string → Date)
     if (vo.startAt !== undefined) {
@@ -65,6 +66,12 @@ export class UpdateGoalDto extends IntersectionType(
     }
     if (vo.endAt !== undefined) {
       this.endAt = vo.endAt ? dayjs(vo.endAt).toDate() : undefined;
+    }
+    if (vo.doneAt !== undefined) {
+      this.doneAt = vo.doneAt ? dayjs(vo.doneAt).toDate() : undefined;
+    }
+    if (vo.abandonedAt !== undefined) {
+      this.abandonedAt = vo.abandonedAt ? dayjs(vo.abandonedAt).toDate() : undefined;
     }
   }
 

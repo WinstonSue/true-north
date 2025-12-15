@@ -9,7 +9,6 @@ import clsx from 'clsx';
 interface GoalStatusTransitionProps {
   goal: GoalVo;
   onStatusChange?: (newStatus: GoalStatus) => void;
-  size?: 'mini' | 'small' | 'default' | 'large';
   disabled?: boolean;
 }
 
@@ -64,7 +63,6 @@ const STATUS_ACTIONS = {
 const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
   goal,
   onStatusChange,
-  size = 'small',
   disabled = false,
 }) => {
   const [loading, setLoading] = useState(false);
@@ -154,7 +152,6 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
       disabled={disabled || loading || availableStates.length === 0}
     >
       <Button
-        size={size}
         loading={loading}
         disabled={disabled}
         className={clsx(
@@ -164,7 +161,6 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
         )}
       >
         <div className="flex items-center gap-1">
-          {currentConfig.icon}
           <Tag color={currentConfig.color} size="small">
             {currentConfig.label}
           </Tag>

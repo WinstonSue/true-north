@@ -1,15 +1,19 @@
-import { IsOptional, IsString, IsDateString, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsDateString, IsBoolean, IsArray } from 'class-validator';
 import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
 import { GoalFilterVo, GoalPageFilterVo } from '@true-north/vo';
 import { GoalDto } from './goal-model.dto';
 import { PageFilterDto } from '../../../common';
 import { BaseFilterDto, importBaseVo } from '@business/common';
+import { GoalStatus } from '@true-north/enum';
 
 // 列表过滤DTO - 选择可过滤的字段
 export class GoalFilterDto extends IntersectionType(
   BaseFilterDto,
-  PartialType(PickType(GoalDto, ['type', 'importance', 'status'] as const))
+  PartialType(PickType(GoalDto, ['type', 'importance'] as const))
 ) {
+  /** 目标状态 - 支持单个或数组 */
+  @IsOptional()
+  status?: GoalStatus | GoalStatus[];
   /** 开始日期范围 - 开始 */
   @IsDateString()
   @IsOptional()
