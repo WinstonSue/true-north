@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Tree,
-  Input,
-  Button,
-  Dropdown,
-  Menu,
-  Spin,
-  Empty,
-} from '@arco-design/web-react';
+import { Tree, Input, Button, Spin, Empty } from '@arco-design/web-react';
 import {
   IconSearch,
   IconPlus,
-  IconMore,
   IconEdit,
   IconDelete,
   IconCopy,
@@ -21,7 +12,7 @@ import { GoalStatus } from '@true-north/enum';
 import { useGoalContext } from '../context';
 import { useGoalDetail } from '../../components/GoalDetail';
 import { GoalService } from '@true-north/web-service';
-import { Modal, Message, Tag } from '@arco-design/web-react';
+import { Modal, Message, Tag, Divider } from '@arco-design/web-react';
 import styles from './style.module.less';
 import clsx from 'clsx';
 import {
@@ -38,6 +29,7 @@ interface TreeNodeData {
   children?: TreeNodeData[];
   goalData: GoalVo;
   goalName: string; // 用于搜索的纯文本标题
+  isLeaf?: boolean; // 是否为叶子节点
 }
 
 const GoalTreePanel: React.FC = ({}) => {
@@ -48,47 +40,18 @@ const GoalTreePanel: React.FC = ({}) => {
     refreshData,
     selectedGoalId,
     setSelectedGoalId,
+    searchValue,
+    filters,
+    loadChildren,
   } = useGoalContext();
   const { openCreateDrawer, openEditDrawer } = useGoalDetail();
-  const [searchValue, setSearchValue] = useState('');
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [treeData, setTreeData] = useState<TreeNodeData[]>([]);
 
-  // 初始化数据
+  // 初始化数据和监听筛选条件变化
   useEffect(() => {
     fetchGoalTree();
-  }, []);
-
-  // 渲染节点操作菜单
-  const renderNodeMenu = (goal: GoalVo) => (
-    <Menu>
-      <Menu.Item key="edit" onClick={() => handleEdit(goal)}>
-        <IconEdit /> 编辑
-      </Menu.Item>
-      <Menu.Item key="addChild" onClick={() => handleAddChild(goal)}>
-        <IconPlus /> 添加子目标
-      </Menu.Item>
-      <Menu.Item key="addSibling" onClick={() => handleAddSibling(goal)}>
-        <IconPlus /> 添加同级目标
-      </Menu.Item>
-      <Menu.Item key="copy" onClick={() => handleCopy(goal)}>
-        <IconCopy /> 复制
-      </Menu.Item>
-      <Menu.Item
-        key="divider"
-        disabled
-        style={{
-          height: '1px',
-          padding: 0,
-          margin: '4px 0',
-          backgroundColor: '#e5e6eb',
-        }}
-      />
-      <Menu.Item key="delete" onClick={() => handleDelete(goal)}>
-        <IconDelete /> 删除
-      </Menu.Item>
-    </Menu>
-  );
+  }, [fetchGoalTree]);
 
   // 获取状态标签
   const getStatusTag = (status: GoalStatus) => {
@@ -111,6 +74,7 @@ const GoalTreePanel: React.FC = ({}) => {
   const convertToTreeData = (goals: GoalVo[]): TreeNodeData[] => {
     return goals.map((goal) => ({
       key: goal.id,
+      isLeaf: !goal.hasChildren, // 根据 hasChildren 字段判断是否为叶子节点
       title: (
         <ContextMenu
           style={{
@@ -177,41 +141,18 @@ const GoalTreePanel: React.FC = ({}) => {
     }));
   };
 
-  // 过滤树节点
-  const filterTreeData = (
-    data: TreeNodeData[],
-    keyword: string,
-  ): TreeNodeData[] => {
-    if (!keyword) return data;
-
-    return data.reduce<TreeNodeData[]>((acc, node) => {
-      const matchesSearch = node.goalName
-        .toLowerCase()
-        .includes(keyword.toLowerCase());
-      const filteredChildren = node.children
-        ? filterTreeData(node.children, keyword)
-        : [];
-
-      if (matchesSearch || filteredChildren.length > 0) {
-        acc.push({
-          ...node,
-          children:
-            filteredChildren.length > 0 ? filteredChildren : node.children,
-        });
-      }
-
-      return acc;
-    }, []);
-  };
-
   // 更新树形数据
   useEffect(() => {
     const converted = convertToTreeData(goalTree);
-    const filtered = filterTreeData(converted, searchValue);
-    setTreeData(filtered);
+    setTreeData(converted);
 
-    // 搜索时自动展开所有节点
-    if (searchValue) {
+    // 有筛选条件时自动展开所有节点
+    if (
+      searchValue ||
+      Object.values(filters).some(
+        (value) => value !== undefined && value !== null,
+      )
+    ) {
       const getAllKeys = (data: TreeNodeData[]): string[] => {
         const keys: string[] = [];
         data.forEach((node) => {
@@ -222,9 +163,9 @@ const GoalTreePanel: React.FC = ({}) => {
         });
         return keys;
       };
-      setExpandedKeys(getAllKeys(filtered));
+      setExpandedKeys(getAllKeys(converted));
     }
-  }, [goalTree, searchValue]);
+  }, [goalTree, searchValue, filters]);
 
   // 处理节点选择
   const handleSelect = (selectedKeys: string[]) => {
@@ -232,9 +173,51 @@ const GoalTreePanel: React.FC = ({}) => {
     setSelectedGoalId(goalId);
   };
 
-  // 处理节点展开
-  const handleExpand = (expandedKeys: string[]) => {
+  // 处理节点展开并懒加载
+  const handleExpandWithLoad = async (expandedKeys: string[], info: any) => {
     setExpandedKeys(expandedKeys);
+
+    // 如果是展开操作且节点没有子节点，则尝试加载
+    if (info.expanded && info.node) {
+      const nodeKey = info.node.key;
+      const nodeData = treeData.find((node) => findNodeByKey(node, nodeKey));
+
+      if (
+        nodeData &&
+        (!nodeData.children || nodeData.children.length === 0) &&
+        !nodeData.isLeaf
+      ) {
+        await loadData({ key: nodeKey });
+      }
+    }
+  };
+
+  // 递归查找节点
+  const findNodeByKey = (
+    node: TreeNodeData,
+    key: string,
+  ): TreeNodeData | null => {
+    if (node.key === key) {
+      return node;
+    }
+    if (node.children) {
+      for (const child of node.children) {
+        const found = findNodeByKey(child, key);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // 懒加载子节点
+  const loadData = async (treeNode: any) => {
+    const goalId = treeNode.key;
+    try {
+      // 使用上下文中的 loadChildren 方法
+      await loadChildren(goalId);
+    } catch (error) {
+      console.error('加载子节点失败:', error);
+    }
   };
 
   // 创建子目标
@@ -308,7 +291,6 @@ const GoalTreePanel: React.FC = ({}) => {
             setSelectedGoalId(null);
           }
         } catch (error) {
-          console.error('删除失败:', error);
           Message.error('删除失败');
         }
       },
@@ -328,65 +310,28 @@ const GoalTreePanel: React.FC = ({}) => {
   };
 
   return (
-    <FlexibleContainer>
-      {/* 头部工具栏 */}
-      <Fixed
-        className={clsx(
-          'p-4',
-          'flex flex-col gap-3',
-          'border-b border-border-2',
-        )}
-      >
-        <div className={clsx('w-full')}>
-          <Input
-            placeholder="搜索目标..."
-            prefix={<IconSearch />}
-            value={searchValue}
-            onChange={setSearchValue}
-            allowClear
-          />
-        </div>
-        <Button
-          type="primary"
-          icon={<IconPlus />}
-          onClick={() =>
-            openCreateDrawer({
-              title: '新建目标',
-              contentProps: {
-                afterSubmit: refreshData,
-              },
-            })
-          }
-        >
-          新建
-        </Button>
-      </Fixed>
-
-      <Shrink className={clsx('p-4', 'overflow-y-auto')}>
-        <Spin loading={loading} className={clsx('w-full')}>
-          {treeData.length > 0 ? (
-            <Tree
-              treeData={treeData}
-              selectedKeys={selectedGoalId ? [selectedGoalId] : []}
-              expandedKeys={expandedKeys}
-              onSelect={handleSelect}
-              onExpand={handleExpand}
-              showLine
-              blockNode
-              className={clsx(
-                'w-full',
-                '[&_.arco-tree-node]:w-full',
-                '[&_.arco-tree-node-title]:w-full',
-                '[&_.arco-tree-node-title-text]:w-full',
-                '[&_.arco-tree-node-title-text]:block',
-              )}
-            />
-          ) : (
-            <Empty description="暂无目标数据" />
+    <Spin loading={loading} className={clsx('w-full')}>
+      {treeData.length > 0 ? (
+        <Tree
+          treeData={treeData}
+          selectedKeys={selectedGoalId ? [selectedGoalId] : []}
+          expandedKeys={expandedKeys}
+          onSelect={handleSelect}
+          onExpand={handleExpandWithLoad}
+          showLine
+          blockNode
+          className={clsx(
+            'w-full',
+            '[&_.arco-tree-node]:w-full',
+            '[&_.arco-tree-node-title]:w-full',
+            '[&_.arco-tree-node-title-text]:w-full',
+            '[&_.arco-tree-node-title-text]:block',
           )}
-        </Spin>
-      </Shrink>
-    </FlexibleContainer>
+        />
+      ) : (
+        <Empty description="暂无目标数据" />
+      )}
+    </Spin>
   );
 };
 

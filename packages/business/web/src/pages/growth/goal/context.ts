@@ -2,81 +2,156 @@ import { useState, useCallback } from 'react';
 import { GoalVo } from '@true-north/vo';
 import { GoalService, TaskService } from '@true-north/web-service';
 import { Message } from '@arco-design/web-react';
-import { GoalStatus } from '@true-north/enum';
+import { GoalStatus, GoalType, Importance, Difficulty } from '@true-north/enum';
 import { createInjectState } from '@true-north/common-web-utils';
-import type { Task as TaskVO } from '@true-north/vo';
+
+interface GoalFilters {
+  status?: GoalStatus[];
+  type?: GoalType;
+  importance?: Importance;
+  difficulty?: Difficulty;
+  dateRange?: string[];
+}
 
 export const [GoalProvider, useGoalContext] = createInjectState<{
   PropsType: {
     children: React.ReactNode;
   };
   ContextType: {
+    searchValue: string;
+    setSearchValue: (value: string) => void;
+
+    filters: GoalFilters;
+    setFilters: (filters: GoalFilters) => void;
+    clearFilters: () => void;
+
+    isEditing: boolean;
+    setIsEditing: (editing: boolean) => void;
+
     loading: boolean;
     goalTree: GoalVo[];
     selectedGoal: GoalVo | null;
-    relatedTasks: TaskVO.TaskWithoutRelationsVo[];
     selectedGoalId: string | null;
     setSelectedGoalId: (goalId: string | null) => void;
     fetchGoalTree: () => Promise<void>;
     fetchGoalDetail: (goalId: string) => Promise<void>;
-    fetchRelatedTasks: (goalId: string) => Promise<void>;
+    loadChildren: (parentId: string) => Promise<void>;
     refreshData: () => Promise<void>;
   };
 }>(() => {
+  const [searchValue, setSearchValue] = useState('');
+
+  const [filters, setFilters] = useState<GoalFilters>({});
+
+  const clearFilters = useCallback(() => {
+    setFilters({});
+  }, []);
+
+  const [isEditing, setIsEditing] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [goalTree, setGoalTree] = useState<GoalVo[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<GoalVo | null>(null);
-  const [relatedTasks, setRelatedTasks] = useState<
-    TaskVO.TaskWithoutRelationsVo[]
-  >([]);
 
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
 
-  // 获取目标树数据
+  // 获取目标树数据 - 只获取根节点
   const fetchGoalTree = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await GoalService.getTree({
-        status: [GoalStatus.TODO, GoalStatus.DOING],
-      });
-      setGoalTree(data);
+      // 如果有搜索条件或筛选条件，使用原有的 findByFilter 方法
+      if (searchValue || Object.keys(filters).length > 0) {
+        // 构建筛选条件
+        const filterParams: any = {
+          keyword: searchValue || undefined,
+          type: filters.type || undefined,
+          importance: filters.importance || undefined,
+          difficulty: filters.difficulty || undefined,
+        };
+
+        // 处理状态筛选
+        if (filters.status && filters.status.length > 0) {
+          filterParams.status = filters.status;
+        }
+
+        // 处理日期范围
+        if (filters.dateRange && filters.dateRange.length === 2) {
+          filterParams.startDateStart = filters.dateRange[0];
+          filterParams.startDateEnd = filters.dateRange[1];
+        }
+
+        const response = await GoalService.findByFilter(filterParams);
+        const data = response?.list || response || [];
+        const treeData = Array.isArray(data) ? data : [];
+        setGoalTree(treeData);
+      } else {
+        // 没有筛选条件时，只获取根节点
+        const rootGoals = await GoalService.findRoots();
+        const rootData = Array.isArray(rootGoals) ? rootGoals : [];
+        // 为每个根节点添加 children 数组，标记为未加载
+        const treeData = rootData.map((goal) => ({
+          ...goal,
+          children: [], // 空数组表示未加载子节点
+          hasChildren: true, // 标记可能有子节点，需要异步加载
+        }));
+        setGoalTree(treeData);
+      }
     } catch (error) {
       console.error('获取目标数据失败:', error);
       Message.error('获取目标数据失败');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [searchValue, filters]);
 
-  // 获取关联任务
-  const fetchRelatedTasks = useCallback(async (goalId: string) => {
+  // 获取目标详情
+  const fetchGoalDetail = useCallback(async (goalId: string) => {
     try {
-      const result = await TaskService.findByFilter({
-        goalIds: [goalId],
-      });
-      setRelatedTasks(result?.list || []);
+      const goal = await GoalService.find(goalId);
+      setSelectedGoal(goal);
+      // 同时获取关联任务
     } catch (error) {
-      console.error('获取关联任务失败:', error);
-      Message.error('获取关联任务失败');
-      setRelatedTasks([]);
+      console.error('获取目标详情失败:', error);
+      Message.error('获取目标详情失败');
     }
   }, []);
 
-  // 获取目标详情
-  const fetchGoalDetail = useCallback(
-    async (goalId: string) => {
-      try {
-        const goal = await GoalService.find(goalId);
-        setSelectedGoal(goal);
-        // 同时获取关联任务
-        await fetchRelatedTasks(goalId);
-      } catch (error) {
-        console.error('获取目标详情失败:', error);
-        Message.error('获取目标详情失败');
-      }
-    },
-    [fetchRelatedTasks],
-  );
+  // 异步加载子节点
+  const loadChildren = useCallback(async (parentId: string) => {
+    try {
+      const children = await GoalService.findChildren(parentId);
+      const childrenData = Array.isArray(children) ? children : [];
+
+      // 更新树形数据，将子节点添加到对应的父节点
+      const updateTreeWithChildren = (nodes: GoalVo[]): GoalVo[] => {
+        return nodes.map((node) => {
+          if (node.id === parentId) {
+            return {
+              ...node,
+              children: childrenData.map((child) => ({
+                ...child,
+                children: [],
+                hasChildren: true, // 假设子节点也可能有子节点
+              })),
+              hasChildren: childrenData.length > 0,
+            };
+          }
+          if (node.children && node.children.length > 0) {
+            return {
+              ...node,
+              children: updateTreeWithChildren(node.children),
+            };
+          }
+          return node;
+        });
+      };
+
+      setGoalTree((prevTree) => updateTreeWithChildren(prevTree));
+    } catch (error) {
+      console.error('加载子节点失败:', error);
+      Message.error('加载子节点失败');
+    }
+  }, []);
 
   // 刷新数据
   const refreshData = useCallback(async () => {
@@ -87,15 +162,24 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
   }, [fetchGoalTree, fetchGoalDetail, selectedGoal]);
 
   return {
+    searchValue,
+    setSearchValue,
+
+    filters,
+    setFilters,
+    clearFilters,
+
+    isEditing,
+    setIsEditing,
+
     loading,
     goalTree,
     selectedGoal,
-    relatedTasks,
     selectedGoalId,
     setSelectedGoalId,
     fetchGoalTree,
     fetchGoalDetail,
-    fetchRelatedTasks,
+    loadChildren,
     refreshData,
   };
 });

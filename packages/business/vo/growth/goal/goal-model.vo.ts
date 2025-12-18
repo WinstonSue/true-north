@@ -20,4 +20,5 @@ export type GoalVo = GoalWithoutRelationsVo & {
   children?: GoalVo[];
   parent?: GoalVo;
   taskList?: TaskVo[];
+  hasChildren?: boolean; // 标记是否有子节点，用于异步加载
 };

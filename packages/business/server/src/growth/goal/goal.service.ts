@@ -33,6 +33,11 @@ export class GoalService {
   }
 
   async findByFilter(filter: GoalFilterDto): Promise<GoalDto[]> {
+    // 如果只获取根级目标，直接使用 findRoots 方法
+    if (filter.onlyRootLevel) {
+      return this.findRoots();
+    }
+
     const treeFilters = await this.processTreeFilter({
       excludeIds: filter.excludeIds,
       parentId: filter.parentId,

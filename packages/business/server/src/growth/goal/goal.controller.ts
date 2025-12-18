@@ -32,7 +32,7 @@ export class GoalController {
   @Get('/find/:id', { description: '根据ID查询目标详情' })
   async find(@Param('id') id: string): Promise<GoalVO.GoalVo> {
     const dto = await this.goalService.findWithRelations(id);
-    console.log('dto',  dto.exportVo());
+    console.log('dto', dto.exportVo());
     return dto.exportVo();
   }
 
@@ -67,6 +67,14 @@ export class GoalController {
   @Get('/find-roots', { description: '查询根目标列表' })
   async findRoots(): Promise<GoalVO.GoalVo[]> {
     return (await this.goalService.findRoots()).map((dto) => dto.exportVo());
+  }
+
+  @Get('/children/:parentId', { description: '获取指定父目标的子目标列表' })
+  async findChildren(@Param('parentId') parentId: string): Promise<GoalVO.GoalVo[]> {
+    const filterDto = new GoalFilterDto();
+    filterDto.parentId = parentId;
+    const children = await this.goalService.findByFilter(filterDto);
+    return children.map((dto) => dto.exportVo());
   }
 
   @Put('/abandon/:id', { description: '废弃目标' })

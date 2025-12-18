@@ -64,6 +64,11 @@ export class GoalFilterDto extends IntersectionType(
   @IsOptional()
   parentId?: string;
 
+  /** 只获取根级目标（没有父目标的目标） */
+  @IsBoolean()
+  @IsOptional()
+  onlyRootLevel?: boolean;
+
   importListVo(filterVo: GoalFilterVo) {
     importVo(filterVo, this);
   }
@@ -88,4 +93,5 @@ function importVo(filterVo: GoalFilterVo, filterDto: GoalFilterDto) {
   if (filterVo.abandonedDateStart) filterDto.abandonedDateStart = filterVo.abandonedDateStart;
   if (filterVo.abandonedDateEnd) filterDto.abandonedDateEnd = filterVo.abandonedDateEnd;
   if (filterVo.parentId) filterDto.parentId = filterVo.parentId;
+  if (filterVo.onlyRootLevel !== undefined) filterDto.onlyRootLevel = filterVo.onlyRootLevel;
 }

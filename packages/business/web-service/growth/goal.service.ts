@@ -94,6 +94,15 @@ export default class GoalService {
     }
   }
 
+  static async findChildren(parentId: string): Promise<any> {
+    try {
+      const res = await GoalController.findChildren(parentId);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
   static async abandon(id: string, options?: MethodOptions): Promise<any> {
     try {
       const res = await GoalController.abandon(id);

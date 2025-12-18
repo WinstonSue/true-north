@@ -1,14 +1,16 @@
 'use client';
 
 import { GoalProvider } from './context';
-
-('use client');
-
 import React, { useState } from 'react';
 import { Layout } from '@arco-design/web-react';
-import GoalTree from './GoalTree';
-import GoalDetail from './GoalDetail';
 import clsx from 'clsx';
+import { FlexibleContainer } from 'francis-component-react';
+import { useGoalContext } from './context';
+import { useGoalDetail } from '../components/GoalDetail';
+import GoalMain from './GoalMain';
+import GoalAside from './GoalAside';
+
+const { Fixed, Shrink } = FlexibleContainer;
 
 const { Sider, Content } = Layout;
 
@@ -17,6 +19,9 @@ interface GoalTreeViewProps {
 }
 
 const GoalTreeView: React.FC<GoalTreeViewProps> = () => {
+  const { refreshData } = useGoalContext();
+  const { openCreateDrawer } = useGoalDetail();
+
   return (
     <Layout
       className={clsx('w-full h-full', 'rounded', 'bg-bg-2', 'overflow-hidden')}
@@ -30,12 +35,12 @@ const GoalTreeView: React.FC<GoalTreeViewProps> = () => {
           directions: ['right'],
         }}
       >
-        <GoalTree />
+        <GoalAside />
       </Sider>
 
       {/* 右侧详情面板 */}
       <Content>
-        <GoalDetail />
+        <GoalMain />
       </Content>
     </Layout>
   );

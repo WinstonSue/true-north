@@ -30,6 +30,10 @@ export default class GoalController {
     return request<GoalVO.GoalVo[]>({ method: 'get' })(`/goal/find-roots`);
   }
 
+  static async findChildren(parentId: string) {
+    return request<GoalVO.GoalVo[]>({ method: 'get' })(`/goal/children/${parentId}`);
+  }
+
   static async abandon(id: string) {
     return request<boolean>({ method: 'put' })(`/goal/abandon/${id}`);
   }

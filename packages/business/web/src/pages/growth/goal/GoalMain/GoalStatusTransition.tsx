@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Tag, Dropdown, Menu, Message } from '@arco-design/web-react';
-import { IconDown, IconCheck, IconClose, IconRefresh } from '@arco-design/web-react/icon';
+import { Select, Tag, Message } from '@arco-design/web-react';
 import { GoalStatus } from '@true-north/enum';
 import { GoalService } from '@true-north/web-service';
 import type { GoalVo } from '@true-north/vo';
@@ -74,7 +73,7 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
     setLoading(true);
     try {
       const actionConfig = STATUS_ACTIONS[newStatus];
-      
+
       switch (actionConfig.action) {
         case 'abandon':
           await GoalService.abandon(goal.id, { silent: false });
@@ -85,7 +84,7 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
         case 'update':
           // 通过update接口修改状态
           const updateData: any = { status: newStatus };
-          
+
           // 根据新状态设置或清除相关时间戳
           if (newStatus === GoalStatus.DONE) {
             // 标记为完成，设置完成时间，清除放弃时间
@@ -100,7 +99,7 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
             updateData.doneAt = null;
             updateData.abandonedAt = null;
           }
-          
+
           await GoalService.update(goal.id, updateData, { silent: false });
           break;
         default:
@@ -115,54 +114,36 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
     }
   };
 
-  // 构建下拉菜单
-  const dropdownMenu = (
-    <Menu>
+  return (
+    <Select
+      value={currentStatus}
+      onChange={handleStatusChange}
+      disabled={disabled || loading}
+      loading={loading}
+      placeholder="选择状态"
+      triggerElement={
+        <div
+          className={clsx(
+            'w-20 px-2 py-1',
+            'flex items-center justify-center',
+            'rounded bg-fill-1 hover:bg-fill-2',
+            'cursor-pointer',
+            disabled && 'cursor-not-allowed opacity-50',
+          )}
+        >
+          <Tag color={currentConfig.color}>{currentConfig.label}</Tag>
+        </div>
+      }
+    >
       {availableStates.map((status) => {
         const config = STATUS_CONFIG[status];
-        const actionConfig = STATUS_ACTIONS[status];
         return (
-          <Menu.Item
-            key={status}
-            onClick={() => handleStatusChange(status)}
-          >
-            <div className="flex items-center gap-2">
-              <Tag color={config.color} size="small">
-                {config.label}
-              </Tag>
-              <span className="text-xs text-gray-500 ml-auto">
-                {actionConfig.label}
-              </span>
-            </div>
-          </Menu.Item>
+          <Select.Option key={status} value={status}>
+            <Tag color={config.color}>{config.label}</Tag>
+          </Select.Option>
         );
       })}
-    </Menu>
-  );
-
-  return (
-    <Dropdown
-      droplist={dropdownMenu}
-      position="bottom"
-      disabled={disabled || loading || availableStates.length === 0}
-    >
-      <Button
-        loading={loading}
-        disabled={disabled}
-        className={clsx(
-          'flex items-center gap-1',
-          'border-0 shadow-none',
-          'hover:bg-gray-100'
-        )}
-      >
-        <div className="flex items-center gap-1">
-          <Tag color={currentConfig.color} size="small">
-            {currentConfig.label}
-          </Tag>
-          {availableStates.length > 0 && <IconDown className="text-xs" />}
-        </div>
-      </Button>
-    </Dropdown>
+    </Select>
   );
 };
 
