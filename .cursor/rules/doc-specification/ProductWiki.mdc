@@ -1,7 +1,7 @@
 ---
-trigger: model_decision
 description: 编写产品Wiki文档时
 globs: 
+alwaysApply: false
 ---
 # True North 产品Wiki文档规范
 
@@ -13,7 +13,13 @@ globs:
 - **业务模型**: 核心业务逻辑和数据模型
 - **技术栈**: 技术选型和架构决策
 - **设计规范**: UI/UX设计标准和组件库
-- **运营规范**: 产品运营和数据指标体系
+
+## 核心原则
+1. **架构导向**: 专注于产品整体架构和模块关系
+2. **标准化描述**: 使用统一的架构描述格式
+3. **全局视角**: 从产品整体角度组织信息
+4. **可追溯性**: 建立清晰的信息索引和关联关系
+5. **版本管理**: 记录架构演进和变更历史
 
 ## 🏗️ 与PRD的职责边界
 
@@ -31,15 +37,6 @@ globs:
 - 单个功能的用户故事
 - 功能级的验收标准
 - 具体的交互流程设计
-
-## 🤖 AI友好型设计原则
-
-### 核心原则
-1. **架构导向**: 专注于产品整体架构和模块关系
-2. **标准化描述**: 使用统一的架构描述格式
-3. **全局视角**: 从产品整体角度组织信息
-4. **可追溯性**: 建立清晰的信息索引和关联关系
-5. **版本管理**: 记录架构演进和变更历史
 
 ## 🏗️ 核心文档结构
 
@@ -78,7 +75,7 @@ business_domains:
   - name: "个人成长"
     description: "目标、任务、待办、习惯管理"
     modules: ["goal", "task", "todo", "habit"]
-    relationships: "四级联动架构"
+    relationships: "多级联动架构"
   
   - name: "时间管理" 
     description: "时间追踪和分析"
@@ -154,9 +151,6 @@ tech_stack:
 # 代码组织结构
 code_structure:
   apps:
-    - name: "server"
-      description: "NestJS后端服务"
-      
     - name: "web" 
       description: "React Web应用"
       
@@ -221,6 +215,25 @@ interaction_patterns:
     layout: "响应式表单布局"
 ```
 
+#### 交互细节与页面展示
+```yaml
+# 模块文档必须包含的页面展示信息
+interface_blueprint:
+  view_matrix:
+    requirement: "列出主要视图/页面、目标人群、核心亮点"
+    format: "表格或结构化列表"
+  layout_spec:
+    requirement: "描述页面布局区域（顶部/侧边/内容/辅助区）及主要组件"
+    detail_level: "突出信息架构和组件组合，而非像素级稿件"
+  interaction_focus:
+    requirement: "总结关键交互流程（筛选、批量操作、状态切换等）及反馈机制"
+    coverage: ["输入校验", "状态提示", "快捷操作", "多视图联动"]
+  responsiveness:
+    requirement: "说明桌面/移动端适配策略或断点差异"
+  visual_elements:
+    requirement: "列出核心可视化组件（图表类型、数据要素）与展示目的"
+```
+
 ### 五、业务规范 (必填)
 
 #### 核心业务规则
@@ -265,66 +278,7 @@ data_constraints:
     status: "根据业务模块定义"
 ```
 
-### 六、运营规范 (必填)
-
-#### 数据指标体系
-```yaml
-# 关键指标定义
-key_metrics:
-  user_metrics:
-    - name: "日活跃用户(DAU)"
-      definition: "每日登录并使用核心功能的用户数"
-      
-    - name: "用户留存率"
-      definition: "新用户在第7天、第30天的留存比例"
-      
-  business_metrics:
-    - name: "目标完成率"
-      definition: "用户设定目标的实际完成比例"
-      
-    - name: "功能使用率"
-      definition: "各核心功能的用户使用比例"
-      
-  technical_metrics:
-    - name: "系统可用性"
-      definition: "系统正常运行时间比例，目标99.9%"
-      
-    - name: "响应时间"
-      definition: "API平均响应时间，目标<500ms"
-```
-
-#### 内容管理规范
-```yaml
-# 内容标准
-content_standards:
-  user_generated_content:
-    moderation: "自动过滤 + 人工审核"
-    guidelines: "禁止违法、暴力、色情内容"
-    
-  system_content:
-    tone: "友好、专业、简洁"
-    language: "简体中文为主"
-    
-  error_messages:
-    format: "问题描述 + 解决建议"
-    tone: "友好提示，避免技术术语"
-```
-
-## 📝 AI友好型编写规范
-
-### 格式要求
-- **结构化数据**: 优先使用YAML、Mermaid等标准格式
-- **模块化组织**: 按业务域和技术层次组织内容
-- **版本控制**: 记录重要变更和演进历史
-- **索引完整**: 提供清晰的导航和交叉引用
-
-### 内容要求
-- **全局视角**: 从产品整体角度描述架构和规范
-- **标准统一**: 建立一致的术语和标准定义
-- **可追溯性**: 建立清晰的模块间关系和依赖
-- **演进记录**: 记录重要的架构决策和变更历史
-
-## 🔧 AI友好型示例模板
+## 🔧示例模板
 
 ```markdown
 # True North 产品Wiki
@@ -334,7 +288,7 @@ content_standards:
 product_overview:
   name: "True North"
   version: "v2.0"
-  description: "基于四级联动架构的个人成长管理工具"
+  description: "基于多级联动架构的个人成长管理工具"
   vision: "成为最智能的个人成长伙伴"
   target_users: ["效率提升用户", "自我管理爱好者", "知识工作者"]
   core_value: "通过目标-任务-待办-习惯的联动管理，实现个人成长的系统化"
@@ -488,27 +442,6 @@ validation_rules:
     hierarchy_rule: "子级难度 ≤ 父级难度"
 ```
 
-## 六、运营规范
-
-### 关键指标
-```yaml
-kpi_system:
-  user_engagement:
-    - daily_active_users: "日活跃用户数"
-    - feature_adoption: "功能采用率"
-    - user_retention: "用户留存率"
-    
-  business_health:
-    - goal_completion_rate: "目标完成率"
-    - habit_consistency: "习惯坚持度"
-    - task_efficiency: "任务完成效率"
-```
-
-### 数据分析体系
-- **用户行为分析**: 功能使用路径、停留时间、操作频次
-- **业务效果分析**: 目标达成情况、习惯养成效果
-- **系统性能分析**: 响应时间、错误率、可用性
-
 ## 🧪 典型模块蓝图示例
 
 以下示例展示了如何在ProductWiki中沉淀全局性的业务蓝图，具体需求在PRD中只需描述差异化增量即可。
@@ -600,7 +533,7 @@ module_overview:
 changelog:
   v2.0.0:
     date: "2024-01-15"
-    changes: ["四级联动架构确立", "Monorepo架构迁移"]
+    changes: ["多级联动架构确立", "Monorepo架构迁移"]
     
   v1.1.0:
     date: "2023-12-01" 
