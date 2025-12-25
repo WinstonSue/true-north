@@ -37,4 +37,8 @@ export default class TaskController {
   static async findByFilter(taskListFiltersVo?: TaskVO.TaskFilterVo) {
     return request<ResponseListVo<TaskVO.TaskWithoutRelationsVo>>({ method: 'get' })(`/task/list`, taskListFiltersVo);
   }
+
+  static async getTree(taskFilterVo?: TaskVO.TaskFilterVo) {
+    return request<ResponseListVo<TaskVO.TaskVo>>({ method: 'get' })(`/task/tree`, taskFilterVo);
+  }
 }

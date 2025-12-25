@@ -441,6 +441,9 @@ importers:
       '@true-north/components-mind':
         specifier: workspace:*
         version: link:../../components/mind
+      '@true-north/components-tree':
+        specifier: workspace:*
+        version: link:../../components/tree
       '@true-north/components-ui':
         specifier: workspace:*
         version: link:../../components/ui
@@ -698,6 +701,28 @@ importers:
       react-dnd-html5-backend:
         specifier: ^16
         version: 16.0.1
+
+  packages/components/tree:
+    dependencies:
+      clsx:
+        specifier: ^2.0.0
+        version: 2.1.1
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.3.24
+      '@types/react-dom':
+        specifier: ^18.2.0
+        version: 18.3.7(@types/react@18.3.24)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.2
 
   packages/components/ui:
     dependencies:

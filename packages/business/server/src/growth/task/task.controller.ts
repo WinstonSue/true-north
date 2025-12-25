@@ -68,4 +68,33 @@ export class TaskController {
   async restore(@Param('id') id: string): Promise<boolean> {
     return await this.taskService.restore(id);
   }
+
+  @Get('/tree', { description: '获取任务树结构' })
+  async getTree(@Query() taskFilterVo?: TaskVO.TaskFilterVo): Promise<ResponseListVo<TaskVO.TaskVo>> {
+    const filter = new TaskFilterDto();
+    if (taskFilterVo) filter.importListVo(taskFilterVo);
+    const list = await this.taskService.findByFilter(filter);
+    // 构建树形结构
+    const taskMap = new Map<string, TaskVO.TaskVo>();
+    const rootTasks: TaskVO.TaskVo[] = [];
+    
+    // 转换为 VO 并建立映射
+    const taskVos = list.map(dto => dto.exportVo());
+    taskVos.forEach(task => taskMap.set(task.id, task));
+    
+    // 构建父子关系
+    taskVos.forEach(task => {
+      if (!task.parentId) {
+        rootTasks.push(task);
+      } else {
+        const parent = taskMap.get(task.parentId);
+        if (parent) {
+          if (!parent.children) parent.children = [];
+          parent.children.push(task);
+        }
+      }
+    });
+    
+    return { list: rootTasks };
+  }
 }

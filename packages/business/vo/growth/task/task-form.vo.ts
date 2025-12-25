@@ -16,4 +16,8 @@ export type CreateTaskVo = Pick<
   trackTimeIds?: string[];
 };
 
-export type UpdateTaskVo = Partial<CreateTaskVo>;
+export type UpdateTaskVo = Partial<CreateTaskVo> & {
+  status?: TaskVo['status'];
+  doneAt?: TaskVo['doneAt'];
+  abandonedAt?: TaskVo['abandonedAt'];
+};

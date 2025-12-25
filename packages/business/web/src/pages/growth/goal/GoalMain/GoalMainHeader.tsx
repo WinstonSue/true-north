@@ -1,14 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { FlexibleContainer } from 'francis-component-react';
-import { Modal, Message } from '@arco-design/web-react';
+import { Modal, Message, Tag, Dropdown, Menu } from '@arco-design/web-react';
 import { Button, Breadcrumb } from '@arco-design/web-react';
-import { IconEdit, IconDelete, IconRight } from '@arco-design/web-react/icon';
+import {
+  IconEdit,
+  IconDelete,
+  IconRight,
+  IconMore,
+  IconCheck,
+  IconClose,
+} from '@arco-design/web-react/icon';
 import { GoalService } from '@true-north/web-service';
 import { useGoalContext } from '../context';
-import GoalStatusTransition from './GoalStatusTransition';
+import { GoalStatus } from '@true-north/enum';
 import clsx from 'clsx';
 
 const { Fixed, Shrink } = FlexibleContainer;
+
+// 状态配置映射
+const STATUS_CONFIG = {
+  [GoalStatus.TODO]: {
+    label: '待开始',
+    color: 'gray',
+  },
+  [GoalStatus.DOING]: {
+    label: '进行中',
+    color: 'blue',
+  },
+  [GoalStatus.DONE]: {
+    label: '已完成',
+    color: 'green',
+  },
+  [GoalStatus.ABANDONED]: {
+    label: '已放弃',
+    color: 'red',
+  },
+};
 
 const GoalMainHeader: React.FC = () => {
   const {
@@ -62,6 +89,44 @@ const GoalMainHeader: React.FC = () => {
     await refreshData();
   };
 
+  // 标记完成
+  const handleComplete = async () => {
+    if (!selectedGoal) return;
+
+    try {
+      await GoalService.update(selectedGoal.id, {
+        status: GoalStatus.DONE,
+        doneAt: new Date().toISOString(),
+        abandonedAt: null,
+      });
+      Message.success('目标已标记为完成');
+      await refreshData();
+    } catch (error) {
+      console.error('标记完成失败:', error);
+      Message.error('标记完成失败');
+    }
+  };
+
+  // 放弃目标
+  const handleAbandon = () => {
+    if (!selectedGoal) return;
+
+    Modal.confirm({
+      title: '确定放弃目标吗？',
+      content: '放弃后可以重新激活，是否继续？',
+      onOk: async () => {
+        try {
+          await GoalService.abandon(selectedGoal.id);
+          Message.success('目标已放弃');
+          await refreshData();
+        } catch (error) {
+          console.error('放弃失败:', error);
+          Message.error('放弃失败');
+        }
+      },
+    });
+  };
+
   // 删除目标
   const handleDelete = () => {
     if (!selectedGoal) return;
@@ -73,7 +138,7 @@ const GoalMainHeader: React.FC = () => {
         try {
           await GoalService.delete(selectedGoal.id);
           Message.success('删除成功');
-          refreshData();
+          await refreshData();
         } catch (error) {
           console.error('删除失败:', error);
           Message.error('删除失败');
@@ -82,13 +147,32 @@ const GoalMainHeader: React.FC = () => {
     });
   };
 
+  // 渲染操作菜单
+  const renderActionMenu = () => (
+    <Menu>
+      <Menu.Item key="edit" onClick={() => setIsEditing(true)}>
+        <IconEdit /> 编辑
+      </Menu.Item>
+      <Menu.Item key="abandon" onClick={handleAbandon}>
+        <IconClose /> 放弃
+      </Menu.Item>
+      <Menu.Item key="delete" onClick={handleDelete} className="text-red-500">
+        <IconDelete /> 删除
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
     <Fixed
       direction="vertical"
-      className={clsx('px-4 !h-14', 'border-b border-border-2', 'gap-2')}
+      className={clsx(
+        'px-4 !h-14',
+        'border-b border-border-2',
+        'justify-between',
+      )}
     >
-      <Shrink direction="vertical" className={clsx('items-center gap-2')}>
-        {/* 面包屑导航 */}
+      {/* 左侧：面包屑导航 */}
+      <Shrink className={clsx('flex items-center')}>
         <Breadcrumb separator={<IconRight className="text-xs text-gray-400" />}>
           {breadcrumbPath.map((item, index) => (
             <Breadcrumb.Item
@@ -109,43 +193,32 @@ const GoalMainHeader: React.FC = () => {
             </Breadcrumb.Item>
           ))}
         </Breadcrumb>
-        <GoalStatusTransition
-          goal={selectedGoal}
-          onStatusChange={handleStatusChange}
-        />
-      </Shrink>
-      <Fixed className={'flex items-center gap-2'}>
-        {!isEditing ? (
-          <Button
-            icon={<IconEdit />}
-            onClick={() => setIsEditing(true)}
-          ></Button>
-        ) : (
-          <>
-            <Button
-              icon={<IconEdit />}
-              onClick={async () => {
-                await handleEditComplete();
-                setIsEditing(false);
-              }}
-            >
-              确认
-            </Button>
-            <Button
-              icon={<IconEdit />}
-              onClick={() => {
-                setIsEditing(false);
-              }}
-            >
-              取消
-            </Button>
-          </>
+
+        {selectedGoal && (
+          <Tag color={STATUS_CONFIG[selectedGoal.status]?.color}>
+            {STATUS_CONFIG[selectedGoal.status]?.label}
+          </Tag>
         )}
-        <Button
-          icon={<IconDelete />}
-          status="danger"
-          onClick={handleDelete}
-        ></Button>
+      </Shrink>
+
+      {/* 右侧：状态 Tag + 操作区 */}
+      <Fixed className={clsx('flex items-center gap-2')}>
+        {/* 主要按钮：已完成 */}
+        {selectedGoal && selectedGoal.status !== GoalStatus.DONE && (
+          <Button
+            type="outline"
+            size="default"
+            status="success"
+            icon={<IconCheck />}
+            onClick={handleComplete}
+          >
+            已完成
+          </Button>
+        )}
+
+        <Dropdown droplist={renderActionMenu()} position="br">
+          <Button type="outline" status="default" icon={<IconMore />} />
+        </Dropdown>
       </Fixed>
     </Fixed>
   );

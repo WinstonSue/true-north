@@ -1,5 +1,6 @@
 import { Empty } from '@arco-design/web-react';
 import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
 import { CreateButton } from '@/components/Button/CreateButton';
 import { useGoalDetailContext } from '../context';
 import { useTaskDetail } from '../..';
@@ -7,11 +8,19 @@ import TaskList from '../../TaskList';
 
 export function GoalTaskList() {
   const { currentGoal, refreshGoalDetail } = useGoalDetailContext();
+  const navigate = useNavigate();
+
+  // 点击任务跳转到 Task 详情页
+  const handleTaskClick = async (taskId: string) => {
+    navigate(`/growth/task/detail/${taskId}`, {
+      state: { fromGoal: currentGoal.id }
+    });
+  };
 
   return currentGoal.taskList?.length > 0 ? (
     <TaskList
       taskList={currentGoal.taskList}
-      onClickTask={async (id) => {}}
+      onClickTask={handleTaskClick}
       refreshTaskList={async () => {
         await refreshGoalDetail(currentGoal.id);
       }}

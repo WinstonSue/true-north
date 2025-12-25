@@ -295,7 +295,7 @@ product_overview:
 ```
 
 **产品定位**: 
-- 核心价值: 四级联动的个人成长管理体系
+- 核心价值: 多级联动的个人成长管理体系
 - 差异化优势: 业务逻辑深度整合，数据智能分析
 - 目标市场: 追求系统化自我管理的个人用户
 
@@ -305,7 +305,7 @@ product_overview:
 ```yaml
 business_domains:
   growth_management:
-    description: "个人成长四级联动系统"
+    description: "个人成长多级联动系统"
     modules:
       - goal: "目标管理 - 树形层级结构"
       - task: "任务管理 - 二选一关联规则"  

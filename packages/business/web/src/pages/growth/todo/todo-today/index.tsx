@@ -7,13 +7,13 @@ import { TodoService } from '@true-north/web-service';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import { flushSync } from 'react-dom';
 import clsx from 'clsx';
-import { useTodoContext } from '../context';
+import { useTodoHooks } from '../hooks';
 import { TodoStatus } from '@true-north/enum';
 
 const { Fixed, Shrink } = FlexibleContainer;
 
 export default function TodoToday() {
-  const { today, yesterday } = useTodoContext();
+  const { today, yesterday } = useTodoHooks();
   const [todayTodoList, setTodayTodoList] = useState<TodoVo[]>([]);
   const [todayDoneTodoList, setTodayDoneTodoList] = useState<TodoVo[]>([]);
   const [expiredTodoList, setExpiredTodoList] = useState<TodoVo[]>([]);

@@ -51,4 +51,9 @@ export class TaskController {
   async restore(@Param('id') id: string): Promise<boolean> {
     return this.controller.restore(id);
   }
+
+  @Get('/tree')
+  async getTree(@Query() taskFilterVo?: TaskVO.TaskFilterVo): Promise<ResponseListVo<TaskVO.TaskVo>> {
+    return this.controller.getTree(taskFilterVo);
+  }
 }

@@ -6,13 +6,13 @@ import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { flushSync } from 'react-dom';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
-import { useTodoContext } from '../context';
+import { useTodoHooks } from '../hooks';
 import { TodoStatus } from '@true-north/enum';
 
 const { Fixed, Shrink } = FlexibleContainer;
 
 export default function TodoWeek() {
-  const { weekStart, weekEnd } = useTodoContext();
+  const { weekStart, weekEnd } = useTodoHooks();
   const [weekTodoList, setWeekTodoList] = useState<TodoVo[]>([]);
   const [weekDoneTodoList, setWeekDoneTodoList] = useState<TodoVo[]>([]);
   const [expiredTodoList, setExpiredTodoList] = useState<TodoVo[]>([]);

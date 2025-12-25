@@ -3,7 +3,7 @@ import { IRoute } from '@/router/routes';
 export const todoRoutes: IRoute = {
   name: 'menu.todo',
   key: '/growth/todo',
-  breadcrumb: true,
+  breadcrumb: false,
   redirect: '/growth/todo/todo-today',
   children: [
     {
@@ -42,7 +42,7 @@ export const todoRoutes: IRoute = {
 export const taskRoutes: IRoute = {
   name: 'menu.task',
   key: '/growth/task',
-  breadcrumb: true,
+  breadcrumb: false,
   redirect: '/growth/task/task-week',
   children: [
     {
@@ -66,10 +66,17 @@ export const taskRoutes: IRoute = {
   ],
 };
 
+export const taskDetailRoutes: IRoute = {
+  name: 'menu.task.detail',
+  key: '/growth/task/detail/:id',
+  breadcrumb: false,
+  ignore: true,
+};
+
 export const goalRoutes: IRoute = {
   name: 'menu.goal',
   key: '/growth/goal',
-  breadcrumb: true,
+  breadcrumb: false,
   // redirect: '/growth/goal',
   // children: [
   //   {
@@ -117,6 +124,13 @@ export const habitRoutes: IRoute = {
 export const growthRoutes: IRoute = {
   name: 'menu.growth',
   key: '/growth',
-  breadcrumb: true,
-  children: [todoRoutes, goalRoutes, taskRoutes, habitRoutes, timerRoutes],
+  breadcrumb: false,
+  children: [
+    todoRoutes,
+    goalRoutes,
+    taskRoutes,
+    taskDetailRoutes,
+    habitRoutes,
+    timerRoutes,
+  ],
 };

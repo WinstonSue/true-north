@@ -85,6 +85,20 @@ export default class TaskService {
   }
 
   /**
+   * getTree
+   * @param taskFilterVo 过滤条件
+   * @returns 任务树结构
+   */
+  static async getTree(taskFilterVo?: TaskVO.TaskFilterVo) {
+    try {
+      const res = await TaskController.getTree(taskFilterVo);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
    * page
    * @param taskPageFilterVo 查询参数
    * @returns 操作结果
