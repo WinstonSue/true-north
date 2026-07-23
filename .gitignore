@@ -60,8 +60,6 @@ database.sqlite
 
 apps/server
 
-
-
 /.claude/
 /.codex/
 /.cursor/
