@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "3396c59dc14de5b7",
+        "id": "e03e38bb400680f0",
         "type": "tabs",
         "children": [
           {
-            "id": "a3e2ae7660cd4742",
+            "id": "c03b45bcb567f4ce",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "ProductWiki/growth/ProductWiki.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "ProductWiki"
+              "title": "新标签页"
             }
           }
         ]
@@ -169,9 +165,12 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "a3e2ae7660cd4742",
+  "active": "c03b45bcb567f4ce",
   "lastOpenFiles": [
-    "v0.1.0/PRD.md",
-    "v0.1.0/A9B9A91B-B4EB-44A7-84BA-FECE4363EFC9.jpg"
+    "v0.1.0/A9B9A91B-B4EB-44A7-84BA-FECE4363EFC9.jpg",
+    "ProductWiki/growth/ProductWiki.md",
+    "Pasted image 20260119115506.png",
+    "未命名.md",
+    "v0.1.0/PRD.md"
   ]
 }

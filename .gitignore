@@ -62,3 +62,6 @@ apps/server
 
 
 
+/.claude/
+/.codex/
+/.cursor/
