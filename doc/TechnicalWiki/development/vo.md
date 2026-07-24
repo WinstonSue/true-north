@@ -1,7 +1,3 @@
----
-description: 编写VO代码时
-alwaysApply: false
----
 # VO 规范
 ## 📋 概述
 

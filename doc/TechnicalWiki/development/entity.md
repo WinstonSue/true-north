@@ -1,7 +1,3 @@
----
-description: 编写server Entity代码时
-alwaysApply: false
----
 # Entity 规范
 
 ## 📋 概述

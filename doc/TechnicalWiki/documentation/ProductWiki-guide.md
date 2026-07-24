@@ -1,8 +1,5 @@
----
-description: 编写产品Wiki文档时
-globs: 
-alwaysApply: false
----
+> 写作规范原文档。产品 Wiki 实例见 [doc/ProductWiki](../../ProductWiki/ProductWiki.md)。
+
 # True North 产品Wiki文档规范
 
 ## 📋 适用场景
@@ -127,8 +124,8 @@ erDiagram
 tech_stack:
   architecture: "Monorepo + 微前端"
   backend:
-    framework: "NestJS"
-    database: "MySQL/SQLite"
+    framework: "Electron"
+    database: "SQLite"
     orm: "TypeORM"
     auth: "JWT + bcrypt"
     
@@ -348,12 +345,12 @@ graph TB
     end
     
     subgraph "后端服务层"
-        F[NestJS Server]
+        F[Desktop apps/desktop]
         G[TypeORM]
     end
     
     subgraph "数据存储层"
-        H[MySQL/SQLite]
+        H[SQLite]
     end
     
     A --> C

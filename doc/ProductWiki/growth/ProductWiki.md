@@ -79,47 +79,14 @@ erDiagram
 
 ## 三、技术架构
 
-### 3.1 技术栈
+实现细节见 **[TechnicalWiki](../../TechnicalWiki/TechnicalWiki.md)**（`apps/desktop`、Growth `service/growth` 等）。
 
 ```yaml
-tech_stack:
-  architecture: 'Monorepo + pnpm workspace + Turbo'
-  backend:
-    framework: 'NestJS'
-    database: 'MySQL / SQLite'
-    orm: 'TypeORM'
-    auth: 'JWT + bcrypt'
-  frontend:
-    framework: 'React 18 + TypeScript'
-    build_tool: 'Vite'
-    ui_library: ['Arco Design', 'Ant Design']
-    state_management: 'React Context + Hooks'
-  desktop:
-    framework: 'Electron'
-    build_tool: 'electron-vite'
-```
-
-### 3.2 模块与代码结构
-
-```yaml
-code_structure:
-  apps:
-    - server: 'NestJS 后端服务'
-    - web: 'React Web 应用'
-    - desktop: 'Electron 桌面端'
-  packages:
-    - business: '业务域包,含 api/server/web/vo/enum'
-    - common: '通用工具'
-    - components: '复用组件'
-```
-
-### 3.3 系统分层
-
-```mermaid
-graph TB
-    A[前端应用层<br/>Web/Electron] --> B[共享包层<br/>business/common/components]
-    B --> C[后端服务层<br/>NestJS + TypeORM]
-    C --> D[数据层<br/>MySQL / SQLite]
+tech_stack_summary:
+  app: 'apps/desktop（Electron）'
+  ui: 'React 18 + Vite，render/pages/growth'
+  service: 'TypeORM + SQLite，service/growth/{module}'
+  shared: '@true-north/vo、packages/business/enum'
 ```
 
 ---
@@ -249,9 +216,9 @@ metrics:
 
 ### 8.1 文档协作
 
-1. ProductWiki 提供全局基线 → PRD 引用并描述差异化需求
-2. 若 PRD 引入新的全局规则,需优先同步 ProductWiki
-3. README 用于导航,不承载规范内容
+1. ProductWiki 提供全局基线 → PRD 引用并描述本版本产品差异
+2. 版本迭代：PRD/TDD → 实现 → 功能入库后回写 ProductWiki / TechnicalWiki
+3. README 用于导航，不承载规范内容
 
 ### 8.2 版本记录
 

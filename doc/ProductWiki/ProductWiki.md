@@ -75,43 +75,15 @@ erDiagram
 
 ## 三、技术架构
 
-```yaml
-tech_stack:
-  architecture: 'Monorepo + pnpm workspace + Turbo'
-  backend:
-    framework: 'NestJS'
-    database: 'MySQL/SQLite'
-    orm: 'TypeORM'
-  frontend:
-    framework: 'React 18 + TypeScript'
-    build_tool: 'Vite'
-    ui_library: ['Arco Design', 'Ant Design']
-  desktop:
-    framework: 'Electron'
-    build_tool: 'electron-vite'
-```
-
-### 模块与代码组织
+技术栈、Monorepo 布局、Desktop 分层与数据流详见 **[TechnicalWiki](../TechnicalWiki/TechnicalWiki.md)**。
 
 ```yaml
-code_structure:
-  apps:
-    - name: 'server' # NestJS 服务
-    - name: 'web' # React Web
-    - name: 'desktop' # Electron 桌面端
-  packages:
-    - name: 'business' # 业务域（api/server/web/vo/enum）
-    - name: 'common' # 通用工具
-    - name: 'components' # 复用组件
-```
-
-### 系统分层
-
-```mermaid
-graph TB
-    A[前端应用层] --> B[共享包层]
-    B --> C[后端服务层]
-    C --> D[数据层]
+tech_stack_summary:
+  monorepo: 'pnpm workspace + Turbo'
+  client: 'Electron（apps/desktop）'
+  ui: 'React 18 + Vite + Arco/Ant Design'
+  persistence: 'TypeORM + SQLite（本地 service 层）'
+  shared: '@true-north/vo / enum，packages/business'
 ```
 
 ---
@@ -153,11 +125,12 @@ design_tokens:
 
 ## 六、域级导航
 
-| 业务域             | Wiki                                                             | 说明                          |
-| ------------------ | ---------------------------------------------------------------- | ----------------------------- |
+| 类型 | 文档 | 说明 |
+| --- | --- | --- |
+| 技术全局 | [doc/TechnicalWiki/TechnicalWiki.md](../TechnicalWiki/TechnicalWiki.md) | 工程架构与开发规范 |
 | Growth（个人成长） | [doc/ProductWiki/growth/ProductWiki.md](./growth/ProductWiki.md) | 目标/任务/待办/习惯及其子模块 |
-| Finance（财务）    | _待建设_                                                         | 预算、记账、统计              |
-| Calendar & Timer   | _待建设_                                                         | 日历、计划、计时器            |
+| Finance（财务） | _待建设_ | 预算、记账、统计 |
+| Calendar & Timer | _待建设_ | 日历、计划、计时器 |
 
 ---
 
@@ -165,14 +138,18 @@ design_tokens:
 
 ### 7.1 文档协作
 
-1. 全局 ProductWiki 记录系统级标准；域级 Wiki 继承并扩展
-2. PRD/TDD 引用 ProductWiki，不复制全局内容
-3. 变更流程：先更新对应 Wiki，再落地 PRD/TDD/实现
+1. 全局 ProductWiki 记录系统级产品标准；TechnicalWiki 记录工程技术标准
+2. PRD 引用 ProductWiki；TDD 引用 TechnicalWiki，不复制 Wiki 全文
+3. 版本迭代：先 PRD/TDD（相对 Wiki 的差异）→ 实现 → 功能入库后回写 ProductWiki / TechnicalWiki
 
 ### 7.2 版本记录
 
 ```yaml
 changelog:
+  - version: 'v2.1'
+    date: '2026-07-24'
+    highlights:
+      - 'TechnicalWiki 建立，技术规范自 .cursor/rules 迁出'
   - version: 'v2.0'
     date: '2025-12-01'
     highlights:

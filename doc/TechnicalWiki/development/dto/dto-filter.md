@@ -1,7 +1,3 @@
----
-description: 编写server DTO Filter代码时
-alwaysApply: false
----
 需要生成或修改DTO过滤器时
 
 # DTO Filter 规范

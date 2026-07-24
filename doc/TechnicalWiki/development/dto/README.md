@@ -1,7 +1,3 @@
----
-description: 编写server DTO代码时
-alwaysApply: false
----
 需要生成或修改DTO时
 
 # DTO 规范总览
@@ -15,7 +11,7 @@ DTO (Data Transfer Object) 是用于数据传输的对象，主要用于控制�
 ### 基础结构
 
 ```
-apps/server/src/business/{domain}/{module}/dto/
+apps/desktop/src/service/growth/{domain}/{module}/dto/
 ├── {module}-model.dto.ts      # 基础模型DTO
 ├── {module}-form.dto.ts       # 表单操作DTO
 ├── {module}-filter.dto.ts     # 过滤查询DTO
@@ -25,7 +21,7 @@ apps/server/src/business/{domain}/{module}/dto/
 ### 实际项目结构示例
 
 ```
-packages/business/server/src/growth/{module}/dto/
+apps/desktop/src/service/growth/growth/{module}/dto/
 ├── {module}-model.dto.ts      # 基础模型DTO
 ├── {module}-form.dto.ts       # 表单操作DTO
 ├── {module}-filter.dto.ts     # 过滤查询DTO
@@ -54,17 +50,17 @@ packages/business/server/src/growth/{module}/dto/
 
 本规范包含以下子规范，请根据具体需求参考对应规范：
 
-### 1. DTO Model 规范 (@dto-model.mdc)
+### 1. DTO Model 规范 (@dto-model.md)
 - 基础模型DTO和简化模型DTO的定义
 - Entity→DTO、DTO→VO的映射逻辑
 - 关联数据处理和类型安全设计
 
-### 2. DTO Form 规范 (@dto-form.mdc)
+### 2. DTO Form 规范 (@dto-form.md)
 - 创建DTO和更新DTO的定义
 - 表单验证规则和字段映射
 - 关联数据处理和嵌套DTO设计
 
-### 3. DTO Filter 规范 (@dto-filter.mdc)
+### 3. DTO Filter 规范 (@dto-filter.md)
 - 列表过滤DTO和分页过滤DTO的定义
 - 查询条件验证和VO映射逻辑
 - 复杂过滤模式和性能优化

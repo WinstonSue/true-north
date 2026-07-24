@@ -1,7 +1,3 @@
----
-description: 编写server Service代码时
-alwaysApply: false
----
 # Service 规范
 
 ## 📋 概述

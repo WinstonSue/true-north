@@ -1,7 +1,3 @@
----
-description: 编写server DTO Form代码时
-alwaysApply: false
----
 需要生成或修改DTO表单时
 
 # DTO Form 规范

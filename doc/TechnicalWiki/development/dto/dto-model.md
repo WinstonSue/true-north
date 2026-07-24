@@ -1,7 +1,3 @@
----
-description: 编写server DTO Model代码时
-alwaysApply: false
----
 需要生成或修改DTO模型时
 
 # DTO Model 规范

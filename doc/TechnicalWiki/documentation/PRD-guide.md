@@ -1,8 +1,5 @@
----
-description: 编写需求文档时
-globs: 
-alwaysApply: false
----
+> 写作规范。全局业务规则引用 [ProductWiki](../../ProductWiki/ProductWiki.md)。
+
 # True North 产品需求文档(PRD)规范
 
 ## 📋 适用场景
@@ -27,7 +24,7 @@ alwaysApply: false
 - **信息来源**: 产品定位、架构关系、全局业务规则等统一存放在ProductWiki中，PRD只复用引用，不重复描述。
 - **局部聚焦**: PRD聚焦单次需求/功能改动，描述范围限定在受影响的业务子域。
 - **引用方式**: 如需使用全局约束，使用“参见ProductWiki · <章节名称>”的方式引用，必要时仅补充差异化说明。
-- **同步机制**: 当PRD定义了会反向影响全局规范的内容，先更新ProductWiki，再在PRD中引用最新条目。
+- **同步机制**: 版本迭代以 PRD 记录相对 ProductWiki 的产品差异；若内容会反向影响全局规范，在 PRD 中写清差异，**功能入库时回写 ProductWiki**，再在 PRD 中引用最新章节。
 
 ## 🏗️ 核心文档结构
 

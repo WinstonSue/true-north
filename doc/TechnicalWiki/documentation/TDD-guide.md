@@ -1,8 +1,5 @@
----
-description: 编写开发文档时
-globs: 
-alwaysApply: false
----
+> 写作规范。技术实现引用 [TechnicalWiki](../TechnicalWiki.md) 与 [TDD-guide](./TDD-guide.md)。
+
 # True North 技术开发文档规范
 
 ## 📋 适用场景
@@ -45,9 +42,9 @@ document_meta:
 # 技术栈信息
 tech_stack:
   backend:
-    framework: "NestJS"
+    framework: "Electron + TypeORM"
     language: "TypeScript"
-    database: "MySQL/SQLite"
+    database: "SQLite"
     orm: "TypeORM"
     auth: "JWT + bcrypt"
   frontend:
@@ -121,14 +118,14 @@ graph TB
     end
     
     subgraph "后端服务层"
-        G[NestJS Server]
+        G[Desktop service layer]
         H[业务模块]
         I[认证模块]
         J[AI模块]
     end
     
     subgraph "数据存储层"
-        K[MySQL/SQLite]
+        K[SQLite]
     end
     
     A --> C
@@ -317,28 +314,28 @@ ai_instructions:
     backend:
       - task: "生成Entity实体类"
         template: "entity_template"
-        output_path: "apps/server/src/business/{module}/entities/{entity}.entity.ts"
+        output_path: "apps/desktop/src/service/growth/{module}/{module}.entity.ts"
         dependencies: ["TypeORM", "class-validator"]
         
       - task: "生成DTO传输对象"
         template: "dto_template"
-        output_path: "apps/server/src/business/{module}/dto/"
+        output_path: "apps/desktop/src/service/growth/{module}/dto/"
         dependencies: ["class-validator", "class-transformer"]
         
       - task: "生成Controller控制器"
         template: "controller_template"
-        output_path: "apps/server/src/business/{module}/{entity}.controller.ts"
+        output_path: "apps/desktop/src/service/growth/{module}/{module}.route-controller.ts"
         dependencies: ["@nestjs/common", "swagger"]
         
       - task: "生成Service服务类"
         template: "service_template"
-        output_path: "apps/server/src/business/{module}/{entity}.service.ts"
+        output_path: "apps/desktop/src/service/growth/{module}/{module}.service.ts"
         dependencies: ["TypeORM", "Repository"]
         
     frontend:
       - task: "生成页面组件"
         template: "page_template"
-        output_path: "apps/web/src/pages/{module}/{entity}/"
+        output_path: "apps/desktop/src/render/pages/growth/{module}/"
         dependencies: ["React", "Arco Design"]
         
       - task: "生成API接口"
@@ -383,15 +380,15 @@ ai_instructions:
   # 文件路径约定
   file_paths:
     backend:
-      entity: "apps/server/src/business/{module}/entities/{entity}.entity.ts"
-      dto: "apps/server/src/business/{module}/dto/"
-      controller: "apps/server/src/business/{module}/{entity}.controller.ts"
-      service: "apps/server/src/business/{module}/{entity}.service.ts"
-      mapper: "apps/server/src/business/{module}/mappers/{entity}.mapper.ts"
-      module: "apps/server/src/business/{module}/{entity}.module.ts"
+      entity: "apps/desktop/src/service/growth/{module}/{module}.entity.ts"
+      dto: "apps/desktop/src/service/growth/{module}/dto/"
+      controller: "apps/desktop/src/service/growth/{module}/{module}.route-controller.ts"
+      service: "apps/desktop/src/service/growth/{module}/{module}.service.ts"
+      mapper: "apps/desktop/src/service/growth/{module}/dto/"
+      module: "apps/desktop/src/service/growth/{module}/index.ts"
     frontend:
-      page: "apps/web/src/pages/{module}/{entity}/"
-      component: "apps/web/src/components/{module}/"
+      page: "apps/desktop/src/render/pages/growth/{module}/"
+      component: "apps/desktop/src/render/pages/growth/components/"
     shared:
       vo: "packages/vo/src/{module}/{entity}.vo.ts"
       api: "packages/api/src/controller/{module}/{entity}.api.ts"
@@ -406,7 +403,7 @@ development_workflow:
     prerequisites:
       - "Node.js >= 18.0.0"
       - "pnpm >= 8.0.0"
-      - "MySQL >= 8.0 (生产环境) 或 SQLite (开发环境)"
+      - "SQLite（Desktop 本地库）"
       - "Git >= 2.30.0"
     
     setup_steps:
@@ -434,8 +431,8 @@ development_workflow:
       constants: "UPPER_SNAKE_CASE (API_BASE_URL)"
       
     file_structure:
-      backend: "apps/server/src/business/{module}/"
-      frontend: "apps/web/src/pages/{module}/"
+      backend: "apps/desktop/src/service/growth/{module}/"
+      frontend: "apps/desktop/src/render/pages/growth/{module}/"
       shared: "packages/{package_name}/src/"
       
     import_order:

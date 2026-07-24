@@ -1,7 +1,3 @@
----
-description: 编写desktop Controller代码时
-alwaysApply: false
----
 # Desktop Adapter Controller 开发规范
 
 ## 📋 概述
@@ -25,7 +21,7 @@ Desktop Adapter Controller 是Desktop端的适配层，负责将Electron的IPC�
 
 ## 📁 文件位置
 ```
-apps/desktop/src/database/growth/
+apps/desktop/src/service/growth/
 ├── {module}.controller.ts       # Desktop适配控制器
 └── index.ts                     # 模块导出和IPC注册
 ```
@@ -43,7 +39,7 @@ import {
 
 /**
  * {资源名称}Desktop适配控制器
- * 位置: apps/desktop/src/database/growth/{module}.controller.ts
+ * 位置: apps/desktop/src/service/growth/{module}.controller.ts
  */
 export class {Module}DesktopController {
   constructor(private readonly {module}Controller: {Module}Controller) {}
@@ -137,7 +133,7 @@ import { {Module}DesktopController, {module}IpcHandlers } from "./{module}.contr
 
 /**
  * {资源名称}IPC处理器注册
- * 位置: apps/desktop/src/database/growth/index.ts
+ * 位置: apps/desktop/src/service/growth/index.ts
  */
 
 // 创建核心控制器实例
@@ -296,7 +292,7 @@ export class HeavyTaskDesktopController {
 ## 📋 检查清单
 
 ### 文件结构检查
-- [ ] 文件位置正确：`apps/desktop/src/database/growth/{module}.controller.ts`
+- [ ] 文件位置正确：`apps/desktop/src/service/growth/{module}.controller.ts`
 - [ ] 导出文件存在：`index.ts`
 - [ ] IPC处理器正确导出：`{module}IpcHandlers`
 

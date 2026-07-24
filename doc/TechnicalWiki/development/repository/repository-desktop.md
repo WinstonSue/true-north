@@ -1,7 +1,3 @@
----
-description: 编写desktop Repository代码时
-alwaysApply: false
----
 
 # Desktop Repository 实现规范
 
@@ -647,7 +643,7 @@ export class ModuleRepository {
 
 ## 📋 相关规范
 
-- [Business Repository Interface 规范](./repository-business.mdc) - Interface 定义规范
-- [Server Repository 规范](./repository-server.mdc) - Server 层实现规范
-- [Entity 规范](../entity.mdc) - 数据实体定义规范
-- [DTO 规范](../dto.mdc) - 数据传输对象规范
+- [Repository 总览](./README.md)
+- [../../architecture/data-flow.md](../../architecture/data-flow.md)
+- [Entity 规范](../entity.md) - 数据实体定义规范
+- [DTO 规范](../dto.md) - 数据传输对象规范

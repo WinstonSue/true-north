@@ -1,7 +1,3 @@
----
-description: True North 完整开发流程规范
-alwaysApply: false
----
 
 # True North 完整开发流程规范
 
@@ -16,15 +12,14 @@ alwaysApply: false
 ┌─────────────────────────────────────────────────────────────────┐
 │                    客户端层 (Client Layer)                     │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │                前端应用 (Web/Desktop)                 │   │
+│  │           apps/desktop/src/render (React)               │   │
 │  └─────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────┐
-│                    适配层 (Adapter Layer)                     │
-│  ┌─────────────────┬─────────────────┬─────────────────┐   │
-│  │   Server API    │  Desktop IPC    │   Mobile API     │   │
-│  │   (HTTP/REST)   │   (Electron)    │   (计划中...)     │   │
-│  └─────────────────┴─────────────────┴─────────────────┘   │
+│                    路由层 (Route Layer)                        │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │     RouteController + IPC（Electron 主进程 service）      │   │
+│  └─────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────┐
 │                  业务层 (Business Layer)                      │
@@ -56,7 +51,7 @@ alwaysApply: false
 ### 第一阶段：数据格式定义
 
 #### 1.1 Entity 定义（数据模型）
-**位置**: `apps/desktop/src/growth/{module}/`（entity、dto、service、repository、route-controller）
+**位置**: `apps/desktop/src/service/growth/{module}/`（entity、dto、service、repository、route-controller）
 
 **核心原则**:
 - 继承 `BaseEntity` 获取基础字段
@@ -65,7 +60,7 @@ alwaysApply: false
 
 **示例代码**:
 ```typescript
-// packages/business/server/src/{domain}/{module}/{module}.entity.ts
+// apps/desktop/src/service/growth/{domain}/{module}/{module}.entity.ts
 import { BaseEntity } from "../../base/base.entity";
 import { EntityStatus, EntityType } from "@true-north/enum";
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
@@ -118,7 +113,7 @@ export class Module extends ModuleModel {
 ```
 
 #### 1.2 DTO 定义（数据传输对象）
-**位置**: `packages/business/server/src/{domain}/{module}/dto/`
+**位置**: `apps/desktop/src/service/growth/{domain}/{module}/dto/`
 
 **核心原则**:
 - 区分创建、更新、查询等不同场景的 DTO
@@ -127,7 +122,7 @@ export class Module extends ModuleModel {
 
 **示例代码**:
 ```typescript
-// packages/business/server/src/{domain}/{module}/dto/create-{module}.dto.ts
+// apps/desktop/src/service/growth/{domain}/{module}/dto/create-{module}.dto.ts
 import { IsString, IsOptional, IsEnum, IsNumber, IsISO8601 } from "class-validator";
 import { Type } from "class-transformer";
 import { EntityStatus } from "@true-north/enum";
@@ -204,7 +199,7 @@ export namespace ModuleVO {
 ### 第二阶段：业务逻辑实现
 
 #### 2.1 Repository 定义（数据访问层）
-**位置**: `packages/business/server/src/{domain}/{module}/*.repository.ts`
+**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.repository.ts`
 
 **核心原则**:
 - 实现数据访问接口
@@ -213,7 +208,7 @@ export namespace ModuleVO {
 
 **示例代码**:
 ```typescript
-// packages/business/server/src/{domain}/{module}/{module}.repository.ts
+// apps/desktop/src/service/growth/{domain}/{module}/{module}.repository.ts
 import { Module } from "./entities/{module}.entity";
 import { ModuleDto, CreateModuleDto, UpdateModuleDto } from "./dto";
 
@@ -244,7 +239,7 @@ export abstract class ModuleRepository {
 ### 第三阶段：业务逻辑
 
 #### 3.1 Repository Interface 定义（数据访问契约）
-**位置**: `packages/business/server/src/{domain}/{module}/*.repository.ts`
+**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.repository.ts`
 
 **核心原则**:
 - 定义数据访问的统一接口
@@ -253,7 +248,7 @@ export abstract class ModuleRepository {
 
 **示例代码**:
 ```typescript
-// packages/business/server/src/{domain}/{module}/{module}.repository.ts
+// apps/desktop/src/service/growth/{domain}/{module}/{module}.repository.ts
 import { Module } from "./{module}.entity";
 import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from "./dto";
 
@@ -286,8 +281,8 @@ export interface ModuleRepository {
 }
 ```
 
-#### 3.2 Repository Server 实现（MySQL/PostgreSQL）
-**位置**: `apps/server/src/business/{domain}/{module}/*.repository.ts`
+#### 3.2 Repository 实现（SQLite / TypeORM）
+**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.repository.ts`
 
 **核心原则**:
 - 使用 TypeORM 实现复杂查询
@@ -296,7 +291,7 @@ export interface ModuleRepository {
 
 **示例代码**:
 ```typescript
-// apps/server/src/business/{domain}/{module}/{module}.repository.ts
+// apps/desktop/src/service/growth/{domain}/{module}/{module}.repository.ts
 @Injectable()
 export class ModuleRepository {
   constructor(
@@ -432,7 +427,7 @@ export class ModuleRepository {
 ```
 
 #### 3.4 Service 定义（业务服务）
-**位置**: `packages/business/server/src/{domain}/{module}/*.service.ts`
+**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.service.ts`
 
 **核心原则**:
 - 实现业务规则和逻辑处理
@@ -441,7 +436,7 @@ export class ModuleRepository {
 
 **示例代码**:
 ```typescript
-// packages/business/server/src/{domain}/{module}/{module}.service.ts
+// apps/desktop/src/service/growth/{domain}/{module}/{module}.service.ts
 export class ModuleService {
   protected moduleRepository: ModuleRepository;
 
@@ -500,7 +495,7 @@ export class ModuleService {
 ### 第四阶段：控制器
 
 #### 4.1 Business Controller 定义（核心业务控制器）
-**位置**: `packages/business/server/src/{domain}/{module}/*.controller.ts`
+**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.controller.ts`
 
 **核心原则**:
 - 实现核心业务逻辑
@@ -509,7 +504,7 @@ export class ModuleService {
 
 **示例代码**:
 ```typescript
-// packages/business/server/src/{domain}/{module}/{module}.controller.ts
+// apps/desktop/src/service/growth/{domain}/{module}/{module}.controller.ts
 export class ModuleController {
   protected moduleService: ModuleService;
 
@@ -550,7 +545,7 @@ export class ModuleController {
 ```
 
 #### 4.2 Server Controller 实现（HTTP API）
-**位置**: `apps/server/src/business/{domain}/{module}/*.controller.ts`
+**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.controller.ts`
 
 **核心原则**:
 - 提供 HTTP REST API 接口
@@ -559,7 +554,7 @@ export class ModuleController {
 
 **示例代码**:
 ```typescript
-// apps/server/src/business/{domain}/{module}/{module}.controller.ts
+// apps/desktop/src/service/growth/{domain}/{module}/{module}.controller.ts
 @Controller("{module}")
 export class ModuleServerController {
   constructor(
@@ -598,7 +593,7 @@ export class ModuleServerController {
 ```
 
 #### 4.3 Desktop Controller 实现（IPC 接口）
-**位置**: `apps/desktop/src/database/growth/{module}.controller.ts`
+**位置**: `apps/desktop/src/service/growth/{module}.controller.ts`
 
 **核心原则**:
 - 提供 IPC 异步接口
@@ -645,7 +640,7 @@ export function registerModuleIpcHandlers(moduleController: ModuleDesktopControl
 ### 第五阶段：字段控制
 
 #### 5.1 字段流转管理
-**参考**: [`field-manage.mdc`](./field-manage.mdc)
+**参考**: [`field-manage.md`](./field-manage.md)
 
 **核心原则**:
 - 确保字段在各层级的定义一致性
@@ -653,7 +648,7 @@ export function registerModuleIpcHandlers(moduleController: ModuleDesktopControl
 - 验证字段流转的完整性
 
 #### 5.2 筛选功能管理
-**参考**: [`field-filter-manage.mdc`](./field-filter-manage.mdc)
+**参考**: [`field-filter-manage.md`](./field-filter-manage.md)
 
 **核心原则**:
 - 支持灵活的筛选操作符
@@ -718,14 +713,14 @@ export function registerModuleIpcHandlers(moduleController: ModuleDesktopControl
 
 ## 📚 相关规范文档
 
-- **[`entity.mdc`](./entity.mdc)** - Entity 规范（数据模型定义）
-- **[`dto.mdc`](./dto.mdc)** - DTO 规范（数据传输对象）
-- **[`vo.mdc`](./vo.mdc)** - VO 规范（值对象）
-- **[`repository.mdc`](./repository.mdc)** - Repository 规范总览
-- **[`service.mdc`](./service.mdc)** - Service 规范（业务服务）
-- **[`controller.mdc`](./controller.mdc)** - Controller 规范总览
-- **[`field-manage.mdc`](./field-manage.mdc)** - 字段流转管理
-- **[`field-filter-manage.mdc`](./field-filter-manage.mdc)** - 筛选功能管理
+- **[`entity.md`](./entity.md)** - Entity 规范（数据模型定义）
+- **[`dto.md`](./dto.md)** - DTO 规范（数据传输对象）
+- **[`vo.md`](./vo.md)** - VO 规范（值对象）
+- **[`repository.md`](./repository.md)** - Repository 规范总览
+- **[`service.md`](./service.md)** - Service 规范（业务服务）
+- **[`controller.md`](./controller.md)** - Controller 规范总览
+- **[`field-manage.md`](./field-manage.md)** - 字段流转管理
+- **[`field-filter-manage.md`](./field-filter-manage.md)** - 筛选功能管理
 
 ## 🎯 最佳实践
 

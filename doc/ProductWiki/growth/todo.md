@@ -183,4 +183,4 @@ changelog:
 - **与 Goal/Task**：继承时间、重要度、难度约束；参见 [goal](./goal.md)、[task](./task.md)。
 - **与 Habit**：Habit 生成的打卡待办视为 `relatedType=habit` 的扩展（规划中）；当前需对接 Habit 的提醒策略。
 - **与全局 Wiki**：遵循 `doc/ProductWiki/ProductWiki.md` 的状态体系与设计规范。
-- **PRD/TDD 协作**：需求新增新视图/提醒策略时，先更新本 Wiki，再在 `doc/growth/todo/PRD.md`、`TDD.md` 描述实现细节。
+- **PRD/TDD 协作**：版本差异先写在 `doc/growth/todo/PRD.md`、`TDD.md`，实现完成后将仍长期有效的规则回写本 Wiki（功能入库）。
