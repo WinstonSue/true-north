@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["preload/index.ts"]
+  "include": ["src/preload/index.ts"]
 }

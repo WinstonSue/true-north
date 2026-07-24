@@ -48,7 +48,7 @@ tech_stack:
 
 ### 4.1 目标页（/growth/goal）
 
-- 组件：`apps/desktop/render/pages/growth/goal`
+- 组件：`apps/desktop/src/render/pages/growth/goal`
   - GoalAside：保持树加载与搜索占位，无需改。
   - GoalMainHeader：右上区域改为「状态 Tag（只读） + Dropdown(...: 编辑/删除/放弃) + 主要按钮“已完成”」。
     - 状态 Tag：仅展示，不提供下拉。

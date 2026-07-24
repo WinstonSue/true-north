@@ -22,16 +22,17 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["render/*"],
-      "@business/*": ["service/*"]
+      "@/*": ["src/render/*"],
+      "@business/*": ["src/service/*"]
     }
   },
   "include": [
-    "render/**/*.ts",
-    "render/**/*.tsx",
-    "main/**/*.ts",
-    "service/**/*.ts",
-    "preload/**/*.ts",
+    "src/render/**/*.ts",
+    "src/render/**/*.tsx",
+    "src/main/**/*.ts",
+    "src/service/**/*.ts",
+    "src/preload/**/*.ts",
+    "src/config/**/*.ts",
     "**/*.d.ts"
   ],
   "exclude": ["node_modules", "dist", "**/*.md"],

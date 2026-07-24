@@ -85,7 +85,7 @@ pnpm pack-linux  # Linux
 
 ## 修改加载的URL
 
-如果您想要修改默认加载的URL，请编辑`main/index.ts`文件中的`DEFAULT_URL`常量:
+如果您想要修改默认加载的URL，请编辑`src/main/index.ts`文件中的`DEFAULT_URL`常量:
 
 ```typescript
 // 默认加载的URL
@@ -120,11 +120,12 @@ window.electronAPI.loadURL('https://example.com').then((result) => {
 ```
 .
 ├── dist/                   # 构建输出目录
-├── render/                 # 渲染进程（Vite UI）
-├── main/                   # Electron 主进程入口与 IPC 装配
-├── preload/                # 预加载脚本
-├── service/                # 本地 IPC 业务域（growth、db、users、common 等）
-├── config/                 # Tailwind 等配置
+├── src/
+│   ├── render/             # 渲染进程（Vite UI）
+│   ├── main/               # Electron 主进程入口与 IPC 装配
+│   ├── preload/            # 预加载脚本
+│   ├── service/            # 本地 IPC 业务域（growth、db、users、common 等）
+│   └── config/             # Tailwind 等配置
 ├── build.sh                # 构建脚本
 ├── electron.vite.config.ts # electron-vite配置
 ├── package.json            # 项目配置

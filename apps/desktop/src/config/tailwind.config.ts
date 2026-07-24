@@ -1,9 +1,14 @@
 import type { Config } from 'tailwindcss';
-import { colors } from './config/tailwind-colors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { colors } from './tailwind-colors';
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
+const srcDir = path.resolve(configDir, '..');
 
 const config: Config = {
   darkMode: 'class',
-  content: ['./render/**/*.{js,ts,jsx,tsx,mdx}'],
+  content: [path.join(srcDir, 'render/**/*.{js,ts,jsx,tsx,mdx}')],
   theme: {
     extend: {
       colors,

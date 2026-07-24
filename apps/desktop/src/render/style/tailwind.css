@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-@config '../../tailwind.config.ts';
+@config '../../config/tailwind.config.ts';
 
 @layer base {
   *,

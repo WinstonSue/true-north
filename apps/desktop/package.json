@@ -14,8 +14,8 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .vite",
     "sync-entities": "node scripts/sync-entities.js",
     "sync-entities:watch": "node scripts/sync-entities.js --watch",
-    "eslint": "eslint render/ --ext .ts,.tsx,.js,.jsx --fix --cache",
-    "stylelint": "stylelint 'render/**/*.less' 'render/**/*.css' --fix --cache",
+    "eslint": "eslint src/render/ --ext .ts,.tsx,.js,.jsx --fix --cache",
+    "stylelint": "stylelint 'src/render/**/*.less' 'src/render/**/*.css' --fix --cache",
     "lint": "npm run eslint && npm run stylelint"
   },
   "dependencies": {

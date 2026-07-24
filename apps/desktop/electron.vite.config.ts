@@ -9,14 +9,15 @@ import { vitePluginForArco } from '@arco-plugins/vite-react';
 // 获取当前文件的目录路径
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDirPath = path.dirname(currentFilePath);
+const srcDir = path.resolve(currentDirPath, 'src');
 
 export default defineConfig({
   main: {
     resolve: {
       alias: {
-        '@business': path.resolve(currentDirPath, 'service'),
-        '@db': path.resolve(currentDirPath, 'service/db'),
-        '@': path.resolve(currentDirPath, 'main'),
+        '@business': path.resolve(srcDir, 'service'),
+        '@db': path.resolve(srcDir, 'service/db'),
+        '@': path.resolve(srcDir, 'main'),
         '@true-north/enum': path.resolve(currentDirPath, '../../packages/business/enum/index.ts'),
         '@true-north/vo': path.resolve(currentDirPath, '../../packages/business/vo/index.ts'),
       },
@@ -26,7 +27,7 @@ export default defineConfig({
       outDir: 'dist/main',
       rollupOptions: {
         input: {
-          index: path.resolve(currentDirPath, 'main/index.ts'),
+          index: path.resolve(srcDir, 'main/index.ts'),
         },
         external: [
           'electron',
@@ -54,8 +55,8 @@ export default defineConfig({
         process.env.NODE_ENV === 'development'
           ? {
               include: [
-                path.resolve(currentDirPath, 'main/**/*'),
-                path.resolve(currentDirPath, 'service/**/*'),
+                path.resolve(srcDir, 'main/**/*'),
+                path.resolve(srcDir, 'service/**/*'),
               ],
             }
           : undefined,
@@ -71,7 +72,7 @@ export default defineConfig({
       outDir: 'dist/preload',
       rollupOptions: {
         input: {
-          index: path.resolve(currentDirPath, 'preload/index.ts'),
+          index: path.resolve(srcDir, 'preload/index.ts'),
         },
         external: [
           'electron',
@@ -99,7 +100,7 @@ export default defineConfig({
       port: 8100,
     },
     // 渲染进程配置
-    root: path.resolve(currentDirPath, 'render'),
+    root: path.resolve(srcDir, 'render'),
     plugins: [
       react(),
       tailwindcss(),
@@ -125,11 +126,11 @@ export default defineConfig({
       alias: [
         {
           find: /^@\/(.*)$/,
-          replacement: path.resolve(currentDirPath, 'render/$1'),
+          replacement: path.resolve(srcDir, 'render/$1'),
         },
         {
           find: '@',
-          replacement: path.resolve(currentDirPath, 'render'),
+          replacement: path.resolve(srcDir, 'render'),
         },
         {
           find: '@true-north/enum',
@@ -153,7 +154,7 @@ export default defineConfig({
     build: {
       outDir: 'dist/renderer',
       rollupOptions: {
-        input: path.resolve(currentDirPath, 'render/index.html'),
+        input: path.resolve(srcDir, 'render/index.html'),
         external: [/^react-dnd/, /^dnd-core/, /^immutability-helper/],
       },
       minify: false, // 禁用压缩以保留 TypeORM 装饰器元数据
