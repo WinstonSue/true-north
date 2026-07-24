@@ -16,7 +16,7 @@ true-north/
 ├── doc/
 │   ├── ProductWiki/          # 产品 Wiki
 │   ├── TechnicalWiki/        # 技术 Wiki
-│   └── v0.1.0/               # 版本交付文档
+│   └── {version}/            # 版本交付 PRD/TDD（如 v0.1.0/）
 ├── package.json
 ├── pnpm-workspace.yaml
 └── turbo.json

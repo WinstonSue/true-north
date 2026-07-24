@@ -188,4 +188,4 @@ changelog:
 - **与 Todo 模块**：任务是 Todo 的主要关联源；参见 [todo ProductWiki](./todo.md) “关联继承”。
 - **与 Habit 模块**：任务可向 Habit 输出可视化指标，但不强制关联；参见 [habit ProductWiki](./habit.md)。
 - **与 Track-Time**：任务提供 `relatedType=task` 的时间记录归属；全局规范见 `doc/ProductWiki/ProductWiki.md`。
-- **PRD/TDD 协作**：版本差异先写在 `doc/growth/task/PRD.md`、`TDD.md`，实现完成后将仍长期有效的规则回写本 Wiki（功能入库）。
+- **PRD/TDD 协作**：版本差异写在 `doc/{version}/PRD.md`、`TDD.md`（如 [v0.1.0](../../v0.1.0/PRD.md)）；实现完成后将仍长期有效的规则回写本 Wiki（功能入库）。

@@ -53,7 +53,7 @@ Growth 等业务域的产品级约束（关联规则、时间/重要度继承等
 | **ProductWiki** | 产品架构、业务模型、设计规范 | PRD 引用，不复制全文 |
 | **TechnicalWiki** | 工程架构、代码分层、实现规范 | TDD 引用，不复制全文 |
 | **PRD.md** | 单次需求/版本的功能与交互 | 业务规则 → ProductWiki |
-| **TDD.md** | 模块技术设计与 API/数据模型 | 实现规范 → TechnicalWiki |
+| **TDD.md** | 本版本技术设计与 API/数据模型 | 实现规范 → TechnicalWiki |
 
 变更流程（版本迭代）：PRD/TDD（本版本差异）→ 实现代码 → Wiki（功能入库，沉淀全局）。
 
@@ -67,8 +67,7 @@ Growth 等业务域的产品级约束（关联规则、时间/重要度继承等
 | --- | --- |
 | [doc/ProductWiki/ProductWiki.md](../ProductWiki/ProductWiki.md) | 产品全局 SSOT |
 | [doc/TechnicalWiki/TechnicalWiki.md](./TechnicalWiki.md) | 技术全局 SSOT |
-| [doc/v0.1.0/](../v0.1.0/) | 版本级 PRD/TDD 示例 |
-| `doc/{system}/` | 系统级 PRD/TDD（如未来 `doc/growth/`） |
+| `doc/{version}/`（如 [v0.1.0](../v0.1.0/)） | 本版本 PRD/TDD（唯一交付落点） |
 
 ---
 

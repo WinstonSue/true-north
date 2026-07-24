@@ -7,26 +7,32 @@
 
 - **PRD.md** — Product Requirements Document（产品需求）
 - **TDD.md** — Technical Design Document（技术设计）
-- **README.md** — 功能说明 / 导航
+- **README.md** — 版本说明 / 导航（可选）
 
 ## 层次结构
 
-### 系统级
+### 版本级（唯一交付落点）
+
+目录名采用 semver 风格（如 `v0.1.0`）。每个版本目录包含该版本的 PRD/TDD：
 
 ```
-doc/{system}/
-├── README.md       # 文档导航
-├── PRD.md          # 系统级产品需求
-└── TDD.md          # 系统级技术设计
+doc/{version}/
+├── README.md       # 可选：版本说明与导航
+├── PRD.md          # 本版本产品需求
+└── TDD.md          # 本版本技术设计
 ```
 
-### 模块级
+完整 `doc/` 树：
 
 ```
-doc/{system}/{module}/
-├── README.md       # 模块概览（引用 PRD/TDD）
-├── PRD.md          # 模块产品需求
-└── TDD.md          # 模块技术设计
+doc/
+├── ProductWiki/
+├── TechnicalWiki/
+├── {version}/
+│   ├── README.md
+│   ├── PRD.md
+│   └── TDD.md
+└── README.md
 ```
 
 ## 内容分工
@@ -43,25 +49,9 @@ doc/{system}/{module}/
 | --- | --- | --- |
 | 产品 SSOT | [ProductWiki/ProductWiki.md](../../ProductWiki/ProductWiki.md) | 产品架构、业务规范 |
 | 技术 SSOT | [TechnicalWiki/TechnicalWiki.md](../TechnicalWiki.md) | 工程架构、代码规范 |
-| 版本/系统 | `doc/v0.1.0/`、`doc/{system}/` | 可交付范围的 PRD/TDD |
+| 版本交付 | `doc/{version}/`（示例 [v0.1.0](../../v0.1.0/PRD.md)） | 本版本 PRD/TDD |
 
-### Growth 示例（目标结构）
-
-```
-doc/growth/
-├── README.md
-├── PRD.md
-├── TDD.md
-├── goal/
-│   ├── README.md
-│   ├── PRD.md
-│   └── TDD.md
-├── task/
-├── todo/
-└── habit/
-```
-
-当前 Growth 产品蓝图见 [ProductWiki/growth](../../ProductWiki/growth/ProductWiki.md)；版本示例见 [doc/v0.1.0](../../v0.1.0/PRD.md)。
+域级产品蓝图（如 Growth）见 [ProductWiki/growth](../../ProductWiki/growth/ProductWiki.md)，**不**使用 `doc/growth/` 等独立 PRD/TDD 目录。
 
 ## 写作规范
 
@@ -73,4 +63,4 @@ doc/growth/
 
 - PRD 引用 ProductWiki，不复制全局业务段落
 - TDD 引用 TechnicalWiki，不复制全局分层/代码模板全文
-- 版本迭代：PRD/TDD → 代码 → 功能入库后回写 Wiki
+- 版本迭代：在 `doc/{version}/` 写 PRD/TDD → 代码 → 功能入库后回写 Wiki

@@ -188,4 +188,4 @@ changelog:
 - **Goal**：继承 [goal ProductWiki](./goal.md) 的时间/重要度约束，并向目标进度回写数据。
 - **Task/Todo**：习惯可派生定期 Todo（规划中），需遵循 [todo ProductWiki](./todo.md) 的提醒与状态规范。
 - **全局 ProductWiki**：遵循 `doc/ProductWiki/ProductWiki.md` 的状态、设计、数据规范。
-- **PRD/TDD 协作**：版本差异先写在 `doc/growth/habit/PRD.md`、`TDD.md`，实现完成后将仍长期有效的规则回写本 Wiki（功能入库）。
+- **PRD/TDD 协作**：版本差异写在 `doc/{version}/PRD.md`、`TDD.md`（如 [v0.1.0](../../v0.1.0/PRD.md)）；实现完成后将仍长期有效的规则回写本 Wiki（功能入库）。

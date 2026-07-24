@@ -184,4 +184,4 @@ changelog:
 - **与待办模块**：作为高优先级待办的约束源；参见 [todo ProductWiki](./todo.md)“关联继承”章节。
 - **与习惯模块**：所有习惯必须绑定至少一个目标；参见 [habit ProductWiki](./habit.md)“目标驱动”章节。
 - **与全局 Wiki**：继承 `doc/ProductWiki/ProductWiki.md` 里的全局约束（时间、重要度、状态）。
-- **PRD/TDD 协作**：版本差异先写在 `doc/growth/goal/PRD.md` 与 `TDD.md`，实现完成后将仍长期有效的规则回写本 Wiki（功能入库）。
+- **PRD/TDD 协作**：版本差异写在 `doc/{version}/PRD.md`、`TDD.md`（如 [v0.1.0](../../v0.1.0/PRD.md)）；实现完成后将仍长期有效的规则回写本 Wiki（功能入库）。
