@@ -6,7 +6,7 @@ import {
   IconMinusCircle,
   IconMore,
 } from '@arco-design/web-react/icon';
-import GoalEditor from '../../../components/GoalDetail/GoalEditor';
+import GoalEditor from '@/pages/growth/components/GoalDetail/GoalEditor';
 import { openDrawer } from '@/layout/Drawer';
 import styles from './style.module.less';
 import clsx from 'clsx';

@@ -10,7 +10,7 @@ import { Message } from '@arco-design/web-react';
 import MindMapNode from './MindMapNode';
 import MenuManager, { MenuManagerRef } from './NodeMenu/MenuManager';
 import { openDrawer } from '@/layout/Drawer';
-import GoalEditor from '../../components/GoalDetail/GoalEditor';
+import GoalEditor from '@/pages/growth/components/GoalDetail/GoalEditor';
 import { useGoalMindMapContext } from './context';
 import {
   handleAddChild,

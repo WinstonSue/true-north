@@ -1,4 +1,6 @@
+import 'reflect-metadata';
 import React, { useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { ConfigProvider, Message } from '@arco-design/web-react';
@@ -46,7 +48,7 @@ if (process.env.NODE_ENV === 'development') {
   document.title = '知止 True North';
 }
 
-export default function LifeToolkitApp() {
+function LifeToolkitApp() {
   const [lang, setLang] = useStorage('arco-lang', 'en-US');
   const [theme, setTheme] = useStorage('arco-theme', 'light');
 
@@ -71,8 +73,6 @@ export default function LifeToolkitApp() {
       payload: {
         userInfo: {
           name: 'admin',
-          // avatar:
-          //   'https://lf1-xgcdn-tos.pstatp.com/obj/vcloud/vadmin/start.8e0e4855ee346a46ccff8ff3e24db27b.png',
           email: 'wangliqun@email.com',
           job: 'frontend',
           jobName: '前端开发工程师',
@@ -91,9 +91,6 @@ export default function LifeToolkitApp() {
         userLoading: false,
       },
     });
-    // axios.get('/api/user/userInfo').then((res) => {
-
-    // });
   }
 
   useEffect(() => {
@@ -160,5 +157,4 @@ export default function LifeToolkitApp() {
   );
 }
 
-// 导出组件供外部使用，不直接渲染
-// createRoot(document.getElementById('root') as HTMLElement).render(<LifeToolkitApp />);
+createRoot(document.getElementById('root') as HTMLElement).render(<LifeToolkitApp />);

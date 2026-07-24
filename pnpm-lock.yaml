@@ -66,30 +66,78 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@true-north/business-web':
+      '@arco-design/color':
+        specifier: ^0.4.0
+        version: 0.4.0
+      '@arco-design/web-react':
+        specifier: ^2.66.0
+        version: 2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@arco-themes/react-francis':
+        specifier: ^0.0.1
+        version: 0.0.1(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+      '@loadable/component':
+        specifier: ^5.13.2
+        version: 5.16.7(react@18.3.1)
+      '@nanostores/react':
+        specifier: ^0.8.4
+        version: 0.8.4(nanostores@0.11.4)(react@18.3.1)
+      '@true-north/api':
         specifier: workspace:*
-        version: link:../../packages/business/web
+        version: link:../../packages/business/api
       '@true-north/common-web-utils':
         specifier: workspace:*
         version: link:../../packages/common-web/utils
+      '@true-north/components-mind':
+        specifier: workspace:*
+        version: link:../../packages/components/mind
+      '@true-north/components-ui':
+        specifier: workspace:*
+        version: link:../../packages/components/ui
       '@true-north/enum':
         specifier: workspace:*
         version: link:../../packages/business/enum
       '@true-north/share-types':
         specifier: workspace:*
         version: link:../../packages/share/types
+      '@true-north/tabs':
+        specifier: workspace:*
+        version: link:../../packages/components/tabs
+      '@true-north/web-service':
+        specifier: workspace:*
+        version: link:../../packages/business/web-service
+      '@turf/turf':
+        specifier: ^6.5.0
+        version: 6.5.0
+      bizcharts:
+        specifier: ^4.1.11
+        version: 4.1.23(@babel/core@7.28.4)(react@18.3.1)
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
       class-validator:
         specifier: ^0.14.0
         version: 0.14.2
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      copy-to-clipboard:
+        specifier: ^3.3.1
+        version: 3.3.3
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      echarts:
+        specifier: ^5.5.1
+        version: 5.6.0
       electron-ipc-restful:
         specifier: 0.0.1
         version: 0.0.1(electron@36.0.0)
+      francis-component-react:
+        specifier: 0.0.8
+        version: 0.0.8(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(dayjs@1.11.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       francis-helper-repeat:
         specifier: 0.0.6
         version: 0.0.6
@@ -99,21 +147,60 @@ importers:
       francis-types-repeat:
         specifier: 0.0.1
         version: 0.0.1
+      insert-css:
+        specifier: ^2.0.0
+        version: 2.0.0
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
+      lucide-react:
+        specifier: ^0.460.0
+        version: 0.460.0(react@18.3.1)
+      mockjs:
+        specifier: ^1.1.0
+        version: 1.1.0
+      nanostores:
+        specifier: ^0.11.3
+        version: 0.11.4
+      nprogress:
+        specifier: ^0.2.0
+        version: 0.2.0
+      query-string:
+        specifier: ^6.13.8
+        version: 6.14.1
       react:
         specifier: ^18.2.0
         version: 18.3.1
+      react-color:
+        specifier: ^2.18.1
+        version: 2.19.3(react@18.3.1)
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
+      react-redux:
+        specifier: ^7.2.6
+        version: 7.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-router:
+        specifier: ^5.2.0
+        version: 5.3.4(react@18.3.1)
+      react-router-dom:
+        specifier: ^6.25.1
+        version: 6.30.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-use:
+        specifier: ^17.6.0
+        version: 17.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      redux:
+        specifier: ^4.1.2
+        version: 4.2.1
       reflect-metadata:
         specifier: ^0.1.13
         version: 0.1.14
       sqlite3:
         specifier: ^5.1.6
         version: 5.1.7
+      tailwind-merge:
+        specifier: ^2.5.2
+        version: 2.6.0
       ts-mixer:
         specifier: ^6.0.3
         version: 6.0.4
@@ -126,13 +213,22 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
+      '@arco-design/webpack-plugin':
+        specifier: ^1.6.0
+        version: 1.7.0(webpack@5.97.1(@swc/core@1.13.5))
       '@arco-plugins/vite-plugin-svgr':
         specifier: ^0.7.2
         version: 0.7.2(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
       '@arco-plugins/vite-react':
         specifier: ^1.3.3
         version: 1.3.3
+      '@svgr/webpack':
+        specifier: ^5.5.0
+        version: 5.5.0
       '@swc/core':
         specifier: ^1.13.4
         version: 1.13.5
@@ -172,12 +268,48 @@ importers:
       electron-vite:
         specifier: ^3.1.0
         version: 3.1.0(@swc/core@1.13.5)(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
+      eslint-plugin-babel:
+        specifier: ^5.3.1
+        version: 5.3.1(eslint@9.35.0(jiti@2.5.1))
+      eslint-plugin-react:
+        specifier: ^7.34.1
+        version: 7.37.5(eslint@9.35.0(jiti@2.5.1))
+      eslint-plugin-react-hooks:
+        specifier: ^4.6.0
+        version: 4.6.2(eslint@9.35.0(jiti@2.5.1))
       less:
         specifier: ^4.1.2
         version: 4.4.1
+      less-loader:
+        specifier: 7.3.0
+        version: 7.3.0(less@4.4.1)(webpack@5.97.1(@swc/core@1.13.5))
+      postcss:
+        specifier: 8.4.30
+        version: 8.4.30
+      postcss-less:
+        specifier: '4'
+        version: 4.0.1
+      stylelint:
+        specifier: ^14.1.0
+        version: 14.16.1
+      stylelint-config-prettier:
+        specifier: ^9.0.3
+        version: 9.0.5(stylelint@14.16.1)
+      stylelint-config-standard:
+        specifier: ^24.0.0
+        version: 24.0.0(stylelint@14.16.1)
+      tailwindcss:
+        specifier: 4.1.11
+        version: 4.1.11
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@4.1.11)
       vite:
         specifier: 5.4.15
         version: 5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0)
+      vite-plugin-html:
+        specifier: ^3.2.2
+        version: 3.2.2(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
       vite-plugin-swc:
         specifier: ^0.0.2
         version: 0.0.2(@swc/core@1.13.5)(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
@@ -210,196 +342,6 @@ importers:
       francis-helper-repeat:
         specifier: 0.0.6
         version: 0.0.6
-
-  packages/business/web:
-    dependencies:
-      '@arco-design/color':
-        specifier: ^0.4.0
-        version: 0.4.0
-      '@arco-design/web-react':
-        specifier: ^2.66.0
-        version: 2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@arco-themes/react-francis':
-        specifier: ^0.0.1
-        version: 0.0.1(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
-      '@loadable/component':
-        specifier: ^5.13.2
-        version: 5.16.7(react@18.3.1)
-      '@nanostores/react':
-        specifier: ^0.8.4
-        version: 0.8.4(nanostores@0.11.4)(react@18.3.1)
-      '@true-north/api':
-        specifier: workspace:*
-        version: link:../api
-      '@true-north/common-web-utils':
-        specifier: workspace:*
-        version: link:../../common-web/utils
-      '@true-north/components-mind':
-        specifier: workspace:*
-        version: link:../../components/mind
-      '@true-north/components-ui':
-        specifier: workspace:*
-        version: link:../../components/ui
-      '@true-north/enum':
-        specifier: workspace:*
-        version: link:../enum
-      '@true-north/share-types':
-        specifier: workspace:*
-        version: link:../../share/types
-      '@true-north/tabs':
-        specifier: workspace:*
-        version: link:../../components/tabs
-      '@true-north/web-service':
-        specifier: workspace:*
-        version: link:../web-service
-      '@turf/turf':
-        specifier: ^6.5.0
-        version: 6.5.0
-      bizcharts:
-        specifier: ^4.1.11
-        version: 4.1.23(@babel/core@7.28.4)(react@18.3.1)
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      copy-to-clipboard:
-        specifier: ^3.3.1
-        version: 3.3.3
-      date-fns:
-        specifier: ^3.6.0
-        version: 3.6.0
-      echarts:
-        specifier: ^5.5.1
-        version: 5.6.0
-      francis-component-react:
-        specifier: 0.0.8
-        version: 0.0.8(@arco-design/web-react@2.66.5(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(dayjs@1.11.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      francis-helper-repeat:
-        specifier: 0.0.6
-        version: 0.0.6
-      francis-types-repeat:
-        specifier: 0.0.1
-        version: 0.0.1
-      insert-css:
-        specifier: ^2.0.0
-        version: 2.0.0
-      lucide-react:
-        specifier: ^0.460.0
-        version: 0.460.0(react@18.3.1)
-      mockjs:
-        specifier: ^1.1.0
-        version: 1.1.0
-      nanostores:
-        specifier: ^0.11.3
-        version: 0.11.4
-      nprogress:
-        specifier: ^0.2.0
-        version: 0.2.0
-      query-string:
-        specifier: ^6.13.8
-        version: 6.14.1
-      react:
-        specifier: ^18.0.2
-        version: 18.3.1
-      react-color:
-        specifier: ^2.18.1
-        version: 2.19.3(react@18.3.1)
-      react-dom:
-        specifier: ^18.0.2
-        version: 18.3.1(react@18.3.1)
-      react-redux:
-        specifier: ^7.2.6
-        version: 7.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react-router:
-        specifier: ^5.2.0
-        version: 5.3.4(react@18.3.1)
-      react-router-dom:
-        specifier: ^6.25.1
-        version: 6.30.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react-use:
-        specifier: ^17.6.0
-        version: 17.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      redux:
-        specifier: ^4.1.2
-        version: 4.2.1
-      tailwind-merge:
-        specifier: ^2.5.2
-        version: 2.6.0
-      zod:
-        specifier: ^3.24.1
-        version: 3.25.76
-    devDependencies:
-      '@arco-design/webpack-plugin':
-        specifier: ^1.6.0
-        version: 1.7.0(webpack@5.97.1(@swc/core@1.13.5))
-      '@arco-plugins/vite-plugin-svgr':
-        specifier: ^0.7.2
-        version: 0.7.2(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
-      '@arco-plugins/vite-react':
-        specifier: ^1.0.5
-        version: 1.3.3
-      '@svgr/webpack':
-        specifier: ^5.5.0
-        version: 5.5.0
-      '@tailwindcss/vite':
-        specifier: ^4.1.11
-        version: 4.1.13(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
-      '@types/react':
-        specifier: ^18.0.0
-        version: 18.3.24
-      '@types/react-dom':
-        specifier: ^18.0.0
-        version: 18.3.7(@types/react@18.3.24)
-      '@vitejs/plugin-react':
-        specifier: ^4.0.0
-        version: 4.7.0(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
-      eslint-plugin-babel:
-        specifier: ^5.3.1
-        version: 5.3.1(eslint@9.35.0(jiti@2.5.1))
-      eslint-plugin-react:
-        specifier: ^7.34.1
-        version: 7.37.5(eslint@9.35.0(jiti@2.5.1))
-      eslint-plugin-react-hooks:
-        specifier: ^4.6.0
-        version: 4.6.2(eslint@9.35.0(jiti@2.5.1))
-      husky:
-        specifier: ^7.0.2
-        version: 7.0.4
-      less:
-        specifier: ^4.1.2
-        version: 4.4.1
-      less-loader:
-        specifier: 7.3.0
-        version: 7.3.0(less@4.4.1)(webpack@5.97.1(@swc/core@1.13.5))
-      postcss:
-        specifier: 8.4.30
-        version: 8.4.30
-      postcss-less:
-        specifier: '4'
-        version: 4.0.1
-      pretty-quick:
-        specifier: ^3.1.2
-        version: 3.3.1(prettier@3.6.2)
-      stylelint:
-        specifier: ^14.1.0
-        version: 14.16.1
-      stylelint-config-prettier:
-        specifier: ^9.0.3
-        version: 9.0.5(stylelint@14.16.1)
-      stylelint-config-standard:
-        specifier: ^24.0.0
-        version: 24.0.0(stylelint@14.16.1)
-      tailwindcss:
-        specifier: 4.1.11
-        version: 4.1.11
-      tailwindcss-animate:
-        specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@4.1.11)
-      vite:
-        specifier: 5.4.15
-        version: 5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0)
-      vite-plugin-html:
-        specifier: ^3.2.2
-        version: 3.2.2(vite@5.4.15(@types/node@22.13.0)(less@4.4.1)(lightningcss@1.30.1)(terser@5.44.0))
 
   packages/business/web-service:
     dependencies:
@@ -4129,10 +4071,6 @@ packages:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
 
-  commander@14.0.1:
-    resolution: {integrity: sha512-2JkV3gUZUVrbNA+1sjBOYLsMZ5cEEl8GTFP2a4AVz5hvasAMCQ1D2l2le/cX+pV4N6ZU17zjUahLpIXRrnWL8A==}
-    engines: {node: '>=20'}
-
   commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
 
@@ -4885,10 +4823,6 @@ packages:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
 
-  execa@4.1.0:
-    resolution: {integrity: sha512-j5W0//W7f8UxAn8hXVnwG8tLwdiUy4FJLcSupCg6maBYZDpyBvTApK7KyuI4bKj8KOh1r2YH+6ucuYtJv1bTZA==}
-    engines: {node: '>=10'}
-
   execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
     engines: {node: '>=10'}
@@ -5349,21 +5283,12 @@ packages:
     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
     engines: {node: '>= 14'}
 
-  human-signals@1.1.1:
-    resolution: {integrity: sha512-SEQu7vl8KjNL2eoGBLF3+wAjpsNfA9XMlXAYj/3EdaNfAlxKthD1xjEQfGOUhllCGGJVNY34bRr6lPINhNjyZw==}
-    engines: {node: '>=8.12.0'}
-
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
 
   humanize-ms@1.2.1:
     resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
-
-  husky@7.0.4:
-    resolution: {integrity: sha512-vbaCKN2QLtP/vD4yvs6iz6hBEo6wkSzs8HpRah1Z6aGmF2KW5PdYuAd7uX5a+OyBZHBhd+TFLqgjUgytQr4RvQ==}
-    engines: {node: '>=12'}
-    hasBin: true
 
   hyphenate-style-name@1.1.0:
     resolution: {integrity: sha512-WDC/ui2VVRrz3jOVi+XtjqkDjiVjTtFaAGiW37k6b+ohyQ5wYDOGkvCZa8+H0nx3gyvv0+BST9xuOgIyGQ00gw==}
@@ -6327,10 +6252,6 @@ packages:
   mousetrap@1.6.5:
     resolution: {integrity: sha512-QNo4kEepaIBwiT8CDhP98umTetp+JNfQYBWvC1pc6/OAibuXtRcxZ58Qz8skvEHYvURne/7R8T5VoOI7rDsEUA==}
 
-  mri@1.2.0:
-    resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
-    engines: {node: '>=4'}
-
   ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
 
@@ -6634,10 +6555,6 @@ packages:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
 
-  picomatch@3.0.1:
-    resolution: {integrity: sha512-I3EurrIQMlRc9IaAZnqRR044Phh2DXY+55o7uJ0V+hYZAcQYSuFWsc9q5PvyDHUSCe1Qxn/iBz+78s86zWnGag==}
-    engines: {node: '>=10'}
-
   pify@4.0.1:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
@@ -6737,13 +6654,6 @@ packages:
   pretty-format@29.7.0:
     resolution: {integrity: sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  pretty-quick@3.3.1:
-    resolution: {integrity: sha512-3b36UXfYQ+IXXqex6mCca89jC8u0mYLqFAN5eTQKoXO6oCQYcIVYZEB/5AlBHI7JPYygReM2Vv6Vom/Gln7fBg==}
-    engines: {node: '>=10.13'}
-    hasBin: true
-    peerDependencies:
-      prettier: ^2.0.0
 
   proc-log@2.0.1:
     resolution: {integrity: sha512-Kcmo2FhfDTXdcbfDH76N7uBYHINxc/8GW7UAVuVP9I+Va3uHSerrnKV6dLooga/gh7GlgzuCCr/eoldnL1muGw==}
@@ -13197,8 +13107,6 @@ snapshots:
 
   commander@11.1.0: {}
 
-  commander@14.0.1: {}
-
   commander@2.20.3: {}
 
   commander@4.1.1: {}
@@ -14148,18 +14056,6 @@ snapshots:
 
   events@3.3.0: {}
 
-  execa@4.1.0:
-    dependencies:
-      cross-spawn: 7.0.6
-      get-stream: 5.2.0
-      human-signals: 1.1.1
-      is-stream: 2.0.1
-      merge-stream: 2.0.0
-      npm-run-path: 4.0.1
-      onetime: 5.1.2
-      signal-exit: 3.0.7
-      strip-final-newline: 2.0.0
-
   execa@5.1.1:
     dependencies:
       cross-spawn: 7.0.6
@@ -14756,15 +14652,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  human-signals@1.1.1: {}
-
   human-signals@2.1.0: {}
 
   humanize-ms@1.2.1:
     dependencies:
       ms: 2.1.3
-
-  husky@7.0.4: {}
 
   hyphenate-style-name@1.1.0: {}
 
@@ -15869,11 +15761,9 @@ snapshots:
 
   mockjs@1.1.0:
     dependencies:
-      commander: 14.0.1
+      commander: 11.1.0
 
   mousetrap@1.6.5: {}
-
-  mri@1.2.0: {}
 
   ms@2.0.0: {}
 
@@ -16213,8 +16103,6 @@ snapshots:
 
   picomatch@2.3.1: {}
 
-  picomatch@3.0.1: {}
-
   pify@4.0.1:
     optional: true
 
@@ -16317,17 +16205,6 @@ snapshots:
       '@jest/schemas': 29.6.3
       ansi-styles: 5.2.0
       react-is: 18.3.1
-
-  pretty-quick@3.3.1(prettier@3.6.2):
-    dependencies:
-      execa: 4.1.0
-      find-up: 4.1.0
-      ignore: 5.3.2
-      mri: 1.2.0
-      picocolors: 1.1.1
-      picomatch: 3.0.1
-      prettier: 3.6.2
-      tslib: 2.8.1
 
   proc-log@2.0.1: {}
 

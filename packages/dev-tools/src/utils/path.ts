@@ -20,7 +20,7 @@ export function getDesktopControllerPathFromServer(sourceControllerPath: string)
  * 从来源代码 DTO 路径获取 VO 路径
  */
 export function getVoPathFromDto(dtoFilePath: string): string {
-  // 从 apps/desktop/src/growth/goal/dto/goal-model.dto.ts
+  // 从 apps/desktop/service/growth/goal/dto/goal-model.dto.ts
   // 转换为 packages/business/vo/growth/goal/goal-model.vo.ts
   const relativePath = path.relative(CONTROLLER_SOURCE_PATH, dtoFilePath);
   const parts = relativePath.split(path.sep);
@@ -42,7 +42,7 @@ export function getVoPathFromDto(dtoFilePath: string): string {
  * 从来源代码控制器路径获取 API 控制器路径
  */
 export function getApiControllerPathFromServer(sourceControllerPath: string): string {
-  // 从 apps/desktop/src/growth/task/task.route-controller.ts
+  // 从 apps/desktop/service/growth/task/task.route-controller.ts
   const relativePath = path.relative(CONTROLLER_SOURCE_PATH, sourceControllerPath);
   const parts = relativePath.split(path.sep);
 

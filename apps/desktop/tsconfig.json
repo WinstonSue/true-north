@@ -22,12 +22,18 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@business/*": ["src/*"],
-      "@true-north/business-web": ["../../packages/business/web/src/main.tsx"]
+      "@/*": ["render/*"],
+      "@business/*": ["service/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "include": [
+    "render/**/*.ts",
+    "render/**/*.tsx",
+    "main/**/*.ts",
+    "service/**/*.ts",
+    "preload/**/*.ts",
+    "**/*.d.ts"
+  ],
   "exclude": ["node_modules", "dist", "**/*.md"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

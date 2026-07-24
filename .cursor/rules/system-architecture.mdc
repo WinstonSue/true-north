@@ -17,11 +17,10 @@ True North 是一个基于 **Monorepo** 架构的全栈生活管理工具套件,
 ```
 true-north/
 ├── apps/                    # 应用层
-│   ├── desktop/            # Electron 桌面应用（业务域 + SQLite + IPC）
+│   ├── desktop/            # Electron：render/ UI、main/ 主进程、preload/、service/ 本地 IPC 业务域
 ├── packages/               # 共享包
 │   ├── business/           # 业务域包（前后端共享的业务定义与实现）
 │   │   ├── api/            # API 接口/DTO/类型定义
-│   │   ├── web/            # Web 业务 UI（页面/组件/路由）
 │   │   ├── vo/             # 值对象
 │   │   └── enum/           # 枚举
 │   ├── common/             # 通用工具
@@ -254,7 +253,7 @@ business/
 └── excel/                 # Excel 处理模块
 ```
 
-### 前端页面模块 (packages/business/web/src/pages)
+### 前端页面模块 (apps/desktop/render/pages)
 
 ```
 pages/
@@ -315,7 +314,7 @@ packages/
 ├── business/              # 业务域包
 │   ├── api/               # API 接口/DTO/类型定义
 │   ├── server/            # 业务核心（实体/仓储/服务/映射）
-│   ├── web/               # Web 业务 UI（页面/组件/路由）
+│   ├── web-service/       # 前端 Web 服务层
 │   ├── vo/                # 值对象 (Value Objects)
 │   └── enum/              # 业务枚举
 ├── common/                # 通用工具

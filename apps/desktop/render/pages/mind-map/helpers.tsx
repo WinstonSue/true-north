@@ -1,7 +1,7 @@
 import { Message } from '@arco-design/web-react';
 import { openDrawer } from '@/layout/Drawer';
-import GoalEditor from '../../components/GoalDetail/GoalEditor';
-import GoalCreator from '../../components/GoalDetail/GoalCreator';
+import GoalEditor from '@/pages/growth/components/GoalDetail/GoalEditor';
+import GoalCreator from '@/pages/growth/components/GoalDetail/GoalCreator';
 import { Modal } from '@arco-design/web-react';
 import { GoalService } from '@true-north/web-service';
 
