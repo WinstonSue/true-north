@@ -103,13 +103,13 @@ GoalService.delete(id: string): Promise<void>
 
 ```typescript
 interface GoalFilter {
-  keyword?: string;        // 关键词搜索
-  status?: GoalStatus[];   // 状态筛选
-  type?: GoalType;         // 类型筛选
+  keyword?: string; // 关键词搜索
+  status?: GoalStatus[]; // 状态筛选
+  type?: GoalType; // 类型筛选
   importance?: Importance; // 重要程度筛选
   difficulty?: Difficulty; // 难度筛选
   startDateStart?: string; // 开始时间范围-起
-  startDateEnd?: string;   // 开始时间范围-止
+  startDateEnd?: string; // 开始时间范围-止
 }
 ```
 
@@ -125,20 +125,20 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
   ContextType: {
     searchValue: string;
     setSearchValue: (value: string) => void;
-    
+
     filters: GoalFilters;
     setFilters: (filters: GoalFilters) => void;
     clearFilters: () => void;
-    
+
     isEditing: boolean;
     setIsEditing: (editing: boolean) => void;
-    
+
     loading: boolean;
     goalTree: GoalVo[];
     selectedGoal: GoalVo | null;
     selectedGoalId: string | null;
     setSelectedGoalId: (goalId: string | null) => void;
-    
+
     fetchGoalTree: () => Promise<void>;
     fetchGoalDetail: (goalId: string) => Promise<void>;
     loadChildren: (parentId: string) => Promise<void>;

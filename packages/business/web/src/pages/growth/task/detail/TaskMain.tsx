@@ -2,8 +2,22 @@
 
 import React, { useState } from 'react';
 import { FlexibleContainer } from 'francis-component-react';
-import { Tabs, Tag, Dropdown, Menu, Button, Modal, Message } from '@arco-design/web-react';
-import { IconMore, IconEdit, IconDelete, IconClose, IconCheck } from '@arco-design/web-react/icon';
+import {
+  Tabs,
+  Tag,
+  Dropdown,
+  Menu,
+  Button,
+  Modal,
+  Message,
+} from '@arco-design/web-react';
+import {
+  IconMore,
+  IconEdit,
+  IconDelete,
+  IconClose,
+  IconCheck,
+} from '@arco-design/web-react/icon';
 import { TaskVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
 import { TaskService } from '@true-north/web-service';
@@ -154,7 +168,11 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
       {/* 头部 */}
       <Fixed
         direction="vertical"
-        className={clsx('px-4 !h-14', 'border-b border-border-2', 'justify-between')}
+        className={clsx(
+          'px-4 !h-14',
+          'border-b border-border-2',
+          'justify-between',
+        )}
       >
         {/* 左侧：任务名称 */}
         <Shrink className={clsx('flex items-center')}>
@@ -169,12 +187,12 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
           <Tag color={STATUS_CONFIG[task.status]?.color}>
             {STATUS_CONFIG[task.status]?.label}
           </Tag>
-          
+
           {/* ... 下拉菜单 */}
           <Dropdown droplist={renderActionMenu()} position="br">
             <Button type="text" icon={<IconMore />} />
           </Dropdown>
-          
+
           {/* 主要按钮 */}
           {getPrimaryButton()}
         </Fixed>
@@ -182,17 +200,15 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
 
       {/* 内容区域 */}
       <Shrink className={clsx('flex flex-col overflow-auto')}>
-        <Tabs
-          activeTab={activeTab}
-          onChange={setActiveTab}
-          className="h-full"
-        >
+        <Tabs activeTab={activeTab} onChange={setActiveTab} className="h-full">
           <TabPane key="overview" title="概览">
             <div className="p-4">
               <div className="space-y-4">
                 {/* 基础信息 */}
                 <div className="bg-white rounded-lg p-4 border">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">基础信息</h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">
+                    基础信息
+                  </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-500">任务名称：</span>
@@ -200,7 +216,10 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
                     </div>
                     <div>
                       <span className="text-gray-500">状态：</span>
-                      <Tag color={STATUS_CONFIG[task.status]?.color} size="small">
+                      <Tag
+                        color={STATUS_CONFIG[task.status]?.color}
+                        size="small"
+                      >
                         {STATUS_CONFIG[task.status]?.label}
                       </Tag>
                     </div>
@@ -215,7 +234,9 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
 
                 {/* 时间信息 */}
                 <div className="bg-white rounded-lg p-4 border">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">时间信息</h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">
+                    时间信息
+                  </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     {task.startAt && (
                       <div>
@@ -258,9 +279,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
           <TabPane key="tracktime" title="时间追踪">
             <div className="p-4">
               <div className="text-center text-gray-500 py-8">
-                <Button type="primary">
-                  跳转到计时器
-                </Button>
+                <Button type="primary">跳转到计时器</Button>
               </div>
             </div>
           </TabPane>

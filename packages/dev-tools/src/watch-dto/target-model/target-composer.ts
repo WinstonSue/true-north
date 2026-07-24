@@ -22,8 +22,8 @@ export class TargetModelComposer {
 
     // 标准 Model VO - 从 Entity 文件解析字段
     const entityFields = this.parseEntityFields(intermediateState);
-    
-    if (entityFields.length  > 0) {
+
+    if (entityFields.length > 0) {
       return this.generateVoFromEntity(intermediateState, entityFields);
     }
 
@@ -64,10 +64,10 @@ export class TargetModelComposer {
   private parseEntityFields(intermediateState: IntermediateState): string[] {
     const dtoFilePath = intermediateState.metadata.filePath;
     const className = intermediateState.metadata.className;
-    
+
     // 获取 entity 文件路径
     const entityPath = this.getEntityPath(dtoFilePath, className);
-    
+
     if (!fs.existsSync(entityPath)) {
       return [];
     }
@@ -91,28 +91,28 @@ export class TargetModelComposer {
    */
   private extractFieldsFromEntity(content: string, className: string): string[] {
     const fields: string[] = [];
-    
+
     // 找到 WithoutRelations 类定义
     const entityName = className.replace('Dto', '');
     const classRegex = new RegExp(`export\\s+class\\s+${entityName}[\\s\\S]*?(?=\\n\\n|\\n@|\\nexport|$)`, 'g');
     const classMatch = content.match(classRegex);
-    
+
     if (!classMatch) return fields;
 
     const classContent = classMatch[0];
-    
+
     // 提取字段定义
     const fieldRegex = /@Column[^]*?(\w+)(\?)?:\s*([^;]+);/g;
     let match;
-    
+
     while ((match = fieldRegex.exec(classContent)) !== null) {
       const fieldName = match[1];
       const optional = match[2] || '';
       let fieldType = match[3].trim();
-      
+
       // 转换类型
       fieldType = this.convertEntityTypeToVoType(fieldType);
-      
+
       fields.push(`${fieldName}${optional}: ${fieldType};`);
     }
 
@@ -149,13 +149,13 @@ export class TargetModelComposer {
 
     // 生成完整 VO（包含关系字段）
     lines.push(`export type ${voName} = ${withoutRelationsVoName} & {`);
-    
+
     // 添加关系字段 - 从 DTO 字段中提取
     const relationFields = this.extractRelationFields(intermediateState);
     for (const field of relationFields) {
       lines.push(`  ${field}`);
     }
-    
+
     lines.push('};');
 
     return lines.join('\n');
@@ -166,7 +166,7 @@ export class TargetModelComposer {
    */
   private extractRelationFields(intermediateState: IntermediateState): string[] {
     const fields: string[] = [];
-    
+
     for (const [name, field] of intermediateState.fields) {
       // 检查是否为关系字段（通常是对象或数组类型）
       if (this.isRelationField(field)) {
@@ -175,7 +175,7 @@ export class TargetModelComposer {
         fields.push(`${name}${optional}: ${voType};`);
       }
     }
-    
+
     return fields;
   }
 
@@ -185,8 +185,7 @@ export class TargetModelComposer {
   private isRelationField(field: FieldDefinition): boolean {
     // 关系字段通常是对象或数组类型
     const type = field.type;
-    return type.endsWith('Dto') || type.endsWith('Dto[]') || 
-           type.endsWith('Entity') || type.endsWith('Entity[]');
+    return type.endsWith('Dto') || type.endsWith('Dto[]') || type.endsWith('Entity') || type.endsWith('Entity[]');
   }
 
   /**
@@ -227,4 +226,3 @@ export class TargetModelComposer {
       .replace(/\bDate\b/g, 'string');
   }
 }
-

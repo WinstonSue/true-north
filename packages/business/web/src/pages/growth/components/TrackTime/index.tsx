@@ -5,12 +5,11 @@ import TimeTracker from './TimeTracker';
 import { TimeEntry, TrackTimeProps } from './types';
 
 function TrackTime(props: TrackTimeProps) {
-
   // 格式化持续时间显示
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }

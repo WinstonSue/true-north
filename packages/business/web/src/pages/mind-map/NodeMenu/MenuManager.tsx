@@ -17,7 +17,11 @@ interface MenuManagerProps {
 }
 
 export interface MenuManagerRef {
-  showMenu: (nodeId: string, nodeType: string, position: { x: number; y: number }) => void;
+  showMenu: (
+    nodeId: string,
+    nodeType: string,
+    position: { x: number; y: number },
+  ) => void;
   hideMenu: () => void;
 }
 
@@ -30,27 +34,38 @@ const MenuManager = React.forwardRef<MenuManagerRef, MenuManagerProps>(
       position: { x: 0, y: 0 },
     });
 
-    const showMenu = useCallback((nodeId: string, nodeType: string, position: { x: number; y: number }) => {
-      setMenuState({
-        visible: true,
-        nodeId,
-        nodeType,
-        position,
-      });
-    }, []);
+    const showMenu = useCallback(
+      (
+        nodeId: string,
+        nodeType: string,
+        position: { x: number; y: number },
+      ) => {
+        setMenuState({
+          visible: true,
+          nodeId,
+          nodeType,
+          position,
+        });
+      },
+      [],
+    );
 
     const hideMenu = useCallback(() => {
-      setMenuState(prev => ({
+      setMenuState((prev) => ({
         ...prev,
         visible: false,
       }));
     }, []);
 
     // 暴露方法给父组件
-    React.useImperativeHandle(ref, () => ({
-      showMenu,
-      hideMenu,
-    }), [showMenu, hideMenu]);
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        showMenu,
+        hideMenu,
+      }),
+      [showMenu, hideMenu],
+    );
 
     return (
       <NodeMenu
@@ -66,7 +81,7 @@ const MenuManager = React.forwardRef<MenuManagerRef, MenuManagerProps>(
         onCopy={onCopy}
       />
     );
-  }
+  },
 );
 
 MenuManager.displayName = 'MenuManager';

@@ -71,7 +71,14 @@ const TaskDetailPage: React.FC = () => {
       fromGoal={fromGoal}
       onRefresh={refreshData}
     >
-      <Layout className={clsx('w-full h-full', 'rounded', 'bg-bg-2', 'overflow-hidden')}>
+      <Layout
+        className={clsx(
+          'w-full h-full',
+          'rounded',
+          'bg-bg-2',
+          'overflow-hidden',
+        )}
+      >
         {/* 左侧任务树 */}
         <Sider
           width={320}

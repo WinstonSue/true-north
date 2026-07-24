@@ -41,8 +41,18 @@ tech_stack:
 interface TodoModuleArchitecture {
   overview: {
     purpose: '提供轻量级待办事项管理功能，支持任务创建、状态管理、重复任务和优先级管理';
-    scope: ['待办事项CRUD操作', '状态管理(待办/完成/放弃)', '重复任务自动生成', '优先级和标签管理', '统计分析功能'];
-    constraints: ['单用户模式，不支持团队协作', '轻量级设计，不支持复杂项目管理', '基于Life Toolkit架构规范'];
+    scope: [
+      '待办事项CRUD操作',
+      '状态管理(待办/完成/放弃)',
+      '重复任务自动生成',
+      '优先级和标签管理',
+      '统计分析功能',
+    ];
+    constraints: [
+      '单用户模式，不支持团队协作',
+      '轻量级设计，不支持复杂项目管理',
+      '基于Life Toolkit架构规范',
+    ];
     principles: ['分层架构设计', '模块化组织', '类型安全优先', '代码生成'];
   };
 
@@ -56,7 +66,12 @@ interface TodoModuleArchitecture {
         'TodoWeek - 周视图页面',
         'TodoToday - 今日待办页面',
       ];
-      responsibilities: ['用户交互处理', '数据展示和表单处理', '路由管理', '状态管理'];
+      responsibilities: [
+        '用户交互处理',
+        '数据展示和表单处理',
+        '路由管理',
+        '状态管理',
+      ];
       technologies: ['React', 'TypeScript', 'Arco Design', 'React Router'];
     };
     business: {
@@ -67,12 +82,24 @@ interface TodoModuleArchitecture {
         'TodoStatusService - 状态管理服务',
         'TodoRepeatService - 重复任务服务',
       ];
-      services: ['待办事项创建和编辑', '状态转换管理', '重复任务生成', '优先级计算', '统计分析'];
+      services: [
+        '待办事项创建和编辑',
+        '状态转换管理',
+        '重复任务生成',
+        '优先级计算',
+        '统计分析',
+      ];
       patterns: ['Service层模式', 'Repository模式', 'Mapper模式'];
     };
     data: {
-      entities: ['TodoEntity - 待办事项实体', 'TodoRepeatEntity - 重复配置实体'];
-      repositories: ['TodoRepository - 待办事项数据访问', 'TodoRepeatRepository - 重复配置数据访问'];
+      entities: [
+        'TodoEntity - 待办事项实体',
+        'TodoRepeatEntity - 重复配置实体',
+      ];
+      repositories: [
+        'TodoRepository - 待办事项数据访问',
+        'TodoRepeatRepository - 重复配置数据访问',
+      ];
       storage: ['MySQL(生产)', 'SQLite(开发)'];
     };
   };
@@ -174,10 +201,25 @@ interface TodoModuleStructure {
   path: 'apps/server/src/business/growth/todo';
 
   files: {
-    entities: ['entities/todo.entity.ts', 'entities/todo-repeat.entity.ts', 'entities/enum.ts', 'entities/index.ts'];
-    dto: ['dto/todo-form.dto.ts', 'dto/todo-filter.dto.ts', 'dto/todo-model.dto.ts', 'dto/index.ts'];
+    entities: [
+      'entities/todo.entity.ts',
+      'entities/todo-repeat.entity.ts',
+      'entities/enum.ts',
+      'entities/index.ts',
+    ];
+    dto: [
+      'dto/todo-form.dto.ts',
+      'dto/todo-filter.dto.ts',
+      'dto/todo-model.dto.ts',
+      'dto/index.ts',
+    ];
     controllers: ['todo.controller.ts'];
-    services: ['todo.service.ts', 'todo-base.service.ts', 'todo-status.service.ts', 'todo-repeat.service.ts'];
+    services: [
+      'todo.service.ts',
+      'todo-base.service.ts',
+      'todo-status.service.ts',
+      'todo-repeat.service.ts',
+    ];
     module: ['todo.module.ts'];
   };
 
@@ -187,7 +229,13 @@ interface TodoModuleStructure {
       'apps/web/src/pages/growth/todo/context.tsx',
       'apps/web/src/pages/growth/todo/style.module.less',
     ];
-    sub_pages: ['todo-today/', 'todo-all/', 'todo-calendar/', 'todo-week/', 'todo-dashboard/'];
+    sub_pages: [
+      'todo-today/',
+      'todo-all/',
+      'todo-calendar/',
+      'todo-week/',
+      'todo-dashboard/',
+    ];
   };
 
   shared_files: {
@@ -245,7 +293,12 @@ interface TodoModuleStructure {
 
   dependencies: {
     internal: ['users', 'auth'];
-    external: ['@nestjs/common', '@nestjs/typeorm', 'typeorm', 'class-validator'];
+    external: [
+      '@nestjs/common',
+      '@nestjs/typeorm',
+      'typeorm',
+      'class-validator',
+    ];
     database: ['todo', 'todo_repeat'];
   };
 }
@@ -489,7 +542,13 @@ interface TodoEntityStructure {
     };
   };
 
-  indexes: ['idx_todo_user_id', 'idx_todo_status', 'idx_todo_plan_date', 'idx_todo_repeat_id', 'idx_todo_task_id'];
+  indexes: [
+    'idx_todo_user_id',
+    'idx_todo_status',
+    'idx_todo_plan_date',
+    'idx_todo_repeat_id',
+    'idx_todo_task_id',
+  ];
 
   constraints: [
     'CHECK (importance >= 1 AND importance <= 5)',
@@ -651,7 +710,11 @@ interface TodoAPISpecification {
       description: '标记待办事项为完成';
       path_params: { id: 'string' };
       response: '{ result: boolean }';
-      business_logic: ['更新状态为done', '记录完成时间', '如果是重复任务，创建下一个重复待办'];
+      business_logic: [
+        '更新状态为done',
+        '记录完成时间',
+        '如果是重复任务，创建下一个重复待办',
+      ];
     };
 
     abandon: {
@@ -660,7 +723,11 @@ interface TodoAPISpecification {
       description: '标记待办事项为放弃';
       path_params: { id: 'string' };
       response: '{ result: boolean }';
-      business_logic: ['更新状态为abandoned', '记录放弃时间', '如果是重复任务，创建下一个重复待办'];
+      business_logic: [
+        '更新状态为abandoned',
+        '记录放弃时间',
+        '如果是重复任务，创建下一个重复待办',
+      ];
     };
 
     restore: {
@@ -678,7 +745,11 @@ interface TodoAPISpecification {
       description: '批量标记待办事项为完成';
       request_body: 'OperationByIdListVo';
       response: 'void';
-      business_logic: ['批量更新状态为done', '记录完成时间', '处理重复任务的自动生成'];
+      business_logic: [
+        '批量更新状态为done',
+        '记录完成时间',
+        '处理重复任务的自动生成',
+      ];
     };
   };
 
@@ -755,7 +826,12 @@ interface TodoServiceImplementation {
   class_name: 'TodoService';
   description: '待办事项主业务服务，负责业务流程编排和事务管理';
 
-  dependencies: ['TodoRepository', 'TodoRepeatService', 'TodoBaseService', 'TodoStatusService'];
+  dependencies: [
+    'TodoRepository',
+    'TodoRepeatService',
+    'TodoBaseService',
+    'TodoStatusService',
+  ];
 
   methods: {
     create: {
@@ -789,7 +865,11 @@ interface TodoServiceImplementation {
     findWithRelations: {
       signature: 'async findWithRelations(id: string): Promise<TodoDto>';
       description: '根据ID获取待办详情，包含关联的重复配置';
-      business_logic: ['1. 调用TodoBaseService查询基础信息', '2. 加载关联的重复配置信息', '3. 返回完整的待办详情'];
+      business_logic: [
+        '1. 调用TodoBaseService查询基础信息',
+        '2. 加载关联的重复配置信息',
+        '3. 返回完整的待办详情',
+      ];
       relations: ['repeat'];
     };
 
@@ -864,7 +944,11 @@ interface TodoFrontendArchitecture {
 
   state_management: {
     pattern: 'Context + Hooks';
-    providers: ['TodoProvider - 待办数据状态管理', 'FilterProvider - 筛选状态管理', 'UIProvider - UI状态管理'];
+    providers: [
+      'TodoProvider - 待办数据状态管理',
+      'FilterProvider - 筛选状态管理',
+      'UIProvider - UI状态管理',
+    ];
 
     hooks: [
       'useTodo - 待办操作hooks',
@@ -885,7 +969,11 @@ interface TodoPageComponent {
   component_name: 'TodoPage';
   file_path: 'apps/web/src/pages/growth/todo/index.tsx';
 
-  responsibilities: ['提供路由出口(Outlet)', '初始化TodoProvider上下文', '管理全局状态和配置'];
+  responsibilities: [
+    '提供路由出口(Outlet)',
+    '初始化TodoProvider上下文',
+    '管理全局状态和配置',
+  ];
 
   structure: {
     providers: ['TodoProvider'];
@@ -912,11 +1000,20 @@ interface TodoTodayComponent {
   component_name: 'TodoToday';
   file_path: 'apps/web/src/pages/growth/todo/todo-today/index.tsx';
 
-  responsibilities: ['展示今日待办事项', '支持快速操作(完成/放弃)', '提供创建新待办功能', '实时更新待办状态'];
+  responsibilities: [
+    '展示今日待办事项',
+    '支持快速操作(完成/放弃)',
+    '提供创建新待办功能',
+    '实时更新待办状态',
+  ];
 
   features: ['按优先级分组显示', '拖拽排序支持', '批量操作功能', '快捷键支持'];
 
-  state_hooks: ['useTodoList - 获取今日待办列表', 'useTodoOperations - 待办操作方法', 'useFilter - 筛选和排序'];
+  state_hooks: [
+    'useTodoList - 获取今日待办列表',
+    'useTodoOperations - 待办操作方法',
+    'useFilter - 筛选和排序',
+  ];
 
   ui_components: [
     'TodoList - 待办列表',
@@ -993,7 +1090,14 @@ interface TodoListComponent {
     onSelectionChange?: '(ids: string[]) => void';
   };
 
-  features: ['虚拟滚动支持大量数据', '拖拽排序', '多选支持', '快捷操作菜单', '优先级视觉指示', '状态动画效果'];
+  features: [
+    '虚拟滚动支持大量数据',
+    '拖拽排序',
+    '多选支持',
+    '快捷操作菜单',
+    '优先级视觉指示',
+    '状态动画效果',
+  ];
 
   responsive_design: ['移动端适配', '触摸手势支持', '响应式布局'];
 }
@@ -1033,7 +1137,13 @@ interface TodoFormComponent {
     '至少选择一个标签',
   ];
 
-  ui_features: ['实时验证反馈', '智能日期选择', '标签自动补全', '重复配置向导', '表单数据自动保存'];
+  ui_features: [
+    '实时验证反馈',
+    '智能日期选择',
+    '标签自动补全',
+    '重复配置向导',
+    '表单数据自动保存',
+  ];
 }
 ```
 
@@ -1057,11 +1167,20 @@ interface TodoDevelopmentStandards {
       '枚举使用PascalCase',
     ];
 
-    database: ['表名使用snake_case', '字段名使用camelCase(TypeORM自动转换)', '索引名使用idx_前缀'];
+    database: [
+      '表名使用snake_case',
+      '字段名使用camelCase(TypeORM自动转换)',
+      '索引名使用idx_前缀',
+    ];
   };
 
   type_safety: {
-    principles: ['严格的TypeScript配置', '避免使用any类型', '使用泛型提高代码复用性', '接口优于类型别名'];
+    principles: [
+      '严格的TypeScript配置',
+      '避免使用any类型',
+      '使用泛型提高代码复用性',
+      '接口优于类型别名',
+    ];
 
     dto_vo_mapping: [
       'DTO用于服务器内部数据传输',
@@ -1072,13 +1191,28 @@ interface TodoDevelopmentStandards {
   };
 
   error_handling: {
-    backend: ['使用自定义异常类', '统一错误响应格式', '记录详细错误日志', '区分业务错误和系统错误'];
+    backend: [
+      '使用自定义异常类',
+      '统一错误响应格式',
+      '记录详细错误日志',
+      '区分业务错误和系统错误',
+    ];
 
-    frontend: ['全局错误边界', 'API错误统一处理', '用户友好的错误提示', '错误重试机制'];
+    frontend: [
+      '全局错误边界',
+      'API错误统一处理',
+      '用户友好的错误提示',
+      '错误重试机制',
+    ];
   };
 
   testing_strategy: {
-    backend: ['单元测试覆盖核心业务逻辑', '集成测试验证API接口', '使用测试数据库', 'Mock外部依赖'];
+    backend: [
+      '单元测试覆盖核心业务逻辑',
+      '集成测试验证API接口',
+      '使用测试数据库',
+      'Mock外部依赖',
+    ];
 
     frontend: ['组件单元测试', '用户交互测试', 'API集成测试', '端到端测试'];
   };
@@ -1090,11 +1224,26 @@ interface TodoDevelopmentStandards {
 ```typescript
 interface TodoPerformanceOptimization {
   backend_optimization: {
-    database: ['合理使用索引优化查询', '分页查询避免大量数据加载', '使用连接查询减少N+1问题', '定期分析慢查询并优化'];
+    database: [
+      '合理使用索引优化查询',
+      '分页查询避免大量数据加载',
+      '使用连接查询减少N+1问题',
+      '定期分析慢查询并优化',
+    ];
 
-    api: ['响应数据压缩', '合理的缓存策略', '批量操作减少请求次数', '异步处理非关键业务'];
+    api: [
+      '响应数据压缩',
+      '合理的缓存策略',
+      '批量操作减少请求次数',
+      '异步处理非关键业务',
+    ];
 
-    memory: ['及时释放不用的对象', '使用连接池管理数据库连接', '避免内存泄漏', '监控内存使用情况'];
+    memory: [
+      '及时释放不用的对象',
+      '使用连接池管理数据库连接',
+      '避免内存泄漏',
+      '监控内存使用情况',
+    ];
   };
 
   frontend_optimization: {
@@ -1105,7 +1254,12 @@ interface TodoPerformanceOptimization {
       '合理使用useMemo和useCallback',
     ];
 
-    state_management: ['避免过度的状态更新', '使用局部状态而非全局状态', '状态规范化减少冗余', '乐观更新提升用户体验'];
+    state_management: [
+      '避免过度的状态更新',
+      '使用局部状态而非全局状态',
+      '状态规范化减少冗余',
+      '乐观更新提升用户体验',
+    ];
 
     network: ['API请求去重', '合理的缓存策略', '请求批量化', '离线支持(PWA)'];
   };
@@ -1117,7 +1271,12 @@ interface TodoPerformanceOptimization {
 ```typescript
 interface TodoDeploymentGuide {
   development: {
-    setup: ['pnpm install 安装依赖', '配置数据库连接', '运行数据库迁移', 'pnpm dev 启动开发服务'];
+    setup: [
+      'pnpm install 安装依赖',
+      '配置数据库连接',
+      '运行数据库迁移',
+      'pnpm dev 启动开发服务',
+    ];
 
     database: ['开发环境使用SQLite', '自动运行种子数据', '支持热重载'];
   };
@@ -1127,13 +1286,29 @@ interface TodoDeploymentGuide {
 
     database: ['生产环境使用MySQL', '运行生产数据库迁移', '配置数据库备份策略'];
 
-    monitoring: ['API响应时间监控', '错误率监控', '数据库性能监控', '用户行为分析'];
+    monitoring: [
+      'API响应时间监控',
+      '错误率监控',
+      '数据库性能监控',
+      '用户行为分析',
+    ];
   };
 
   ci_cd: {
-    pipeline: ['代码提交触发构建', '运行自动化测试', '代码质量检查', '自动部署到测试环境', '手动部署到生产环境'];
+    pipeline: [
+      '代码提交触发构建',
+      '运行自动化测试',
+      '代码质量检查',
+      '自动部署到测试环境',
+      '手动部署到生产环境',
+    ];
 
-    quality_gates: ['测试覆盖率 > 80%', 'ESLint检查通过', 'TypeScript编译无错误', '安全漏洞扫描通过'];
+    quality_gates: [
+      '测试覆盖率 > 80%',
+      'ESLint检查通过',
+      'TypeScript编译无错误',
+      '安全漏洞扫描通过',
+    ];
   };
 }
 ```

@@ -13,7 +13,7 @@ export function GoalTaskList() {
   // 点击任务跳转到 Task 详情页
   const handleTaskClick = async (taskId: string) => {
     navigate(`/growth/task/detail/${taskId}`, {
-      state: { fromGoal: currentGoal.id }
+      state: { fromGoal: currentGoal.id },
     });
   };
 

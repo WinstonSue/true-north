@@ -10,7 +10,7 @@ import electron from 'electron';
 const { app, BrowserWindow, ipcMain, shell, dialog } = electron;
 
 // 导入数据库初始化功能
-import { initDB, setupDatabaseCleanup } from '../database/init';
+import { initDB, setupDatabaseCleanup } from '../db/init';
 import { initIpcRouter } from './ipc-handlers';
 
 // 是否为开发环境

@@ -45,7 +45,7 @@ export default function GoalTreeSelector(props: GoalTreeSelectorProps) {
       const data = await GoalService.getTree({
         status: GoalStatus.TODO, // 只显示进行中的目标
       });
-      
+
       if (data) {
         const tree = convertToTreeNodes(data, excludeId);
         setTreeData(tree);
@@ -58,7 +58,10 @@ export default function GoalTreeSelector(props: GoalTreeSelectorProps) {
   };
 
   // 将 GoalVo 转换为 TreeSelect 所需的 TreeNode 格式
-  const convertToTreeNodes = (goals: GoalVo[], excludeId?: string): TreeNode[] => {
+  const convertToTreeNodes = (
+    goals: GoalVo[],
+    excludeId?: string,
+  ): TreeNode[] => {
     return goals
       .filter((goal) => goal.id !== excludeId) // 过滤掉当前编辑的目标
       .map((goal) => {
@@ -82,11 +85,11 @@ export default function GoalTreeSelector(props: GoalTreeSelectorProps) {
   // 检查目标是否是指定ID的子孙节点（防止循环引用）
   const isDescendantOf = (goal: GoalVo, targetId: string): boolean => {
     if (goal.id === targetId) return true;
-    
+
     if (goal.children && goal.children.length > 0) {
       return goal.children.some((child) => isDescendantOf(child, targetId));
     }
-    
+
     return false;
   };
 
@@ -101,7 +104,10 @@ export default function GoalTreeSelector(props: GoalTreeSelectorProps) {
       disabled={disabled}
       showSearch
       filterTreeNode={(inputValue, treeNode) => {
-        return treeNode.title?.toLowerCase().includes(inputValue.toLowerCase()) || false;
+        return (
+          treeNode.title?.toLowerCase().includes(inputValue.toLowerCase()) ||
+          false
+        );
       }}
       treeProps={{
         virtualListProps: {

@@ -32,9 +32,10 @@ export default function TaskForm() {
 
   // 判断是否为创建模式（没有 currentTask.id）
   const isCreateMode = !currentTask?.id;
-  
+
   // 创建模式下，如果有父任务id或目标id，则不显示是否子任务开关
-  const shouldHideSubTaskSwitch = isCreateMode && (taskFormData?.parentId || taskFormData?.goalId);
+  const shouldHideSubTaskSwitch =
+    isCreateMode && (taskFormData?.parentId || taskFormData?.goalId);
 
   const { handleComponentLoaded } = useComponentLoad(async () => {
     if (currentTask?.id) {
@@ -81,11 +82,8 @@ export default function TaskForm() {
     fetchParentGoal();
   }, [taskFormData?.goalId]);
 
-  const {
-    allowedDateRange,
-    allowedImportance,
-    updateByConstraints,
-  } = useTaskFormConstraints(parentTask, parentGoal);
+  const { allowedDateRange, allowedImportance, updateByConstraints } =
+    useTaskFormConstraints(parentTask, parentGoal);
 
   // 当父任务或父目标变化时，检查并调整当前值
   useEffect(() => {
@@ -93,10 +91,17 @@ export default function TaskForm() {
       const updates = updateByConstraints(taskFormData);
       if (Object.keys(updates).length > 0) {
         form.setFieldsValue(updates);
-        setTaskFormData(prev => ({ ...prev, ...updates }));
+        setTaskFormData((prev) => ({ ...prev, ...updates }));
       }
     }
-  }, [parentTask, parentGoal, taskFormData, form, setTaskFormData, updateByConstraints]);
+  }, [
+    parentTask,
+    parentGoal,
+    taskFormData,
+    form,
+    setTaskFormData,
+    updateByConstraints,
+  ]);
 
   if (loading) {
     return <Spin dot />;
@@ -143,9 +148,9 @@ export default function TaskForm() {
           </Item>
         )}
         <Item span={24} label="日期" name="planTimeRange">
-          <RangePicker 
-            className="w-full rounded-md" 
-            allowClear 
+          <RangePicker
+            className="w-full rounded-md"
+            allowClear
             showTime
             disabledDate={(current) => {
               if (!allowedDateRange) return false;
@@ -167,7 +172,8 @@ export default function TaskForm() {
           {(parentTask || parentGoal) && allowedDateRange && (
             <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
               <span>
-                {parentTask ? '父任务' : '目标'}时间范围限制：{allowedDateRange[0]} ~ {allowedDateRange[1]}
+                {parentTask ? '父任务' : '目标'}时间范围限制：
+                {allowedDateRange[0]} ~ {allowedDateRange[1]}
               </span>
             </div>
           )}
@@ -176,10 +182,10 @@ export default function TaskForm() {
           <Input />
         </Item>
         <Item span={12} label="跟踪时间" name="trackTimeList">
-          <TrackTime 
+          <TrackTime
             trackTimeList={taskFormData.trackTimeList || []}
             onChange={(trackTimeList) => {
-              setTaskFormData(prev => ({ ...prev, trackTimeList }));
+              setTaskFormData((prev) => ({ ...prev, trackTimeList }));
               form.setFieldValue('trackTimeList', trackTimeList);
             }}
             taskName={taskFormData.name}
@@ -200,7 +206,10 @@ export default function TaskForm() {
                 <span>⚠️</span>
                 <span>
                   重要程度不能高于{parentTask ? '父任务' : '目标'}：
-                  {IMPORTANCE_MAP.get((parentTask || parentGoal).importance)?.label}
+                  {
+                    IMPORTANCE_MAP.get((parentTask || parentGoal).importance)
+                      ?.label
+                  }
                 </span>
               </div>
             )}

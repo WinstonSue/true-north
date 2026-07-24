@@ -12,9 +12,7 @@ export default class GoalMapping {
       type: goalVo.type,
       status: goalVo.status,
       parentId: goalVo.parent?.id,
-      children:
-        goalVo.children?.map((child) => GoalMapping.voToGoalFormData(child)) ||
-        [],
+      children: goalVo.children?.map((child) => GoalMapping.voToGoalFormData(child)) || [],
     };
   }
 

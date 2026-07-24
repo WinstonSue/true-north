@@ -22,7 +22,7 @@ export class FormDiffEngine extends DiffEngine {
 
   compareIntermediateState(): DiffResult {
     const sourceState = this.sourceAdapter.intermediateState;
-    
+
     if (!this.targetAdapter) {
       const fieldChanges = Array.from(sourceState.fields.values()).map((field) => ({
         fieldName: field.name,

@@ -57,10 +57,7 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
 
   // 刷新数据
   const refreshData = useCallback(async () => {
-    await Promise.all([
-      fetchTaskDetail(selectedTaskId),
-      fetchTaskTree(),
-    ]);
+    await Promise.all([fetchTaskDetail(selectedTaskId), fetchTaskTree()]);
     await props.onRefresh?.();
   }, [selectedTaskId, fetchTaskDetail, fetchTaskTree, props.onRefresh]);
 

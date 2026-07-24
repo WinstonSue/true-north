@@ -34,7 +34,7 @@ export class ControllerApiSyncEngine {
 
         const newCode = codeGenerator.applySyncActions(actions);
         writeFileSync(targetPath, newCode, 'utf-8');
-        
+
         // 格式化生成的代码
         formatFile(targetPath);
       }

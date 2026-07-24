@@ -20,14 +20,14 @@ export function formatFile(filePath: string): void {
 
     // 查找项目根目录的 prettier 配置
     const projectRoot = findProjectRoot(filePath);
-    
+
     // 执行 prettier 格式化
     const command = `npx prettier --write "${filePath}"`;
-    execSync(command, { 
+    execSync(command, {
       cwd: projectRoot,
-      stdio: 'pipe' // 静默执行，避免输出干扰
+      stdio: 'pipe', // 静默执行，避免输出干扰
     });
-    
+
     console.log(`✓ 已格式化: ${filePath}`);
   } catch (error) {
     console.warn(`格式化失败: ${filePath}`, error instanceof Error ? error.message : error);
@@ -39,14 +39,14 @@ export function formatFile(filePath: string): void {
  */
 function findProjectRoot(startPath: string): string {
   let currentDir = dirname(startPath);
-  
+
   while (currentDir !== '/') {
     if (existsSync(join(currentDir, 'package.json'))) {
       return currentDir;
     }
     currentDir = dirname(currentDir);
   }
-  
+
   // 如果找不到，返回当前目录
   return dirname(startPath);
 }

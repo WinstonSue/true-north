@@ -1,9 +1,6 @@
 import { Popover } from '@arco-design/web-react';
 import { useState } from 'react';
-import GoalEditor, {
-  GoalEditorFooter,
-  GoalEditorProps,
-} from './GoalEditor';
+import GoalEditor, { GoalEditorFooter, GoalEditorProps } from './GoalEditor';
 import GoalForeign from './GoalForeign';
 import GoalForm from './GoalForm';
 import GoalCreator, { GoalCreatorProps } from './GoalCreator';

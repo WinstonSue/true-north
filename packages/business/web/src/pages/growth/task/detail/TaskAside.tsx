@@ -27,12 +27,12 @@ const TaskAside: React.FC<TaskAsideProps> = ({ currentTaskId }) => {
   // 构建树形数据
   const buildTreeData = (tasks: TaskVo[]) => {
     const taskMap = new Map<string, TaskVo>();
-    tasks.forEach(task => taskMap.set(task.id, task));
+    tasks.forEach((task) => taskMap.set(task.id, task));
 
     const rootTasks: TaskVo[] = [];
     const childrenMap = new Map<string, TaskVo[]>();
 
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (!task.parentId) {
         rootTasks.push(task);
       } else {
@@ -49,10 +49,12 @@ const TaskAside: React.FC<TaskAsideProps> = ({ currentTaskId }) => {
         key: task.id,
         title: (
           <div className="flex items-center justify-between w-full">
-            <span className={clsx(
-              'truncate',
-              task.status === TaskStatus.DONE && 'line-through text-gray-400'
-            )}>
+            <span
+              className={clsx(
+                'truncate',
+                task.status === TaskStatus.DONE && 'line-through text-gray-400',
+              )}
+            >
               {task.name}
             </span>
             <div className="flex items-center gap-1">
@@ -82,7 +84,7 @@ const TaskAside: React.FC<TaskAsideProps> = ({ currentTaskId }) => {
 
     const config = statusConfig[status];
     return (
-      <span 
+      <span
         className={clsx(
           'px-1 py-0.5 text-xs rounded',
           config.color === 'gray' && 'bg-gray-100 text-gray-600',
@@ -97,8 +99,10 @@ const TaskAside: React.FC<TaskAsideProps> = ({ currentTaskId }) => {
   };
 
   // 过滤任务
-  const filteredTasks = taskTree.filter(task =>
-    !searchKeyword || task.name.toLowerCase().includes(searchKeyword.toLowerCase())
+  const filteredTasks = taskTree.filter(
+    (task) =>
+      !searchKeyword ||
+      task.name.toLowerCase().includes(searchKeyword.toLowerCase()),
   );
 
   const treeData = buildTreeData(filteredTasks);
@@ -117,7 +121,7 @@ const TaskAside: React.FC<TaskAsideProps> = ({ currentTaskId }) => {
     if (currentTaskId && taskTree.length > 0) {
       const expandKeys: string[] = [];
       const findParentChain = (taskId: string) => {
-        const task = taskTree.find(t => t.id === taskId);
+        const task = taskTree.find((t) => t.id === taskId);
         if (task?.parentId) {
           expandKeys.push(task.parentId);
           findParentChain(task.parentId);

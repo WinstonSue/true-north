@@ -13,7 +13,7 @@ export default function TriggerStatusCheckbox(props: {
   const { goal } = props;
 
   async function restore() {
-    await GoalService.restore(goal.id, );
+    await GoalService.restore(goal.id);
     await props.onChange();
   }
 

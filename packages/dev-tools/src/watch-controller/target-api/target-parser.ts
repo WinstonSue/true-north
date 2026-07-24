@@ -1,11 +1,4 @@
-import {
-  ASTClassInfo,
-  ASTMethod,
-  ASTParameter,
-  ASTConstructor,
-  ASTImport,
-  ASTSourceLocation,
-} from '../core/ast';
+import { ASTClassInfo, ASTMethod, ASTParameter, ASTConstructor, ASTImport, ASTSourceLocation } from '../core/ast';
 import {
   IntermediateState,
   MethodDefinition,
@@ -83,7 +76,7 @@ export class TargetApiParser extends BaseParser {
 
     // 从方法体中提取路径和 HTTP 动词
     const { path, verb } = this.extractPathAndVerbFromBody(bodyText);
-    
+
     // 基于路径解析参数装饰器
     const parameters = this.parseParameters(astMethod.parameters, path);
 
@@ -105,7 +98,7 @@ export class TargetApiParser extends BaseParser {
   private parseParameters(astParameters: ASTParameter[], path: string = ''): ParameterDefinition[] {
     // 从路径中提取动态参数
     const pathParams = this.extractPathParams(path);
-    
+
     return astParameters.map((param) => {
       const name = param.name;
       const type = param.type;
@@ -142,8 +135,8 @@ export class TargetApiParser extends BaseParser {
   private extractPathParams(path: string): string[] {
     const paramMatches = path.match(/:(\w+)/g);
     if (!paramMatches) return [];
-    
-    return paramMatches.map(match => match.substring(1)); // 移除 : 前缀
+
+    return paramMatches.map((match) => match.substring(1)); // 移除 : 前缀
   }
 
   /**
@@ -177,7 +170,10 @@ export class TargetApiParser extends BaseParser {
   /**
    * 从方法体中提取路径和 HTTP 动词
    */
-  private extractPathAndVerbFromBody(bodyText: string): { path: string; verb: 'Get' | 'Post' | 'Put' | 'Delete' | 'Patch' } {
+  private extractPathAndVerbFromBody(bodyText: string): {
+    path: string;
+    verb: 'Get' | 'Post' | 'Put' | 'Delete' | 'Patch';
+  } {
     // 默认值
     let path = '';
     let verb: 'Get' | 'Post' | 'Put' | 'Delete' | 'Patch' = 'Get';

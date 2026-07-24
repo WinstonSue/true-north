@@ -8,23 +8,25 @@
 
 ```yaml
 product_overview:
-  name: "True North"
-  version: "v2.0"
-  description: "个人成长与生活管理工具套件"
-  vision: "成为最智能、最体系化的个人成长伙伴"
-  mission: "帮助用户将目标落地执行并持续复盘迭代"
-  target_market: ["个人效率用户", "自我管理者", "知识工作者"]
-  business_model: "Freemium + 订阅增值"
-  launch_date: "2024-01-01"
-  current_stage: "成长期"
+  name: 'True North'
+  version: 'v2.0'
+  description: '个人成长与生活管理工具套件'
+  vision: '成为最智能、最体系化的个人成长伙伴'
+  mission: '帮助用户将目标落地执行并持续复盘迭代'
+  target_market: ['个人效率用户', '自我管理者', '知识工作者']
+  business_model: 'Freemium + 订阅增值'
+  launch_date: '2024-01-01'
+  current_stage: '成长期'
 ```
 
 **产品定位**
+
 - 核心价值：目标驱动 + 执行联动 + 数据闭环
 - 竞争优势：Monorepo + 多端统一体验 + 深度业务约束引擎
 - 市场策略：先深耕个人成长领域，逐步扩展到协作与运营工具
 
 **产品生命周期**
+
 1. v1.0：构建多级联动（目标/任务/待办/习惯）
 2. v1.5：引入时间追踪、统计看板
 3. v2.0：AI 助手与多端统一体验
@@ -35,25 +37,27 @@ product_overview:
 
 ```yaml
 business_domains:
-  - key: "growth"
-    name: "个人成长"
-    modules: ["goal", "task", "todo", "habit", "track-time"]
-  - key: "finance"
-    name: "财务管理"
-    modules: ["expenses", "budget"]
-  - key: "calendar"
-    name: "日历与计划"
-    modules: ["calendar", "timer"]
+  - key: 'growth'
+    name: '个人成长'
+    modules: ['goal', 'task', 'todo', 'habit', 'track-time']
+  - key: 'finance'
+    name: '财务管理'
+    modules: ['expenses', 'budget']
+  - key: 'calendar'
+    name: '日历与计划'
+    modules: ['calendar', 'timer']
 ```
 
 ### 用户角色
-| 角色 | 权限 | 限制 |
-| --- | --- | --- |
-| 个人用户 | 管理个人数据、使用基础功能 | 无法访问其他用户数据 |
-| 高级用户 | 高级分析、数据导出、开放 API | 受订阅配额限制 |
-| 管理员 | 系统运营、全局配置、统计 | 不可查看用户私密内容 |
+
+| 角色     | 权限                         | 限制                 |
+| -------- | ---------------------------- | -------------------- |
+| 个人用户 | 管理个人数据、使用基础功能   | 无法访问其他用户数据 |
+| 高级用户 | 高级分析、数据导出、开放 API | 受订阅配额限制       |
+| 管理员   | 系统运营、全局配置、统计     | 不可查看用户私密内容 |
 
 ### 全局数据关系
+
 ```mermaid
 erDiagram
     User ||--o{ Goal : "拥有"
@@ -73,34 +77,36 @@ erDiagram
 
 ```yaml
 tech_stack:
-  architecture: "Monorepo + pnpm workspace + Turbo"
+  architecture: 'Monorepo + pnpm workspace + Turbo'
   backend:
-    framework: "NestJS"
-    database: "MySQL/SQLite"
-    orm: "TypeORM"
+    framework: 'NestJS'
+    database: 'MySQL/SQLite'
+    orm: 'TypeORM'
   frontend:
-    framework: "React 18 + TypeScript"
-    build_tool: "Vite"
-    ui_library: ["Arco Design", "Ant Design"]
+    framework: 'React 18 + TypeScript'
+    build_tool: 'Vite'
+    ui_library: ['Arco Design', 'Ant Design']
   desktop:
-    framework: "Electron"
-    build_tool: "electron-vite"
+    framework: 'Electron'
+    build_tool: 'electron-vite'
 ```
 
 ### 模块与代码组织
+
 ```yaml
 code_structure:
   apps:
-    - name: "server"   # NestJS 服务
-    - name: "web"      # React Web
-    - name: "desktop"  # Electron 桌面端
+    - name: 'server' # NestJS 服务
+    - name: 'web' # React Web
+    - name: 'desktop' # Electron 桌面端
   packages:
-    - name: "business"   # 业务域（api/server/web/vo/enum）
-    - name: "common"     # 通用工具
-    - name: "components" # 复用组件
+    - name: 'business' # 业务域（api/server/web/vo/enum）
+    - name: 'common' # 通用工具
+    - name: 'components' # 复用组件
 ```
 
 ### 系统分层
+
 ```mermaid
 graph TB
     A[前端应用层] --> B[共享包层]
@@ -115,12 +121,12 @@ graph TB
 ```yaml
 design_tokens:
   colors:
-    primary: "#1890FF"
-    success: "#52C41A"
-    warning: "#FAAD14"
-    danger: "#F5222D"
+    primary: '#1890FF'
+    success: '#52C41A'
+    warning: '#FAAD14'
+    danger: '#F5222D'
   typography:
-    family: "PingFang SC, -apple-system"
+    family: 'PingFang SC, -apple-system'
     sizes: [12, 14, 16, 18, 20, 24]
   spacing:
     base: 4
@@ -147,33 +153,35 @@ design_tokens:
 
 ## 六、域级导航
 
-| 业务域 | Wiki | 说明 |
-| --- | --- | --- |
+| 业务域             | Wiki                                                             | 说明                          |
+| ------------------ | ---------------------------------------------------------------- | ----------------------------- |
 | Growth（个人成长） | [doc/ProductWiki/growth/ProductWiki.md](./growth/ProductWiki.md) | 目标/任务/待办/习惯及其子模块 |
-| Finance（财务） | _待建设_ | 预算、记账、统计 |
-| Calendar & Timer | _待建设_ | 日历、计划、计时器 |
+| Finance（财务）    | _待建设_                                                         | 预算、记账、统计              |
+| Calendar & Timer   | _待建设_                                                         | 日历、计划、计时器            |
 
 ---
 
 ## 七、协作与版本
 
 ### 7.1 文档协作
+
 1. 全局 ProductWiki 记录系统级标准；域级 Wiki 继承并扩展
 2. PRD/TDD 引用 ProductWiki，不复制全局内容
 3. 变更流程：先更新对应 Wiki，再落地 PRD/TDD/实现
 
 ### 7.2 版本记录
+
 ```yaml
 changelog:
-  - version: "v2.0"
-    date: "2025-12-01"
+  - version: 'v2.0'
+    date: '2025-12-01'
     highlights:
-      - "ProductWiki 全局重构"
-      - "Growth 域模块化蓝图完成"
-  - version: "v1.0"
-    date: "2024-01-01"
+      - 'ProductWiki 全局重构'
+      - 'Growth 域模块化蓝图完成'
+  - version: 'v1.0'
+    date: '2024-01-01'
     highlights:
-      - "多级联动 MVP 发布"
+      - '多级联动 MVP 发布'
 ```
 
 ---

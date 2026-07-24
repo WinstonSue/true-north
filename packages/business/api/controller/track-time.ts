@@ -15,7 +15,10 @@ export default class TrackTimeController {
   }
 
   static async list(query?: TrackTimeVO.TrackTimeFilterVo) {
-    return request<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>>({ method: 'get' })(`/trackTime/list`, query);
+    return request<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>>({ method: 'get' })(
+      `/trackTime/list`,
+      query
+    );
   }
 
   static async findOne(id: string) {
@@ -23,7 +26,9 @@ export default class TrackTimeController {
   }
 
   static async findByRelatedId(relatedType: string, relatedId: string) {
-    return request<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>>({ method: 'get' })(`/trackTime/related/${relatedType}/${relatedId}`);
+    return request<ResponseListVo<TrackTimeVO.TrackTimeWithoutRelationsVo>>({ method: 'get' })(
+      `/trackTime/related/${relatedType}/${relatedId}`
+    );
   }
 
   static async deleteByRelatedId(relatedType: string, relatedId: string) {

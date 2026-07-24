@@ -23,8 +23,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@business/*": ["../../packages/business/server/src/*"],
-      "@true-north/business-server": ["../../packages/business/server/src/index.ts"],
+      "@business/*": ["src/*"],
       "@true-north/business-web": ["../../packages/business/web/src/main.tsx"]
     }
   },

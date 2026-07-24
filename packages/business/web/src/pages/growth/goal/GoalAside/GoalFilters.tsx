@@ -8,7 +8,12 @@ import {
   Tag,
   Space,
 } from '@arco-design/web-react';
-import { IconSearch, IconDown, IconUp, IconRefresh } from '@arco-design/web-react/icon';
+import {
+  IconSearch,
+  IconDown,
+  IconUp,
+  IconRefresh,
+} from '@arco-design/web-react/icon';
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 import { GoalStatus, GoalType } from '@true-north/enum';
 import { useGoalContext } from '../context';
@@ -29,7 +34,7 @@ const GoalFilters: React.FC = () => {
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    [setSearchValue]
+    [setSearchValue],
   );
 
   // 获取状态标签文本
@@ -62,8 +67,11 @@ const GoalFilters: React.FC = () => {
           key: `status-${status}`,
           label: getStatusLabel(status),
           onClose: () => {
-            const newStatus = filters.status?.filter(s => s !== status) || [];
-            setFilters({ ...filters, status: newStatus.length > 0 ? newStatus : undefined });
+            const newStatus = filters.status?.filter((s) => s !== status) || [];
+            setFilters({
+              ...filters,
+              status: newStatus.length > 0 ? newStatus : undefined,
+            });
           },
         });
       });

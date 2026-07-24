@@ -29,7 +29,7 @@ export class ModelDiffEngine extends DiffEngine {
    */
   compareIntermediateState(): DiffResult {
     const sourceState = this.sourceAdapter.intermediateState;
-    
+
     // 如果没有目标文件，所有字段都是新增的
     if (!this.targetAdapter) {
       const fieldChanges = Array.from(sourceState.fields.values()).map((field) => ({

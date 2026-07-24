@@ -16,7 +16,6 @@
     "sync-entities:watch": "node scripts/sync-entities.js --watch"
   },
   "dependencies": {
-    "@true-north/business-server": "workspace:*",
     "@true-north/business-web": "workspace:*",
     "@true-north/enum": "workspace:*",
     "francis-mapped-types": "0.0.1",
@@ -33,7 +32,9 @@
     "sqlite3": "^5.1.6",
     "typeorm": "^0.3.17",
     "typeorm-naming-strategies": "^4.1.0",
+    "dayjs": "^1.11.13",
     "lodash-es": "^4.17.21",
+    "ts-mixer": "^6.0.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

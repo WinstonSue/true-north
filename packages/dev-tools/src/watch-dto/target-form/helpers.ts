@@ -20,8 +20,5 @@ export function isUpdateDto(className: string): boolean {
  * 获取 Form 基础名称
  */
 export function getFormBaseName(className: string): string {
-  return className
-    .replace('Dto', '')
-    .replace('Create', '')
-    .replace('Update', '');
+  return className.replace('Dto', '').replace('Create', '').replace('Update', '');
 }

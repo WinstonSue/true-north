@@ -3,20 +3,24 @@
 ## 1. 前端技术栈
 
 ### 1.1 核心框架
+
 - **React 18**: UI 框架
 - **TypeScript**: 类型安全
 - **React Router v6**: 路由管理
 
 ### 1.2 UI 组件库
+
 - **Arco Design**: 主要 UI 组件库
 - **自定义组件**: 业务特定组件
 
 ### 1.3 样式方案
+
 - **CSS Modules**: 样式隔离
 - **Less**: CSS 预处理器
 - **Tailwind CSS**: 快速样式开发
 
 ### 1.4 工具库
+
 - **dayjs**: 日期处理
 - **ECharts**: 数据图表
 - **clsx**: 类名管理
@@ -46,6 +50,7 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
 ```
 
 **特点**:
+
 - 每个模块独立的 Context Provider
 - 通过 custom hooks 访问状态
 - 类型安全
@@ -65,16 +70,16 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
 页面级组件 (Page Components)
   ├── TodoPage, TaskPage, GoalPage, HabitPage
   └── 提供 Provider 和路由出口
-  
+
 视图级组件 (View Components)
   ├── 各个子路由页面组件
   └── 实现具体的业务逻辑
-  
+
 共享组件 (Shared Components)
   ├── GoalDetail, TaskDetail, TodoDetail
   ├── GoalTreeSelector, IconSelector
   └── TrackTime
-  
+
 复用组件 (Reusable Components)
   ├── TabsPage
   └── FlexibleContainer
@@ -190,7 +195,7 @@ interface HabitVo {
   createdAt: string;
   updatedAt: string;
   // 关联数据
-  goals?: GoalVo[];  // 必填,至少一个
+  goals?: GoalVo[]; // 必填,至少一个
   recentLogs?: HabitLogVo[];
   statistics?: HabitStatisticsVo;
 }
@@ -215,15 +220,16 @@ interface HabitLogVo {
 
 ```typescript
 enum GoalStatus {
-  Planning = 'Planning',      // 规划中
-  InProgress = 'InProgress',  // 进行中
-  Done = 'Done',              // 已完成
-  Abandoned = 'Abandoned',    // 已放弃
-  Paused = 'Paused',          // 已暂停
+  Planning = 'Planning', // 规划中
+  InProgress = 'InProgress', // 进行中
+  Done = 'Done', // 已完成
+  Abandoned = 'Abandoned', // 已放弃
+  Paused = 'Paused', // 已暂停
 }
 ```
 
 **状态转换**:
+
 ```
 Planning → InProgress → Done
          → Paused → InProgress
@@ -234,14 +240,15 @@ Planning → InProgress → Done
 
 ```typescript
 enum TaskStatus {
-  Todo = 'Todo',              // 待办
-  InProgress = 'InProgress',  // 进行中
-  Done = 'Done',              // 已完成
-  Abandoned = 'Abandoned',    // 已放弃
+  Todo = 'Todo', // 待办
+  InProgress = 'InProgress', // 进行中
+  Done = 'Done', // 已完成
+  Abandoned = 'Abandoned', // 已放弃
 }
 ```
 
 **状态转换**:
+
 ```
 Todo → InProgress → Done
      → Abandoned
@@ -251,14 +258,15 @@ Todo → InProgress → Done
 
 ```typescript
 enum TodoStatus {
-  Todo = 'Todo',              // 待办
-  InProgress = 'InProgress',  // 进行中
-  Done = 'Done',              // 已完成
-  Abandoned = 'Abandoned',    // 已放弃
+  Todo = 'Todo', // 待办
+  InProgress = 'InProgress', // 进行中
+  Done = 'Done', // 已完成
+  Abandoned = 'Abandoned', // 已放弃
 }
 ```
 
 **状态转换**:
+
 ```
 Todo → InProgress → Done
      → Abandoned → Todo (可恢复)
@@ -268,14 +276,15 @@ Todo → InProgress → Done
 
 ```typescript
 enum HabitStatus {
-  Active = 'Active',          // 活跃中
-  Paused = 'Paused',          // 已暂停
-  Completed = 'Completed',    // 已完成
-  Abandoned = 'Abandoned',    // 已放弃
+  Active = 'Active', // 活跃中
+  Paused = 'Paused', // 已暂停
+  Completed = 'Completed', // 已完成
+  Abandoned = 'Abandoned', // 已放弃
 }
 ```
 
 **状态转换**:
+
 ```
 Active → Paused → Active
        → Completed
@@ -288,11 +297,11 @@ Active → Paused → Active
 
 ```typescript
 enum GoalType {
-  LongTerm = 'LongTerm',      // 长期目标
-  ShortTerm = 'ShortTerm',    // 短期目标
-  Project = 'Project',        // 项目目标
-  Learning = 'Learning',      // 学习目标
-  Other = 'Other',            // 其他
+  LongTerm = 'LongTerm', // 长期目标
+  ShortTerm = 'ShortTerm', // 短期目标
+  Project = 'Project', // 项目目标
+  Learning = 'Learning', // 学习目标
+  Other = 'Other', // 其他
 }
 ```
 
@@ -302,15 +311,16 @@ enum GoalType {
 
 ```typescript
 enum Importance {
-  Supplementary = 1,  // 聊胜于无
-  Helpful = 2,        // 略有裨益
-  Core = 3,           // 重要
-  Key = 4,            // 举足轻重
-  Essential = 5,      // 不容或缺
+  Supplementary = 1, // 聊胜于无
+  Helpful = 2, // 略有裨益
+  Core = 3, // 重要
+  Key = 4, // 举足轻重
+  Essential = 5, // 不容或缺
 }
 ```
 
 **颜色映射**:
+
 ```typescript
 export const IMPORTANCE_MAP = new Map([
   [1, { color: 'gray', label: '聊胜于无' }],
@@ -325,15 +335,16 @@ export const IMPORTANCE_MAP = new Map([
 
 ```typescript
 enum Difficulty {
-  GettingStarted = 'GettingStarted',  // 轻而易举
-  Skilled = 'Skilled',                // 略费手脚
-  Challenger = 'Challenger',          // 颇费周章
-  Master = 'Master',                  // 千回百转
-  Legendary = 'Legendary',            // 登峰造极
+  GettingStarted = 'GettingStarted', // 轻而易举
+  Skilled = 'Skilled', // 略费手脚
+  Challenger = 'Challenger', // 颇费周章
+  Master = 'Master', // 千回百转
+  Legendary = 'Legendary', // 登峰造极
 }
 ```
 
 **颜色映射**:
+
 ```typescript
 export const DIFFICULTY_MAP = new Map([
   [Difficulty.GettingStarted, { color: 'gray', label: '轻而易举' }],
@@ -348,15 +359,16 @@ export const DIFFICULTY_MAP = new Map([
 
 ```typescript
 enum Urgency {
-  Someday = 'Someday',  // 来日方长
-  Later = 'Later',      // 按部就班
-  Soon = 'Soon',        // 事不宜迟
-  Now = 'Now',          // 刻不容缓
-  ASAP = 'ASAP',        // 十万火急
+  Someday = 'Someday', // 来日方长
+  Later = 'Later', // 按部就班
+  Soon = 'Soon', // 事不宜迟
+  Now = 'Now', // 刻不容缓
+  ASAP = 'ASAP', // 十万火急
 }
 ```
 
 **颜色映射**:
+
 ```typescript
 export const URGENCY_MAP = new Map([
   [Urgency.Someday, { color: 'gray', label: '来日方长' }],
@@ -372,10 +384,10 @@ export const URGENCY_MAP = new Map([
 
 ```typescript
 enum HabitCompletionScore {
-  Perfect = 'Perfect',          // 完美完成
-  Good = 'Good',                // 良好完成
-  Basic = 'Basic',              // 基本完成
-  Incomplete = 'Incomplete',    // 未完成
+  Perfect = 'Perfect', // 完美完成
+  Good = 'Good', // 良好完成
+  Basic = 'Basic', // 基本完成
+  Incomplete = 'Incomplete', // 未完成
 }
 ```
 
@@ -385,37 +397,37 @@ enum HabitCompletionScore {
 
 ```typescript
 // 目标服务
-GoalService.findRoots()           // 获取根目标
-GoalService.findChildren(id)      // 获取子目标
-GoalService.find(id)              // 获取目标详情
-GoalService.findByFilter(filter)  // 筛选查询
-GoalService.create(data)          // 创建目标
-GoalService.update(id, data)      // 更新目标
-GoalService.delete(id)            // 删除目标
+GoalService.findRoots(); // 获取根目标
+GoalService.findChildren(id); // 获取子目标
+GoalService.find(id); // 获取目标详情
+GoalService.findByFilter(filter); // 筛选查询
+GoalService.create(data); // 创建目标
+GoalService.update(id, data); // 更新目标
+GoalService.delete(id); // 删除目标
 
 // 任务服务
-TaskService.find(id)
-TaskService.findByFilter(filter)
-TaskService.create(data)
-TaskService.update(id, data)
-TaskService.delete(id)
+TaskService.find(id);
+TaskService.findByFilter(filter);
+TaskService.create(data);
+TaskService.update(id, data);
+TaskService.delete(id);
 
 // 待办服务
-TodoService.find(id)
-TodoService.findByFilter(filter)
-TodoService.create(data)
-TodoService.update(id, data)
-TodoService.delete(id)
-TodoService.batchUpdateStatus(ids, status)
+TodoService.find(id);
+TodoService.findByFilter(filter);
+TodoService.create(data);
+TodoService.update(id, data);
+TodoService.delete(id);
+TodoService.batchUpdateStatus(ids, status);
 
 // 习惯服务
-HabitService.getHabitDetail(id)
-HabitService.getHabitPage(params)
-HabitService.createHabit(data)
-HabitService.updateHabit(id, data)
-HabitService.deleteHabit(id)
-HabitService.doneBatchHabit(params)
-HabitService.abandonHabit(id)
+HabitService.getHabitDetail(id);
+HabitService.getHabitPage(params);
+HabitService.createHabit(data);
+HabitService.updateHabit(id, data);
+HabitService.deleteHabit(id);
+HabitService.doneBatchHabit(params);
+HabitService.abandonHabit(id);
 ```
 
 ### 6.2 服务层设计

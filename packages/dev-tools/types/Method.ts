@@ -1,5 +1,3 @@
-
-
 export interface MethodChange {
   methodName: string;
   changeType: MethodChangeType;

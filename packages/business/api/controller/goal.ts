@@ -43,10 +43,7 @@ export default class GoalController {
   }
 
   static async findByFilter(goalListFiltersVo?: GoalVO.GoalFilterVo) {
-    return request<ResponseListVo<GoalVO.GoalWithoutRelationsVo>>({ method: 'get' })(
-      `/goal/list`,
-      goalListFiltersVo
-    );
+    return request<ResponseListVo<GoalVO.GoalWithoutRelationsVo>>({ method: 'get' })(`/goal/list`, goalListFiltersVo);
   }
 
   static async getTree(goalListFiltersVo?: GoalVO.GoalFilterVo) {

@@ -7,4 +7,3 @@ export interface DiffResult {
   methodChanges: MethodChange[];
   error?: string;
 }
-

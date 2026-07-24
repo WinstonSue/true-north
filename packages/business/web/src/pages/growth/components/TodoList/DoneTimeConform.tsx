@@ -13,7 +13,8 @@ export default function DoneTimeConform(props: {
     'onTime' | 'currentTime' | 'customTime'
   >('onTime');
 
-  const getPlanEndTime = () => todo.planEndTime ? ' ' + todo.planEndTime : '23:59:59';
+  const getPlanEndTime = () =>
+    todo.planEndTime ? ' ' + todo.planEndTime : '23:59:59';
   useEffect(() => {
     console.log(todo.planDate + ' ' + getPlanEndTime());
     onChangeDoneTime(dayjs(todo.planDate + ' ' + getPlanEndTime()));

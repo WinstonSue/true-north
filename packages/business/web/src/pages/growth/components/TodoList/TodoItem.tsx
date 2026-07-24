@@ -42,7 +42,12 @@ function TodoItem(props: TodoItemProps) {
             <span className="text-text-1 flex items-center">
               {todo.name}
               {todo.relatedType === TodoRelatedType.IS_REPEAT && (
-                <SiteIcon id={'repeat'} className={"text-danger"} width={20} height={20}/>
+                <SiteIcon
+                  id={'repeat'}
+                  className={'text-danger'}
+                  width={20}
+                  height={20}
+                />
               )}
             </span>
             <div className="h-8 flex items-center">

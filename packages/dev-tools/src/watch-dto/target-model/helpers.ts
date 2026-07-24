@@ -15,10 +15,7 @@ export function isWithoutRelationsDto(className: string): boolean {
  * 获取基础名称（移除 Dto、Model、WithoutRelations 后缀）
  */
 export function getModelBaseName(className: string): string {
-  return className
-    .replace('Dto', '')
-    .replace('Model', '')
-    .replace('WithoutRelations', '');
+  return className.replace('Dto', '').replace('Model', '').replace('WithoutRelations', '');
 }
 
 /**

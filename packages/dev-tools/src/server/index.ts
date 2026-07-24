@@ -21,10 +21,12 @@ app.use(express.static(path.join(process.cwd(), 'dist')));
 // 辅助函数：生成控制器类名
 function generateControllerClassName(name: string): string {
   // 将 kebab-case 转换为 PascalCase
-  return name
-    .split('-')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('') + 'Controller';
+  return (
+    name
+      .split('-')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('') + 'Controller'
+  );
 }
 
 // 辅助函数：查找 Desktop 控制器对

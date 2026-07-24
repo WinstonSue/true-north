@@ -14,8 +14,8 @@ export default defineConfig({
   main: {
     resolve: {
       alias: {
-        '@business': path.resolve(currentDirPath, '../../packages/business/server/src'),
-        '@database': path.resolve(currentDirPath, 'src/database'),
+        '@business': path.resolve(currentDirPath, 'src'),
+        '@db': path.resolve(currentDirPath, 'src/db'),
         '@': path.resolve(currentDirPath, 'src/main'),
         '@true-north/enum': path.resolve(currentDirPath, '../../packages/business/enum/index.ts'),
         '@true-north/vo': path.resolve(currentDirPath, '../../packages/business/vo/index.ts'),
@@ -56,8 +56,11 @@ export default defineConfig({
           ? {
               include: [
                 path.resolve(currentDirPath, 'src/main/**/*'),
-                path.resolve(currentDirPath, 'src/database/**/*'),
-                path.resolve(currentDirPath, '../../packages/business/server/**/*'),
+                path.resolve(currentDirPath, 'src/db/**/*'),
+                path.resolve(currentDirPath, 'src/growth/**/*'),
+                path.resolve(currentDirPath, 'src/common/**/*'),
+                path.resolve(currentDirPath, 'src/decorators/**/*'),
+                path.resolve(currentDirPath, 'src/users/**/*'),
               ],
             }
           : undefined,

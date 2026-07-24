@@ -26,6 +26,7 @@ pnpm watch:dto
 ### 2. Web 界面方式（新增）
 
 #### 开发模式
+
 ```bash
 # 启动开发服务器（前端 + 后端）
 pnpm dev:full
@@ -34,6 +35,7 @@ pnpm dev:full
 然后访问 http://localhost:3001 即可使用 Web 界面进行同步操作。
 
 #### 生产模式
+
 ```bash
 # 构建并启动生产服务器
 pnpm start
@@ -44,14 +46,17 @@ pnpm start
 ## Web 界面功能
 
 ### 同步操作
+
 - **同步 Controllers**: 一键执行控制器同步
 - **同步 DTO**: 一键执行 DTO 同步
 
 ### 监听任务
+
 - **监听 Controllers**: 启动/停止控制器监听任务
 - **监听 DTO**: 启动/停止 DTO 监听任务
 
 ### 特性
+
 - 实时显示任务执行状态
 - 支持启动和停止长期运行的监听任务
 - 友好的操作界面和状态反馈
@@ -60,16 +65,19 @@ pnpm start
 ## 技术架构
 
 ### 前端
+
 - React 18 + TypeScript
 - Ant Design UI 组件库
 - Vite 构建工具
 
 ### 后端
+
 - Express.js API 服务器
 - 子进程管理执行同步命令
 - RESTful API 接口
 
 ### 开发工具
+
 - TypeScript 严格模式
 - ESLint + Prettier 代码规范
 - 热重载开发体验
@@ -77,6 +85,7 @@ pnpm start
 ## API 接口
 
 ### POST /api/execute
+
 执行同步命令或启动监听任务
 
 ```json
@@ -88,6 +97,7 @@ pnpm start
 ```
 
 ### POST /api/stop
+
 停止监听任务
 
 ```json
@@ -97,6 +107,7 @@ pnpm start
 ```
 
 ### GET /api/tasks
+
 获取运行中的任务列表
 
 ## 项目结构

@@ -69,13 +69,13 @@ const shouldHideSubTaskSwitch = isCreateMode && (
 
 ```typescript
 const { allowedDateRange } = useTaskFormConstraints(
-  parentTask, 
+  parentTask,
   parentGoal
 );
 
-<RangePicker 
-  className="w-full rounded-md" 
-  allowClear 
+<RangePicker
+  className="w-full rounded-md"
+  allowClear
   showTime
   disabledDate={(current) => {
     if (!allowedDateRange) return false;
@@ -137,11 +137,13 @@ function useTaskFormConstraints(parentTask, parentGoal) {
   const allowedDateRange = useMemo(() => {
     const parent = parentTask || parentGoal;
     if (!parent) return null;
-    
-    const [startTime, endTime] = parent.planTimeRange || 
-                                  [parent.startAt, parent.endAt];
+
+    const [startTime, endTime] = parent.planTimeRange || [
+      parent.startAt,
+      parent.endAt,
+    ];
     if (!startTime && !endTime) return null;
-    
+
     return [startTime, endTime];
   }, [parentTask, parentGoal]);
 
@@ -151,27 +153,31 @@ function useTaskFormConstraints(parentTask, parentGoal) {
     if (!parent?.importance) {
       return [...IMPORTANCE_MAP.keys()];
     }
-    return [...IMPORTANCE_MAP.keys()].filter(
-      key => key <= parent.importance
-    );
+    return [...IMPORTANCE_MAP.keys()].filter((key) => key <= parent.importance);
   }, [parentTask, parentGoal]);
 
   // 根据约束更新表单值
-  const updateByConstraints = useCallback((formData) => {
-    const updates = {};
-    
-    // 时间约束检查
-    if (allowedDateRange && formData.planTimeRange) {
-      // 检查并调整时间范围
-    }
-    
-    // 重要程度约束检查
-    if (formData.importance && !allowedImportance.includes(formData.importance)) {
-      updates.importance = Math.max(...allowedImportance);
-    }
-    
-    return updates;
-  }, [allowedDateRange, allowedImportance]);
+  const updateByConstraints = useCallback(
+    (formData) => {
+      const updates = {};
+
+      // 时间约束检查
+      if (allowedDateRange && formData.planTimeRange) {
+        // 检查并调整时间范围
+      }
+
+      // 重要程度约束检查
+      if (
+        formData.importance &&
+        !allowedImportance.includes(formData.importance)
+      ) {
+        updates.importance = Math.max(...allowedImportance);
+      }
+
+      return updates;
+    },
+    [allowedDateRange, allowedImportance],
+  );
 
   return {
     allowedDateRange,

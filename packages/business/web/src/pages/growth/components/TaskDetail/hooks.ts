@@ -4,7 +4,10 @@ import { IMPORTANCE_MAP } from '../../constants';
 import { TaskFormData } from '@true-north/web-service';
 import { TaskVo, GoalVo } from '@true-north/vo';
 
-export const useTaskFormConstraints = (parentTask: TaskVo | null, parentGoal: GoalVo | null) => {
+export const useTaskFormConstraints = (
+  parentTask: TaskVo | null,
+  parentGoal: GoalVo | null,
+) => {
   const allowedDateRange = useMemo(() => {
     // 优先使用父任务的时间范围，其次是父目标
     const parent = parentTask || parentGoal;

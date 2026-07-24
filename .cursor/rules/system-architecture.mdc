@@ -17,13 +17,10 @@ True North 是一个基于 **Monorepo** 架构的全栈生活管理工具套件,
 ```
 true-north/
 ├── apps/                    # 应用层
-│   ├── server/             # NestJS 后端服务
-│   ├── web/                # React Web 应用
-│   └── desktop/            # Electron 桌面应用
+│   ├── desktop/            # Electron 桌面应用（业务域 + SQLite + IPC）
 ├── packages/               # 共享包
 │   ├── business/           # 业务域包（前后端共享的业务定义与实现）
 │   │   ├── api/            # API 接口/DTO/类型定义
-│   │   ├── server/         # 业务核心（实体/仓储/服务/映射）
 │   │   ├── web/            # Web 业务 UI（页面/组件/路由）
 │   │   ├── vo/             # 值对象
 │   │   └── enum/           # 枚举

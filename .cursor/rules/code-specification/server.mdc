@@ -56,7 +56,7 @@ alwaysApply: false
 ### 第一阶段：数据格式定义
 
 #### 1.1 Entity 定义（数据模型）
-**位置**: `packages/business/server/src/{domain}/{module}/entities/*.entity.ts`
+**位置**: `apps/desktop/src/growth/{module}/`（entity、dto、service、repository、route-controller）
 
 **核心原则**:
 - 继承 `BaseEntity` 获取基础字段

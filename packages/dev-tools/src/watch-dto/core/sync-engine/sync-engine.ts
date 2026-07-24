@@ -6,6 +6,7 @@ import { IntermediateState } from '../intermediate-state/types';
 import { DiffResult } from '../diff-engine';
 import fs from 'fs';
 import path from 'path';
+import { getVoPathFromDto } from '../../../utils/path';
 
 /**
  * 同步引擎基类
@@ -43,17 +44,7 @@ export abstract class SyncEngine {
    * 获取 VO 文件路径
    */
   getVoPath(dtoFilePath: string): string {
-    // 将 DTO 路径转换为 VO 路径
-    // packages/business/server/src/**/dto/*.dto.ts -> packages/business/vo/**/*.vo.ts
-    
-    const relativePath = dtoFilePath.replace(/.*\/server\/src\//, '');
-    const voRelativePath = relativePath
-      .replace('/dto/', '/')
-      .replace('.dto.ts', '.vo.ts');
-    
-    // 假设 VO 基础路径
-    const voBase = dtoFilePath.split('/server/src/')[0].replace('/server', '/vo');
-    return path.join(voBase, voRelativePath);
+    return getVoPathFromDto(dtoFilePath);
   }
 
   /**

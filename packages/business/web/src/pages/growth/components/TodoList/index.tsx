@@ -18,10 +18,7 @@ function TodoList(props: {
           onClickTodo={props.onClickTodo}
           refreshTodoList={props.refreshTodoList}
           TriggerCheckbox={
-            <TriggerTodoStatus
-              todo={todo}
-              onChange={props.refreshTodoList}
-            />
+            <TriggerTodoStatus todo={todo} onChange={props.refreshTodoList} />
           }
         />
       ))}

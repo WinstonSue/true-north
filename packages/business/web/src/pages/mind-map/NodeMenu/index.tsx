@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Dropdown, Menu } from '@arco-design/web-react';
-import { IconMore, IconEdit, IconDelete, IconPlus, IconCopy } from '@arco-design/web-react/icon';
+import {
+  IconMore,
+  IconEdit,
+  IconDelete,
+  IconPlus,
+  IconCopy,
+} from '@arco-design/web-react/icon';
 import styles from './style.module.less';
 
 interface NodeMenuProps {
@@ -143,7 +149,7 @@ const NodeMenu: React.FC<NodeMenuProps> = ({
         })}
       </Menu>
     </div>,
-    portalContainer
+    portalContainer,
   );
 };
 
