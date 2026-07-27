@@ -25,7 +25,7 @@ export default function TaskCreator(props: TaskCreatorProps) {
         <Flex container="fill">
           <TaskForm />
         </Flex>
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <Footer onClose={props.onClose} />
         </Flex>
       </Flex>

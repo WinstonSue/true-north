@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { IconSettings } from '@true-north/components-ui';
-import { Modal, Form, Input } from '@sue/design-web-react';
+
+import { Modal, Form, Input, SettingOutlined } from '@sue/design-web-react';
 
 interface SettingProps {
   onConfirm: (form: { countdown: number }) => void;
@@ -35,7 +35,7 @@ const Setting: React.FC<SettingProps> = ({ onConfirm, className }) => {
 
   return (
     <>
-      <IconSettings
+      <SettingOutlined
         onClick={onClickSetting}
         className={className}
         style={{ color: '#fff', fontSize: '30px' }}

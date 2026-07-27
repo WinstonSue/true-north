@@ -1,9 +1,8 @@
 import React from 'react';
 import { Badge } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
+
 import styles from './style/index.module.less';
 
-const { Text } = Typography;
 interface TooltipProps {
   title: string;
   data: {
@@ -21,23 +20,23 @@ function CustomTooltip(props: TooltipProps) {
   return (
     <div className={styles['customer-tooltip']}>
       <div className={styles['customer-tooltip-title']}>
-        <Text bold>{props.title}</Text>
+        <span style={{ fontWeight: "bold" }}>{props.title}</span>
       </div>
       <div>
-        {props.data.map((item, index) => (
-          <div className={styles['customer-tooltip-item']} key={index}>
+        {props.data.map((item, index) =>
+        <div className={styles['customer-tooltip-item']} key={index}>
             <div>
               <Badge color={color || item.color} />
               {name || item.name}
             </div>
             <div>
-              <Text bold>{formatter(item.value)}</Text>
+              <span style={{ fontWeight: "bold" }}>{formatter(item.value)}</span>
             </div>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default CustomTooltip;

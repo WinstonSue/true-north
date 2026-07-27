@@ -1,8 +1,7 @@
 'use client';
 
-import { Input, Select, DatePicker } from '@sue/design-web-react';
-import { Grid } from '@true-north/components-ui';
-import { IconSearch } from '@true-north/components-ui';
+import { Input, Select, DatePicker, Row, Col, SearchOutlined } from '@sue/design-web-react';
+
 import { IMPORTANCE_MAP, URGENCY_MAP } from '../../constants';
 import { TagSelector } from '../../../../components/TagSelector';
 import { useTodoAllContext } from './context';
@@ -11,7 +10,6 @@ import { TableFilter } from '@/components/Layout/TableFilter';
 import { TodoStatus } from '@true-north/enum';
 
 const DatePickerRange = DatePicker.RangePicker;
-const { Row, Col } = Grid;
 
 export function TodoFilters() {
   const { getTodoPage, filters, setFilters, clearFilters } =
@@ -29,7 +27,7 @@ export function TodoFilters() {
       <Row gutter={[16, 16]}>
         <Col span={6}>
           <Input
-            prefix={<IconSearch />}
+            prefix={<SearchOutlined />}
             placeholder="关键字"
             value={filters.keyword}
             onChange={(value) => {

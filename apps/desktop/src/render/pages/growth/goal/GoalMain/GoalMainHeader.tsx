@@ -1,22 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Modal,
-  message,
-  Tag,
-  Dropdown,
-  Menu,
-  Button,
-  Breadcrumb,
-  Flex,
-} from '@sue/design-web-react';
-import {
-  IconEdit,
-  IconDelete,
-  IconRight,
-  IconMore,
-  IconCheck,
-  IconClose,
-} from '@true-north/components-ui';
+import { Modal, message, Tag, Dropdown, Menu, Button, Breadcrumb, Flex, CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, EllipsisOutlined, RightOutlined } from '@sue/design-web-react';
+
 import { GoalService } from '@true-north/web-service';
 import { useGoalContext } from '../context';
 import { GoalStatus } from '@true-north/enum';
@@ -156,13 +140,13 @@ const GoalMainHeader: React.FC = () => {
   const renderActionMenu = () => (
     <Menu>
       <Menu.Item key="edit" onClick={() => setIsEditing(true)}>
-        <IconEdit /> 编辑
+        <EditOutlined /> 编辑
       </Menu.Item>
       <Menu.Item key="abandon" onClick={handleAbandon}>
-        <IconClose /> 放弃
+        <CloseOutlined /> 放弃
       </Menu.Item>
       <Menu.Item key="delete" onClick={handleDelete} className="text-red-500">
-        <IconDelete /> 删除
+        <DeleteOutlined /> 删除
       </Menu.Item>
     </Menu>
   );
@@ -171,14 +155,14 @@ const GoalMainHeader: React.FC = () => {
     <Flex
       container="fixed"
       className={clsx(
-        'px-4 !h-14',
+        'w-full px-4 !h-14',
         'border-b border-border-2',
         'justify-between',
       )}
     >
       {/* 左侧：面包屑导航 */}
       <Flex container="fill" className={clsx('flex items-center')}>
-        <Breadcrumb separator={<IconRight className="text-xs text-gray-400" />}>
+        <Breadcrumb separator={<RightOutlined className="text-xs text-gray-400" />}>
           {breadcrumbPath.map((item, index) => (
             <Breadcrumb.Item
               key={item.id}
@@ -207,14 +191,17 @@ const GoalMainHeader: React.FC = () => {
       </Flex>
 
       {/* 右侧：状态 Tag + 操作区 */}
-      <Flex container="fixed" className={clsx('flex items-center gap-2')}>
+      <Flex
+        container="fixed"
+        className={clsx('h-full', 'flex items-center gap-2')}
+      >
         {/* 主要按钮：已完成 */}
         {selectedGoal && selectedGoal.status !== GoalStatus.DONE && (
           <Button
             type="outline"
             size="default"
             status="success"
-            icon={<IconCheck />}
+            icon={<CheckOutlined />}
             onClick={handleComplete}
           >
             已完成
@@ -225,7 +212,7 @@ const GoalMainHeader: React.FC = () => {
           dropdownRender={() => renderActionMenu()}
           placement="bottomRight"
         >
-          <Button icon={<IconMore />} />
+          <Button icon={<EllipsisOutlined />} />
         </Dropdown>
       </Flex>
     </Flex>

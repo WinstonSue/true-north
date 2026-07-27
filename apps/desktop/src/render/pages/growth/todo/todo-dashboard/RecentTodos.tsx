@@ -1,16 +1,15 @@
 'use client';
 
-import { Tag, Avatar } from '@sue/design-web-react';
-import { Typography, List } from '@true-north/components-ui';
+import {
+  Tag,
+  Avatar,
+  Flex,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+} from '@sue/design-web-react';
+import { ExclamationOutlined } from '@ant-design/icons';
 import { format, isToday, isTomorrow, isPast } from 'date-fns';
 import { TodoVo } from '@true-north/vo';
-import {
-  IconCheckCircle,
-  IconClockCircle,
-  IconExclamation,
-} from '@true-north/components-ui';
-
-const { Title, Text } = Typography;
 
 interface RecentTodosProps {
   todoList: TodoVo[];
@@ -18,26 +17,26 @@ interface RecentTodosProps {
 
 export function RecentTodos({ todoList }: RecentTodosProps) {
   // 最近完成的任务（最近7天）
-  const recentCompleted = todoList
-    .filter((todo) => {
-      if (todo.status !== 'done' || !todo.doneAt) return false;
-      const doneDate = new Date(todo.doneAt);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return doneDate >= weekAgo;
-    })
-    .sort(
-      (a, b) => new Date(b.doneAt!).getTime() - new Date(a.doneAt!).getTime(),
-    )
-    .slice(0, 5);
+  const recentCompleted = todoList.
+  filter((todo) => {
+    if (todo.status !== 'done' || !todo.doneAt) return false;
+    const doneDate = new Date(todo.doneAt);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return doneDate >= weekAgo;
+  }).
+  sort(
+    (a, b) => new Date(b.doneAt!).getTime() - new Date(a.doneAt!).getTime()
+  ).
+  slice(0, 5);
 
   // 即将到期的任务
-  const upcomingTasks = todoList
-    .filter((todo) => todo.status === 'todo')
-    .sort(
-      (a, b) => new Date(a.planDate).getTime() - new Date(b.planDate).getTime(),
-    )
-    .slice(0, 5);
+  const upcomingTasks = todoList.
+  filter((todo) => todo.status === 'todo').
+  sort(
+    (a, b) => new Date(a.planDate).getTime() - new Date(b.planDate).getTime()
+  ).
+  slice(0, 5);
 
   const getDateLabel = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -57,9 +56,9 @@ export function RecentTodos({ todoList }: RecentTodosProps) {
 
   const getPriorityIcon = (importance?: number, urgency?: number) => {
     if (importance === 1 && urgency === 1) {
-      return <IconExclamation style={{ color: '#f53f3f' }} />;
+      return <ExclamationOutlined style={{ color: '#f53f3f' }} />;
     }
-    return <IconClockCircle style={{ color: '#86909c' }} />;
+    return <ClockCircleOutlined style={{ color: '#86909c' }} />;
   };
 
   return (
@@ -71,62 +70,67 @@ export function RecentTodos({ todoList }: RecentTodosProps) {
             <div className="w-5 h-5 bg-success rounded"></div>
           </div>
           <div>
-            <Title heading={5} className="!mb-0">
+            <h5 className="text-title-1 font-medium !mb-0">
               最近完成
-            </Title>
+            </h5>
             <div className="text-sm text-text-3">最近7天完成的任务</div>
           </div>
         </div>
 
-        <List
-          size="small"
-          dataSource={recentCompleted}
-          render={(todo) => (
-            <List.Item key={todo.id} className="!px-0">
-              <List.Item.Meta
-                avatar={
+        {recentCompleted.length === 0 ?
+        <div className="text-center py-8">
+            <span className="text-text-3 text-text-3">
+              暂无最近完成的任务
+            </span>
+          </div> :
+
+        recentCompleted.map((todo, index) =>
+        <div
+          key={todo.id}
+          className="!px-0"
+          style={{
+            padding: '12px 0',
+            display: 'flex',
+            gap: 8,
+            borderTop:
+            index > 0 ?
+            '1px solid var(--color-border-2, #e5e6eb)' :
+            undefined
+          }}>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Flex gap={12} align="flex-start">
                   <Avatar size={24} style={{ backgroundColor: '#10b981' }}>
-                    <IconCheckCircle />
+                    <CheckCircleOutlined />
                   </Avatar>
-                }
-                title={
-                  <Text
-                    ellipsis
-                    style={{ maxWidth: 200 }}
-                    className="text-text-1"
-                  >
-                    {todo.name}
-                  </Text>
-                }
-                description={
-                  <Text
-                    type="secondary"
-                    style={{ fontSize: 12 }}
-                    className="text-text-3"
-                  >
-                    {format(new Date(todo.doneAt!), 'MM/dd HH:mm')} 完成
-                  </Text>
-                }
-              />
-              {todo.tags && todo.tags.length > 0 && (
-                <div className="flex gap-1">
-                  {todo.tags.slice(0, 2).map((tag) => (
-                    <Tag key={tag} size="small">
+                  <Flex vertical gap={4} style={{ minWidth: 0, flex: 1 }}>
+                    <span
+
+                  className="truncate text-text-1" style={{ maxWidth: 200 }}>
+
+                      {todo.name}
+                    </span>
+                    <span
+
+                  className="text-text-3 text-text-3" style={{ fontSize: 12 }}>
+
+                      {format(new Date(todo.doneAt!), 'MM/dd HH:mm')} 完成
+                    </span>
+                  </Flex>
+                </Flex>
+              </div>
+              {todo.tags && todo.tags.length > 0 &&
+          <div className="flex gap-1">
+                  {todo.tags.slice(0, 2).map((tag) =>
+            <Tag key={tag} size="small">
                       {tag}
                     </Tag>
-                  ))}
+            )}
                 </div>
-              )}
-            </List.Item>
-          )}
-          noDataElement={
-            <div className="text-center py-8">
-              <Text type="secondary" className="text-text-3">
-                暂无最近完成的任务
-              </Text>
-            </div>
           }
-        />
+            </div>
+        )
+        }
       </div>
 
       {/* 即将到期 */}
@@ -136,57 +140,63 @@ export function RecentTodos({ todoList }: RecentTodosProps) {
             <div className="w-5 h-5 bg-warning rounded"></div>
           </div>
           <div>
-            <Title heading={5} className="!mb-0">
+            <h5 className="text-title-1 font-medium !mb-0">
               即将到期
-            </Title>
+            </h5>
             <div className="text-sm text-text-3">按计划日期排序的待办任务</div>
           </div>
         </div>
 
-        <List
-          size="small"
-          dataSource={upcomingTasks}
-          render={(todo) => (
-            <List.Item key={todo.id} className="!px-0">
-              <List.Item.Meta
-                avatar={
+        {upcomingTasks.length === 0 ?
+        <div className="text-center py-8">
+            <span className="text-text-3 text-text-3">
+              暂无待处理任务
+            </span>
+          </div> :
+
+        upcomingTasks.map((todo, index) =>
+        <div
+          key={todo.id}
+          className="!px-0"
+          style={{
+            padding: '12px 0',
+            display: 'flex',
+            gap: 8,
+            borderTop:
+            index > 0 ?
+            '1px solid var(--color-border-2, #e5e6eb)' :
+            undefined
+          }}>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Flex gap={12} align="flex-start">
                   <Avatar size={24} style={{ backgroundColor: '#3b82f6' }}>
                     {getPriorityIcon(todo.importance, todo.urgency)}
                   </Avatar>
-                }
-                title={
-                  <Text
-                    ellipsis
-                    style={{ maxWidth: 200 }}
-                    className="text-text-1"
-                  >
-                    {todo.name}
-                  </Text>
-                }
-                description={
-                  <div className="flex gap-2">
-                    <Tag color={getDateColor(todo.planDate)} size="small">
-                      {getDateLabel(todo.planDate)}
-                    </Tag>
-                    {todo.importance === 1 && todo.urgency === 1 && (
-                      <Tag color="red" size="small">
-                        高优先级
+                  <Flex vertical gap={4} style={{ minWidth: 0, flex: 1 }}>
+                    <span
+
+                  className="truncate text-text-1" style={{ maxWidth: 200 }}>
+
+                      {todo.name}
+                    </span>
+                    <div className="flex gap-2">
+                      <Tag color={getDateColor(todo.planDate)} size="small">
+                        {getDateLabel(todo.planDate)}
                       </Tag>
-                    )}
-                  </div>
-                }
-              />
-            </List.Item>
-          )}
-          noDataElement={
-            <div className="text-center py-8">
-              <Text type="secondary" className="text-text-3">
-                暂无待处理任务
-              </Text>
+                      {todo.importance === 1 && todo.urgency === 1 &&
+                  <Tag color="red" size="small">
+                          高优先级
+                        </Tag>
+                  }
+                    </div>
+                  </Flex>
+                </Flex>
+              </div>
             </div>
-          }
-        />
+        )
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }

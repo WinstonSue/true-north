@@ -1,3 +1,5 @@
+import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, ReloadOutlined } from '@sue/design-web-react';
 import Countdown from './Countdown';
 import Flip from './Flip';
 import { getTimeArr } from '../utils';
@@ -5,12 +7,6 @@ import { PlayController, Setting } from '../actions';
 import { useTimerContext } from '../context';
 import styles from '../style.module.less';
 import clsx from 'clsx';
-import {
-  IconRefresh,
-  IconMinusCircle,
-  IconFullscreen,
-  IconFullscreenExit,
-} from '@true-north/components-ui';
 
 export { Countdown, Flip, getTimeArr };
 
@@ -44,7 +40,7 @@ const NormalTimer: React.FC = () => {
           state={clockState}
           setState={setClockState}
         />
-        <IconRefresh
+        <ReloadOutlined
           className={clsx(styles['action'], 'action-reload')}
           onClick={handleRefresh}
           style={{ color: '#fff', fontSize: '30px' }}
@@ -54,19 +50,19 @@ const NormalTimer: React.FC = () => {
           onConfirm={onConfirmSetting}
         />
         {isFullscreen ? (
-          <IconFullscreenExit
+          <FullscreenExitOutlined
             className={clsx(styles['action'], 'action-fullscreen')}
             onClick={toggleFullscreen}
             style={{ color: '#fff', fontSize: '30px' }}
           />
         ) : (
-          <IconFullscreen
+          <FullscreenOutlined
             className={clsx(styles['action'], 'action-fullscreen')}
             onClick={toggleFullscreen}
             style={{ color: '#fff', fontSize: '30px' }}
           />
         )}
-        <IconMinusCircle
+        <MinusCircleOutlined
           className={clsx(styles['action'], 'action-mini')}
           onClick={toggleMiniMode}
           style={{ color: '#fff', fontSize: '30px' }}

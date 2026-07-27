@@ -1,11 +1,7 @@
+import { CameraOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import React from 'react';
-import { Avatar, Space, Skeleton } from '@sue/design-web-react';
-import {
-  IconCamera,
-  IconLocation,
-  IconUser,
-  IconHome,
-} from '@true-north/components-ui';
+import { Avatar, Space, Skeleton, HomeOutlined, UserOutlined } from '@sue/design-web-react';
+
 import styles from './style/index.module.less';
 
 interface HeaderProps {
@@ -50,7 +46,7 @@ function UserInfoHeader(props: HeaderProps) {
         {loading ? (
           loadingImgNode
         ) : (
-          <Avatar size={64} triggerIcon={<IconCamera />}>
+          <Avatar size={64} triggerIcon={<CameraOutlined />}>
             <img src={userInfo.avatar} />
           </Avatar>
         )}
@@ -60,19 +56,19 @@ function UserInfoHeader(props: HeaderProps) {
         <div className={styles['user-msg']}>
           <Space size={18}>
             <div>
-              <IconUser />
+              <UserOutlined />
               <span className={styles['user-msg-text']}>
                 {loading ? loadingNode : userInfo.jobName}
               </span>
             </div>
             <div>
-              <IconHome />
+              <HomeOutlined />
               <span className={styles['user-msg-text']}>
                 {loading ? loadingNode : userInfo.organizationName}
               </span>
             </div>
             <div>
-              <IconLocation />
+              <EnvironmentOutlined />
               <span className={styles['user-msg-text']}>
                 {loading ? loadingNode : userInfo.locationName}
               </span>

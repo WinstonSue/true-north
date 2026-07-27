@@ -73,7 +73,7 @@ export default function TodoWeek() {
     >
       <Flex
         container="fixed"
-        className="px-5 py-2 flex justify-between items-center border-b"
+        className="w-full px-5 py-2 flex justify-between items-center border-b"
       >
         <div className="text-text-1 text-title-2 font-medium py-1">
           本周待办
@@ -82,7 +82,7 @@ export default function TodoWeek() {
 
       <Flex container="fill" className="px-5 w-full h-full flex">
         <Flex vertical container="fill" className="py-2">
-          <Flex container="fixed">
+          <Flex container="fixed" className="w-full">
             <TodoCreatorMini
               afterSubmit={async () => {
                 refreshData();

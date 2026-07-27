@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Select, Input, Button, Spin } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
-import { IconDownload, IconFaceSmileFill } from '@true-north/components-ui';
+import { Space, Select, Input, Button, Spin, DownloadOutlined, SmileFilled } from '@sue/design-web-react';
+
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
@@ -15,14 +14,14 @@ export default function ChatPanel() {
 
   function fetchMessageList() {
     setLoading(true);
-    axios
-      .get('/api/chatList')
-      .then((res) => {
-        setMessageList(res.data || []);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    axios.
+    get('/api/chatList').
+    then((res) => {
+      setMessageList(res.data || []);
+    }).
+    finally(() => {
+      setLoading(false);
+    });
   }
 
   useEffect(() => {
@@ -32,12 +31,11 @@ export default function ChatPanel() {
   return (
     <div className={styles['chat-panel']}>
       <div className={styles['chat-panel-header']}>
-        <Typography.Title
-          style={{ marginTop: 0, marginBottom: 16 }}
-          heading={6}
-        >
+        <h6 className="text-title-1 font-medium"
+        style={{ marginTop: 0, marginBottom: 16 }}>
+
           {t['monitor.title.chatPanel']}
-        </Typography.Title>
+        </h6>
         <Space size={8}>
           <Select style={{ width: 80 }} defaultValue="all">
             <Select.Option value="all">
@@ -45,10 +43,10 @@ export default function ChatPanel() {
             </Select.Option>
           </Select>
           <Input.Search
-            placeholder={t['monitor.chat.placeholder.searchCategory']}
-          />
+            placeholder={t['monitor.chat.placeholder.searchCategory']} />
+
           <Button type="text" iconOnly>
-            <IconDownload />
+            <DownloadOutlined />
           </Button>
         </Space>
       </div>
@@ -59,10 +57,10 @@ export default function ChatPanel() {
       </div>
       <div className={styles['chat-panel-footer']}>
         <Space size={8}>
-          <Input suffix={<IconFaceSmileFill />} />
+          <Input suffix={<SmileFilled />} />
           <Button type="primary">{t['monitor.chat.update']}</Button>
         </Space>
       </div>
-    </div>
-  );
+    </div>);
+
 }

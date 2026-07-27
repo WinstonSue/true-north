@@ -1,6 +1,7 @@
+import { UnorderedListOutlined } from '@ant-design/icons';
 import React, { useState } from 'react';
-import { Card, Button, Space, message, Table, Tag, Alert } from '@sue/design-web-react';
-import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@true-north/components-ui';
+import { Card, Button, Space, message, Table, Tag, Alert, CheckCircleOutlined, ExclamationCircleOutlined, ReloadOutlined, SyncOutlined } from '@sue/design-web-react';
+
 import MethodDetailsModal from './MethodDetailsModal';
 import { ControllerSyncStatus } from '../../../types';
 
@@ -102,11 +103,11 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
           <Space direction="vertical" size="small">
             <div>
               {record.needsSync ? (
-                <Tag color="orange" icon={<IconExclamationCircle />}>
+                <Tag color="orange" icon={<ExclamationCircleOutlined />}>
                   需要同步
                 </Tag>
               ) : (
-                <Tag color="green" icon={<IconCheckCircle />}>
+                <Tag color="green" icon={<CheckCircleOutlined />}>
                   已同步
                 </Tag>
               )}
@@ -138,14 +139,14 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
         if (!record) return null;
         return (
           <Space>
-            <Button size="small" icon={<IconList />} onClick={() => showWebServiceMethodDetails(record)}>
+            <Button size="small" icon={<UnorderedListOutlined />} onClick={() => showWebServiceMethodDetails(record)}>
               查看详情
             </Button>
             {record.needsSync && (
               <Button
                 size="small"
                 type="primary"
-                icon={<IconSync />}
+                icon={<SyncOutlined />}
                 onClick={() => syncWebServiceController(record.className)}
               >
                 同步
@@ -167,7 +168,7 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
             <span>Web Service 方法级别差异检查</span>
             <Button
               size="small"
-              icon={<IconRefresh />}
+              icon={<ReloadOutlined />}
               loading={webServiceMethodDetailsLoading}
               onClick={checkWebServiceMethodDetails}
             >

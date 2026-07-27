@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@ant-design/colors": "^8.0.1",
+    "@ant-design/icons": "^6.3.2",
     "@loadable/component": "^5.13.2",
     "@nanostores/react": "^0.8.4",
     "@sue/design-web-react": "file:../../vendor/sue-design-web-react",

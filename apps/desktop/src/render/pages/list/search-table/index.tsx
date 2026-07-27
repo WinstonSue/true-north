@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table, Card, PaginationProps, Button, Space } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
+import { Table, Card, PaginationProps, Button, Space, DownloadOutlined, PlusOutlined } from '@sue/design-web-react';
+
 import PermissionWrapper from '@/components/PermissionWrapper';
-import { IconDownload, IconPlus } from '@true-north/components-ui';
+
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import SearchForm from './form';
@@ -11,7 +11,6 @@ import styles from './style/index.module.less';
 import './mock';
 import { getColumns } from './constants';
 
-const { Title } = Typography;
 export const ContentType = ['图文', '横版短视频', '竖版短视频'];
 export const FilterType = ['规则筛选', '人工'];
 export const Status = ['已上线', '未上线'];
@@ -31,7 +30,7 @@ function SearchTable() {
     showTotal: true,
     pageSize: 10,
     current: 1,
-    pageSizeChangeResetCurrent: true,
+    pageSizeChangeResetCurrent: true
   });
   const [loading, setLoading] = useState(true);
   const [formParams, setFormParams] = useState({});
@@ -43,31 +42,31 @@ function SearchTable() {
   function fetchData() {
     const { current, pageSize } = pagination;
     setLoading(true);
-    axios
-      .get('/api/list', {
-        params: {
-          page: current,
-          pageSize,
-          ...formParams,
-        },
-      })
-      .then((res) => {
-        setData(res.data.list);
-        setPatination({
-          ...pagination,
-          current,
-          pageSize,
-          total: res.data.total,
-        });
-        setLoading(false);
+    axios.
+    get('/api/list', {
+      params: {
+        page: current,
+        pageSize,
+        ...formParams
+      }
+    }).
+    then((res) => {
+      setData(res.data.list);
+      setPatination({
+        ...pagination,
+        current,
+        pageSize,
+        total: res.data.total
       });
+      setLoading(false);
+    });
   }
 
   function onChangeTable({ current, pageSize }) {
     setPatination({
       ...pagination,
       current,
-      pageSize,
+      pageSize
     });
   }
 
@@ -78,22 +77,22 @@ function SearchTable() {
 
   return (
     <Card>
-      <Title heading={6}>{t['menu.list.searchTable']}</Title>
+      <h6 className="text-title-1 font-medium">{t['menu.list.searchTable']}</h6>
       <SearchForm onSearch={handleSearch} />
       <PermissionWrapper
         requiredPermissions={[
-          { resource: 'menu.list.searchTable', actions: ['write'] },
-        ]}
-      >
+        { resource: 'menu.list.searchTable', actions: ['write'] }]
+        }>
+
         <div className={styles['button-group']}>
           <Space>
-            <Button type="primary" icon={<IconPlus />}>
+            <Button type="primary" icon={<PlusOutlined />}>
               {t['searchTable.operations.add']}
             </Button>
             <Button>{t['searchTable.operations.upload']}</Button>
           </Space>
           <Space>
-            <Button icon={<IconDownload />}>
+            <Button icon={<DownloadOutlined />}>
               {t['searchTable.operation.download']}
             </Button>
           </Space>
@@ -105,10 +104,10 @@ function SearchTable() {
         onChange={onChangeTable}
         pagination={pagination}
         columns={columns}
-        data={data}
-      />
-    </Card>
-  );
+        data={data} />
+
+    </Card>);
+
 }
 
 export default SearchTable;

@@ -67,7 +67,7 @@ export default function TodoToday() {
   return (
     <Flex container="fill" className="flex">
       <Flex vertical container="fill" className="py-2">
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <TodoCreatorMini
             afterSubmit={async () => {
               refreshData();

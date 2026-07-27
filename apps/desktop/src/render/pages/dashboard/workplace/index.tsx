@@ -1,6 +1,6 @@
 import React from 'react';
-import { Space } from '@sue/design-web-react';
-import { Grid } from '@true-north/components-ui';
+import { Space, Row, Col } from '@sue/design-web-react';
+
 import Overview from './overview';
 import PopularContents from './popular-contents';
 import ContentPercentage from './content-percentage';
@@ -10,8 +10,6 @@ import Carousel from './carousel';
 import Docs from './docs';
 import styles from './style/index.module.less';
 import './mock';
-
-const { Row, Col } = Grid;
 
 const gutter = 16;
 

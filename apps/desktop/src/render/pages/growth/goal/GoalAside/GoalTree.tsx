@@ -11,15 +11,13 @@ import {
   Divider,
   Flex,
   EditableText,
+  SearchOutlined,
+  CopyOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
 } from '@sue/design-web-react';
-import {
-  IconSearch,
-  IconPlus,
-  IconEdit,
-  IconDelete,
-  IconCopy,
-  ContextMenu,
-} from '@true-north/components-ui';
+import { ContextMenu } from '@true-north/components-ui';
 import { GoalVo } from '@true-north/vo';
 import { GoalStatus } from '@true-north/enum';
 import { useGoalContext } from '../context';
@@ -91,25 +89,25 @@ const GoalTreePanel: React.FC = ({}) => {
             {
               key: 'edit',
               label: '编辑',
-              icon: <IconEdit />,
+              icon: <EditOutlined />,
               onClick: () => handleEdit(goal),
             },
             {
               key: 'addChild',
               label: '添加子目标',
-              icon: <IconPlus />,
+              icon: <PlusOutlined />,
               onClick: () => handleAddChild(goal),
             },
             {
               key: 'addSibling',
               label: '添加同级目标',
-              icon: <IconPlus />,
+              icon: <PlusOutlined />,
               onClick: () => handleAddSibling(goal),
             },
             {
               key: 'copy',
               label: '复制',
-              icon: <IconCopy />,
+              icon: <CopyOutlined />,
               onClick: () => handleCopy(goal),
             },
             {
@@ -120,7 +118,7 @@ const GoalTreePanel: React.FC = ({}) => {
             {
               key: 'delete',
               label: '删除',
-              icon: <IconDelete />,
+              icon: <DeleteOutlined />,
               onClick: () => handleDelete(goal),
             },
           ]}
@@ -129,7 +127,9 @@ const GoalTreePanel: React.FC = ({}) => {
             container="full"
             className={clsx(styles['tree-node'], 'gap-2')}
           >
-            <Flex container="fixed">{getStatusTag(goal.status)}</Flex>
+            <Flex container="fixed" className="h-full">
+              {getStatusTag(goal.status)}
+            </Flex>
             <Flex container="fill">
               <EditableText
                 ellipsis={{ tooltip: true }}

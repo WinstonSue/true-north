@@ -1,13 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { groupBy } from 'lodash-es';
-import { Popover, Badge, Tabs, Avatar, Spin, Button } from '@sue/design-web-react';
-import {
-  IconMessage,
-  IconCustomerService,
-  IconFile,
-  IconDesktop,
-} from '@true-north/components-ui';
+import { Popover, Badge, Tabs, Avatar, Spin, Button, CustomerServiceOutlined, DesktopOutlined, FileOutlined, MessageOutlined } from '@sue/design-web-react';
+
 import useLocale from '../../utils/useLocale';
 import MessageList, { MessageListType } from './list';
 import styles from './style/index.module.less';
@@ -59,20 +54,20 @@ function DropContent() {
     {
       key: 'message',
       title: t['message.tab.title.message'],
-      titleIcon: <IconMessage />,
+      titleIcon: <MessageOutlined />,
     },
     {
       key: 'notice',
       title: t['message.tab.title.notice'],
-      titleIcon: <IconCustomerService />,
+      titleIcon: <CustomerServiceOutlined />,
     },
     {
       key: 'todo',
       title: t['message.tab.title.todo'],
-      titleIcon: <IconFile />,
+      titleIcon: <FileOutlined />,
       avatar: (
         <Avatar style={{ backgroundColor: '#0FC6C2' }}>
-          <IconDesktop />
+          <DesktopOutlined />
         </Avatar>
       ),
     },

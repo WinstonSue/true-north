@@ -1,16 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Space, Tag, Progress, Descriptions, Tabs, Spin, message, Modal, Badge } from '@sue/design-web-react';
-import { Typography, Grid } from '@true-north/components-ui';
 import {
-  IconLeft,
-  IconEdit,
-  IconDelete,
-  IconCheck,
-  IconPause,
-  IconPlayArrow,
-  IconClose,
-} from '@true-north/components-ui';
+  Card,
+  Button,
+  Space,
+  Tag,
+  Progress,
+  Descriptions,
+  Tabs,
+  Spin,
+  message,
+  Modal,
+  Badge,
+  Row,
+  Col,
+  CheckOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  LeftOutlined,
+} from '@sue/design-web-react';
+import { CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
 import { HabitService } from '@true-north/web-service';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
@@ -18,11 +28,8 @@ import { useHabitContext } from './context';
 import { HabitStatus } from '@true-north/enum';
 import { DIFFICULTY_MAP } from '../constants';
 
-const { Title, Text, Paragraph } = Typography;
-const { Row, Col } = Grid;
-
 export const HabitDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{id: string;}>();
   const navigate = useNavigate();
   const { refreshHabits } = useHabitContext();
 
@@ -80,7 +87,7 @@ export const HabitDetailPage: React.FC = () => {
         setActionLoading(false);
       }
     },
-    [habit, fetchHabitDetail, refreshHabits],
+    [habit, fetchHabitDetail, refreshHabits]
   );
 
   // 处理删除习惯
@@ -100,40 +107,40 @@ export const HabitDetailPage: React.FC = () => {
           console.error('删除习惯失败:', error);
           message.error('删除习惯失败');
         }
-      },
+      }
     });
   }, [habit, navigate, refreshHabits]);
 
   // 获取状态配置
-  const statusConfig = habit
-    ? HABIT_STATUS_OPTIONS.find((option) => option.value === habit.status)
-    : null;
+  const statusConfig = habit ?
+  HABIT_STATUS_OPTIONS.find((option) => option.value === habit.status) :
+  null;
   const difficultyConfig = habit ? DIFFICULTY_MAP.get(habit.difficulty) : null;
 
   // 计算完成率
   const completionRate =
-    habit?.completedCount && habit?.currentStreak
-      ? Math.round(
-          (habit.completedCount /
-            (habit.currentStreak + habit.completedCount)) *
-            100,
-        )
-      : 0;
+  habit?.completedCount && habit?.currentStreak ?
+  Math.round(
+    habit.completedCount / (
+    habit.currentStreak + habit.completedCount) *
+    100
+  ) :
+  0;
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Spin size={40} />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!habit) {
     return (
       <div className="text-center py-8">
-        <Text>习惯不存在或已被删除</Text>
-      </div>
-    );
+        <span>习惯不存在或已被删除</span>
+      </div>);
+
   }
 
   return (
@@ -143,78 +150,78 @@ export const HabitDetailPage: React.FC = () => {
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
             <Button
-              icon={<IconLeft />}
-              onClick={() => navigate('/growth/habits')}
-            >
+              icon={<LeftOutlined />}
+              onClick={() => navigate('/growth/habits')}>
+
               返回
             </Button>
             <div>
               <div className="flex items-center space-x-2 mb-2">
-                <Title heading={4} className="mb-0">
+                <h4 className="text-title-1 font-medium mb-0">
                   {habit.name}
-                </Title>
+                </h4>
                 <Badge
                   status={statusConfig?.color as any}
-                  text={statusConfig?.label}
-                />
+                  text={statusConfig?.label} />
+
               </div>
-              {habit.description && (
-                <Text type="secondary">{habit.description}</Text>
-              )}
+              {habit.description &&
+              <span className="text-text-3">{habit.description}</span>
+              }
             </div>
           </div>
 
           <Space>
             {/* 状态操作按钮 */}
-            {habit.status === HabitStatus.ACTIVE && (
-              <>
+            {habit.status === HabitStatus.ACTIVE &&
+            <>
                 <Button
-                  type="primary"
-                  icon={<IconCheck />}
-                  loading={actionLoading}
-                  onClick={() => handleHabitAction('complete')}
-                >
+                type="primary"
+                icon={<CheckOutlined />}
+                loading={actionLoading}
+                onClick={() => handleHabitAction('complete')}>
+
                   完成
                 </Button>
                 <Button
-                  icon={<IconPause />}
-                  loading={actionLoading}
-                  onClick={() => handleHabitAction('pause')}
-                >
+                icon={<PauseOutlined />}
+                loading={actionLoading}
+                onClick={() => handleHabitAction('pause')}>
+
                   暂停
                 </Button>
               </>
-            )}
+            }
 
-            {habit.status === HabitStatus.PAUSED && (
-              <Button
-                type="primary"
-                icon={<IconPlayArrow />}
-                loading={actionLoading}
-                onClick={() => handleHabitAction('resume')}
-              >
+            {habit.status === HabitStatus.PAUSED &&
+            <Button
+              type="primary"
+              icon={<CaretRightOutlined />}
+              loading={actionLoading}
+              onClick={() => handleHabitAction('resume')}>
+
                 恢复
               </Button>
-            )}
+            }
 
             {(habit.status === HabitStatus.ACTIVE ||
-              habit.status === HabitStatus.PAUSED) && (
-              <Button
-                icon={<IconClose />}
-                loading={actionLoading}
-                onClick={() => handleHabitAction('abandon')}
-              >
+            habit.status === HabitStatus.PAUSED) &&
+            <Button
+              icon={<CloseOutlined />}
+              loading={actionLoading}
+              onClick={() => handleHabitAction('abandon')}>
+
                 放弃
               </Button>
-            )}
+            }
 
-            <Button icon={<IconEdit />}>编辑</Button>
+            <Button icon={<EditOutlined />}>编辑</Button>
             <Button
               type="primary"
               status="danger"
-              icon={<IconDelete />}
-              onClick={handleDelete}
-            >
+              icon={<DeleteOutlined />}
+              onClick={handleDelete}>
+
               删除
             </Button>
           </Space>
@@ -228,142 +235,140 @@ export const HabitDetailPage: React.FC = () => {
           <Tabs
             defaultActiveKey="info"
             items={[
-              {
-                key: 'info',
-                label: '基本信息',
-                children: (
-                  <Card>
+            {
+              key: 'info',
+              label: '基本信息',
+              children:
+              <Card>
                     <Descriptions
-                      column={2}
-                      items={[
-                        {
-                          key: 'name',
-                          label: '习惯名称',
-                          children: habit.name,
-                        },
-                        {
-                          key: 'status',
-                          label: '状态',
-                          children: (
-                            <Badge
-                              status={statusConfig?.color as any}
-                              text={statusConfig?.label}
-                            />
-                          ),
-                        },
-                        {
-                          key: 'importance',
-                          label: '重要程度',
-                          children: habit.importance
-                            ? `${habit.importance}/5`
-                            : '-',
-                        },
-                        {
-                          key: 'difficulty',
-                          label: '难度等级',
-                          children: difficultyConfig ? (
-                            <Tag color={difficultyConfig.color}>
+                  column={2}
+                  items={[
+                  {
+                    key: 'name',
+                    label: '习惯名称',
+                    children: habit.name
+                  },
+                  {
+                    key: 'status',
+                    label: '状态',
+                    children:
+                    <Badge
+                      status={statusConfig?.color as any}
+                      text={statusConfig?.label} />
+
+                  },
+                  {
+                    key: 'importance',
+                    label: '重要程度',
+                    children: habit.importance ?
+                    `${habit.importance}/5` :
+                    '-'
+                  },
+                  {
+                    key: 'difficulty',
+                    label: '难度等级',
+                    children: difficultyConfig ?
+                    <Tag color={difficultyConfig.color}>
                               {difficultyConfig.label}
-                            </Tag>
-                          ) : (
-                            '-'
-                          ),
-                        },
-                        {
-                          key: 'startAt',
-                          label: '开始时间',
-                          children: habit.startAt
-                            ? new Date(habit.startAt).toLocaleDateString()
-                            : '-',
-                        },
-                        {
-                          key: 'endAt',
-                          label: '目标时间',
-                          children: habit.endAt
-                            ? new Date(habit.endAt).toLocaleDateString()
-                            : '长期习惯',
-                        },
-                        {
-                          key: 'createdAt',
-                          label: '创建时间',
-                          children: new Date(habit.createdAt).toLocaleString(),
-                        },
-                        {
-                          key: 'updatedAt',
-                          label: '更新时间',
-                          children: new Date(habit.updatedAt).toLocaleString(),
-                        },
-                      ]}
-                    />
+                            </Tag> :
 
-                    {habit.description && (
-                      <div className="mt-4">
-                        <Text className="font-medium">描述：</Text>
-                        <Paragraph className="mt-2">
+                    '-'
+
+                  },
+                  {
+                    key: 'startAt',
+                    label: '开始时间',
+                    children: habit.startAt ?
+                    new Date(habit.startAt).toLocaleDateString() :
+                    '-'
+                  },
+                  {
+                    key: 'endAt',
+                    label: '目标时间',
+                    children: habit.endAt ?
+                    new Date(habit.endAt).toLocaleDateString() :
+                    '长期习惯'
+                  },
+                  {
+                    key: 'createdAt',
+                    label: '创建时间',
+                    children: new Date(habit.createdAt).toLocaleString()
+                  },
+                  {
+                    key: 'updatedAt',
+                    label: '更新时间',
+                    children: new Date(habit.updatedAt).toLocaleString()
+                  }]
+                  } />
+
+                    {habit.description &&
+                <div className="mt-4">
+                        <span className="font-medium">描述：</span>
+                        <p className="mt-2">
                           {habit.description}
-                        </Paragraph>
+                        </p>
                       </div>
-                    )}
+                }
 
-                    {habit.tags && habit.tags.length > 0 && (
-                      <div className="mt-4">
-                        <Text className="font-medium">标签：</Text>
+                    {habit.tags && habit.tags.length > 0 &&
+                <div className="mt-4">
+                        <span className="font-medium">标签：</span>
                         <div className="mt-2">
-                          {habit.tags.map((tag, index) => (
-                            <Tag key={index} className="mr-2 mb-2">
+                          {habit.tags.map((tag, index) =>
+                    <Tag key={index} className="mr-2 mb-2">
                               {tag}
                             </Tag>
-                          ))}
+                    )}
                         </div>
                       </div>
-                    )}
+                }
                   </Card>
-                ),
-              },
-              {
-                key: 'goals',
-                label: '关联目标',
-                children: (
-                  <Card>
-                    {habit.goals && habit.goals.length > 0 ? (
-                      <div className="space-y-4">
-                        {habit.goals.map((goal) => (
-                          <Card key={goal.id} size="small" hoverable>
+
+            },
+            {
+              key: 'goals',
+              label: '关联目标',
+              children:
+              <Card>
+                    {habit.goals && habit.goals.length > 0 ?
+                <div className="space-y-4">
+                        {habit.goals.map((goal) =>
+                  <Card key={goal.id} size="small" hoverable>
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <Text className="font-medium">{goal.name}</Text>
-                                {goal.description && (
-                                  <Text type="secondary" className="block mt-1">
+                                <span className="font-medium">{goal.name}</span>
+                                {goal.description &&
+                        <span className="text-text-3 block mt-1">
                                     {goal.description}
-                                  </Text>
-                                )}
+                                  </span>
+                        }
                               </div>
                               <div className="ml-4 text-right">
-                                <Text className="text-sm text-gray-500">
+                                <span className="text-sm text-gray-500">
                                   进度
-                                </Text>
+                                </span>
                                 <div className="mt-1">
                                   <Progress
-                                    percent={(goal as any).progress || 0}
-                                    size="small"
-                                    style={{ width: 100 }}
-                                  />
+                            percent={(goal as any).progress || 0}
+                            size="small"
+                            style={{ width: 100 }} />
+
                                 </div>
                               </div>
                             </div>
                           </Card>
-                        ))}
+                  )}
+                      </div> :
+
+                <div className="text-center py-8 text-gray-500">
+                        <span>暂无关联目标</span>
                       </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <Text>暂无关联目标</Text>
-                      </div>
-                    )}
+                }
                   </Card>
-                ),
-              },
-            ]}
-          />
+
+            }]
+            } />
+
         </Col>
 
         {/* 右侧：统计信息 */}
@@ -372,8 +377,8 @@ export const HabitDetailPage: React.FC = () => {
             {/* 完成率 */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <Text>完成率</Text>
-                <Text className="font-medium">{completionRate}%</Text>
+                <span>完成率</span>
+                <span className="font-medium">{completionRate}%</span>
               </div>
               <Progress percent={completionRate} />
             </div>
@@ -408,38 +413,38 @@ export const HabitDetailPage: React.FC = () => {
 
             {/* 时间信息 */}
             <div className="space-y-2 text-sm">
-              {habit.startAt && (
-                <div className="flex justify-between">
-                  <Text type="secondary">开始时间:</Text>
-                  <Text>{new Date(habit.startAt).toLocaleDateString()}</Text>
+              {habit.startAt &&
+              <div className="flex justify-between">
+                  <span className="text-text-3">开始时间:</span>
+                  <span>{new Date(habit.startAt).toLocaleDateString()}</span>
                 </div>
-              )}
-              {habit.endAt && (
-                <div className="flex justify-between">
-                  <Text type="secondary">目标时间:</Text>
-                  <Text>{new Date(habit.endAt).toLocaleDateString()}</Text>
+              }
+              {habit.endAt &&
+              <div className="flex justify-between">
+                  <span className="text-text-3">目标时间:</span>
+                  <span>{new Date(habit.endAt).toLocaleDateString()}</span>
                 </div>
-              )}
-              {habit.doneAt && (
-                <div className="flex justify-between">
-                  <Text type="secondary">完成时间:</Text>
-                  <Text>{new Date(habit.doneAt).toLocaleDateString()}</Text>
+              }
+              {habit.doneAt &&
+              <div className="flex justify-between">
+                  <span className="text-text-3">完成时间:</span>
+                  <span>{new Date(habit.doneAt).toLocaleDateString()}</span>
                 </div>
-              )}
-              {habit.abandonedAt && (
-                <div className="flex justify-between">
-                  <Text type="secondary">放弃时间:</Text>
-                  <Text>
+              }
+              {habit.abandonedAt &&
+              <div className="flex justify-between">
+                  <span className="text-text-3">放弃时间:</span>
+                  <span>
                     {new Date(habit.abandonedAt).toLocaleDateString()}
-                  </Text>
+                  </span>
                 </div>
-              )}
+              }
             </div>
           </Card>
         </Col>
       </Row>
-    </div>
-  );
+    </div>);
+
 };
 
 export default HabitDetailPage;

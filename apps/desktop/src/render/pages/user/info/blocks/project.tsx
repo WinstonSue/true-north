@@ -1,8 +1,7 @@
 import React from 'react';
+import clsx from 'clsx';
 import styles from '../style/blocks.module.less';
 import { Card, Avatar, Skeleton } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
-const { Text, Title } = Typography;
 
 export interface ProjectProps {
   title?: string;
@@ -20,40 +19,40 @@ function ProjectCard(props: ProjectProps) {
   const { loading, contributors } = props;
   return (
     <Card className={styles['project-wrapper']} bordered={true} size="small">
-      {loading ? (
-        <Skeleton text={{ rows: 1 }} animation />
-      ) : (
-        <Title heading={6}>{props.title}</Title>
-      )}
+      {loading ?
+      <Skeleton text={{ rows: 1 }} animation /> :
 
-      {loading ? (
-        <Skeleton text={{ rows: 1 }} animation style={{ marginTop: '4px' }} />
-      ) : (
-        <Text type="secondary" ellipsis style={{ margin: '0' }}>
+      <h6 className="text-title-1 font-medium">{props.title}</h6>
+      }
+
+      {loading ?
+      <Skeleton text={{ rows: 1 }} animation style={{ marginTop: '4px' }} /> :
+
+      <span className="text-text-3 truncate" style={{ margin: '0' }}>
           {props.enTitle}
-        </Text>
-      )}
+        </span>
+      }
 
       <div className={styles.avatar}>
-        {loading ? (
-          <Skeleton text={{ rows: 1 }} animation />
-        ) : (
-          <>
+        {loading ?
+        <Skeleton text={{ rows: 1 }} animation /> :
+
+        <>
             <Avatar.Group size={24}>
-              {(contributors || []).map((item, index) => (
-                <Avatar key={index}>
+              {(contributors || []).map((item, index) =>
+            <Avatar key={index}>
                   <img src={item.avatar} />
                 </Avatar>
-              ))}
+            )}
             </Avatar.Group>
-            <Text type="secondary" className={styles.more}>
+            <span className={clsx("text-text-3", styles.more)}>
               等{(props.contributorsLength || 0).toLocaleString()}人
-            </Text>
+            </span>
           </>
-        )}
+        }
       </div>
-    </Card>
-  );
+    </Card>);
+
 }
 
 export default ProjectCard;

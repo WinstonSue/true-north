@@ -82,7 +82,7 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
 
 复用组件 (Reusable Components)
   ├── TabsPage
-  └── Flex（@sue/design-web-react，container=full|fixed|fill）
+  └── Flex（@sue/design-web-react，container=full|fixed|fill；fixed 列父加 w-full、行父加 h-full）
 ```
 
 ### 3.2 组件设计原则

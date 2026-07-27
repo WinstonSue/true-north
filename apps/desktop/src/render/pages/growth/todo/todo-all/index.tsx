@@ -14,11 +14,11 @@ function TodoAll() {
 
   return (
     <>
-      <Flex container="fixed" className="px-5 flex border-b">
+      <Flex container="fixed" className="w-full px-5 flex border-b">
         <TodoFilters />
       </Flex>
 
-      <Flex container="fixed" className="px-5 flex my-3">
+      <Flex container="fixed" className="w-full px-5 flex my-3">
         <CreateTodoPopover
           creatorProps={{
             showSubmitButton: true,

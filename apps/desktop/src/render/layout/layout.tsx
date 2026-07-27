@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
-import { Layout, Breadcrumb, Spin, Flex } from '@sue/design-web-react';
+import { Layout, Breadcrumb, Spin, Flex, MenuFoldOutlined, MenuUnfoldOutlined } from '@sue/design-web-react';
 import cs from 'clsx';
-import { IconMenuFold, IconMenuUnfold } from '@true-north/components-ui';
+
 import { useSelector } from 'react-redux';
 import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -50,7 +50,7 @@ function PageLayout() {
     <Flex vertical container="full">
       <Flex
         container="fixed"
-        className={cs(styles['layout-navbar'], {
+        className={cs('w-full', styles['layout-navbar'], {
           [styles['layout-navbar-hidden']]: !showNavbar,
         })}
       >
@@ -62,7 +62,7 @@ function PageLayout() {
         ) : (
           <>
             {showMenu && (
-              <Flex container="fixed">
+              <Flex container="fixed" className="h-full">
                 <Aside
                   theme="light"
                   className={styles['layout-sider']}
@@ -80,7 +80,7 @@ function PageLayout() {
                     className={styles['collapse-btn']}
                     onClick={toggleCollapse}
                   >
-                    {collapsed ? <IconMenuUnfold /> : <IconMenuFold />}
+                    {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                   </div>
                 </Aside>
               </Flex>
@@ -91,7 +91,10 @@ function PageLayout() {
               className={styles['layout-content']}
             >
               {!!breadcrumb.length && (
-                <Flex container="fixed" className={styles['layout-breadcrumb']}>
+                <Flex
+                  container="fixed"
+                  className={cs('w-full', styles['layout-breadcrumb'])}
+                >
                   <Breadcrumb>
                     {breadcrumb.map((node, index) => (
                       <Breadcrumb.Item key={index}>

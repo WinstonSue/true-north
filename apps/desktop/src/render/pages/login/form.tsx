@@ -1,6 +1,6 @@
-import { Form, Input, Checkbox, Button, Space } from '@sue/design-web-react';
+import { Form, Input, Checkbox, Button, Space, LockOutlined, UserOutlined } from '@sue/design-web-react';
 import { FormInstance } from '@sue/design-web-react';
-import { IconLock, IconUser, Link } from '@true-north/components-ui';
+
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import useStorage from '@/utils/useStorage';
@@ -12,7 +12,7 @@ export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [loginParams, setLoginParams, removeLoginParams] =
-    useStorage('loginParams');
+  useStorage('loginParams');
   const t = useLocale(locale);
   const [rememberPassword, setRememberPassword] = useState(!!loginParams);
   function afterLoginSuccess(params) {
@@ -30,19 +30,19 @@ export default function LoginForm() {
   function login(params) {
     setErrorMessage('');
     setLoading(true);
-    axios
-      .post('/api/user/login', params)
-      .then((res) => {
-        const { status, msg } = res.data;
-        if (status === 'ok') {
-          afterLoginSuccess(params);
-        } else {
-          setErrorMessage(msg || t['login.form.login.errMsg']);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    axios.
+    post('/api/user/login', params).
+    then((res) => {
+      const { status, msg } = res.data;
+      if (status === 'ok') {
+        afterLoginSuccess(params);
+      } else {
+        setErrorMessage(msg || t['login.form.login.errMsg']);
+      }
+    }).
+    finally(() => {
+      setLoading(false);
+    });
   }
   function onSubmitClick() {
     formRef.current.validate().then((values) => {
@@ -69,34 +69,34 @@ export default function LoginForm() {
         className={styles['login-form']}
         layout="vertical"
         ref={formRef}
-        initialValues={{ userName: 'admin', password: 'admin' }}
-      >
+        initialValues={{ userName: 'admin', password: 'admin' }}>
+
         <Form.Item
           field="userName"
-          rules={[{ required: true, message: t['login.form.userName.errMsg'] }]}
-        >
+          rules={[{ required: true, message: t['login.form.userName.errMsg'] }]}>
+
           <Input
-            prefix={<IconUser />}
+            prefix={<UserOutlined />}
             placeholder={t['login.form.userName.placeholder']}
-            onPressEnter={onSubmitClick}
-          />
+            onPressEnter={onSubmitClick} />
+
         </Form.Item>
         <Form.Item
           field="password"
-          rules={[{ required: true, message: t['login.form.password.errMsg'] }]}
-        >
+          rules={[{ required: true, message: t['login.form.password.errMsg'] }]}>
+
           <Input.Password
-            prefix={<IconLock />}
+            prefix={<LockOutlined />}
             placeholder={t['login.form.password.placeholder']}
-            onPressEnter={onSubmitClick}
-          />
+            onPressEnter={onSubmitClick} />
+
         </Form.Item>
         <Space size={16} direction="vertical">
           <div className={styles['login-form-password-actions']}>
             <Checkbox checked={rememberPassword} onChange={setRememberPassword}>
               {t['login.form.rememberPassword']}
             </Checkbox>
-            <Link>{t['login.form.forgetPassword']}</Link>
+            <a style={{ color: "var(--color-primary-6)" }}>{t['login.form.forgetPassword']}</a>
           </div>
           <Button type="primary" long onClick={onSubmitClick} loading={loading}>
             {t['login.form.login']}
@@ -104,12 +104,12 @@ export default function LoginForm() {
           <Button
             type="text"
             long
-            className={styles['login-form-register-btn']}
-          >
+            className={styles['login-form-register-btn']}>
+
             {t['login.form.register']}
           </Button>
         </Space>
       </Form>
-    </div>
-  );
+    </div>);
+
 }

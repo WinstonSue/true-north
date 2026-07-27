@@ -20,16 +20,16 @@ export default function Budgets() {
     >
       <Flex
         container="fixed"
-        className="px-5 py-2 flex justify-between items-center border-b"
+        className="w-full px-5 py-2 flex justify-between items-center border-b"
       >
         <div className="text-text-1 text-title-2 font-[500] py-1">预算</div>
       </Flex>
 
-      <Flex container="fixed" className="px-5 py-2">
+      <Flex container="fixed" className="w-full px-5 py-2">
         <BudgetFilters />
       </Flex>
 
-      <Flex container="fixed" className="px-5 py-2">
+      <Flex container="fixed" className="w-full px-5 py-2">
         <CreateButton onClick={openCreateModal}>添加预算</CreateButton>
       </Flex>
 

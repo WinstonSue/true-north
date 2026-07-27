@@ -1,8 +1,8 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { Card, Divider, Skeleton } from '@sue/design-web-react';
-import { Grid, Typography, Link } from '@true-north/components-ui';
+import { Card, Divider, Skeleton, Row, Col, CaretUpOutlined } from '@sue/design-web-react';
+
 import { useSelector } from 'react-redux';
-import { IconCaretUp } from '@true-north/components-ui';
+
 import OverviewAreaLine from '@/components/Chart/overview-area-line';
 import axios from 'axios';
 import locale from './locale';
@@ -12,7 +12,6 @@ import IconCalendar from './assets/calendar.svg';
 import IconComments from './assets/comments.svg';
 import IconContent from './assets/content.svg';
 import IconIncrease from './assets/increase.svg';
-const { Row, Col } = Grid;
 type StatisticItemType = {
   icon?: ReactNode;
   title?: ReactNode;
@@ -34,15 +33,15 @@ function StatisticItem(props: StatisticItemType) {
           </div>
         </Skeleton>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 type DataType = {
   allContents?: string;
   liveContents?: string;
   increaseComments?: string;
   growthRate?: string;
-  chartData?: { count?: number; date?: string }[];
+  chartData?: {count?: number;date?: string;}[];
   down?: boolean;
 };
 function Overview() {
@@ -52,24 +51,24 @@ function Overview() {
   const userInfo = useSelector((state: any) => state.userInfo || {});
   const fetchData = () => {
     setLoading(true);
-    axios
-      .get('/api/workplace/overview-content')
-      .then((res) => {
-        setData(res.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    axios.
+    get('/api/workplace/overview-content').
+    then((res) => {
+      setData(res.data);
+    }).
+    finally(() => {
+      setLoading(false);
+    });
   };
   useEffect(() => {
     fetchData();
   }, []);
   return (
     <Card>
-      <Typography.Title heading={5}>
+      <h5 className="text-title-1 font-medium">
         {t['workplace.welcomeBack']}
         {userInfo.name}
-      </Typography.Title>
+      </h5>
       <Divider />
       <Row>
         <Col flex={1}>
@@ -78,8 +77,8 @@ function Overview() {
             title={t['workplace.totalOnlyData']}
             count={data.allContents}
             loading={loading}
-            unit={t['workplace.pecs']}
-          />
+            unit={t['workplace.pecs']} />
+
         </Col>
         <Divider type="vertical" className={styles.divider} />
         <Col flex={1}>
@@ -88,8 +87,8 @@ function Overview() {
             title={t['workplace.contentInMarket']}
             count={data.liveContents}
             loading={loading}
-            unit={t['workplace.pecs']}
-          />
+            unit={t['workplace.pecs']} />
+
         </Col>
         <Divider type="vertical" className={styles.divider} />
         <Col flex={1}>
@@ -98,8 +97,8 @@ function Overview() {
             title={t['workplace.comments']}
             count={data.increaseComments}
             loading={loading}
-            unit={t['workplace.pecs']}
-          />
+            unit={t['workplace.pecs']} />
+
         </Col>
         <Divider type="vertical" className={styles.divider} />
         <Col flex={1}>
@@ -107,34 +106,34 @@ function Overview() {
             icon={<IconIncrease />}
             title={t['workplace.growth']}
             count={
-              <span>
+            <span>
                 {data.growthRate}{' '}
-                <IconCaretUp
-                  style={{ fontSize: 18, color: 'rgb(var(--green-6))' }}
-                />
+                <CaretUpOutlined
+                style={{ fontSize: 18, color: 'rgb(var(--green-6))' }} />
+
               </span>
             }
-            loading={loading}
-          />
+            loading={loading} />
+
         </Col>
       </Row>
       <Divider />
       <div>
         <div className={styles.ctw}>
-          <Typography.Paragraph
+          <p
             className={styles['chart-title']}
-            style={{ marginBottom: 0 }}
-          >
+            style={{ marginBottom: 0 }}>
+
             {t['workplace.contentData']}
             <span className={styles['chart-sub-title']}>
               ({t['workplace.1year']})
             </span>
-          </Typography.Paragraph>
-          <Link>{t['workplace.seeMore']}</Link>
+          </p>
+          <a style={{ color: "var(--color-primary-6)" }}>{t['workplace.seeMore']}</a>
         </div>
         <OverviewAreaLine data={data.chartData} loading={loading} />
       </div>
-    </Card>
-  );
+    </Card>);
+
 }
 export default Overview;

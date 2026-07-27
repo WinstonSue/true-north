@@ -21,7 +21,10 @@ export default function TabsPage(props: {
       container="full"
       className="bg-bg-2 rounded-lg w-full h-full"
     >
-      <Flex container="fixed" className="px-4 flex items-center border-b gap-4">
+      <Flex
+        container="fixed"
+        className="w-full px-4 flex items-center border-b gap-4"
+      >
         {props.tabs.map((tab) => (
           <div
             key={tab.path}

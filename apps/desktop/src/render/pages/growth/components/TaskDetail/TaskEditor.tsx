@@ -21,7 +21,7 @@ export default function TaskEditor(props: TaskEditorProps) {
       afterSubmit={props.afterSubmit}
     >
       <Flex vertical container="full">
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <TaskForm />
         </Flex>
         <Flex vertical container="fill" className="overflow-y-auto">
@@ -32,7 +32,7 @@ export default function TaskEditor(props: TaskEditorProps) {
             <TodoList />
           </div>
         </Flex>
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <Footer onClose={props.onClose} />
         </Flex>
       </Flex>

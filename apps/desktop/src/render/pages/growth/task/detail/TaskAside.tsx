@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Tree, Input, Button, Empty } from '@sue/design-web-react';
-import { IconSearch, IconPlus } from '@true-north/components-ui';
+import { Tree, Input, Button, Empty, PlusOutlined, SearchOutlined } from '@sue/design-web-react';
+
 import { useTaskDetailContext } from './context';
 import { TaskVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
@@ -139,14 +139,14 @@ const TaskAside: React.FC<TaskAsideProps> = ({ currentTaskId }) => {
         <div className="flex flex-col gap-2">
           <Input
             placeholder="搜索任务..."
-            prefix={<IconSearch />}
+            prefix={<SearchOutlined />}
             value={searchKeyword}
             onChange={setSearchKeyword}
             allowClear
           />
           <Button
             type="primary"
-            icon={<IconPlus />}
+            icon={<PlusOutlined />}
             size="small"
             className="w-full"
           >

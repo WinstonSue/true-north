@@ -1,23 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Tabs,
-  Tag,
-  Dropdown,
-  Menu,
-  Button,
-  Modal,
-  message,
-  Flex,
-} from '@sue/design-web-react';
-import {
-  IconMore,
-  IconEdit,
-  IconDelete,
-  IconClose,
-  IconCheck,
-} from '@true-north/components-ui';
+import { Tabs, Tag, Dropdown, Menu, Button, Modal, message, Flex, CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, EllipsisOutlined } from '@sue/design-web-react';
+
 import { TaskVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
 import { TaskService } from '@true-north/web-service';
@@ -127,13 +112,13 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
   const renderActionMenu = () => (
     <Menu>
       <Menu.Item key="edit">
-        <IconEdit /> 编辑
+        <EditOutlined /> 编辑
       </Menu.Item>
       <Menu.Item key="abandon" onClick={handleAbandon}>
-        <IconClose /> 放弃
+        <CloseOutlined /> 放弃
       </Menu.Item>
       <Menu.Item key="delete" onClick={handleDelete} className="text-red-500">
-        <IconDelete /> 删除
+        <DeleteOutlined /> 删除
       </Menu.Item>
     </Menu>
   );
@@ -144,7 +129,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
       case TaskStatus.TODO:
       case TaskStatus.DOING:
         return (
-          <Button type="primary" icon={<IconCheck />} onClick={handleComplete}>
+          <Button type="primary" icon={<CheckOutlined />} onClick={handleComplete}>
             标记完成
           </Button>
         );
@@ -166,7 +151,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
       <Flex
         container="fixed"
         className={clsx(
-          'px-4 !h-14',
+          'w-full px-4 !h-14',
           'border-b border-border-2',
           'justify-between',
         )}
@@ -179,7 +164,10 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
         </Flex>
 
         {/* 右侧：状态 Tag + 操作区 */}
-        <Flex container="fixed" className={clsx('flex items-center gap-2')}>
+        <Flex
+          container="fixed"
+          className={clsx('h-full', 'flex items-center gap-2')}
+        >
           {/* 状态 Tag（只读） */}
           <Tag color={STATUS_CONFIG[task.status]?.color}>
             {STATUS_CONFIG[task.status]?.label}
@@ -190,7 +178,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
             dropdownRender={() => renderActionMenu()}
             placement="bottomRight"
           >
-            <Button type="text" icon={<IconMore />} />
+            <Button type="text" icon={<EllipsisOutlined />} />
           </Dropdown>
 
           {/* 主要按钮 */}

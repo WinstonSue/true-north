@@ -20,14 +20,14 @@ export default function Transactions() {
     >
       <Flex
         container="fixed"
-        className="px-5 py-2 flex justify-between items-center border-b"
+        className="w-full px-5 py-2 flex justify-between items-center border-b"
       >
         <div className="text-text-1 text-title-2 font-[500] py-1">账单</div>
       </Flex>
-      <Flex container="fixed" className="px-5 my-3">
+      <Flex container="fixed" className="w-full px-5 my-3">
         <TransactionFilters />
       </Flex>
-      <Flex container="fixed" className="px-5 my-3">
+      <Flex container="fixed" className="w-full px-5 my-3">
         <CreateButton onClick={() => openCreateModal()}>记账</CreateButton>
       </Flex>
       <Flex container="fill" className="px-5 my-3">

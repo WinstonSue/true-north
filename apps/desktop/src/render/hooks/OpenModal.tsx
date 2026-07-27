@@ -1,7 +1,6 @@
-import { Modal } from '@sue/design-web-react';
-import type { ConfirmProps } from '@true-north/components-ui';
+import { Modal, type ModalFuncProps } from '@sue/design-web-react';
 
-export function openModal(modalOption: ConfirmProps = {}) {
+export function openModal(modalOption: ModalFuncProps = {}) {
   return Modal.confirm({
     icon: null,
     closable: true,

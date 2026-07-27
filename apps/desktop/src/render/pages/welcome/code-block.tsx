@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Tooltip, message } from '@sue/design-web-react';
-import { IconCopy } from '@true-north/components-ui';
+import { Button, Tooltip, message, CopyOutlined } from '@sue/design-web-react';
+
 import clipboard from '@/utils/clipboard';
 import styles from './style/code-block.module.less';
 
@@ -17,7 +17,7 @@ export default function CodeBlock(props: CodeBlockProps) {
         <Button
           type="text"
           className={styles['code-block-copy-btn']}
-          icon={<IconCopy />}
+          icon={<CopyOutlined />}
           onClick={() => {
             clipboard(code);
             message.success('复制成功');

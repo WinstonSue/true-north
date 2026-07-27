@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Input, DatePicker, Select, Form, Radio, Tag } from '@sue/design-web-react';
-import { Grid, RulesProps } from '@true-north/components-ui';
+import { Input, DatePicker, Select, Form, Radio, Tag, type FormRule, Row, Col } from '@sue/design-web-react';
+
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { GoalService } from '@true-north/web-service';
@@ -10,7 +10,6 @@ import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 import GoalTreeSelector from '../GoalTreeSelector';
 import { useGoalFormConstraints } from './hooks';
 
-const { Row, Col } = Grid;
 const RangePicker = DatePicker.RangePicker;
 const TextArea = Input.TextArea;
 
@@ -240,7 +239,7 @@ function Item(props: {
   label: string;
   children: React.ReactNode;
   name: string;
-  rules?: RulesProps[];
+  rules?: FormRule[];
   slot?: {
     prefix?: React.ReactNode;
     suffix?: React.ReactNode;

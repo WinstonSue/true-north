@@ -15,7 +15,7 @@ export default function DefaultPage(props: {
     >
       <Flex
         container="fixed"
-        className="px-5 py-2 flex justify-between items-center border-b"
+        className="w-full px-5 py-2 flex justify-between items-center border-b"
       >
         <div className="text-text-1 text-title-2 font-medium py-1">
           {props.title}

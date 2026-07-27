@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card } from '@sue/design-web-react';
+import { Card, PlusOutlined } from '@sue/design-web-react';
 import cs from 'clsx';
-import { IconPlus } from '@true-north/components-ui';
+
 import styles from './style/index.module.less';
 
 interface AddCardProps {
@@ -17,7 +17,7 @@ function AddCard(props: AddCardProps) {
     >
       <div className={styles.content}>
         <div className={styles['add-icon']}>
-          <IconPlus />
+          <PlusOutlined />
         </div>
         <div className={styles.description}>{props.description}</div>
       </div>

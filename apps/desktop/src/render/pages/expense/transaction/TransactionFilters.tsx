@@ -1,15 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Select, DatePicker } from '@sue/design-web-react';
-import { Grid } from '@true-north/components-ui';
-import { IconCalendar } from '@true-north/components-ui';
+import { Select, DatePicker, Row, Col, CalendarOutlined } from '@sue/design-web-react';
+
 import { useExpenses } from '../context';
 import { PERIODS } from '../constants';
 import { TagSelector } from '../../../components/TagSelector';
 import { Dayjs } from 'dayjs';
-
-const { Row, Col } = Grid;
 
 export function TransactionFilters() {
   const { filters, setFilters } = useExpenses();
@@ -65,7 +62,7 @@ export function TransactionFilters() {
               handleDateSelect(dateString, date?.toDate());
             }}
             placeholder="Pick a date"
-            prefix={<IconCalendar />}
+            prefix={<CalendarOutlined />}
           />
         </Col>
         <Col flex="auto" span={6}>

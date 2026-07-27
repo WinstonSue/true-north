@@ -1,6 +1,5 @@
 import React from 'react';
-import { Button } from '@sue/design-web-react';
-import { Result } from '@true-north/components-ui';
+import { Button, Empty, Flex } from '@sue/design-web-react';
 import locale from './locale';
 import useLocale from '@/utils/useLocale';
 import styles from './style/index.module.less';
@@ -11,16 +10,22 @@ function Exception403() {
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
-        <Result
-          className={styles.result}
-          status="403"
-          subTitle={t['exception.result.403.description']}
-          extra={
-            <Button key="back" type="primary">
-              {t['exception.result.403.back']}
-            </Button>
-          }
-        />
+        <Flex
+          vertical
+          align="center"
+          justify="center"
+          gap={16}
+          className={`${styles.result} p-6 text-center`}
+        >
+          <Empty description={null} />
+          <div className="text-title-1 font-medium">403</div>
+          <div className="text-text-3">
+            {t['exception.result.403.description']}
+          </div>
+          <Button key="back" type="primary">
+            {t['exception.result.403.back']}
+          </Button>
+        </Flex>
       </div>
     </div>
   );

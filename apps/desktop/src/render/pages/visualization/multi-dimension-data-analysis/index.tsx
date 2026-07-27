@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Space } from '@sue/design-web-react';
-import { Typography, Grid } from '@true-north/components-ui';
+import { Card, Space, Row, Col } from '@sue/design-web-react';
+
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import HorizontalInterval from '@/components/Chart/horizontal-interval';
@@ -11,9 +11,6 @@ import DataOverview from './data-overview';
 import CardList from './card-list';
 
 import './mock';
-
-const { Row, Col } = Grid;
-const { Title } = Typography;
 
 function DataAnalysis() {
   const t = useLocale(locale);
@@ -26,30 +23,30 @@ function DataAnalysis() {
 
   const getInterval = async () => {
     setLoading(true);
-    const { data } = await axios
-      .get('/api/multi-dimension/activity')
-      .finally(() => {
-        setLoading(false);
-      });
+    const { data } = await axios.
+    get('/api/multi-dimension/activity').
+    finally(() => {
+      setLoading(false);
+    });
     setInterval(data);
   };
 
   const getPolar = async () => {
     setPolarLoading(true);
-    const { data } = await axios
-      .get('/api/multi-dimension/polar')
-      .finally(() => setPolarLoading(false));
+    const { data } = await axios.
+    get('/api/multi-dimension/polar').
+    finally(() => setPolarLoading(false));
 
     setPolar(data);
   };
 
   const getMultiPie = async () => {
     setMultiPieLoading(true);
-    const { data } = await axios
-      .get('/api/multi-dimension/content-source')
-      .finally(() => {
-        setMultiPieLoading(false);
-      });
+    const { data } = await axios.
+    get('/api/multi-dimension/content-source').
+    finally(() => {
+      setMultiPieLoading(false);
+    });
 
     setMultiPie(data);
   };
@@ -65,33 +62,33 @@ function DataAnalysis() {
       <Row gutter={20}>
         <Col span={16}>
           <Card>
-            <Title heading={6}>
+            <h6 className="text-title-1 font-medium">
               {t['multiDAnalysis.card.title.dataOverview']}
-            </Title>
+            </h6>
             <DataOverview />
           </Card>
         </Col>
         <Col span={8}>
           <Card>
-            <Title heading={6}>
+            <h6 className="text-title-1 font-medium">
               {t['multiDAnalysis.card.title.todayActivity']}
-            </Title>
+            </h6>
             <HorizontalInterval
               data={interval}
               loading={loading}
-              height={160}
-            />
+              height={160} />
+
           </Card>
           <Card>
-            <Title heading={6}>
+            <h6 className="text-title-1 font-medium">
               {t['multiDAnalysis.card.title.contentTheme']}
-            </Title>
+            </h6>
             <AreaPolar
               data={polar.list}
               fields={polar.fields}
               height={197}
-              loading={polarLoading}
-            />
+              loading={polarLoading} />
+
           </Card>
         </Col>
       </Row>
@@ -103,18 +100,18 @@ function DataAnalysis() {
       <Row>
         <Col span={24}>
           <Card>
-            <Title heading={6}>
+            <h6 className="text-title-1 font-medium">
               {t['multiDAnalysis.card.title.contentSource']}
-            </Title>
+            </h6>
             <FactMultiPie
               loading={multiPieLoading}
               data={multiPie}
-              height={240}
-            />
+              height={240} />
+
           </Card>
         </Col>
       </Row>
-    </Space>
-  );
+    </Space>);
+
 }
 export default DataAnalysis;

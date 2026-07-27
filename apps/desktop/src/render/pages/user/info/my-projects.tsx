@@ -1,13 +1,14 @@
+import { Row, Col } from '@sue/design-web-react';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Grid } from '@true-north/components-ui';
+
 import ProjectCard, { ProjectProps } from './blocks/project';
 
 function MyProject() {
   const [data, setData] = useState<ProjectProps[]>(new Array(6).fill({}));
   const [loading, setLoading] = useState(true);
 
-  const { Row, Col } = Grid;
+  
 
   const getData = async () => {
     setLoading(true);

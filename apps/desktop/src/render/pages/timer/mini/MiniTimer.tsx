@@ -1,12 +1,7 @@
+import { FullscreenExitOutlined, FullscreenOutlined, PauseCircleOutlined, PlayCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { ReloadOutlined } from '@sue/design-web-react';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import {
-  IconPlayCircle,
-  IconPauseCircle,
-  IconRefresh,
-  IconPlusCircle,
-  IconFullscreen,
-  IconFullscreenExit,
-} from '@true-north/components-ui';
+
 import { getTimeArr } from '../utils';
 import styles from './MiniTimer.module.css';
 import { useTimerContext } from '../context';
@@ -124,16 +119,16 @@ const MiniTimer: React.FC = () => {
             className={styles['mini-btn']}
             onClick={() => setClockState(!clockState)}
           >
-            {clockState ? <IconPauseCircle /> : <IconPlayCircle />}
+            {clockState ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
           </button>
           <button className={styles['mini-btn']} onClick={handleRefresh}>
-            <IconRefresh />
+            <ReloadOutlined />
           </button>
           <button className={styles['mini-btn']} onClick={toggleFullscreen}>
-            {isFullscreen ? <IconFullscreenExit /> : <IconFullscreen />}
+            {isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
           </button>
           <button className={styles['mini-btn']} onClick={toggleMiniMode}>
-            <IconPlusCircle />
+            <PlusCircleOutlined />
           </button>
         </div>
       </div>

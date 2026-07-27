@@ -26,11 +26,11 @@ export default function GoalEditor(props: GoalEditorProps) {
       afterSubmit={props.afterSubmit}
     >
       <Flex vertical container="full" className="gap-2">
-        <Flex container="fixed" className="border-b border-border-2">
+        <Flex container="fixed" className="w-full border-b border-border-2">
           <GoalForm />
         </Flex>
         <GoalForeign goalId={props.goalId} />
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <GoalEditorFooter />
         </Flex>
       </Flex>

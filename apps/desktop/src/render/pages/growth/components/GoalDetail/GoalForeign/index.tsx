@@ -44,7 +44,10 @@ export default function GoalForeign(props: GoalForeignProps) {
 
   return (
     <>
-      <Flex container="fixed" className="flex items-center justify-between">
+      <Flex
+        container="fixed"
+        className="w-full flex items-center justify-between"
+      >
         <div className={clsx('h-10', 'flex gap-2 items-center')}>
           {tabs.map((item) => (
             <div

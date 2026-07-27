@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Spin } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
+
 import { DonutChart } from 'bizcharts';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
@@ -13,14 +13,14 @@ function PopularContent() {
 
   const fetchData = () => {
     setLoading(true);
-    axios
-      .get('/api/workplace/content-percentage')
-      .then((res) => {
-        setData(res.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    axios.
+    get('/api/workplace/content-percentage').
+    then((res) => {
+      setData(res.data);
+    }).
+    finally(() => {
+      setLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -29,9 +29,9 @@ function PopularContent() {
 
   return (
     <Card>
-      <Typography.Title heading={6}>
+      <h6 className="text-title-1 font-medium">
         {t['workplace.contentPercentage']}
-      </Typography.Title>
+      </h6>
       <Spin spinning={loading} style={{ display: 'block' }}>
         <DonutChart
           autoFit
@@ -43,10 +43,10 @@ function PopularContent() {
           colorField="type"
           color={['#21CCFF', '#313CA9', '#249EFF']}
           interactions={[
-            {
-              type: 'element-single-selected',
-            },
-          ]}
+          {
+            type: 'element-single-selected'
+          }]
+          }
           tooltip={{ showMarkers: false }}
           label={{
             visible: true,
@@ -54,36 +54,36 @@ function PopularContent() {
             formatter: (v) => `${(v.percent * 100).toFixed(0)}%`,
             style: {
               fill: '#86909C',
-              fontSize: 14,
-            },
+              fontSize: 14
+            }
           }}
           legend={{
-            position: 'bottom',
+            position: 'bottom'
           }}
           statistic={{
             title: {
               style: {
                 fontSize: '14px',
                 lineHeight: 2,
-                color: 'rgb(--var(color-text-1))',
+                color: 'rgb(--var(color-text-1))'
               },
-              formatter: () => '内容量',
+              formatter: () => '内容量'
             },
             content: {
               style: {
                 fontSize: '16px',
-                color: 'rgb(--var(color-text-1))',
+                color: 'rgb(--var(color-text-1))'
               },
               formatter: (_, data) => {
                 const sum = data.reduce((a, b) => a + b.count, 0);
                 return Number(sum).toLocaleString();
-              },
-            },
-          }}
-        />
+              }
+            }
+          }} />
+
       </Spin>
-    </Card>
-  );
+    </Card>);
+
 }
 
 export default PopularContent;

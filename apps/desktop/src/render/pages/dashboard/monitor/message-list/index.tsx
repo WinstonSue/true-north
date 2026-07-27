@@ -1,5 +1,5 @@
 import React from 'react';
-import { Result } from '@true-north/components-ui';
+import { Empty, Flex } from '@sue/design-web-react';
 import MessageItem, { Message } from './item';
 import styles from './style/index.module.less';
 
@@ -14,7 +14,18 @@ function MessageList(props: MessageListProps) {
       {data.map((item) => (
         <MessageItem key={item.id} data={item} />
       ))}
-      {!data.length && <Result status="404" />}
+      {!data.length && (
+        <Flex
+          vertical
+          align="center"
+          justify="center"
+          gap={16}
+          className="p-6 text-center"
+        >
+          <Empty description={null} />
+          <div className="text-title-1 font-medium">404</div>
+        </Flex>
+      )}
     </div>
   );
 }

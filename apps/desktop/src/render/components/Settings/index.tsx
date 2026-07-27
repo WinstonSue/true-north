@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Drawer, Alert, message, Button } from '@sue/design-web-react';
-import { IconSettings } from '@true-north/components-ui';
+import { Drawer, Alert, message, Button, SettingOutlined } from '@sue/design-web-react';
+
 import copy from 'copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import { GlobalState } from '../../store';
@@ -31,13 +31,13 @@ function Setting(props: SettingProps) {
           onClick: () => setVisible(true),
         })
       ) : (
-        <IconButton icon={<IconSettings />} onClick={() => setVisible(true)} />
+        <IconButton icon={<SettingOutlined />} onClick={() => setVisible(true)} />
       )}
       <Drawer
         size={300}
         title={
           <>
-            <IconSettings />
+            <SettingOutlined />
             {locale['settings.title']}
           </>
         }

@@ -8,7 +8,6 @@
     ".": "./index.ts"
   },
   "dependencies": {
-    "@ant-design/icons": "^6.3.2",
     "@sue/design-web-react": "file:../../../vendor/sue-design-web-react",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.13",

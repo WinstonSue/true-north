@@ -1,4 +1,4 @@
-import type { ColumnProps } from '@true-north/components-ui';
+import type { TableColumnProps } from '@sue/design-web-react';
 import { Table, Button, Modal, Card, Divider } from '@sue/design-web-react';
 import dayjs from 'dayjs';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
@@ -18,7 +18,7 @@ export default function TodoTable() {
     getTodoPage();
   }, []);
 
-  const columns: ColumnProps<TodoVo>[] = [
+  const columns: TableColumnProps<TodoVo>[] = [
     { title: '待办', dataIndex: 'name', key: 'name' },
     { title: '描述', dataIndex: 'description', key: 'description' },
     {

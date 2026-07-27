@@ -1,7 +1,6 @@
 import React from 'react';
-import { Button } from '@sue/design-web-react';
-import { Typography, Result } from '@true-north/components-ui';
-import { IconLink } from '@true-north/components-ui';
+import { Button, Empty, Flex, LinkOutlined } from '@sue/design-web-react';
+
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
@@ -12,43 +11,50 @@ function Success() {
   return (
     <div>
       <div className={styles.wrapper}>
-        <Result
-          className={styles.result}
-          status="error"
-          title={t['error.result.title']}
-          subTitle={t['error.result.subTitle']}
-          extra={[
+        <Flex
+          vertical
+          align="center"
+          justify="center"
+          gap={16}
+          className={`${styles.result} p-6 text-center`}>
+
+          <Empty description={null} />
+          <div className="text-title-1 font-medium">
+            {t['error.result.title']}
+          </div>
+          <div className="text-text-3">{t['error.result.subTitle']}</div>
+          <div>
             <Button key="again" type="secondary" style={{ marginRight: 16 }}>
               {t['error.result.goBack']}
-            </Button>,
+            </Button>
             <Button key="back" type="primary">
               {t['error.result.retry']}
-            </Button>,
-          ]}
-        />
+            </Button>
+          </div>
+        </Flex>
         <div className={styles['details-wrapper']}>
-          <Typography.Title heading={6} style={{ marginTop: 0 }}>
+          <h6 className="text-title-1 font-medium" style={{ marginTop: 0 }}>
             {t['error.detailTitle']}
-          </Typography.Title>
-          <Typography.Paragraph style={{ marginBottom: 0 }}>
+          </h6>
+          <p style={{ marginBottom: 0 }}>
             <ol>
               <li>
                 {t['error.detailLine.record']}
-                <Typography.Link>
-                  <IconLink />
+                <a style={{ color: "var(--color-primary-6)" }}>
+                  <LinkOutlined />
                   {t['error.detailLine.record.link']}
-                </Typography.Link>
+                </a>
               </li>
               <li>
                 {t['error.detailLine.auth']}
-                <Typography.Link>{t['error.detailLine.auth.link']}</Typography.Link>
+                <a style={{ color: "var(--color-primary-6)" }}>{t['error.detailLine.auth.link']}</a>
               </li>
             </ol>
-          </Typography.Paragraph>
+          </p>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default Success;

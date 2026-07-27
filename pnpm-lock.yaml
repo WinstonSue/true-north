@@ -69,6 +69,9 @@ importers:
       '@ant-design/colors':
         specifier: ^8.0.1
         version: 8.0.1
+      '@ant-design/icons':
+        specifier: ^6.3.2
+        version: 6.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@loadable/component':
         specifier: ^5.13.2
         version: 5.16.7(react@18.3.1)
@@ -354,6 +357,9 @@ importers:
 
   packages/components/mind:
     dependencies:
+      '@ant-design/icons':
+        specifier: ^6.3.2
+        version: 6.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@antv/data-set':
         specifier: ^0.11.8
         version: 0.11.8
@@ -430,9 +436,6 @@ importers:
 
   packages/components/ui:
     dependencies:
-      '@ant-design/icons':
-        specifier: ^6.3.2
-        version: 6.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@sue/design-web-react':
         specifier: file:../../../vendor/sue-design-web-react
         version: file:vendor/sue-design-web-react(date-fns@3.6.0)(luxon@3.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -455,6 +458,9 @@ importers:
 
   packages/dev-tools:
     dependencies:
+      '@ant-design/icons':
+        specifier: ^6.3.2
+        version: 6.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@sue/design-web-react':
         specifier: file:../../vendor/sue-design-web-react
         version: file:vendor/sue-design-web-react(date-fns@3.6.0)(luxon@3.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

@@ -1,7 +1,7 @@
-import { IconLeft, IconRight } from '@true-north/components-ui';
+
 import { dayjs } from './utils';
 import { useCalendarContext } from './context';
-import { Radio, Button, Space, Flex } from '@sue/design-web-react';
+import { Radio, Button, Space, Flex, LeftOutlined, RightOutlined } from '@sue/design-web-react';
 
 function CalendarHeader(props: { prefixCls: string }) {
   const { prefixCls } = props;
@@ -24,7 +24,7 @@ function CalendarHeader(props: { prefixCls: string }) {
         </div>
       </Flex>
 
-      <Flex container="fixed" className="flex items-center gap-4">
+      <Flex container="fixed" className="h-full flex items-center gap-4">
         <Radio.Group
           optionType="button"
           options={[
@@ -45,7 +45,7 @@ function CalendarHeader(props: { prefixCls: string }) {
             className=""
             onClick={() => changePageShowDate('prev', calendarMode)}
           >
-            {<IconLeft />}
+            {<LeftOutlined />}
           </Button>
           <Button
             className={`${prefixCls}-footer-btn-wrapper`}
@@ -54,7 +54,7 @@ function CalendarHeader(props: { prefixCls: string }) {
             今天
           </Button>
           <Button onClick={() => changePageShowDate('next', calendarMode)}>
-            {<IconRight />}
+            {<RightOutlined />}
           </Button>
         </Space.Compact>
       </Flex>

@@ -26,7 +26,7 @@ export default function GoalCreator(props: GoalCreatorProps) {
         <Flex container="fill">
           <GoalForm />
         </Flex>
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <Footer />
         </Flex>
       </Flex>

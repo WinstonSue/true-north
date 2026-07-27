@@ -14,11 +14,11 @@ function TaskAll() {
 
   return (
     <Flex vertical container="full">
-      <Flex container="fixed" className="px-5 flex border-b">
+      <Flex container="fixed" className="w-full px-5 flex border-b">
         <TaskFilters />
       </Flex>
 
-      <Flex container="fixed" className="px-5 flex my-3">
+      <Flex container="fixed" className="w-full px-5 flex my-3">
         <CreateButton
           onClick={() => {
             openCreateTaskDrawer({

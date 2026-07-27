@@ -3,8 +3,8 @@ import DefaultPage from '@/components/Layout/DefaultPage';
 import HabitListFilter from './HabitListFilter';
 import { HabitListProvider, useHabitListContext } from './context';
 import HabitListTable from './HabitListTable';
-import { Button, Flex } from '@sue/design-web-react';
-import { IconPlus } from '@true-north/components-ui';
+import { Button, Flex, PlusOutlined } from '@sue/design-web-react';
+
 import { openDrawer } from '@/layout/Drawer';
 import { CreateHabit } from '../components/CreateHabit';
 
@@ -30,13 +30,13 @@ export const HabitListPage: React.FC = () => {
   return (
     <DefaultPage title="习惯管理">
       <Flex vertical container="full">
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <HabitListFilter />
         </Flex>
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <Button
             type="primary"
-            icon={<IconPlus />}
+            icon={<PlusOutlined />}
             onClick={() => {
               openCreateHabitModal();
             }}

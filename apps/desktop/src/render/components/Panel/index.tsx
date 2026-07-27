@@ -1,5 +1,5 @@
 import React, { CSSProperties, ReactNode } from 'react';
-import { Typography } from '@true-north/components-ui';
+
 import cs from 'clsx';
 import styles from './style/index.module.less';
 
@@ -14,10 +14,10 @@ function Panel(props: PanelProps) {
   const { className, style, title, children } = props;
   return (
     <div className={cs(styles.panel, className)} style={style}>
-      <Typography.Title>{title}</Typography.Title>
+      <h1 className="text-title-1 font-medium">{title}</h1>
       {children}
-    </div>
-  );
+    </div>);
+
 }
 
 export default Panel;

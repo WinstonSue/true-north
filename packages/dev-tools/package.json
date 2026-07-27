@@ -15,6 +15,7 @@
     "dev:full": "concurrently \"pnpm dev\" \"pnpm server\""
   },
   "dependencies": {
+    "@ant-design/icons": "^6.3.2",
     "@sue/design-web-react": "file:../../vendor/sue-design-web-react",
     "@types/express": "^4.17.0",
     "@types/react": "^18.2.0",

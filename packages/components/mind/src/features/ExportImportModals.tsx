@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Radio, Upload, message } from '@sue/design-web-react';
-import { IconUpload } from '@true-north/components-ui';
+import { Modal, Radio, Upload, message, UploadOutlined } from '@sue/design-web-react';
+
 import { Graph } from '@antv/x6';
 import { useMindMapContext } from '../context';
 import { exportToPNG, exportToSVG, exportToJSON, importJSONFromFile } from '../utils/export';
@@ -144,7 +144,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ visible, onClose, onImport })
           className="border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:bg-gray-50 transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
-          <IconUpload className="text-4xl text-gray-400 mb-2" />
+          <UploadOutlined className="text-4xl text-gray-400 mb-2" />
           <div className="text-gray-600">
             点击或拖拽文件到此处上传
             <div className="text-xs text-gray-500 mt-1">仅支持 JSON 格式文件</div>

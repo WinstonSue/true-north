@@ -18,13 +18,13 @@ export default function TodoEditor(props: TodoEditorProps) {
       afterSubmit={props.afterSubmit}
     >
       <Flex vertical container="full">
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <TodoEditorHeader />
         </Flex>
         <Flex container="fill">
           <TodoEditorMain />
         </Flex>
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <Footer onClose={props.onClose} />
         </Flex>
       </Flex>

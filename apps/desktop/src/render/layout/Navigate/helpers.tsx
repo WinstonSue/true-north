@@ -1,15 +1,17 @@
 import {
-  IconDashboard,
-  IconList,
-  IconSettings,
-  IconFile,
-  IconApps,
-  IconCheckCircle,
-  IconExclamationCircle,
-  IconUser,
-} from '@true-north/components-ui';
-import styles from '../layout.module.less';
+  AppstoreOutlined,
+  UserOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  FileOutlined,
+  SettingOutlined,
+} from '@sue/design-web-react';
+import {
+  DashboardOutlined,
+  UnorderedListOutlined,
+} from '@ant-design/icons';
 import { SiteIcon } from '@true-north/components-ui';
+import styles from '../layout.module.less';
 
 export function getIconFromKey(key: string): React.ReactNode {
   switch (key) {
@@ -18,21 +20,21 @@ export function getIconFromKey(key: string): React.ReactNode {
     case '/growth/todo':
       return <SiteIcon id="list-sidebar" className={styles.icon} />;
     case '/dashboard':
-      return <IconDashboard className={styles.icon} />;
+      return <DashboardOutlined className={styles.icon} />;
     case '/list':
-      return <IconList className={styles.icon} />;
+      return <UnorderedListOutlined className={styles.icon} />;
     case '/form':
-      return <IconSettings className={styles.icon} />;
+      return <SettingOutlined className={styles.icon} />;
     case '/profile':
-      return <IconFile className={styles.icon} />;
+      return <FileOutlined className={styles.icon} />;
     case '/visualization':
-      return <IconApps className={styles.icon} />;
+      return <AppstoreOutlined className={styles.icon} />;
     case '/result':
-      return <IconCheckCircle className={styles.icon} />;
+      return <CheckCircleOutlined className={styles.icon} />;
     case '/exception':
-      return <IconExclamationCircle className={styles.icon} />;
+      return <ExclamationCircleOutlined className={styles.icon} />;
     case '/user':
-      return <IconUser className={styles.icon} />;
+      return <UserOutlined className={styles.icon} />;
     default:
       return <div className={styles['icon-empty']} />;
   }

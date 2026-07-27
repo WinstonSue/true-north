@@ -1,5 +1,5 @@
-import { Input, DatePicker, Switch, Spin, Select, Form } from '@sue/design-web-react';
-import { Grid, RulesProps } from '@true-north/components-ui';
+import { Input, DatePicker, Switch, Spin, Select, Form, type FormRule, Row, Col } from '@sue/design-web-react';
+
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { useTaskDetailContext } from './context';
@@ -10,7 +10,6 @@ import { useTaskFormConstraints } from './hooks';
 import { TaskService, GoalService } from '@true-north/web-service';
 import { IMPORTANCE_MAP } from '../../constants';
 
-const { Row, Col } = Grid;
 const RangePicker = DatePicker.RangePicker;
 const TextArea = Input.TextArea;
 
@@ -219,7 +218,7 @@ function Item(props: {
   label: string;
   children: React.ReactNode;
   name: string;
-  rules?: RulesProps[];
+  rules?: FormRule[];
 }) {
   const { size } = useTaskDetailContext();
   const labelCol =

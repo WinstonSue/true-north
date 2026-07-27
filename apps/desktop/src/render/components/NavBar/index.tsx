@@ -1,26 +1,7 @@
+import { DashboardOutlined, ExperimentOutlined, GlobalOutlined, TagOutlined } from '@ant-design/icons';
 import { useContext, useEffect } from 'react';
-import {
-  Tooltip,
-  Input,
-  Avatar,
-  Dropdown,
-  message,
-  Button,
-} from '@sue/design-web-react';
-import {
-  IconLanguage,
-  IconNotification,
-  IconSunFill,
-  IconMoonFill,
-  IconUser,
-  IconSettings,
-  IconPoweroff,
-  IconExperiment,
-  IconDashboard,
-  IconInteraction,
-  IconTag,
-  IconLoading,
-} from '@true-north/components-ui';
+import { Tooltip, Input, Avatar, Dropdown, message, Button, CommentOutlined, LoadingOutlined, MoonOutlined, NotificationOutlined, PoweroffOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@sue/design-web-react';
+
 import { useSelector, useDispatch } from 'react-redux';
 import { GlobalState } from '@/store';
 import { GlobalContext } from '@/context';
@@ -76,7 +57,7 @@ function Navbar({ show }: { show: boolean }) {
       <div className={styles['fixed-settings']}>
         <Settings
           trigger={
-            <Button icon={<IconSettings />} type="primary" size="large" />
+            <Button icon={<SettingOutlined />} type="primary" size="large" />
           }
         />
       </div>
@@ -94,7 +75,7 @@ function Navbar({ show }: { show: boolean }) {
         key: 'role',
         label: (
           <span>
-            <IconUser className={styles['dropdown-icon']} />
+            <UserOutlined className={styles['dropdown-icon']} />
             <span className={styles['user-role']}>
               {role === 'admin'
                 ? t['menu.user.role.admin']
@@ -107,7 +88,7 @@ function Navbar({ show }: { show: boolean }) {
             key: 'switch role',
             label: (
               <span>
-                <IconTag className={styles['dropdown-icon']} />
+                <TagOutlined className={styles['dropdown-icon']} />
                 {t['menu.user.switchRoles']}
               </span>
             ),
@@ -118,7 +99,7 @@ function Navbar({ show }: { show: boolean }) {
         key: 'setting',
         label: (
           <span>
-            <IconSettings className={styles['dropdown-icon']} />
+            <SettingOutlined className={styles['dropdown-icon']} />
             {t['menu.user.setting']}
           </span>
         ),
@@ -127,7 +108,7 @@ function Navbar({ show }: { show: boolean }) {
         key: 'more',
         label: (
           <span>
-            <IconExperiment className={styles['dropdown-icon']} />
+            <ExperimentOutlined className={styles['dropdown-icon']} />
             {t['message.seeMore']}
           </span>
         ),
@@ -136,7 +117,7 @@ function Navbar({ show }: { show: boolean }) {
             key: 'workplace',
             label: (
               <span>
-                <IconDashboard className={styles['dropdown-icon']} />
+                <DashboardOutlined className={styles['dropdown-icon']} />
                 {t['menu.dashboard.workplace']}
               </span>
             ),
@@ -145,7 +126,7 @@ function Navbar({ show }: { show: boolean }) {
             key: 'card list',
             label: (
               <span>
-                <IconInteraction className={styles['dropdown-icon']} />
+                <CommentOutlined className={styles['dropdown-icon']} />
                 {t['menu.list.cardList']}
               </span>
             ),
@@ -157,7 +138,7 @@ function Navbar({ show }: { show: boolean }) {
         key: 'logout',
         label: (
           <span>
-            <IconPoweroff className={styles['dropdown-icon']} />
+            <PoweroffOutlined className={styles['dropdown-icon']} />
             {t['navbar.logout']}
           </span>
         ),
@@ -199,13 +180,13 @@ function Navbar({ show }: { show: boolean }) {
             }}
           >
             <span>
-              <IconButton icon={<IconLanguage />} />
+              <IconButton icon={<GlobalOutlined />} />
             </span>
           </Dropdown>
         </li>
         <li>
           <MessageBox>
-            <IconButton icon={<IconNotification />} />
+            <IconButton icon={<NotificationOutlined />} />
           </MessageBox>
         </li>
         <li>
@@ -217,7 +198,7 @@ function Navbar({ show }: { show: boolean }) {
             }
           >
             <IconButton
-              icon={theme !== 'dark' ? <IconMoonFill /> : <IconSunFill />}
+              icon={theme !== 'dark' ? <MoonOutlined /> : <SunOutlined />}
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             />
           </Tooltip>
@@ -234,7 +215,7 @@ function Navbar({ show }: { show: boolean }) {
             >
               <Avatar size={32} style={{ cursor: 'pointer' }}>
                 {userLoading ? (
-                  <IconLoading />
+                  <LoadingOutlined />
                 ) : (
                   <img alt="avatar" src={userInfo.avatar} />
                 )}

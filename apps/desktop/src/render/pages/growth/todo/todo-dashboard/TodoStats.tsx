@@ -1,12 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Card } from '@sue/design-web-react';
-import { Grid, Typography } from '@true-north/components-ui';
-import { useTodoContext } from './context';
+import { Card, Row, Col } from '@sue/design-web-react';
 
-const { Row, Col } = Grid;
-const { Title, Text } = Typography;
+import { useTodoContext } from './context';
 
 export function TodoStats() {
   const { todoList } = useTodoContext();
@@ -16,7 +13,7 @@ export function TodoStats() {
     const completed = todoList.filter((todo) => todo.status === 'done').length;
     const pending = total - completed;
     const highPriority = todoList.filter(
-      (todo) => todo.importance === 1 && todo.urgency === 1,
+      (todo) => todo.importance === 1 && todo.urgency === 1
     ).length;
 
     return { total, completed, pending, highPriority };
@@ -26,56 +23,56 @@ export function TodoStats() {
     <Row gutter={[16, 16]}>
       <Col span={6}>
         <Card className="bg-bg-2 border-border-1">
-          <Title heading={6} className="text-text-1">
+          <h6 className="text-title-1 font-medium text-text-1">
             Total Tasks
-          </Title>
-          <Text
-            style={{ fontSize: 24, fontWeight: 600 }}
-            className="text-text-1"
-          >
+          </h6>
+          <span
+
+            className="text-text-1" style={{ fontSize: 24, fontWeight: 600 }}>
+
             {stats.total}
-          </Text>
+          </span>
         </Card>
       </Col>
       <Col span={6}>
         <Card className="bg-bg-2 border-border-1">
-          <Title heading={6} className="text-text-1">
+          <h6 className="text-title-1 font-medium text-text-1">
             Completed
-          </Title>
-          <Text
-            style={{ fontSize: 24, fontWeight: 600 }}
-            className="text-success"
-          >
+          </h6>
+          <span
+
+            className="text-success" style={{ fontSize: 24, fontWeight: 600 }}>
+
             {stats.completed}
-          </Text>
+          </span>
         </Card>
       </Col>
       <Col span={6}>
         <Card className="bg-bg-2 border-border-1">
-          <Title heading={6} className="text-text-1">
+          <h6 className="text-title-1 font-medium text-text-1">
             Pending
-          </Title>
-          <Text
-            style={{ fontSize: 24, fontWeight: 600 }}
-            className="text-warning"
-          >
+          </h6>
+          <span
+
+            className="text-warning" style={{ fontSize: 24, fontWeight: 600 }}>
+
             {stats.pending}
-          </Text>
+          </span>
         </Card>
       </Col>
       <Col span={6}>
         <Card className="bg-bg-2 border-border-1">
-          <Title heading={6} className="text-text-1">
+          <h6 className="text-title-1 font-medium text-text-1">
             High Priority
-          </Title>
-          <Text
-            style={{ fontSize: 24, fontWeight: 600 }}
-            className="text-danger"
-          >
+          </h6>
+          <span
+
+            className="text-danger" style={{ fontSize: 24, fontWeight: 600 }}>
+
             {stats.highPriority}
-          </Text>
+          </span>
         </Card>
       </Col>
-    </Row>
-  );
+    </Row>);
+
 }

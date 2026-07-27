@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import { Button, Divider, Flex } from '@sue/design-web-react';
-import { IconPlus } from '@true-north/components-ui';
+import { Button, Divider, Flex, PlusOutlined } from '@sue/design-web-react';
+
 import GoalFilters from './GoalFilters';
 import GoalTree from './GoalTree';
 import { useGoalContext } from '../context';
@@ -14,7 +14,10 @@ export default function GoalAside() {
   return (
     <Flex vertical container="full" className={clsx('py-3', 'gap-3')}>
       {/* 头部工具栏 */}
-      <Flex container="fixed" className={clsx('px-4', 'flex flex-col gap-3')}>
+      <Flex
+        container="fixed"
+        className={clsx('w-full', 'px-4', 'flex flex-col gap-3')}
+      >
         <GoalFilters />
       </Flex>
 
@@ -24,11 +27,11 @@ export default function GoalAside() {
         <GoalTree />
       </Flex>
 
-      <Flex container="fixed" className={clsx('px-4')}>
+      <Flex container="fixed" className={clsx('w-full', 'px-4')}>
         <Button
           className={'w-full'}
           type="primary"
-          icon={<IconPlus />}
+          icon={<PlusOutlined />}
           onClick={() =>
             openCreateDrawer({
               title: '新建目标',

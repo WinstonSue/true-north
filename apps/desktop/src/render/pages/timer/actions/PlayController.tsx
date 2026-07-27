@@ -1,5 +1,5 @@
+import { PauseCircleOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import React from 'react';
-import { IconPlayCircle, IconPauseCircle } from '@true-north/components-ui';
 
 interface PlayControllerProps {
   state: boolean;
@@ -19,13 +19,13 @@ const PlayController: React.FC<PlayControllerProps> = ({
   return (
     <>
       {!state ? (
-        <IconPlayCircle
+        <PlayCircleOutlined
           className={className}
           onClick={handleClick}
           style={{ color: '#fff', fontSize: '30px' }}
         />
       ) : (
-        <IconPauseCircle
+        <PauseCircleOutlined
           className={className}
           onClick={handleClick}
           style={{ color: '#fff', fontSize: '30px' }}

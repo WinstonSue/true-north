@@ -1,6 +1,6 @@
 import React from 'react';
-import { Skeleton, Statistic } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
+import { Skeleton, Statistic, ArrowDownOutlined, ArrowUpOutlined } from '@sue/design-web-react';
+
 import cs from 'clsx';
 import {
   Chart,
@@ -10,18 +10,16 @@ import {
   Interaction,
   Tooltip,
   G2,
-  Legend,
-} from 'bizcharts';
+  Legend } from
+'bizcharts';
 
-import { IconArrowRise, IconArrowFall } from '@true-north/components-ui';
 import styles from '../style/public-opinion.module.less';
 
-const { Title, Text } = Typography;
 const basicChartProps = {
   pure: true,
   autoFit: true,
   height: 80,
-  padding: [10, 10, 0, 10],
+  padding: [10, 10, 0, 10]
 };
 
 export interface PublicOpinionCardProps {
@@ -36,7 +34,7 @@ export interface PublicOpinionCardProps {
   loading?: boolean;
 }
 
-function SimpleLine(props: { chartData: any[] }) {
+function SimpleLine(props: {chartData: any[];}) {
   const { chartData } = props;
   return (
     <Chart data={chartData} {...basicChartProps}>
@@ -52,19 +50,19 @@ function SimpleLine(props: { chartData: any[] }) {
               return { lineDash: [8, 10] };
             }
             return {};
-          },
-        }}
-      />
-    </Chart>
-  );
+          }
+        }} />
+
+    </Chart>);
+
 }
 
-function SimpleInterval(props: { chartData: any[] }) {
+function SimpleInterval(props: {chartData: any[];}) {
   const { chartData } = props;
 
   G2.registerShape('interval', 'border-radius', {
     draw(cfg, container) {
-      const points = cfg.points as unknown as { x: string; y: number };
+      const points = cfg.points as unknown as {x: string;y: number;};
       let path = [];
       path.push(['M', points[0].x, points[0].y]);
       path.push(['L', points[1].x, points[1].y]);
@@ -81,11 +79,11 @@ function SimpleInterval(props: { chartData: any[] }) {
           width: path[2][1] - path[1][1],
           height: path[0][2] - path[1][2],
           fill: cfg.color,
-          radius: (path[2][1] - path[1][1]) / 2,
-        },
+          radius: (path[2][1] - path[1][1]) / 2
+        }
       });
       return group;
-    },
+    }
   });
 
   return (
@@ -93,21 +91,21 @@ function SimpleInterval(props: { chartData: any[] }) {
       <Interval
         position="x*y"
         color={[
-          'x',
-          (xVal) => {
-            if (Number(xVal) % 2 === 0) {
-              return '#2CAB40';
-            }
-            return '#86DF6C';
-          },
-        ]}
-        shape="border-radius"
-      />
-    </Chart>
-  );
+        'x',
+        (xVal) => {
+          if (Number(xVal) % 2 === 0) {
+            return '#2CAB40';
+          }
+          return '#86DF6C';
+        }]
+        }
+        shape="border-radius" />
+
+    </Chart>);
+
 }
 
-function SimplePie(props: { chartData: any[] }) {
+function SimplePie(props: {chartData: any[];}) {
   const { chartData } = props;
 
   return (
@@ -118,18 +116,18 @@ function SimplePie(props: { chartData: any[] }) {
         position="count"
         shape="sliceShape"
         color={['name', ['#8D4EDA', '#00B2FF', '#165DFF']]}
-        label={false}
-      />
+        label={false} />
+
       <Tooltip visible={true} />
       <Legend position="right" />
       <Interaction type="element-single-selected" />
-    </Chart>
-  );
+    </Chart>);
+
 }
 
 function PublicOpinionCard(props: PublicOpinionCardProps) {
   const { chartType, title, count, increment, diff, chartData, loading } =
-    props;
+  props;
   const className = cs(styles.card, styles[`card-${chartType}`]);
 
   return (
@@ -137,52 +135,51 @@ function PublicOpinionCard(props: PublicOpinionCardProps) {
       <div className={styles.statistic}>
         <Statistic
           title={
-            <Title heading={6} className={styles.title}>
+          <h6 className={clsx("text-title-1 font-medium", styles.title)}>
               {title}
-            </Title>
+            </h6>
           }
           loading={loading}
           value={count}
-          groupSeparator
-        />
+          groupSeparator />
+
         <div className={styles['compare-yesterday']}>
-          <Text type="secondary" className={styles['compare-yesterday-text']}>
+          <span className={clsx("text-text-3", styles['compare-yesterday-text'])}>
             {props.compareTime}
-          </Text>
+          </span>
           <span
             className={cs(styles['diff'], {
-              [styles['diff-increment']]: increment,
-            })}
-          >
-            {loading ? (
-              <Skeleton text={{ rows: 1 }} animation />
-            ) : (
-              <>
+              [styles['diff-increment']]: increment
+            })}>
+
+            {loading ?
+            <Skeleton text={{ rows: 1 }} animation /> :
+
+            <>
                 {diff}
-                {increment ? <IconArrowRise /> : <IconArrowFall />}
+                {increment ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
               </>
-            )}
+            }
           </span>
         </div>
       </div>
       <div className={styles.chart}>
-        {loading ? (
-          <Skeleton
-            text={{ rows: 3, width: Array(3).fill('100%') }}
-            animation
-          />
-        ) : (
-          <>
-            {chartType === 'interval' && (
-              <SimpleInterval chartData={chartData} />
-            )}
+        {loading ?
+        <Skeleton
+          text={{ rows: 3, width: Array(3).fill('100%') }}
+          animation /> :
+
+        <>
+            {chartType === 'interval' &&
+          <SimpleInterval chartData={chartData} />
+          }
             {chartType === 'line' && <SimpleLine chartData={chartData} />}
             {chartType === 'pie' && <SimplePie chartData={chartData} />}
           </>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default PublicOpinionCard;

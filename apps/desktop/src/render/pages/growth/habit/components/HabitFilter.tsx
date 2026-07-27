@@ -1,13 +1,11 @@
 import React from 'react';
-import { Form, Input, Select, DatePicker, InputNumber, Button, Space } from '@sue/design-web-react';
-import { Grid } from '@true-north/components-ui';
-import { IconSearch, IconRefresh } from '@true-north/components-ui';
+import { Form, Input, Select, DatePicker, InputNumber, Button, Space, Row, Col, ReloadOutlined, SearchOutlined } from '@sue/design-web-react';
+
 import { HabitPageFilterVo, GoalVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS, HABIT_DIFFICULTY_OPTIONS } from '../constants';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
-const { Row, Col } = Grid;
 
 interface HabitFilterProps {
   filters: HabitPageFilterVo;
@@ -64,7 +62,7 @@ export const HabitFilter: React.FC<HabitFilterProps> = ({
           <Form.Item label="关键词搜索" field="keyword">
             <Input
               placeholder="搜索习惯名称或描述"
-              prefix={<IconSearch />}
+              prefix={<SearchOutlined />}
               value={filters.keyword}
               onChange={(value) => handleFilterChange('keyword', value)}
               allowClear
@@ -212,7 +210,7 @@ export const HabitFilter: React.FC<HabitFilterProps> = ({
       <Row>
         <Col span={24}>
           <Space>
-            <Button icon={<IconRefresh />} onClick={handleReset}>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
               重置筛选
             </Button>
           </Space>

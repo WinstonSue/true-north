@@ -1,12 +1,10 @@
-import { Select } from '@sue/design-web-react';
-import { Grid } from '@true-north/components-ui';
+import { Select, Row, Col } from '@sue/design-web-react';
+
 import { TableFilter } from '@/components/Layout/TableFilter';
 import { HabitPageFilterVo } from '@true-north/vo';
 import { useState } from 'react';
 import { HABIT_STATUS_OPTIONS } from '../constants';
 import { useHabitListContext } from './context';
-
-const { Row, Col } = Grid;
 
 export default function HabitListFilter() {
   const { handleRefresh } = useHabitListContext();

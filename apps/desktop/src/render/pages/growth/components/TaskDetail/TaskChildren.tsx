@@ -16,6 +16,7 @@ export default function TaskChildren() {
       <Flex
         container="fixed"
         className={clsx([
+          'w-full',
           'text-title-1 text-text-1 font-medium p-2',
           'flex justify-between items-center',
         ])}

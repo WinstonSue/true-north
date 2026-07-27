@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import cs from 'clsx';
-import { Button, Switch, Tag, Card, Descriptions, Dropdown, Menu, Skeleton } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
 import {
-  IconStarFill,
-  IconThumbUpFill,
-  IconSunFill,
-  IconFaceSmileFill,
-  IconPenFill,
-  IconCheckCircleFill,
-  IconCloseCircleFill,
-  IconMore,
-} from '@true-north/components-ui';
+  Button,
+  Switch,
+  Tag,
+  Card,
+  Descriptions,
+  Dropdown,
+  Menu,
+  Skeleton,
+  CheckCircleFilled,
+  CloseCircleFilled,
+  EllipsisOutlined,
+  SmileFilled,
+  StarFilled,
+  SunOutlined,
+} from '@sue/design-web-react';
+import { EditFilled, LikeFilled } from '@ant-design/icons';
 import PermissionWrapper from '@/components/PermissionWrapper';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
@@ -25,14 +30,12 @@ interface CardBlockType {
 }
 
 const IconList = [
-  IconStarFill,
-  IconThumbUpFill,
-  IconSunFill,
-  IconFaceSmileFill,
-  IconPenFill,
-].map((Tag, index) => <Tag key={index} />);
-
-const { Paragraph } = Typography;
+  StarFilled,
+  LikeFilled,
+  SunOutlined,
+  SmileFilled,
+  EditFilled,
+].map((Icon, index) => <Icon key={index} />);
 
 function CardBlock(props: CardBlockType) {
   const { type, card = {} } = props;
@@ -44,10 +47,10 @@ function CardBlock(props: CardBlockType) {
   const changeStatus = async () => {
     setLoading(true);
     await new Promise((resolve) =>
-      setTimeout(() => {
-        setStatus(status !== 1 ? 1 : 0);
-        resolve(null);
-      }, 1000),
+    setTimeout(() => {
+      setStatus(status !== 1 ? 1 : 0);
+      resolve(null);
+    }, 1000)
     ).finally(() => setLoading(false));
   };
 
@@ -66,8 +69,8 @@ function CardBlock(props: CardBlockType) {
       return (
         <div className={styles.icon}>
           {IconList[card.icon % IconList.length]}
-        </div>
-      );
+        </div>);
+
     }
     return null;
   };
@@ -78,50 +81,50 @@ function CardBlock(props: CardBlockType) {
         <>
           <PermissionWrapper
             requiredPermissions={[
-              { resource: /^menu.list.*/, actions: ['read'] },
-            ]}
-          >
+            { resource: /^menu.list.*/, actions: ['read'] }]
+            }>
+
             <Button
               type="primary"
               style={{ marginLeft: '12px' }}
-              loading={loading}
-            >
+              loading={loading}>
+
               {t['cardList.options.qualityInspection']}
             </Button>
           </PermissionWrapper>
 
           <PermissionWrapper
             requiredPermissions={[
-              { resource: /^menu.list.*/, actions: ['write'] },
-            ]}
-          >
+            { resource: /^menu.list.*/, actions: ['write'] }]
+            }>
+
             <Button loading={loading}>{t['cardList.options.remove']}</Button>
           </PermissionWrapper>
-        </>
-      );
+        </>);
+
     }
 
     if (type === 'service') {
       return (
         <>
-          {status === 1 ? (
-            <Button loading={loading} onClick={changeStatus}>
+          {status === 1 ?
+          <Button loading={loading} onClick={changeStatus}>
               {t['cardList.options.cancel']}
+            </Button> :
+
+          <Button type="outline" loading={loading} onClick={changeStatus}>
+              {status === 0 ?
+            t['cardList.options.subscribe'] :
+            t['cardList.options.renewal']}
             </Button>
-          ) : (
-            <Button type="outline" loading={loading} onClick={changeStatus}>
-              {status === 0
-                ? t['cardList.options.subscribe']
-                : t['cardList.options.renewal']}
-            </Button>
-          )}
-        </>
-      );
+          }
+        </>);
+
     }
 
     return (
-      <Switch checked={!!status} loading={loading} onChange={changeStatus} />
-    );
+      <Switch checked={!!status} loading={loading} onChange={changeStatus} />);
+
   };
 
   const getStatus = () => {
@@ -129,37 +132,37 @@ function CardBlock(props: CardBlockType) {
       return (
         <Tag
           color="green"
-          icon={<IconCheckCircleFill />}
+          icon={<CheckCircleFilled />}
           className={styles.status}
-          size="small"
-        >
+          size="small">
+
           {t['cardList.tag.activated']}
-        </Tag>
-      );
+        </Tag>);
+
     }
     switch (status) {
       case 1:
         return (
           <Tag
             color="green"
-            icon={<IconCheckCircleFill />}
+            icon={<CheckCircleFilled />}
             className={styles.status}
-            size="small"
-          >
+            size="small">
+
             {t['cardList.tag.opened']}
-          </Tag>
-        );
+          </Tag>);
+
       case 2:
         return (
           <Tag
             color="red"
-            icon={<IconCloseCircleFill />}
+            icon={<CloseCircleFilled />}
             className={styles.status}
-            size="small"
-          >
+            size="small">
+
             {t['cardList.tag.expired']}
-          </Tag>
-        );
+          </Tag>);
+
       default:
         return null;
     }
@@ -171,23 +174,21 @@ function CardBlock(props: CardBlockType) {
         <Skeleton
           text={{ rows: type !== 'quality' ? 3 : 2 }}
           animation
-          className={styles['card-block-skeleton']}
-        />
-      );
+          className={styles['card-block-skeleton']} />);
+
     }
     if (type !== 'quality') {
-      return <Paragraph>{card.description}</Paragraph>;
+      return <p>{card.description}</p>;
     }
     return (
       <Descriptions
         column={2}
         data={[
-          { label: '待质检数', value: card.qualityCount },
-          { label: '积压时长', value: `${card.duration}s` },
-          { label: '待抽检数', value: card.randomCount },
-        ]}
-      />
-    );
+        { label: '待质检数', value: card.qualityCount },
+        { label: '积压时长', value: `${card.duration}s` },
+        { label: '待抽检数', value: card.randomCount }]
+        } />);
+
   };
 
   const className = cs(styles['card-block'], styles[`${type}-card`]);
@@ -198,49 +199,48 @@ function CardBlock(props: CardBlockType) {
       className={className}
       size="small"
       title={
-        loading ? (
-          <Skeleton
-            animation
-            text={{ rows: 1, width: ['100%'] }}
-            style={{ width: '120px', height: '24px' }}
-            className={styles['card-block-skeleton']}
-          />
-        ) : (
-          <>
+      loading ?
+      <Skeleton
+        animation
+        text={{ rows: 1, width: ['100%'] }}
+        style={{ width: '120px', height: '24px' }}
+        className={styles['card-block-skeleton']} /> :
+
+      <>
             <div
-              className={cs(styles.title, {
-                [styles['title-more']]: visible,
-              })}
-            >
+          className={cs(styles.title, {
+            [styles['title-more']]: visible
+          })}>
+
               {getTitleIcon()}
               {card.title}
               {getStatus()}
               <Dropdown
-                dropdownRender={() => (
-                  <Menu>
-                    {['操作1', '操作2'].map((item, key) => (
-                      <Menu.Item key={key.toString()}>{item}</Menu.Item>
-                    ))}
+            dropdownRender={() =>
+            <Menu>
+                    {['操作1', '操作2'].map((item, key) =>
+              <Menu.Item key={key.toString()}>{item}</Menu.Item>
+              )}
                   </Menu>
-                )}
-                trigger={['click']}
-                onOpenChange={setVisible}
-                open={visible}
-              >
+            }
+            trigger={['click']}
+            onOpenChange={setVisible}
+            open={visible}>
+
                 <div className={styles.more}>
-                  <IconMore />
+                  <EllipsisOutlined />
                 </div>
               </Dropdown>
             </div>
             <div className={styles.time}>{card.time}</div>
           </>
-        )
-      }
-    >
+
+      }>
+
       <div className={styles.content}>{getContent()}</div>
       <div className={styles.extra}>{getButtonGroup()}</div>
-    </Card>
-  );
+    </Card>);
+
 }
 
 export default CardBlock;

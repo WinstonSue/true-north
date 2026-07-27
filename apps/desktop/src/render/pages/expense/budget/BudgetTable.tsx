@@ -1,6 +1,5 @@
-import type { ColumnProps } from '@true-north/components-ui';
 import { format } from 'date-fns';
-import { Table, Tag } from '@sue/design-web-react';
+import { Table, Tag, type TableColumnProps } from '@sue/design-web-react';
 
 import { useExpenses } from '../context';
 import type { BudgetVo } from '@true-north/vo';
@@ -9,7 +8,7 @@ import dayjs from 'dayjs';
 export default function BudgetTable() {
   const { budgetList } = useExpenses();
 
-  const columns: ColumnProps<BudgetVo>[] = [
+  const columns: TableColumnProps<BudgetVo>[] = [
     {
       title: '类别',
       dataIndex: 'category',

@@ -1,12 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Input, Select, DatePicker, Button, Tag, Space } from '@sue/design-web-react';
-import { Grid } from '@true-north/components-ui';
-import {
-  IconSearch,
-  IconDown,
-  IconUp,
-  IconRefresh,
-} from '@true-north/components-ui';
+import { Input, Select, DatePicker, Button, Tag, Space, Row, Col, DownOutlined, ReloadOutlined, SearchOutlined, UpOutlined } from '@sue/design-web-react';
+
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 import { GoalStatus, GoalType } from '@true-north/enum';
 import { useGoalContext } from '../context';
@@ -14,7 +8,6 @@ import clsx from 'clsx';
 import { debounce } from 'lodash-es';
 
 const DatePickerRange = DatePicker.RangePicker;
-const { Row, Col } = Grid;
 
 const GoalFilters: React.FC = () => {
   const { searchValue, setSearchValue, filters, setFilters, clearFilters } =
@@ -119,7 +112,7 @@ const GoalFilters: React.FC = () => {
       <div className="flex gap-2">
         <Input
           placeholder="搜索目标..."
-          prefix={<IconSearch />}
+          prefix={<SearchOutlined />}
           value={localSearchValue}
           onChange={(value) => {
             setLocalSearchValue(value);
@@ -130,7 +123,7 @@ const GoalFilters: React.FC = () => {
         />
         <Button
           type="text"
-          icon={collapsed ? <IconDown /> : <IconUp />}
+          icon={collapsed ? <DownOutlined /> : <UpOutlined />}
           onClick={() => setCollapsed(!collapsed)}
           size="small"
         />
@@ -243,7 +236,7 @@ const GoalFilters: React.FC = () => {
       {/* 操作按钮 */}
       {!collapsed && (
         <div className="flex gap-2 justify-end">
-          <Button size="small" icon={<IconRefresh />} onClick={handleReset}>
+          <Button size="small" icon={<ReloadOutlined />} onClick={handleReset}>
             重置
           </Button>
         </div>

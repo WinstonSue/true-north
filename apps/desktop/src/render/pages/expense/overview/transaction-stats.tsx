@@ -1,46 +1,42 @@
 'use client';
 
-import { Card } from '@sue/design-web-react';
-import { Grid } from '@true-north/components-ui';
-import { useExpenses } from '../context';
-import { IconArrowRise, IconArrowFall } from '@true-north/components-ui';
+import { Card, Row, Col, ArrowDownOutlined, ArrowUpOutlined } from '@sue/design-web-react';
 
-const GridItem = Grid.Col;
+import { useExpenses } from '../context';
 
 export function TransactionStats() {
   const { stats } = useExpenses();
 
   return (
-    <Grid cols={24} rowGap={16} colGap={16}>
-      <GridItem span={24} md={12} lg={6}>
+    <Row gutter={[16, 16]}>
+      <Col span={24} md={12} lg={6}>
         <Card>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">总收入</span>
-            <IconArrowRise className="h-4 w-4 text-green-500" />
+            <ArrowUpOutlined className="h-4 w-4 text-green-500" />
           </div>
           <div className="text-2xl font-bold text-green-600">
             ${stats.totalIncome.toFixed(2)}
           </div>
         </Card>
-      </GridItem>
+      </Col>
 
-      <GridItem span={24} md={12} lg={6}>
+      <Col span={24} md={12} lg={6}>
         <Card>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">总支出</span>
-            <IconArrowFall className="h-4 w-4 text-red-500" />
+            <ArrowDownOutlined className="h-4 w-4 text-red-500" />
           </div>
           <div className="text-2xl font-bold text-red-600">
             ${stats.totalExpenses.toFixed(2)}
           </div>
         </Card>
-      </GridItem>
+      </Col>
 
-      <GridItem span={24} md={12} lg={6}>
+      <Col span={24} md={12} lg={6}>
         <Card>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">净额</span>
-            {/* <IconStock className="h-4 w-4 text-blue-500" /> */}
           </div>
           <div
             className={`text-2xl font-bold ${
@@ -50,13 +46,12 @@ export function TransactionStats() {
             ${stats.netAmount.toFixed(2)}
           </div>
         </Card>
-      </GridItem>
+      </Col>
 
-      <GridItem span={24} md={12} lg={6}>
+      <Col span={24} md={12} lg={6}>
         <Card>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">环比变化</span>
-            {/* <IconWallet className="h-4 w-4 text-gray-500" /> */}
           </div>
           <div>
             <div className="text-2xl font-bold">
@@ -65,7 +60,7 @@ export function TransactionStats() {
             <p className="text-xs text-gray-500">相比上期</p>
           </div>
         </Card>
-      </GridItem>
-    </Grid>
+      </Col>
+    </Row>
   );
 }

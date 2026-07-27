@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Card, Form, Select, Input, Space, Button, message } from '@sue/design-web-react';
-import { Typography, Grid } from '@true-north/components-ui';
+import { Card, Form, Select, Input, Space, Button, message, Row, Col } from '@sue/design-web-react';
+
 import { FormInstance } from '@sue/design-web-react';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
@@ -15,16 +15,16 @@ function GroupForm() {
 
   function submit(data) {
     setLoading(true);
-    axios
-      .post('/api/groupForm', {
-        data,
-      })
-      .then(() => {
-        message.success(t['groupForm.submitSuccess']);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    axios.
+    post('/api/groupForm', {
+      data
+    }).
+    then(() => {
+      message.success(t['groupForm.submitSuccess']);
+    }).
+    finally(() => {
+      setLoading(false);
+    });
   }
 
   function handleSubmit() {
@@ -41,212 +41,212 @@ function GroupForm() {
     <div className={styles.container}>
       <Form layout="vertical" ref={formRef} className={styles['form-group']}>
         <Card>
-          <Typography.Title heading={6}>
+          <h6 className="text-title-1 font-medium">
             {t['groupForm.title.video']}
-          </Typography.Title>
-          <Grid.Row gutter={80}>
-            <Grid.Col span={8}>
+          </h6>
+          <Row gutter={80}>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.mode']}
                 field="video.mode"
-                initialValue={'custom'}
-              >
+                initialValue={'custom'}>
+
                 <Select placeholder={t['groupForm.placeholder.video.mode']}>
                   <Select.Option value="custom">自定义</Select.Option>
                   <Select.Option value="mode1">模式1</Select.Option>
                   <Select.Option value="mode2">模式2</Select.Option>
                 </Select>
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.acquisition.resolution']}
-                field="video.acquisition.resolution"
-              >
+                field="video.acquisition.resolution">
+
                 <Select
                   placeholder={
-                    t['groupForm.placeholder.video.acquisition.resolution']
-                  }
-                >
+                  t['groupForm.placeholder.video.acquisition.resolution']
+                  }>
+
                   <Select.Option value="resolution1">分辨率1</Select.Option>
                   <Select.Option value="resolution2">分辨率2</Select.Option>
                   <Select.Option value="resolution3">分辨率3</Select.Option>
                 </Select>
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.acquisition.frameRate']}
-                field="video.acquisition.frameRate"
-              >
+                field="video.acquisition.frameRate">
+
                 <Input
                   placeholder={
-                    t['groupForm.placeholder.video.acquisition.frameRate']
+                  t['groupForm.placeholder.video.acquisition.frameRate']
                   }
-                  addAfter="fps"
-                />
+                  addAfter="fps" />
+
               </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
-          <Grid.Row gutter={80}>
-            <Grid.Col span={8}>
+            </Col>
+          </Row>
+          <Row gutter={80}>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.encoding.resolution']}
-                field="video.encoding.resolution"
-              >
+                field="video.encoding.resolution">
+
                 <Select
                   placeholder={
-                    t['groupForm.placeholder.video.encoding.resolution']
-                  }
-                >
+                  t['groupForm.placeholder.video.encoding.resolution']
+                  }>
+
                   <Select.Option value="resolution1">分辨率1</Select.Option>
                   <Select.Option value="resolution2">分辨率2</Select.Option>
                   <Select.Option value="resolution3">分辨率3</Select.Option>
                 </Select>
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.encoding.rate.min']}
-                field="video.encoding.rate.min"
-              >
+                field="video.encoding.rate.min">
+
                 <Input
                   placeholder={
-                    t['groupForm.placeholder.video.encoding.rate.min']
+                  t['groupForm.placeholder.video.encoding.rate.min']
                   }
-                  addAfter="bps"
-                />
+                  addAfter="bps" />
+
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.encoding.rate.max']}
-                field="video.encoding.rate.max"
-              >
+                field="video.encoding.rate.max">
+
                 <Input
                   placeholder={
-                    t['groupForm.placeholder.video.encoding.rate.max']
+                  t['groupForm.placeholder.video.encoding.rate.max']
                   }
-                  addAfter="bps"
-                />
+                  addAfter="bps" />
+
               </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
-          <Grid.Row gutter={80}>
-            <Grid.Col span={8}>
+            </Col>
+          </Row>
+          <Row gutter={80}>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.encoding.rate.default']}
-                field="video.encoding.rate.default"
-              >
+                field="video.encoding.rate.default">
+
                 <Input
                   placeholder={
-                    t['groupForm.placeholder.video.encoding.rate.default']
+                  t['groupForm.placeholder.video.encoding.rate.default']
                   }
-                  addAfter="bps"
-                />
+                  addAfter="bps" />
+
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.encoding.frameRate']}
-                field="video.encoding.frameRate"
-              >
+                field="video.encoding.frameRate">
+
                 <Input
                   placeholder={
-                    t['groupForm.placeholder.video.encoding.frameRate']
+                  t['groupForm.placeholder.video.encoding.frameRate']
                   }
-                  addAfter="fps"
-                />
+                  addAfter="fps" />
+
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.video.encoding.profile']}
-                field="video.encoding.profile"
-              >
+                field="video.encoding.profile">
+
                 <Input
                   placeholder={
-                    t['groupForm.placeholder.video.encoding.profile']
+                  t['groupForm.placeholder.video.encoding.profile']
                   }
-                  addAfter="bps"
-                />
+                  addAfter="bps" />
+
               </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
+            </Col>
+          </Row>
         </Card>
         <Card>
-          <Typography.Title heading={6}>
+          <h6 className="text-title-1 font-medium">
             {t['groupForm.title.audio']}
-          </Typography.Title>
-          <Grid.Row gutter={80}>
-            <Grid.Col span={8}>
+          </h6>
+          <Row gutter={80}>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.audio.mode']}
                 initialValue={'custom'}
-                field="audio.mode"
-              >
+                field="audio.mode">
+
                 <Select placeholder={t['groupForm.placeholder.audio.mode']}>
                   <Select.Option value="custom">自定义</Select.Option>
                   <Select.Option value="mode1">模式1</Select.Option>
                   <Select.Option value="mode2">模式2</Select.Option>
                 </Select>
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.audio.acquisition.channels']}
-                field="audio.acquisition.channels"
-              >
+                field="audio.acquisition.channels">
+
                 <Select
                   placeholder={
-                    t['groupForm.placeholder.audio.acquisition.channels']
-                  }
-                >
+                  t['groupForm.placeholder.audio.acquisition.channels']
+                  }>
+
                   <Select.Option value="1">1</Select.Option>
                   <Select.Option value="2">2</Select.Option>
                   <Select.Option value="3">3</Select.Option>
                 </Select>
               </Form.Item>
-            </Grid.Col>
-            <Grid.Col span={8}>
+            </Col>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.audio.encoding.rate']}
-                field="audio.encoding.rate"
-              >
+                field="audio.encoding.rate">
+
                 <Input
                   placeholder={t['groupForm.placeholder.audio.encoding.rate']}
-                  addAfter="bps"
-                />
+                  addAfter="bps" />
+
               </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
-          <Grid.Row gutter={80}>
-            <Grid.Col span={8}>
+            </Col>
+          </Row>
+          <Row gutter={80}>
+            <Col span={8}>
               <Form.Item
                 label={t['groupForm.form.label.audio.encoding.profile']}
-                field="audio.encoding.profile"
-              >
+                field="audio.encoding.profile">
+
                 <Input
                   placeholder={
-                    t['groupForm.placeholder.audio.encoding.profile']
+                  t['groupForm.placeholder.audio.encoding.profile']
                   }
-                  addAfter="fps"
-                />
+                  addAfter="fps" />
+
               </Form.Item>
-            </Grid.Col>
-          </Grid.Row>
+            </Col>
+          </Row>
         </Card>
         <Card style={{ marginBottom: '40px' }}>
-          <Typography.Title heading={6}>
+          <h6 className="text-title-1 font-medium">
             {t['groupForm.title.explanation']}
-          </Typography.Title>
+          </h6>
           <Form.Item
             label={t['groupForm.form.label.explanation']}
-            field="audio.explanation"
-          >
+            field="audio.explanation">
+
             <Input.TextArea
-              placeholder={t['groupForm.placeholder.explanation']}
-            />
+              placeholder={t['groupForm.placeholder.explanation']} />
+
           </Form.Item>
         </Card>
       </Form>
@@ -259,14 +259,14 @@ function GroupForm() {
             type="primary"
             onClick={handleSubmit}
             loading={loading}
-            size="large"
-          >
+            size="large">
+
             {t['groupForm.submit']}
           </Button>
         </Space>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default GroupForm;

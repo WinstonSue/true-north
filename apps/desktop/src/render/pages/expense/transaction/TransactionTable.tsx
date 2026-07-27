@@ -1,4 +1,4 @@
-import type { ColumnProps } from '@true-north/components-ui';
+import type { TableColumnProps } from '@sue/design-web-react';
 'use client';
 
 import { format } from 'date-fns';
@@ -11,7 +11,7 @@ import type { TransactionVo } from '@true-north/vo';
 export default function TransactionTable() {
   const { transactionList } = useExpenses();
 
-  const columns: ColumnProps<TransactionVo>[] = [
+  const columns: TableColumnProps<TransactionVo>[] = [
     {
       title: '日期',
       dataIndex: 'transactionDateTime',

@@ -18,7 +18,7 @@ export default function TodoEditorMini(props: TodoEditorSimpleProps) {
       afterSubmit={props.afterSubmit}
     >
       <Flex vertical container="full">
-        <Flex container="fixed">
+        <Flex container="fixed" className="w-full">
           <TodoEditorHeader />
         </Flex>
         <Flex container="fill">

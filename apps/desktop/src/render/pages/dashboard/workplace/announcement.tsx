@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Card, Skeleton, Tag } from '@sue/design-web-react';
-import { Typography, Link } from '@true-north/components-ui';
+
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/announcement.module.less';
@@ -11,14 +11,14 @@ function Announcement() {
   const t = useLocale(locale);
   const fetchData = () => {
     setLoading(true);
-    axios
-      .get('/api/workplace/announcement')
-      .then((res) => {
-        setData(res.data);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    axios.
+    get('/api/workplace/announcement').
+    then((res) => {
+      setData(res.data);
+    }).
+    finally(() => {
+      setLoading(false);
+    });
   };
   useEffect(() => {
     fetchData();
@@ -38,24 +38,24 @@ function Announcement() {
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography.Title heading={6}>
+        <h6 className="text-title-1 font-medium">
           {t['workplace.announcement']}
-        </Typography.Title>
-        <Link>{t['workplace.seeMore']}</Link>
+        </h6>
+        <a style={{ color: "var(--color-primary-6)" }}>{t['workplace.seeMore']}</a>
       </div>
       <Skeleton loading={loading} text={{ rows: 5, width: '100%' }} animation>
         <div>
-          {data.map((d) => (
-            <div key={d.key} className={styles.item}>
+          {data.map((d) =>
+          <div key={d.key} className={styles.item}>
               <Tag color={getTagColor(d.type)} size="small">
                 {t[`workplace.${d.type}`]}
               </Tag>
               <span className={styles.link}>{d.content}</span>
             </div>
-          ))}
+          )}
         </div>
       </Skeleton>
-    </Card>
-  );
+    </Card>);
+
 }
 export default Announcement;
