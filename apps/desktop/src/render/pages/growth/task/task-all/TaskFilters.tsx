@@ -3,7 +3,7 @@
 import { Input, Select, Button, Space, DatePicker, Row, Col, SearchOutlined } from '@sue/design-web-react';
 
 import { IMPORTANCE_MAP, URGENCY_MAP } from '../../constants';
-import { TagSelector } from '../../../../components/TagSelector';
+import { TagSelector } from '@/components/TagSelector';
 import { TaskPageFilterVo } from '@true-north/vo';
 import { useTaskAllContext } from './context';
 import { TableFilter } from '@/components/Layout/TableFilter';

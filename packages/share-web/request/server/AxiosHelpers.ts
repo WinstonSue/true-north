@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { getEmbedAccessToken } from './helper';
 import { debounce } from 'lodash-es';
-import { message } from '@true-north/components-ui';
+import { message } from '@sue/design-web-react';
 
 const debouncedError = debounce(message.error, 500);
 

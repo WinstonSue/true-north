@@ -8,7 +8,8 @@ import {
   RightOutlined,
 } from '@sue/design-web-react';
 import dayjs, { type Dayjs } from 'dayjs';
-import { SiteIcon, RepeatSelector } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
+import RepeatSelector from '@/components/RepeatSelector';
 import { GlobalContext } from '@/context';
 import clsx from 'clsx';
 import { voToForm, formToVo } from 'francis-helper-repeat';

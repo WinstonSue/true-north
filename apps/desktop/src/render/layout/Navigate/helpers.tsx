@@ -10,7 +10,7 @@ import {
   DashboardOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 import styles from '../layout.module.less';
 
 export function getIconFromKey(key: string): React.ReactNode {

@@ -30,7 +30,7 @@ sequenceDiagram
 - 路由：`render/router/`
 - 模块状态：使用 `createInjectState`（`render/utils/createInjectState.tsx`），每功能块独立 Provider + hook
 - 样式：CSS Modules + Less / Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合；页面壳层优先使用其 `Flex`（`container="full|fixed|fill"`）。`fixed` 不自动撑满交叉轴：列父加 `w-full`，行父加 `h-full`（对齐已移除的 `FlexibleContainer.Fixed`）
-- UI 组件：布局/表单/反馈直接用 `@sue/design-web-react` 公开 API；图标优先 design-web 的 `*Outlined`/`*Filled`，缺省再用 `@ant-design/icons`。禁止再引入 Arco 风格 compat（已移除的 `Typography`/`Icon*`/`Grid`/`Result`/`Steps`/`List` 等 shim）。`@true-north/components-ui` 仅保留一等能力（`SiteIcon`、`RepeatSelector`、`ContextMenu`、`message`）
+- UI 组件：布局/表单/反馈直接用 `@sue/design-web-react` 公开 API；图标优先 design-web 的 `*Outlined`/`*Filled`，缺省再用 `@ant-design/icons`。禁止再引入 Arco 风格 compat（已移除的 `Typography`/`Icon*`/`Grid`/`Result`/`Steps`/`List` 等 shim）。业务一等能力（`SiteIcon`、`RepeatSelector`、`ContextMenu`）放在 `@/components`；HTTP 错误提示直接用 design-web 的 `message`
 - 数据调用：优先 `@true-north/web-service` → `@true-north/api` → `share-request` → preload REST
 
 示例（Context 形态）：

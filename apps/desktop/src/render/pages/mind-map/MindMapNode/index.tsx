@@ -5,7 +5,6 @@ import { ReactShape } from '@antv/x6-react-shape';
 import { ENodeType } from '@true-north/components-mind/src/types';
 
 import GoalEditor from '@/pages/growth/components/GoalDetail/GoalEditor';
-import { openDrawer } from '@/layout/Drawer';
 import styles from './style.module.less';
 import clsx from 'clsx';
 import { handleEditNode } from '../helpers';

@@ -5,13 +5,11 @@ import cs from 'clsx';
 
 import { useSelector } from 'react-redux';
 import Navbar from '../components/NavBar';
-import Footer from '../components/Footer';
 import useLocale from '../utils/useLocale';
 import getUrlParams from '../utils/getUrlParams';
 import { GlobalState } from '../store';
 import styles from './layout.module.less';
 import Navigate from './Navigate';
-import { GlobalDrawer } from './Drawer';
 
 const Aside = Layout.Sider;
 
@@ -112,7 +110,6 @@ function PageLayout() {
           </>
         )}
       </Flex>
-      <GlobalDrawer />
     </Flex>
   );
 }

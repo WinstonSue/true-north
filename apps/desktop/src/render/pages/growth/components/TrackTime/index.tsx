@@ -1,6 +1,6 @@
 import { Popover } from '@sue/design-web-react';
 import clsx from 'clsx';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 import TimeTracker from './TimeTracker';
 import { TimeEntry, TrackTimeProps } from './types';
 

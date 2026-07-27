@@ -6,7 +6,7 @@ import styles from './style.module.less';
 import { TaskService } from '@true-north/web-service';
 import { flushSync } from 'react-dom';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 import { useTaskDetail, TaskEditor } from '../../components';
 import { TaskStatus } from '@true-north/enum';
 

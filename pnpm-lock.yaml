@@ -90,18 +90,12 @@ importers:
       '@true-north/components-mind':
         specifier: workspace:*
         version: link:../../packages/components/mind
-      '@true-north/components-ui':
-        specifier: workspace:*
-        version: link:../../packages/components/ui
       '@true-north/enum':
         specifier: workspace:*
         version: link:../../packages/business/enum
       '@true-north/share-types':
         specifier: workspace:*
         version: link:../../packages/share/types
-      '@true-north/tabs':
-        specifier: workspace:*
-        version: link:../../packages/components/tabs
       '@true-north/web-service':
         specifier: workspace:*
         version: link:../../packages/business/web-service
@@ -390,9 +384,6 @@ importers:
       '@true-north/common-web-utils':
         specifier: workspace:*
         version: link:../../common-web/utils
-      '@true-north/components-ui':
-        specifier: workspace:*
-        version: link:../ui
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -415,46 +406,6 @@ importers:
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
-
-  packages/components/tabs:
-    dependencies:
-      dnd-core:
-        specifier: ^16
-        version: 16.0.1
-      immutability-helper:
-        specifier: ^3.1.1
-        version: 3.1.1
-      react:
-        specifier: '*'
-        version: 18.3.1
-      react-dnd:
-        specifier: ^16
-        version: 16.0.1(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.24))(@types/node@22.13.0)(@types/react@18.3.24)(react@18.3.1)
-      react-dnd-html5-backend:
-        specifier: ^16
-        version: 16.0.1
-
-  packages/components/ui:
-    dependencies:
-      '@sue/design-web-react':
-        specifier: file:../../../vendor/sue-design-web-react
-        version: file:vendor/sue-design-web-react(date-fns@3.6.0)(luxon@3.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      clsx:
-        specifier: ^2.0.0
-        version: 2.1.1
-      dayjs:
-        specifier: ^1.11.13
-        version: 1.11.18
-      francis-types-repeat:
-        specifier: 0.0.1
-        version: 0.0.1
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
-    devDependencies:
-      '@types/react':
-        specifier: ^18.2.0
-        version: 18.3.24
 
   packages/dev-tools:
     dependencies:
@@ -531,9 +482,9 @@ importers:
 
   packages/share-web/request:
     dependencies:
-      '@true-north/components-ui':
-        specifier: workspace:*
-        version: link:../../components/ui
+      '@sue/design-web-react':
+        specifier: file:../../../vendor/sue-design-web-react
+        version: file:vendor/sue-design-web-react(date-fns@3.6.0)(luxon@3.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@true-north/share-types':
         specifier: workspace:*
         version: link:../../share/types
@@ -2623,15 +2574,6 @@ packages:
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
-
-  '@react-dnd/asap@5.0.2':
-    resolution: {integrity: sha512-WLyfoHvxhs0V9U+GTsGilGgf2QsPl6ZZ44fnv0/b8T3nQyvzxidxsg/ZltbWssbsRDlYW8UKSQMTGotuTotZ6A==}
-
-  '@react-dnd/invariant@4.0.2':
-    resolution: {integrity: sha512-xKCTqAK/FFauOM9Ta2pswIyT3D8AQlfrYdOi/toTPEhqCuAs1v5tcJ3Y08Izh1cJ5Jchwy9SeAXmMg6zrKs2iw==}
-
-  '@react-dnd/shallowequal@4.0.2':
-    resolution: {integrity: sha512-/RVXdLvJxLg4QKvMoM5WlwNR9ViO9z8B/qPcc+C0Sa/teJY7QG7kJ441DwzOjMYEY7GmU4dj5EcGHIkKZiQZCA==}
 
   '@remix-run/router@1.23.0':
     resolution: {integrity: sha512-O3rHJzAQKamUz1fvE0Qaw0xSFqsA/yafi2iqeE0pvdFtCO1viYx8QL6f3Ln/aCCTLxs68SLf0KPM9eSeM8yBnA==}
@@ -4791,9 +4733,6 @@ packages:
     os: [darwin]
     hasBin: true
 
-  dnd-core@16.0.1:
-    resolution: {integrity: sha512-HK294sl7tbw6F6IeuK16YSBUoorvHpY8RHO+9yFfaJyCDVb6n7PRcezrOEOa2SBCqiYpemh5Jx20ZcjKdFAVng==}
-
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
     engines: {node: '>=0.10.0'}
@@ -5650,9 +5589,6 @@ packages:
 
   immer@10.1.3:
     resolution: {integrity: sha512-tmjF/k8QDKydUlm3mZU+tjM6zeq9/fFpPqH9SzWmBnVVKsPBg/V66qsMwb3/Bo90cgUN+ghdVBess+hPsxUyRw==}
-
-  immutability-helper@3.1.1:
-    resolution: {integrity: sha512-Q0QaXjPjwIju/28TsugCHNEASwoCcJSyJV3uO1sOIQGI0jKgm9f41Lvz0DZj3n46cNCyAZTsEYoY4C2bVRUzyQ==}
 
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
@@ -7358,24 +7294,6 @@ packages:
     resolution: {integrity: sha512-LEeGE/ZzNLIsFWa1TMe8y5VYqr7bibneWmvJwm1pCn/eNmrabWDh659JSPn9BuaMpEfU83WTOJfnCcjDZwNQTA==}
     peerDependencies:
       react: '*'
-
-  react-dnd-html5-backend@16.0.1:
-    resolution: {integrity: sha512-Wu3dw5aDJmOGw8WjH1I1/yTH+vlXEL4vmjk5p+MHxP8HuHJS1lAGeIdG/hze1AvNeXWo/JgULV87LyQOr+r5jw==}
-
-  react-dnd@16.0.1:
-    resolution: {integrity: sha512-QeoM/i73HHu2XF9aKksIUuamHPDvRglEwdHL4jsp784BgUuWcg6mzfxT0QDdQz8Wj0qyRKx2eMg8iZtWvU4E2Q==}
-    peerDependencies:
-      '@types/hoist-non-react-statics': '>= 3.3.1'
-      '@types/node': 22.13.0
-      '@types/react': '>= 16'
-      react: '>= 16.14'
-    peerDependenciesMeta:
-      '@types/hoist-non-react-statics':
-        optional: true
-      '@types/node':
-        optional: true
-      '@types/react':
-        optional: true
 
   react-dom@18.3.1:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
@@ -11299,12 +11217,6 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@react-dnd/asap@5.0.2': {}
-
-  '@react-dnd/invariant@4.0.2': {}
-
-  '@react-dnd/shallowequal@4.0.2': {}
-
   '@remix-run/router@1.23.0': {}
 
   '@rolldown/pluginutils@1.0.0-beta.27': {}
@@ -14254,12 +14166,6 @@ snapshots:
       verror: 1.10.1
     optional: true
 
-  dnd-core@16.0.1:
-    dependencies:
-      '@react-dnd/asap': 5.0.2
-      '@react-dnd/invariant': 4.0.2
-      redux: 4.2.1
-
   doctrine@2.1.0:
     dependencies:
       esutils: 2.0.3
@@ -15435,8 +15341,6 @@ snapshots:
   immediate@3.0.6: {}
 
   immer@10.1.3: {}
-
-  immutability-helper@3.1.1: {}
 
   import-fresh@3.3.1:
     dependencies:
@@ -17439,23 +17343,6 @@ snapshots:
       react: 18.3.1
       reactcss: 1.2.3(react@18.3.1)
       tinycolor2: 1.6.0
-
-  react-dnd-html5-backend@16.0.1:
-    dependencies:
-      dnd-core: 16.0.1
-
-  react-dnd@16.0.1(@types/hoist-non-react-statics@3.3.7(@types/react@18.3.24))(@types/node@22.13.0)(@types/react@18.3.24)(react@18.3.1):
-    dependencies:
-      '@react-dnd/invariant': 4.0.2
-      '@react-dnd/shallowequal': 4.0.2
-      dnd-core: 16.0.1
-      fast-deep-equal: 3.1.3
-      hoist-non-react-statics: 3.3.2
-      react: 18.3.1
-    optionalDependencies:
-      '@types/hoist-non-react-statics': 3.3.7(@types/react@18.3.24)
-      '@types/node': 22.13.0
-      '@types/react': 18.3.24
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:

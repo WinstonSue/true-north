@@ -1,28 +1,27 @@
-import { message } from '@sue/design-web-react';
-import { openDrawer } from '@/layout/Drawer';
+import { Drawer, message, Modal } from '@sue/design-web-react';
 import GoalEditor from '@/pages/growth/components/GoalDetail/GoalEditor';
 import GoalCreator from '@/pages/growth/components/GoalDetail/GoalCreator';
-import { Modal } from '@sue/design-web-react';
 import { GoalService } from '@true-north/web-service';
 
 export const handleAddChild = (nodeId: string) => {
   return new Promise((resolve) => {
-    openDrawer({
+    const instance = Drawer.open({
       title: '新增子目标',
-      width: 800,
-      content: (props) => {
-        return (
-          <GoalCreator
-            initialFormData={{
-              parentId: nodeId, // 设置父级目标为当前节点
-            }}
-            onClose={props.onClose}
-            afterSubmit={async () => {
-              resolve(true);
-            }}
-          />
-        );
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <GoalCreator
+          initialFormData={{
+            parentId: nodeId, // 设置父级目标为当前节点
+          }}
+          onClose={async () => {
+            instance.destroy();
+          }}
+          afterSubmit={async () => {
+            resolve(true);
+          }}
+        />
+      ),
     });
   });
 };
@@ -34,22 +33,23 @@ export const handleAddSibling = async (nodeId: string) => {
       const currentGoal = await GoalService.find(nodeId);
       const parentId = currentGoal.parentId;
 
-      openDrawer({
+      const instance = Drawer.open({
         title: '新增同级目标',
-        width: 800,
-        content: (props) => {
-          return (
-            <GoalCreator
-              initialFormData={{
-                parentId: parentId, // 设置父级目标为当前节点的父级
-              }}
-              onClose={props.onClose}
-              afterSubmit={async () => {
-                resolve(true);
-              }}
-            />
-          );
-        },
+        size: 800,
+        footer: null,
+        content: (
+          <GoalCreator
+            initialFormData={{
+              parentId: parentId, // 设置父级目标为当前节点的父级
+            }}
+            onClose={async () => {
+              instance.destroy();
+            }}
+            afterSubmit={async () => {
+              resolve(true);
+            }}
+          />
+        ),
       });
     } catch (error) {
       console.error('获取目标信息失败:', error);
@@ -65,28 +65,29 @@ export const handleCopyNode = async (nodeId: string) => {
       // 获取当前节点信息
       const currentGoal = await GoalService.find(nodeId);
 
-      openDrawer({
+      const instance = Drawer.open({
         title: '复制目标',
-        width: 800,
-        content: (props) => {
-          return (
-            <GoalCreator
-              initialFormData={{
-                name: `${currentGoal.name} - 副本`,
-                description: currentGoal.description,
-                type: currentGoal.type,
-                importance: currentGoal.importance,
-                difficulty: currentGoal.difficulty,
-                parentId: currentGoal.parentId, // 保持相同的父级
-                planTimeRange: [undefined, undefined], // 重置时间范围
-              }}
-              onClose={props.onClose}
-              afterSubmit={async () => {
-                resolve(true);
-              }}
-            />
-          );
-        },
+        size: 800,
+        footer: null,
+        content: (
+          <GoalCreator
+            initialFormData={{
+              name: `${currentGoal.name} - 副本`,
+              description: currentGoal.description,
+              type: currentGoal.type,
+              importance: currentGoal.importance,
+              difficulty: currentGoal.difficulty,
+              parentId: currentGoal.parentId, // 保持相同的父级
+              planTimeRange: [undefined, undefined], // 重置时间范围
+            }}
+            onClose={async () => {
+              instance.destroy();
+            }}
+            afterSubmit={async () => {
+              resolve(true);
+            }}
+          />
+        ),
       });
     } catch (error) {
       console.error('获取目标信息失败:', error);
@@ -111,20 +112,21 @@ export const handleDeleteNode = (nodeId: string) => {
 
 export const handleEditNode = (nodeId: string) => {
   return new Promise((resolve) => {
-    openDrawer({
+    const instance = Drawer.open({
       title: '编辑目标',
-      width: 800,
-      content: (props) => {
-        return (
-          <GoalEditor
-            goalId={nodeId}
-            onClose={props.onClose}
-            afterSubmit={async () => {
-              resolve(true);
-            }}
-          />
-        );
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <GoalEditor
+          goalId={nodeId}
+          onClose={async () => {
+            instance.destroy();
+          }}
+          afterSubmit={async () => {
+            resolve(true);
+          }}
+        />
+      ),
     });
   });
 };

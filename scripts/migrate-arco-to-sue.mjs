@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Mechanical migration: Arco / francis → @sue/design-web-react + @true-north/components-ui
+ * Mechanical migration: Arco / francis → @sue/design-web-react + @/components
+ * (historical; @true-north/components-ui has been inlined into apps/desktop)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,7 +22,7 @@ const STYLE_EXT = new Set(['.less', '.css', '.module.less']);
 
 const COMPAT_FROM_UI = new Set(['Grid', 'Typography', 'List', 'Result', 'Steps']);
 const SUE = '@sue/design-web-react';
-const UI = '@true-north/components-ui';
+const UI = '@/components';
 
 const TYPE_IMPORT_MAP = [
   [/['"]@arco-design\/web-react\/es\/Modal\/confirm['"]/g, `'${SUE}'`],

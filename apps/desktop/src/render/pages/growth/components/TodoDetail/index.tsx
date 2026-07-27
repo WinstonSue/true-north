@@ -1,42 +1,55 @@
-import { Popover } from '@sue/design-web-react';
+import { Drawer, Popover } from '@sue/design-web-react';
 import { useState } from 'react';
 import TodoEditor, { TodoEditorProps } from './TodoEditor';
 import TodoCreatorMini, { TodoCreatorMiniProps } from './TodoCreatorMini';
 import TodoCreator, { TodoCreatorProps } from './TodoCreator';
-import { openDrawer, IDrawerOption } from '@/layout/Drawer';
 
 export { TodoEditor, TodoCreator, TodoCreatorMini };
+
+type DrawerOptions = Omit<Parameters<typeof Drawer.open>[0], 'content'>;
 
 export function useTodoDetail() {
   const openEditDrawer = (
     props: {
       contentProps: TodoEditorProps;
-    } & Omit<IDrawerOption, 'content'>,
+    } & DrawerOptions,
   ) => {
     const { contentProps, ...rest } = props;
-    openDrawer({
+    const instance = Drawer.open({
       ...rest,
       title: '编辑待办',
-      width: 800,
-      content: (props) => {
-        return <TodoEditor {...contentProps} onClose={props.onClose} />;
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <TodoEditor
+          {...contentProps}
+          onClose={async () => {
+            instance.destroy();
+          }}
+        />
+      ),
     });
   };
 
   const openCreateDrawer = (
     props: {
       contentProps: TodoCreatorProps;
-    } & Omit<IDrawerOption, 'content'>,
+    } & DrawerOptions,
   ) => {
     const { contentProps, ...rest } = props;
-    openDrawer({
+    const instance = Drawer.open({
       ...rest,
       title: '新建待办',
-      width: 800,
-      content: (props) => {
-        return <TodoCreator {...contentProps} onClose={props.onClose} />;
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <TodoCreator
+          {...contentProps}
+          onClose={async () => {
+            instance.destroy();
+          }}
+        />
+      ),
     });
   };
 

@@ -4,7 +4,7 @@ import { TaskVo } from '@true-north/vo';
 import { useTaskDetail } from '../../components/TaskDetail';
 import { useState, useMemo } from 'react';
 import clsx from 'clsx';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 import { TaskStatus } from '@true-north/enum';
 
 function TaskItem({ task }: { task: TaskVo }) {

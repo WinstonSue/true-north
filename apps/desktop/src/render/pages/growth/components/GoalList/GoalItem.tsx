@@ -1,7 +1,7 @@
 'use client';
 
 import { Popover, Button, Card } from '@sue/design-web-react';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 import IconSelector from '../IconSelector';
 import { GoalService } from '@true-north/web-service';
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';

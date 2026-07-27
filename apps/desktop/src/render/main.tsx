@@ -21,7 +21,6 @@ import { generatePermission } from './router/routes';
 import 'dayjs/locale/zh-cn';
 import '@true-north/share-types';
 import dayjs from 'dayjs';
-import { setMessageImpl } from '@true-north/components-ui';
 import { registerMessage } from '@true-north/web-service';
 
 const messageApi = {
@@ -31,7 +30,6 @@ const messageApi = {
   info: (params: string) => message.info(params),
 };
 
-setMessageImpl(messageApi);
 registerMessage(messageApi);
 
 dayjs.locale('zh-cn');

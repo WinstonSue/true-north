@@ -1,7 +1,7 @@
 {
   "name": "@sue/design-web-react",
   "type": "module",
-  "version": "0.0.3-beta.1",
+  "version": "0.0.3-beta.2",
   "description": "Ylib Design React Component Library",
   "license": "UNLICENSED",
   "sideEffects": [

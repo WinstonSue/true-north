@@ -1,7 +1,7 @@
 'use client';
 
 import { Tag, Popover, Button, Flex } from '@sue/design-web-react';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 import { isToday } from 'date-fns';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import IconSelector from '../../components/IconSelector';

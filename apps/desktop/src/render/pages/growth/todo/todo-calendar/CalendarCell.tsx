@@ -5,7 +5,7 @@ import { TodoStatus } from '@true-north/enum';
 import { useState, useMemo } from 'react';
 import clsx from 'clsx';
 import { useTodoDetail } from '../../components';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 
 function TodoItem({ todo }: { todo: TodoVo }) {
   const { getTodoList } = useCalendarContext();

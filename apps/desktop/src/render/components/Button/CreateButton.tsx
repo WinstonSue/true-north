@@ -1,5 +1,5 @@
 import { Button, ButtonProps } from '@sue/design-web-react';
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 
 export function CreateButton({ ...props }: ButtonProps) {
   return (

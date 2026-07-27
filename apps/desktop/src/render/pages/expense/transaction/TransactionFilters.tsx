@@ -5,7 +5,7 @@ import { Select, DatePicker, Row, Col, CalendarOutlined } from '@sue/design-web-
 
 import { useExpenses } from '../context';
 import { PERIODS } from '../constants';
-import { TagSelector } from '../../../components/TagSelector';
+import { TagSelector } from '@/components/TagSelector';
 import { Dayjs } from 'dayjs';
 
 export function TransactionFilters() {

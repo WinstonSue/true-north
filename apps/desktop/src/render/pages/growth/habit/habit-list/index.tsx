@@ -3,27 +3,29 @@ import DefaultPage from '@/components/Layout/DefaultPage';
 import HabitListFilter from './HabitListFilter';
 import { HabitListProvider, useHabitListContext } from './context';
 import HabitListTable from './HabitListTable';
-import { Button, Flex, PlusOutlined } from '@sue/design-web-react';
+import { Button, Drawer, Flex, PlusOutlined } from '@sue/design-web-react';
 
-import { openDrawer } from '@/layout/Drawer';
 import { CreateHabit } from '../components/CreateHabit';
 
 export const HabitListPage: React.FC = () => {
   const { goals, handleRefresh } = useHabitListContext();
   const openCreateHabitModal = () => {
-    openDrawer({
+    const instance = Drawer.open({
       title: '新增习惯',
-      content: () => (
+      size: 800,
+      footer: null,
+      content: (
         <CreateHabit
           goals={goals}
           onSuccess={() => {
             handleRefresh();
+            instance.destroy();
           }}
-          onCancel={() => {}}
+          onCancel={() => {
+            instance.destroy();
+          }}
         />
       ),
-      width: 800,
-      height: 600,
     });
   };
 

@@ -1,10 +1,9 @@
-import { Popover } from '@sue/design-web-react';
+import { Drawer, Popover } from '@sue/design-web-react';
 import { useState } from 'react';
 import GoalEditor, { GoalEditorFooter, GoalEditorProps } from './GoalEditor';
 import GoalForeign from './GoalForeign';
 import GoalForm from './GoalForm';
 import GoalCreator, { GoalCreatorProps } from './GoalCreator';
-import { openDrawer, IDrawerOption } from '@/layout/Drawer';
 import { GoalDetailProvider } from './context';
 
 export {
@@ -16,36 +15,50 @@ export {
   GoalForm,
 };
 
+type DrawerOptions = Omit<Parameters<typeof Drawer.open>[0], 'content'>;
+
 export function useGoalDetail() {
   const openEditDrawer = (
     props: {
       contentProps: GoalEditorProps;
-    } & Omit<IDrawerOption, 'content'>,
+    } & DrawerOptions,
   ) => {
     const { contentProps, ...rest } = props;
-    openDrawer({
+    const instance = Drawer.open({
       ...rest,
       title: '编辑目标',
-      width: 800,
-      content: (props) => {
-        return <GoalEditor {...contentProps} onClose={props.onClose} />;
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <GoalEditor
+          {...contentProps}
+          onClose={async () => {
+            instance.destroy();
+          }}
+        />
+      ),
     });
   };
 
   const openCreateDrawer = (
     props: {
       contentProps: GoalCreatorProps;
-    } & Omit<IDrawerOption, 'content'>,
+    } & DrawerOptions,
   ) => {
     const { contentProps, ...rest } = props;
-    openDrawer({
+    const instance = Drawer.open({
       ...rest,
       title: '新建目标',
-      width: 800,
-      content: (props) => {
-        return <GoalCreator {...contentProps} onClose={props.onClose} />;
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <GoalCreator
+          {...contentProps}
+          onClose={async () => {
+            instance.destroy();
+          }}
+        />
+      ),
     });
   };
 

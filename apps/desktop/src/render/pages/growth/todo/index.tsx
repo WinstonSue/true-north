@@ -1,10 +1,6 @@
 'use client';
 
 import { Outlet } from 'react-router-dom';
-import Tabs, { Tab } from '@true-north/tabs/src/index';
-import { useState } from 'react';
-import clsx from 'clsx';
-import styles from './style.module.less';
 import TabsPage from '@/components/Layout/TabsPage';
 
 export default function TodoPage() {

@@ -23,7 +23,6 @@
     "@antv/xflow": "^2.1.13",
     "@sue/design-web-react": "file:../../../vendor/sue-design-web-react",
     "@true-north/common-web-utils": "workspace:*",
-    "@true-north/components-ui": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

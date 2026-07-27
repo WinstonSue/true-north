@@ -17,7 +17,7 @@ import {
   EditOutlined,
   PlusOutlined,
 } from '@sue/design-web-react';
-import { ContextMenu } from '@true-north/components-ui';
+import ContextMenu from '@/components/ContextMenu';
 import { GoalVo } from '@true-north/vo';
 import { GoalStatus } from '@true-north/enum';
 import { useGoalContext } from '../context';

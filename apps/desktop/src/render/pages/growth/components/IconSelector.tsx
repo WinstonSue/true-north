@@ -1,4 +1,4 @@
-import { SiteIcon } from '@true-north/components-ui';
+import SiteIcon from '@/components/SiteIcon';
 import { Popover, Tooltip } from '@sue/design-web-react';
 
 export default function IconSelector(props: {

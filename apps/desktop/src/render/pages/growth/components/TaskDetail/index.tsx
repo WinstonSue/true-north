@@ -1,41 +1,54 @@
-import { Popover } from '@sue/design-web-react';
+import { Drawer, Popover } from '@sue/design-web-react';
 import { useState } from 'react';
 import TaskEditor, { TaskEditorProps } from './TaskEditor';
 import TaskCreator, { TaskCreatorProps } from './TaskCreator';
-import { openDrawer, IDrawerOption } from '@/layout/Drawer';
 
 export { TaskEditor, TaskCreator };
+
+type DrawerOptions = Omit<Parameters<typeof Drawer.open>[0], 'content'>;
 
 export function useTaskDetail() {
   const openEditDrawer = (
     props: {
       contentProps: TaskEditorProps;
-    } & Omit<IDrawerOption, 'content'>,
+    } & DrawerOptions,
   ) => {
     const { contentProps, ...rest } = props;
-    openDrawer({
+    const instance = Drawer.open({
       ...rest,
       title: '编辑任务',
-      width: 800,
-      content: (props) => {
-        return <TaskEditor {...contentProps} onClose={props.onClose} />;
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <TaskEditor
+          {...contentProps}
+          onClose={async () => {
+            instance.destroy();
+          }}
+        />
+      ),
     });
   };
 
   const openCreateDrawer = (
     props: {
       contentProps: TaskCreatorProps;
-    } & Omit<IDrawerOption, 'content'>,
+    } & DrawerOptions,
   ) => {
     const { contentProps, ...rest } = props;
-    openDrawer({
+    const instance = Drawer.open({
       ...rest,
       title: '新建任务',
-      width: 800,
-      content: (props) => {
-        return <TaskCreator {...contentProps} onClose={props.onClose} />;
-      },
+      size: 800,
+      footer: null,
+      content: (
+        <TaskCreator
+          {...contentProps}
+          onClose={async () => {
+            instance.destroy();
+          }}
+        />
+      ),
     });
   };
 
