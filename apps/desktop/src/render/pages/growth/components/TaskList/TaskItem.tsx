@@ -103,7 +103,7 @@ function TaskItem(props: TaskItemProps) {
         {task.tags?.length > 0 &&
         <div className="flex flex-wrap gap-1">
             {task.tags.map((tag, index) =>
-          <Tag key={index} color="arcoblue">
+          <Tag key={index} color="blue">
                 {tag}
               </Tag>
           )}

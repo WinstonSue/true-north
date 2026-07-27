@@ -137,7 +137,7 @@ function TodoItem(props: TodoItemProps) {
             {todo.tags?.length > 0 &&
             <div className="flex flex-wrap gap-1">
                 {todo.tags.map((tag, index) =>
-              <Tag key={index} color="arcoblue">
+              <Tag key={index} color="blue">
                     {tag}
                   </Tag>
               )}

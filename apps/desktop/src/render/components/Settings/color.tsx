@@ -51,11 +51,15 @@ function ColorPanel() {
               theme: theme === 'dark' ? 'dark' : 'default'
             });
             newList.forEach((l, index) => {
-              document.body.style.setProperty(
-                `--arcoblue-${index + 1}`,
-                hexToRgb(l)
-              );
+              const channel = hexToRgb(l);
+              document.body.style.setProperty(`--primary-${index + 1}`, channel);
+              document.body.style.setProperty(`--link-${index + 1}`, channel);
+              // Keep legacy alias in sync for residual Less/inline usage
+              document.body.style.setProperty(`--arcoblue-${index + 1}`, channel);
             });
+            if (newList[5]) {
+              document.body.style.setProperty('--color-primary-6', newList[5]);
+            }
           }} />
 
         }>
