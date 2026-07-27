@@ -1,15 +1,12 @@
 import { TodoList, TodoCreatorMini, TodoEditor } from '../../components';
 import { useEffect, useState } from 'react';
-import { FlexibleContainer } from '@true-north/components-ui';
-import { Collapse, Divider } from '@sue/design-web-react';
+import { Collapse, Divider, Flex } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { flushSync } from 'react-dom';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import { useTodoHooks } from '../hooks';
 import { TodoStatus } from '@true-north/enum';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 export default function TodoWeek() {
   const { weekStart, weekEnd } = useTodoHooks();
@@ -69,23 +66,30 @@ export default function TodoWeek() {
   }
 
   return (
-    <FlexibleContainer className="bg-bg-2 rounded-lg w-full h-full">
-      <Fixed className="px-5 py-2 flex justify-between items-center border-b">
+    <Flex
+      vertical
+      container="full"
+      className="bg-bg-2 rounded-lg w-full h-full"
+    >
+      <Flex
+        container="fixed"
+        className="px-5 py-2 flex justify-between items-center border-b"
+      >
         <div className="text-text-1 text-title-2 font-medium py-1">
           本周待办
         </div>
-      </Fixed>
+      </Flex>
 
-      <Shrink className="px-5 w-full h-full flex">
-        <Shrink className="py-2" direction="horizontal">
-          <Fixed>
+      <Flex container="fill" className="px-5 w-full h-full flex">
+        <Flex vertical container="fill" className="py-2">
+          <Flex container="fixed">
             <TodoCreatorMini
               afterSubmit={async () => {
                 refreshData();
               }}
             />
-          </Fixed>
-          <Shrink absolute overflowY="auto">
+          </Flex>
+          <Flex container="fill" className="overflow-y-auto">
             <Collapse
               defaultActiveKey={['expired', 'week']}
               className={`${styles['custom-collapse']} mt-2`}
@@ -144,12 +148,12 @@ export default function TodoWeek() {
                 </Collapse.Panel>
               )}
             </Collapse>
-          </Shrink>
-        </Shrink>
+          </Flex>
+        </Flex>
         {currentTodo && (
           <>
             <Divider type="vertical" className="!h-full" />{' '}
-            <Shrink className="w-full py-2">
+            <Flex container="fill" className="w-full py-2">
               <TodoEditor
                 todo={currentTodo}
                 onClose={async () => {
@@ -159,10 +163,10 @@ export default function TodoWeek() {
                   refreshData();
                 }}
               />
-            </Shrink>
+            </Flex>
           </>
         )}
-      </Shrink>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 }

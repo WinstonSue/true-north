@@ -1,15 +1,12 @@
-import { FlexibleContainer } from '@true-north/components-ui';
 import {
   GoalDetailProvider,
   GoalDetailContextProps,
   useGoalDetailContext,
 } from './context';
 import GoalForm from './GoalForm';
-import { Button } from '@sue/design-web-react';
+import { Button, Flex } from '@sue/design-web-react';
 import { GoalService, GoalMapping } from '@true-north/web-service';
 import GoalForeign from './GoalForeign';
-
-const { Shrink, Fixed } = FlexibleContainer;
 
 export type GoalEditorProps = {
   goalId: string;
@@ -28,15 +25,15 @@ export default function GoalEditor(props: GoalEditorProps) {
       onClose={props.onClose}
       afterSubmit={props.afterSubmit}
     >
-      <FlexibleContainer className="gap-2">
-        <Fixed className="border-b border-border-2">
+      <Flex vertical container="full" className="gap-2">
+        <Flex container="fixed" className="border-b border-border-2">
           <GoalForm />
-        </Fixed>
+        </Flex>
         <GoalForeign goalId={props.goalId} />
-        <Fixed>
+        <Flex container="fixed">
           <GoalEditorFooter />
-        </Fixed>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </GoalDetailProvider>
   );
 }

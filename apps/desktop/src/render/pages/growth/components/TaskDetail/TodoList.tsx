@@ -1,11 +1,9 @@
 import { useTaskDetailContext } from './context';
 import TodoList from '../TodoList';
 import clsx from 'clsx';
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Flex } from '@sue/design-web-react';
 import { CreateButton } from '@/components/Button/CreateButton';
 import { useTodoDetail } from '../TodoDetail';
-
-const { Shrink, Fixed } = FlexibleContainer;
 
 export default function TaskDetailTodoList() {
   const { currentTask, refreshTaskDetail } = useTaskDetailContext();
@@ -15,8 +13,9 @@ export default function TaskDetailTodoList() {
   if (!currentTask) return null;
 
   return (
-    <FlexibleContainer className="gap-2">
-      <Fixed
+    <Flex vertical container="full" className="gap-2">
+      <Flex
+        container="fixed"
         className={clsx([
           'text-title-1 text-text-1 font-medium p-2',
           'flex justify-between items-center',
@@ -35,8 +34,8 @@ export default function TaskDetailTodoList() {
         >
           <CreateButton type="text">添加待办</CreateButton>
         </CreateTodoPopover>
-      </Fixed>
-      <Shrink className="overflow-auto">
+      </Flex>
+      <Flex container="fill" className="overflow-auto">
         {currentTask?.todoList && (
           <TodoList
             todoList={currentTask.todoList}
@@ -48,7 +47,7 @@ export default function TaskDetailTodoList() {
             }}
           />
         )}
-      </Shrink>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 }

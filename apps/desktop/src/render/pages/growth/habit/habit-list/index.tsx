@@ -2,14 +2,11 @@ import React from 'react';
 import DefaultPage from '@/components/Layout/DefaultPage';
 import HabitListFilter from './HabitListFilter';
 import { HabitListProvider, useHabitListContext } from './context';
-import { FlexibleContainer } from '@true-north/components-ui';
 import HabitListTable from './HabitListTable';
-import { Button } from '@sue/design-web-react';
+import { Button, Flex } from '@sue/design-web-react';
 import { IconPlus } from '@true-north/components-ui';
 import { openDrawer } from '@/layout/Drawer';
 import { CreateHabit } from '../components/CreateHabit';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 export const HabitListPage: React.FC = () => {
   const { goals, handleRefresh } = useHabitListContext();
@@ -32,11 +29,11 @@ export const HabitListPage: React.FC = () => {
 
   return (
     <DefaultPage title="习惯管理">
-      <FlexibleContainer>
-        <Fixed>
+      <Flex vertical container="full">
+        <Flex container="fixed">
           <HabitListFilter />
-        </Fixed>
-        <Fixed>
+        </Flex>
+        <Flex container="fixed">
           <Button
             type="primary"
             icon={<IconPlus />}
@@ -46,11 +43,11 @@ export const HabitListPage: React.FC = () => {
           >
             新增习惯
           </Button>
-        </Fixed>
-        <Shrink>
+        </Flex>
+        <Flex container="fill">
           <HabitListTable />
-        </Shrink>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </DefaultPage>
   );
 };

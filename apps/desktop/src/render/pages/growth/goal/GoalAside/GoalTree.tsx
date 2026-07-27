@@ -1,27 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { Tree, Input, Button, Spin, Empty } from '@sue/design-web-react';
+import {
+  Tree,
+  Input,
+  Button,
+  Spin,
+  Empty,
+  Modal,
+  message,
+  Tag,
+  Divider,
+  Flex,
+  EditableText,
+} from '@sue/design-web-react';
 import {
   IconSearch,
   IconPlus,
   IconEdit,
   IconDelete,
   IconCopy,
+  ContextMenu,
 } from '@true-north/components-ui';
 import { GoalVo } from '@true-north/vo';
 import { GoalStatus } from '@true-north/enum';
 import { useGoalContext } from '../context';
 import { useGoalDetail } from '../../components/GoalDetail';
 import { GoalService } from '@true-north/web-service';
-import { Modal, message, Tag, Divider } from '@sue/design-web-react';
 import styles from './style.module.less';
 import clsx from 'clsx';
-import {
-  FlexibleContainer,
-  TextEllipsis,
-  ContextMenu,
-} from '@true-north/components-ui';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 interface TreeNodeData {
   key: string;
@@ -120,19 +125,20 @@ const GoalTreePanel: React.FC = ({}) => {
             },
           ]}
         >
-          <FlexibleContainer
+          <Flex
+            container="full"
             className={clsx(styles['tree-node'], 'gap-2')}
-            direction="vertical"
           >
-            <Fixed>{getStatusTag(goal.status)}</Fixed>
-            <Shrink absolute>
-              <TextEllipsis
-                tooltip={true}
-                width="100%"
-                text={goal.name}
-              ></TextEllipsis>
-            </Shrink>
-          </FlexibleContainer>
+            <Flex container="fixed">{getStatusTag(goal.status)}</Flex>
+            <Flex container="fill">
+              <EditableText
+                ellipsis={{ tooltip: true }}
+                style={{ width: '100%' }}
+              >
+                {goal.name}
+              </EditableText>
+            </Flex>
+          </Flex>
         </ContextMenu>
       ),
       goalData: goal,

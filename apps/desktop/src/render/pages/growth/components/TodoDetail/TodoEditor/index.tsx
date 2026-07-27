@@ -1,11 +1,8 @@
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Flex, Button } from '@sue/design-web-react';
 import { TodoVo } from '@true-north/vo';
 import { TodoDetailProvider, useTodoDetailContext } from '../context';
 import TodoEditorMain from './TodoEditorMain';
 import TodoEditorHeader from './TodoEditorHeader';
-import { Button } from '@sue/design-web-react';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 export type TodoEditorProps = {
   todo: TodoVo;
@@ -20,17 +17,17 @@ export default function TodoEditor(props: TodoEditorProps) {
       mode="editor"
       afterSubmit={props.afterSubmit}
     >
-      <FlexibleContainer>
-        <Fixed>
+      <Flex vertical container="full">
+        <Flex container="fixed">
           <TodoEditorHeader />
-        </Fixed>
-        <Shrink>
+        </Flex>
+        <Flex container="fill">
           <TodoEditorMain />
-        </Shrink>
-        <Fixed>
+        </Flex>
+        <Flex container="fixed">
           <Footer onClose={props.onClose} />
-        </Fixed>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </TodoDetailProvider>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlexibleContainer } from '@true-north/components-ui';
-import { Empty, Spin, Divider } from '@sue/design-web-react';
+import { Empty, Spin, Divider, Flex } from '@sue/design-web-react';
 import { useGoalContext } from '../context';
 import {
   GoalDetailProvider,
@@ -9,8 +8,6 @@ import {
 } from '../../components/GoalDetail';
 import GoalMainHeader from './GoalMainHeader';
 import clsx from 'clsx';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 const GoalDetail: React.FC = () => {
   const {
@@ -65,9 +62,12 @@ const GoalDetail: React.FC = () => {
       onClose={handleEditComplete}
       afterSubmit={handleEditComplete}
     >
-      <FlexibleContainer>
+      <Flex vertical container="full">
         <GoalMainHeader />
-        <Shrink className={clsx('flex flex-col gap-4 p-4 overflow-auto')}>
+        <Flex
+          container="fill"
+          className={clsx('flex flex-col gap-4 p-4 overflow-auto')}
+        >
           <GoalForm />
           <Divider className="!m-0" />
           <GoalForeign
@@ -76,8 +76,8 @@ const GoalDetail: React.FC = () => {
               setSelectedGoalId(id);
             }}
           />
-        </Shrink>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </GoalDetailProvider>
   );
 };

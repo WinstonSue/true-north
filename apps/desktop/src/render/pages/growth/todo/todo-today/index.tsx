@@ -1,7 +1,6 @@
 import { TodoList, TodoCreatorMini, TodoEditor } from '../../components';
 import { useEffect, useState } from 'react';
-import { FlexibleContainer } from '@true-north/components-ui';
-import { Collapse, Divider } from '@sue/design-web-react';
+import { Collapse, Divider, Flex } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
@@ -9,8 +8,6 @@ import { flushSync } from 'react-dom';
 import clsx from 'clsx';
 import { useTodoHooks } from '../hooks';
 import { TodoStatus } from '@true-north/enum';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 export default function TodoToday() {
   const { today, yesterday } = useTodoHooks();
@@ -68,16 +65,16 @@ export default function TodoToday() {
   }
 
   return (
-    <Shrink className="flex" direction="vertical">
-      <Shrink className="py-2" direction="horizontal">
-        <Fixed>
+    <Flex container="fill" className="flex">
+      <Flex vertical container="fill" className="py-2">
+        <Flex container="fixed">
           <TodoCreatorMini
             afterSubmit={async () => {
               refreshData();
             }}
           />
-        </Fixed>
-        <Shrink absolute overflowY="auto">
+        </Flex>
+        <Flex container="fill" className="overflow-y-auto">
           <Collapse
             defaultActiveKey={['expired', 'today']}
             className={clsx(styles['custom-collapse'])}
@@ -136,12 +133,12 @@ export default function TodoToday() {
               </Collapse.Panel>
             )}
           </Collapse>
-        </Shrink>
-      </Shrink>
+        </Flex>
+      </Flex>
       {currentTodo && (
         <>
           <Divider type="vertical" className="!h-full" />
-          <Shrink className="w-1/2 py-2">
+          <Flex container="fill" className="w-1/2 py-2">
             <TodoEditor
               todo={currentTodo}
               onClose={async () => {
@@ -151,9 +148,9 @@ export default function TodoToday() {
                 refreshData();
               }}
             />
-          </Shrink>
+          </Flex>
         </>
       )}
-    </Shrink>
+    </Flex>
   );
 }

@@ -1,14 +1,12 @@
 'use client';
 
 import { TodoFilters } from './TodoFilters';
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Flex } from '@sue/design-web-react';
 import { TodoAllProvider } from './context';
 import TodoTable from './TodoTable';
 import { useTodoDetail } from '../../components';
 import { useTodoAllContext } from './context';
 import { CreateButton } from '@/components/Button/CreateButton';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 function TodoAll() {
   const { getTodoPage } = useTodoAllContext();
@@ -16,11 +14,11 @@ function TodoAll() {
 
   return (
     <>
-      <Fixed className="px-5 flex border-b">
+      <Flex container="fixed" className="px-5 flex border-b">
         <TodoFilters />
-      </Fixed>
+      </Flex>
 
-      <Fixed className="px-5 flex my-3">
+      <Flex container="fixed" className="px-5 flex my-3">
         <CreateTodoPopover
           creatorProps={{
             showSubmitButton: true,
@@ -31,11 +29,11 @@ function TodoAll() {
         >
           <CreateButton>新建</CreateButton>
         </CreateTodoPopover>
-      </Fixed>
+      </Flex>
 
-      <Shrink className="px-5 w-full h-full flex">
+      <Flex container="fill" className="px-5 w-full h-full flex">
         <TodoTable />
-      </Shrink>
+      </Flex>
     </>
   );
 }

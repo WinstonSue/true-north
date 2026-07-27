@@ -1,13 +1,10 @@
-import { Popover, Button } from '@sue/design-web-react';
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Popover, Button, Flex } from '@sue/design-web-react';
 import TaskForm from './TaskForm';
 import {
   TaskDetailProvider,
   TaskDetailContextProps,
   useTaskDetailContext,
 } from './context';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 export type TaskCreatorProps = {
   initialFormData?: TaskDetailContextProps['initialFormData'];
@@ -24,14 +21,14 @@ export default function TaskCreator(props: TaskCreatorProps) {
       initialFormData={props.initialFormData}
       afterSubmit={props.afterSubmit}
     >
-      <FlexibleContainer>
-        <Shrink>
+      <Flex vertical container="full">
+        <Flex container="fill">
           <TaskForm />
-        </Shrink>
-        <Fixed>
+        </Flex>
+        <Flex container="fixed">
           <Footer onClose={props.onClose} />
-        </Fixed>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </TaskDetailProvider>
   );
 }

@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { FlexibleContainer } from '@true-north/components-ui';
-import { Modal, message, Tag, Dropdown, Menu } from '@sue/design-web-react';
-import { Button, Breadcrumb } from '@sue/design-web-react';
+import {
+  Modal,
+  message,
+  Tag,
+  Dropdown,
+  Menu,
+  Button,
+  Breadcrumb,
+  Flex,
+} from '@sue/design-web-react';
 import {
   IconEdit,
   IconDelete,
@@ -14,8 +21,6 @@ import { GoalService } from '@true-north/web-service';
 import { useGoalContext } from '../context';
 import { GoalStatus } from '@true-north/enum';
 import clsx from 'clsx';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 // 状态配置映射
 const STATUS_CONFIG = {
@@ -163,8 +168,8 @@ const GoalMainHeader: React.FC = () => {
   );
 
   return (
-    <Fixed
-      direction="vertical"
+    <Flex
+      container="fixed"
       className={clsx(
         'px-4 !h-14',
         'border-b border-border-2',
@@ -172,7 +177,7 @@ const GoalMainHeader: React.FC = () => {
       )}
     >
       {/* 左侧：面包屑导航 */}
-      <Shrink className={clsx('flex items-center')}>
+      <Flex container="fill" className={clsx('flex items-center')}>
         <Breadcrumb separator={<IconRight className="text-xs text-gray-400" />}>
           {breadcrumbPath.map((item, index) => (
             <Breadcrumb.Item
@@ -199,10 +204,10 @@ const GoalMainHeader: React.FC = () => {
             {STATUS_CONFIG[selectedGoal.status]?.label}
           </Tag>
         )}
-      </Shrink>
+      </Flex>
 
       {/* 右侧：状态 Tag + 操作区 */}
-      <Fixed className={clsx('flex items-center gap-2')}>
+      <Flex container="fixed" className={clsx('flex items-center gap-2')}>
         {/* 主要按钮：已完成 */}
         {selectedGoal && selectedGoal.status !== GoalStatus.DONE && (
           <Button
@@ -222,8 +227,8 @@ const GoalMainHeader: React.FC = () => {
         >
           <Button icon={<IconMore />} />
         </Dropdown>
-      </Fixed>
-    </Fixed>
+      </Flex>
+    </Flex>
   );
 };
 

@@ -1,11 +1,9 @@
 import { useTaskDetailContext } from './context';
 import TaskList from '../TaskList';
 import clsx from 'clsx';
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Flex } from '@sue/design-web-react';
 import { useTaskDetail } from '.';
 import { CreateButton } from '@/components/Button/CreateButton';
-
-const { Shrink, Fixed } = FlexibleContainer;
 
 export default function TaskChildren() {
   const { currentTask, showSubTask, refreshTaskDetail } =
@@ -14,8 +12,9 @@ export default function TaskChildren() {
   const { CreatePopover: CreateTaskPopover } = useTaskDetail();
 
   return (
-    <FlexibleContainer className="gap-2 border-b">
-      <Fixed
+    <Flex vertical container="full" className="gap-2 border-b">
+      <Flex
+        container="fixed"
         className={clsx([
           'text-title-1 text-text-1 font-medium p-2',
           'flex justify-between items-center',
@@ -36,8 +35,8 @@ export default function TaskChildren() {
             添加子任务
           </CreateButton>
         </CreateTaskPopover>
-      </Fixed>
-      <Shrink className="overflow-auto">
+      </Flex>
+      <Flex container="fill" className="overflow-auto">
         {currentTask?.children && (
           <TaskList
             taskList={currentTask.children}
@@ -49,7 +48,7 @@ export default function TaskChildren() {
             }}
           />
         )}
-      </Shrink>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
-import { Layout, Breadcrumb, Spin } from '@sue/design-web-react';
+import { Layout, Breadcrumb, Spin, Flex } from '@sue/design-web-react';
 import cs from 'clsx';
 import { IconMenuFold, IconMenuUnfold } from '@true-north/components-ui';
 import { useSelector } from 'react-redux';
@@ -12,9 +12,6 @@ import { GlobalState } from '../store';
 import styles from './layout.module.less';
 import Navigate from './Navigate';
 import { GlobalDrawer } from './Drawer';
-import { FlexibleContainer } from '@true-north/components-ui';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 const Aside = Layout.Sider;
 
@@ -50,21 +47,22 @@ function PageLayout() {
   }, [pathname]);
 
   return (
-    <FlexibleContainer>
-      <Fixed
+    <Flex vertical container="full">
+      <Flex
+        container="fixed"
         className={cs(styles['layout-navbar'], {
           [styles['layout-navbar-hidden']]: !showNavbar,
         })}
       >
         <Navbar show={showNavbar} />
-      </Fixed>
-      <Shrink direction="vertical">
+      </Flex>
+      <Flex container="fill">
         {userLoading ? (
           <Spin className={styles['spin']} />
         ) : (
           <>
             {showMenu && (
-              <Fixed>
+              <Flex container="fixed">
                 <Aside
                   theme="light"
                   className={styles['layout-sider']}
@@ -85,11 +83,15 @@ function PageLayout() {
                     {collapsed ? <IconMenuUnfold /> : <IconMenuFold />}
                   </div>
                 </Aside>
-              </Fixed>
+              </Flex>
             )}
-            <Shrink className={styles['layout-content']} direction="vertical">
+            <Flex
+              container="fill"
+              vertical
+              className={styles['layout-content']}
+            >
               {!!breadcrumb.length && (
-                <Fixed className={styles['layout-breadcrumb']}>
+                <Flex container="fixed" className={styles['layout-breadcrumb']}>
                   <Breadcrumb>
                     {breadcrumb.map((node, index) => (
                       <Breadcrumb.Item key={index}>
@@ -97,18 +99,18 @@ function PageLayout() {
                       </Breadcrumb.Item>
                     ))}
                   </Breadcrumb>
-                </Fixed>
+                </Flex>
               )}
-              <Shrink overflowY="auto" absolute>
+              <Flex container="fill" className="overflow-y-auto">
                 <Outlet />
-              </Shrink>
+              </Flex>
               {/* {showFooter && <Footer />} */}
-            </Shrink>
+            </Flex>
           </>
         )}
-      </Shrink>
+      </Flex>
       <GlobalDrawer />
-    </FlexibleContainer>
+    </Flex>
   );
 }
 

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Flex } from '@sue/design-web-react';
 import DateTimeTool from '../DateTimeTool';
 import { useTodoDetailContext } from '../context';
 import IconSelector from '../../IconSelector';
@@ -9,11 +9,11 @@ export default function TodoEditorHeader() {
   const { todoFormData, setTodoFormData, onSubmit } = useTodoDetailContext();
 
   return todoFormData ? (
-    <FlexibleContainer
-      direction="vertical"
+    <Flex
+      container="full"
       className="flex items-center px-1.5 text-text-3 border-b mb-2 !h-12"
     >
-      <FlexibleContainer.Shrink className="flex items-center">
+      <Flex container="fill" className="flex items-center">
         <DateTimeTool
           formData={{
             date: dayjs(todoFormData.planDate),
@@ -47,8 +47,8 @@ export default function TodoEditorHeader() {
             setTodoFormData({ ...todoFormData, urgency: value });
           }}
         />
-      </FlexibleContainer.Shrink>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   ) : (
     <></>
   );

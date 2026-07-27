@@ -1,12 +1,9 @@
-import { FlexibleContainer } from '@true-north/components-ui';
 import { useGoalDetailContext } from '../context';
-import { Spin } from '@sue/design-web-react';
+import { Spin, Flex } from '@sue/design-web-react';
 import { GoalTaskList, CreateTask } from './TaskList';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { CreateGoal, GoalChildren } from './GoalChildren';
-
-const { Shrink, Fixed } = FlexibleContainer;
 
 export type GoalForeignProps = {
   goalId: string;
@@ -47,7 +44,7 @@ export default function GoalForeign(props: GoalForeignProps) {
 
   return (
     <>
-      <Fixed className="flex items-center justify-between">
+      <Flex container="fixed" className="flex items-center justify-between">
         <div className={clsx('h-10', 'flex gap-2 items-center')}>
           {tabs.map((item) => (
             <div
@@ -73,13 +70,13 @@ export default function GoalForeign(props: GoalForeignProps) {
 
         {!readonly && activeTab === 'children' && <CreateGoal />}
         {!readonly && activeTab === 'taskList' && <CreateTask />}
-      </Fixed>
-      <Shrink>
+      </Flex>
+      <Flex container="fill">
         {activeTab === 'children' && (
           <GoalChildren onChangeGoal={onChangeGoal} />
         )}
         {activeTab === 'taskList' && <GoalTaskList />}
-      </Shrink>
+      </Flex>
     </>
   );
 }

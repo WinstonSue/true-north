@@ -1,13 +1,9 @@
-import { FlexibleContainer } from '@true-north/components-ui';
-import type { TaskVo, TaskWithoutRelationsVo } from '@true-north/vo';
+import { Flex, Button } from '@sue/design-web-react';
 import { TaskDetailProvider } from './context';
 import TaskForm from './TaskForm';
 import TaskChildren from './TaskChildren';
 import TodoList from './TodoList';
 import { TaskDetailContextProps, useTaskDetailContext } from './context';
-import { Button } from '@sue/design-web-react';
-
-const { Shrink, Fixed } = FlexibleContainer;
 
 export type TaskEditorProps = {
   task: TaskDetailContextProps['task'];
@@ -24,22 +20,22 @@ export default function TaskEditor(props: TaskEditorProps) {
       task={props.task}
       afterSubmit={props.afterSubmit}
     >
-      <FlexibleContainer>
-        <Fixed>
+      <Flex vertical container="full">
+        <Flex container="fixed">
           <TaskForm />
-        </Fixed>
-        <Shrink absolute>
+        </Flex>
+        <Flex vertical container="fill" className="overflow-y-auto">
           <div className="h-1/2 overflow-hidden">
             <TaskChildren />
           </div>
           <div className="h-1/2 overflow-hidden">
             <TodoList />
           </div>
-        </Shrink>
-        <Fixed>
+        </Flex>
+        <Flex container="fixed">
           <Footer onClose={props.onClose} />
-        </Fixed>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </TaskDetailProvider>
   );
 }

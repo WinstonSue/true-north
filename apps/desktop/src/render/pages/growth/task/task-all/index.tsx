@@ -1,26 +1,24 @@
 'use client';
 
 import { TaskFilters } from './TaskFilters';
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Flex } from '@sue/design-web-react';
 import { TaskAllProvider } from './context';
 import TaskTable from './TaskTable';
 import { useTaskAllContext } from './context';
 import { CreateButton } from '@/components/Button/CreateButton';
 import { useTaskDetail } from '../../components';
 
-const { Fixed, Shrink } = FlexibleContainer;
-
 function TaskAll() {
   const { getTaskPage } = useTaskAllContext();
   const { openCreateDrawer: openCreateTaskDrawer } = useTaskDetail();
 
   return (
-    <FlexibleContainer>
-      <Fixed className="px-5 flex border-b">
+    <Flex vertical container="full">
+      <Flex container="fixed" className="px-5 flex border-b">
         <TaskFilters />
-      </Fixed>
+      </Flex>
 
-      <Fixed className="px-5 flex my-3">
+      <Flex container="fixed" className="px-5 flex my-3">
         <CreateButton
           onClick={() => {
             openCreateTaskDrawer({
@@ -34,12 +32,12 @@ function TaskAll() {
         >
           新建
         </CreateButton>
-      </Fixed>
+      </Flex>
 
-      <Shrink className="px-5 w-full h-full flex">
+      <Flex container="fill" className="px-5 w-full h-full flex">
         <TaskTable />
-      </Shrink>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 }
 

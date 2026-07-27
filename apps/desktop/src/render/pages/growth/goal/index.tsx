@@ -4,13 +4,10 @@ import { GoalProvider } from './context';
 import React, { useState } from 'react';
 import { Layout } from '@sue/design-web-react';
 import clsx from 'clsx';
-import { FlexibleContainer } from '@true-north/components-ui';
 import { useGoalContext } from './context';
 import { useGoalDetail } from '../components/GoalDetail';
 import GoalMain from './GoalMain';
 import GoalAside from './GoalAside';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 const { Sider, Content } = Layout;
 

@@ -1,8 +1,7 @@
 import { IconLeft, IconRight } from '@true-north/components-ui';
 import { dayjs } from './utils';
 import { useCalendarContext } from './context';
-import { Radio, Button, Space } from '@sue/design-web-react';
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Radio, Button, Space, Flex } from '@sue/design-web-react';
 
 function CalendarHeader(props: { prefixCls: string }) {
   const { prefixCls } = props;
@@ -16,16 +15,16 @@ function CalendarHeader(props: { prefixCls: string }) {
   } = useCalendarContext();
 
   return (
-    <FlexibleContainer direction="vertical" className={`px-5 py-4`}>
-      <FlexibleContainer.Shrink className="flex items-center">
+    <Flex container="full" className="px-5 py-4">
+      <Flex container="fill" className="flex items-center">
         <div className={`${prefixCls}-header-value`}>
           {calendarMode === 'year'
             ? pageShowDate.format('YYYY年')
             : pageShowDate.format('YYYY年MM月')}
         </div>
-      </FlexibleContainer.Shrink>
+      </Flex>
 
-      <FlexibleContainer.Fixed className="flex items-center gap-4">
+      <Flex container="fixed" className="flex items-center gap-4">
         <Radio.Group
           optionType="button"
           options={[
@@ -58,8 +57,8 @@ function CalendarHeader(props: { prefixCls: string }) {
             {<IconRight />}
           </Button>
         </Space.Compact>
-      </FlexibleContainer.Fixed>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 }
 

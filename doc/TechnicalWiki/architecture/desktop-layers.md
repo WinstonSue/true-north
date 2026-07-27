@@ -29,7 +29,7 @@ sequenceDiagram
 - 页面：`render/pages/{domain}/`，Growth 在 `render/pages/growth/`
 - 路由：`render/router/`
 - 模块状态：使用 `createInjectState`（`render/utils/createInjectState.tsx`），每功能块独立 Provider + hook
-- 样式：CSS Modules + Less / Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合；布局壳层见 `@true-north/components-ui`
+- 样式：CSS Modules + Less / Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合；页面壳层优先使用其 `Flex`（`container="full|fixed|fill"`）
 - 数据调用：优先 `@true-north/web-service` → `@true-north/api` → `share-request` → preload REST
 
 示例（Context 形态）：

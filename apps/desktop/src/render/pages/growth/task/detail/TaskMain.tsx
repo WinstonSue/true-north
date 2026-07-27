@@ -1,8 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FlexibleContainer } from '@true-north/components-ui';
-import { Tabs, Tag, Dropdown, Menu, Button, Modal, message } from '@sue/design-web-react';
+import {
+  Tabs,
+  Tag,
+  Dropdown,
+  Menu,
+  Button,
+  Modal,
+  message,
+  Flex,
+} from '@sue/design-web-react';
 import {
   IconMore,
   IconEdit,
@@ -15,8 +23,6 @@ import { TaskStatus } from '@true-north/enum';
 import { TaskService } from '@true-north/web-service';
 import { useTaskDetailContext } from './context';
 import clsx from 'clsx';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 interface TaskMainProps {
   task: TaskVo;
@@ -155,10 +161,10 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
   };
 
   return (
-    <FlexibleContainer>
+    <Flex vertical container="full">
       {/* 头部 */}
-      <Fixed
-        direction="vertical"
+      <Flex
+        container="fixed"
         className={clsx(
           'px-4 !h-14',
           'border-b border-border-2',
@@ -166,14 +172,14 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
         )}
       >
         {/* 左侧：任务名称 */}
-        <Shrink className={clsx('flex items-center')}>
+        <Flex container="fill" className={clsx('flex items-center')}>
           <h2 className="text-lg font-medium text-gray-900 truncate">
             {task.name}
           </h2>
-        </Shrink>
+        </Flex>
 
         {/* 右侧：状态 Tag + 操作区 */}
-        <Fixed className={clsx('flex items-center gap-2')}>
+        <Flex container="fixed" className={clsx('flex items-center gap-2')}>
           {/* 状态 Tag（只读） */}
           <Tag color={STATUS_CONFIG[task.status]?.color}>
             {STATUS_CONFIG[task.status]?.label}
@@ -189,11 +195,11 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
 
           {/* 主要按钮 */}
           {getPrimaryButton()}
-        </Fixed>
-      </Fixed>
+        </Flex>
+      </Flex>
 
       {/* 内容区域 */}
-      <Shrink className={clsx('flex flex-col overflow-auto')}>
+      <Flex container="fill" className={clsx('flex flex-col overflow-auto')}>
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
@@ -309,8 +315,8 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
             },
           ]}
         />
-      </Shrink>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 };
 

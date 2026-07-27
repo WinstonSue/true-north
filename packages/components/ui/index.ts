@@ -1,6 +1,4 @@
 export { default as SiteIcon } from './src/SiteIcon';
-export { default as FlexibleContainer, PageFlex } from './src/FlexibleContainer';
-export { default as TextEllipsis } from './src/TextEllipsis';
 export { default as ContextMenu } from './src/ContextMenu';
 export type { ContextMenuItem, ContextMenuProps } from './src/ContextMenu';
 export { default as RepeatSelector } from './src/RepeatSelector';

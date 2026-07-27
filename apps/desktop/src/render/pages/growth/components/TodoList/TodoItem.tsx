@@ -1,12 +1,10 @@
 'use client';
 
-import { Tag, Popover, Button } from '@sue/design-web-react';
-import { Typography } from '@true-north/components-ui';
+import { Tag, Popover, Button, Flex } from '@sue/design-web-react';
+import { Typography, SiteIcon } from '@true-north/components-ui';
 import { isToday } from 'date-fns';
-import { FlexibleContainer } from '@true-north/components-ui';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import IconSelector from '../../components/IconSelector';
-import { SiteIcon } from '@true-north/components-ui';
 import { TodoService } from '@true-north/web-service';
 import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
@@ -26,11 +24,12 @@ function TodoItem(props: TodoItemProps) {
   const { todo } = props;
   return (
     <div className={'w-full pl-4 py-2 bg-bg'} key={todo.id}>
-      <FlexibleContainer direction="vertical" className="items-start">
-        <FlexibleContainer.Fixed className="flex items-start ">
+      <Flex container="full" className="items-start" align="flex-start">
+        <Flex container="fixed" className="flex items-start">
           {props.TriggerCheckbox}
-        </FlexibleContainer.Fixed>
-        <FlexibleContainer.Shrink
+        </Flex>
+        <Flex
+          container="fill"
           onClick={() => props.onClickTodo(todo)}
           className={clsx([
             'cursor-pointer border-b',
@@ -147,8 +146,8 @@ function TodoItem(props: TodoItemProps) {
               </div>
             )}
           </div>
-        </FlexibleContainer.Shrink>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </div>
   );
 }

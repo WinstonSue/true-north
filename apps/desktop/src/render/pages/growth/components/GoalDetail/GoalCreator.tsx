@@ -1,14 +1,11 @@
-import { FlexibleContainer } from '@true-north/components-ui';
 import {
   GoalDetailProvider,
   useGoalDetailContext,
   GoalDetailContextProps,
 } from './context';
 import GoalForm from './GoalForm';
-import { Button } from '@sue/design-web-react';
+import { Button, Flex } from '@sue/design-web-react';
 import { GoalService, GoalMapping } from '@true-north/web-service';
-
-const { Shrink, Fixed } = FlexibleContainer;
 
 export type GoalCreatorProps = {
   size?: GoalDetailContextProps['size'];
@@ -25,14 +22,14 @@ export default function GoalCreator(props: GoalCreatorProps) {
       afterSubmit={props.afterSubmit}
       onClose={props.onClose}
     >
-      <FlexibleContainer>
-        <Shrink>
+      <Flex vertical container="full">
+        <Flex container="fill">
           <GoalForm />
-        </Shrink>
-        <Fixed>
+        </Flex>
+        <Flex container="fixed">
           <Footer />
-        </Fixed>
-      </FlexibleContainer>
+        </Flex>
+      </Flex>
     </GoalDetailProvider>
   );
 }

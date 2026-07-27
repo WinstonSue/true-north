@@ -1,9 +1,7 @@
-import { Divider, Button } from '@sue/design-web-react';
+import { Divider, Button, Flex } from '@sue/design-web-react';
 import { Grid } from '@true-north/components-ui';
-import { FlexibleContainer } from '@true-north/components-ui';
 import { ReactNode } from 'react';
 
-const { Fixed, Shrink } = FlexibleContainer;
 const { Row, Col } = Grid;
 
 export function TableFilter(props: {
@@ -14,10 +12,10 @@ export function TableFilter(props: {
 }) {
   const { clearFilters, search, Actions, children } = props;
   return (
-    <FlexibleContainer className="w-full my-3" direction="vertical">
-      <Shrink>{children}</Shrink>
+    <Flex container="full" className="w-full my-3">
+      <Flex container="fill">{children}</Flex>
       <Divider type="vertical" style={{ height: '80px' }} />
-      <Fixed className="flex flex-col gap-4 mx-3">
+      <Flex container="fixed" className="flex flex-col gap-4 mx-3">
         {Actions || (
           <>
             <Button
@@ -37,7 +35,7 @@ export function TableFilter(props: {
             </Button>
           </>
         )}
-      </Fixed>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 }

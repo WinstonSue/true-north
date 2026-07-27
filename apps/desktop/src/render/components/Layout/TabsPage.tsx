@@ -1,11 +1,9 @@
 'use client';
 
-import { FlexibleContainer } from '@true-north/components-ui';
+import { Flex } from '@sue/design-web-react';
 import clsx from 'clsx';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 export default function TabsPage(props: {
   tabs: {
@@ -18,8 +16,12 @@ export default function TabsPage(props: {
   const location = useLocation();
 
   return (
-    <FlexibleContainer className="bg-bg-2 rounded-lg w-full h-full">
-      <Fixed className="px-4 flex items-center border-b gap-4">
+    <Flex
+      vertical
+      container="full"
+      className="bg-bg-2 rounded-lg w-full h-full"
+    >
+      <Flex container="fixed" className="px-4 flex items-center border-b gap-4">
         {props.tabs.map((tab) => (
           <div
             key={tab.path}
@@ -39,9 +41,10 @@ export default function TabsPage(props: {
             {tab.name}
           </div>
         ))}
-      </Fixed>
+      </Flex>
 
-      <Shrink
+      <Flex
+        container="fill"
         className={clsx(
           'px-4 w-full h-full',
           'flex flex-col gap-3',
@@ -49,7 +52,7 @@ export default function TabsPage(props: {
         )}
       >
         {props.children}
-      </Shrink>
-    </FlexibleContainer>
+      </Flex>
+    </Flex>
   );
 }

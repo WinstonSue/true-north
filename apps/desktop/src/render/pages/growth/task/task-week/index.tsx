@@ -1,7 +1,6 @@
 import TaskList from '../../components/TaskList';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { FlexibleContainer } from '@true-north/components-ui';
 import { Collapse, Divider, Button } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TaskService } from '@true-north/web-service';
@@ -10,8 +9,6 @@ import { TaskWithoutRelationsVo } from '@true-north/vo';
 import { SiteIcon } from '@true-north/components-ui';
 import { useTaskDetail, TaskEditor } from '../../components';
 import { TaskStatus } from '@true-north/enum';
-
-const { Fixed, Shrink } = FlexibleContainer;
 
 const weekStart = dayjs().startOf('week').format('YYYY-MM-DD');
 const weekEnd = dayjs().endOf('week').format('YYYY-MM-DD');
