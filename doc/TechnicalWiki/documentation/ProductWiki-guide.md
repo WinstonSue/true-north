@@ -132,7 +132,7 @@ tech_stack:
   frontend:
     framework: "React 18 + TypeScript"
     build_tool: "Vite"
-    ui_library: ["Arco Design", "Ant Design"]
+    ui_library: ["@sue/design-web-react"]
     state_management: "React Context + Hooks"
     
   desktop:
@@ -369,7 +369,7 @@ tech_decisions:
     
   react_ecosystem:
     reason: "生态成熟、团队熟悉、组件丰富"
-    ui_library: "Arco Design + Ant Design"
+    ui_library: "@sue/design-web-react"
     
   nestjs_backend:
     reason: "TypeScript原生支持、装饰器模式、模块化架构"

@@ -1,11 +1,11 @@
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import type { TaskVo, TaskWithoutRelationsVo } from '@true-north/vo';
 import { TaskDetailProvider } from './context';
 import TaskForm from './TaskForm';
 import TaskChildren from './TaskChildren';
 import TodoList from './TodoList';
 import { TaskDetailContextProps, useTaskDetailContext } from './context';
-import { Button } from '@arco-design/web-react';
+import { Button } from '@sue/design-web-react';
 
 const { Shrink, Fixed } = FlexibleContainer;
 

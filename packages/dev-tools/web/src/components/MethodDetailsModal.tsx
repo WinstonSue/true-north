@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Button } from '@arco-design/web-react';
-import { IconSync } from '@arco-design/web-react/icon';
+import { Modal, Button } from '@sue/design-web-react';
+import { IconSync } from '@true-north/components-ui';
 import { MethodChange } from '../../../types';
 
 interface MethodDetailsModalProps {

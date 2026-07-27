@@ -1,5 +1,5 @@
 import React from 'react';
-import { Carousel } from '@arco-design/web-react';
+import { Carousel } from '@sue/design-web-react';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';

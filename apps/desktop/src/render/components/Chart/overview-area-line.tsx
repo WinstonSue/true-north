@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chart, Line, Axis, Area, Tooltip } from 'bizcharts';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import CustomTooltip from './customer-tooltip';
 
 function OverviewAreaLine({
@@ -15,7 +15,7 @@ function OverviewAreaLine({
   color?: string;
 }) {
   return (
-    <Spin loading={loading} style={{ width: '100%' }}>
+    <Spin spinning={loading} style={{ width: '100%' }}>
       <Chart
         scale={{ value: { min: 0 } }}
         padding={[10, 20, 50, 40]}

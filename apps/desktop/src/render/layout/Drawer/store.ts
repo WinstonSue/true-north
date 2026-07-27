@@ -1,7 +1,9 @@
 import { atom } from 'nanostores';
-import { DrawerProps } from '@arco-design/web-react';
+import { DrawerProps } from '@sue/design-web-react';
 
-export type IDrawerOption = Omit<DrawerProps, 'visible'> & {
+export type IDrawerOption = Omit<DrawerProps, 'open'> & {
+  /** @deprecated use size; kept for call sites still passing Arco-style width */
+  width?: number | string;
   param?: Record<string, unknown>;
   content: (props: {
     param?: Record<string, unknown>;

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { Empty } from '@arco-design/web-react';
+import { Empty } from '@sue/design-web-react';
 import { useGoalDetailContext } from '../context';
 import GoalList from '../../GoalList/GoalList';
 import { useGoalDetail } from '..';

@@ -1,4 +1,4 @@
-import { Empty } from '@arco-design/web-react';
+import { Empty } from '@sue/design-web-react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { CreateButton } from '@/components/Button/CreateButton';

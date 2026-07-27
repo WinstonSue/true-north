@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chart, Line, Axis, Legend, Area, Tooltip } from 'bizcharts';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import CustomTooltip from './customer-tooltip';
 
 const areaColorMap = [
@@ -14,7 +14,7 @@ const lineColorMap = ['#722ED1', '#33D1C9', '#F77234', '#165DFF'];
 
 function MultiAreaLine({ data, loading }: { data: any[]; loading: boolean }) {
   return (
-    <Spin loading={loading} style={{ width: '100%' }}>
+    <Spin spinning={loading} style={{ width: '100%' }}>
       <Chart
         height={352}
         data={data}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { IconSettings } from '@arco-design/web-react/icon';
-import { Modal, Form, Input } from '@arco-design/web-react';
+import { IconSettings } from '@true-north/components-ui';
+import { Modal, Form, Input } from '@sue/design-web-react';
 
 interface SettingProps {
   onConfirm: (form: { countdown: number }) => void;

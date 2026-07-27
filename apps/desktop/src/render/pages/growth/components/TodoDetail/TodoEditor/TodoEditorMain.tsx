@@ -1,4 +1,4 @@
-import { Input } from '@arco-design/web-react';
+import { Input } from '@sue/design-web-react';
 import clsx from 'clsx';
 import { useTodoDetailContext } from '../context';
 

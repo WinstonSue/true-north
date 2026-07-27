@@ -1,8 +1,9 @@
 'use client';
 
-import { Tag, Typography, Popover, Button } from '@arco-design/web-react';
+import { Tag, Popover, Button } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { isToday } from 'date-fns';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import IconSelector from '../../components/IconSelector';
 import { SiteIcon } from '@true-north/components-ui';

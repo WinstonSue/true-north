@@ -2,16 +2,7 @@ import React, { useContext } from 'react';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import { GlobalContext } from '@/context';
-import {
-  Input,
-  Select,
-  Cascader,
-  Button,
-  Form,
-  Space,
-  Message,
-  Skeleton,
-} from '@arco-design/web-react';
+import { Input, Select, Cascader, Button, Form, Space, message, Skeleton } from '@sue/design-web-react';
 
 function InfoForm({ loading }: { loading?: boolean }) {
   const t = useLocale(locale);
@@ -21,7 +12,7 @@ function InfoForm({ loading }: { loading?: boolean }) {
   const handleSave = async () => {
     try {
       await form.validate();
-      Message.success('userSetting.saveSuccess');
+      message.success('userSetting.saveSuccess');
     } catch (_) {}
   };
 

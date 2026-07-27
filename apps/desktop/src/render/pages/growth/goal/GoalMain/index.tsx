@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { FlexibleContainer } from 'francis-component-react';
-import { Empty, Spin, Divider } from '@arco-design/web-react';
+import { FlexibleContainer } from '@true-north/components-ui';
+import { Empty, Spin, Divider } from '@sue/design-web-react';
 import { useGoalContext } from '../context';
 import {
   GoalDetailProvider,

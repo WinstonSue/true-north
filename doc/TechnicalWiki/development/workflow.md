@@ -492,148 +492,41 @@ export class ModuleService {
 }
 ```
 
-### 第四阶段：控制器
+### 第四阶段：RouteController（IPC + VO 边界）
 
-#### 4.1 Business Controller 定义（核心业务控制器）
-**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.controller.ts`
+**位置**: `apps/desktop/src/service/growth/{module}/{module}.route-controller.ts`
 
 **核心原则**:
-- 实现核心业务逻辑
-- 处理 VO ↔ DTO 数据转换
-- 统一的异常处理
+- 唯一 Controller：同时承担 REST 路径声明与 VO ↔ DTO
+- 装饰器使用 `@business/decorators`（桥接 `electron-ipc-restful`）
+- 业务规则仍在 Service；不另建 `*.controller.ts` 透传层
+- 在 `src/main/ipc-handlers.ts` 注册 Class（构造器默认注入 service 单例）
+
+详细规范见 [controller-desktop.md](./controller/controller-desktop.md)。
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/{module}.controller.ts
+// apps/desktop/src/service/growth/{module}/{module}.route-controller.ts
+import { Controller, Post, Get, Body, Query } from '@business/decorators';
+import { ModuleService, moduleService as defaultModuleService } from './{module}.service';
+
+@Controller('/{module}')
 export class ModuleController {
-  protected moduleService: ModuleService;
+  constructor(private readonly moduleService: ModuleService = defaultModuleService) {}
 
-  constructor(moduleService: ModuleService) {
-    this.moduleService = moduleService;
-  }
-
-  async create(createVo: ModuleVO.CreateModuleVo): Promise<ModuleVO.ModuleItemVo> {
-    // VO → DTO 转换
-    const createDto = CreateModuleDto.importVo(createVo);
-
-    // 调用业务服务
-    const dto = await this.moduleService.create(createDto);
-
-    // DTO → VO 转换
-    return dto.exportVo();
-  }
-
-  async list(filter: ModuleVO.ModuleListFilterVo): Promise<ModuleVO.ModuleItemVo[]> {
-    // VO → DTO 转换
-    const filterDto = ModuleListFilterDto.importVo(filter);
-
-    // 调用业务服务
-    const dtos = await this.moduleService.findByFilter(filterDto);
-
-    // DTO → VO 转换
-    return dtos.map(dto => dto.exportVo());
-  }
-
-  async process(id: string): Promise<ModuleVO.ModuleItemVo> {
-    // 调用业务服务
-    const dto = await this.moduleService.process(id);
-
-    // DTO → VO 转换
-    return dto.exportVo();
-  }
-}
-```
-
-#### 4.2 Server Controller 实现（HTTP API）
-**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.controller.ts`
-
-**核心原则**:
-- 提供 HTTP REST API 接口
-- 处理 HTTP 请求和响应
-- 参数验证和路由定义
-
-**示例代码**:
-```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/{module}.controller.ts
-@Controller("{module}")
-export class ModuleServerController {
-  constructor(
-    private readonly moduleController: ModuleController
-  ) {}
-
-  @Post("create")
+  @Post('/create', { description: '创建' })
   async create(@Body() createVo: ModuleVO.CreateModuleVo): Promise<ModuleVO.ModuleItemVo> {
-    return await this.moduleController.create(createVo);
+    const createDto = CreateModuleDto.importVo(createVo);
+    const dto = await this.moduleService.create(createDto);
+    return dto.exportVo();
   }
 
-  @Get("list")
+  @Get('/list', { description: '列表' })
   async list(@Query() filter: ModuleVO.ModuleListFilterVo): Promise<ModuleVO.ModuleItemVo[]> {
-    return await this.moduleController.list(filter);
+    const filterDto = ModuleListFilterDto.importVo(filter);
+    const dtos = await this.moduleService.findByFilter(filterDto);
+    return dtos.map((dto) => dto.exportVo());
   }
-
-  @Put(":id/process")
-  async process(@Param("id") id: string): Promise<ModuleVO.ModuleItemVo> {
-    return await this.moduleController.process(id);
-  }
-
-  @Get("page")
-  async page(@Query() filter: ModuleVO.ModulePageFilterVo): Promise<ModuleVO.ModulePageResultVo> {
-    // 调用核心业务控制器
-    const result = await this.moduleController.page(filter);
-
-    // 转换分页结果
-    return {
-      list: result.list,
-      total: result.total,
-      pageNum: result.pageNum,
-      pageSize: result.pageSize,
-    };
-  }
-}
-```
-
-#### 4.3 Desktop Controller 实现（IPC 接口）
-**位置**: `apps/desktop/src/service/growth/{module}.controller.ts`
-
-**核心原则**:
-- 提供 IPC 异步接口
-- 处理 Electron 主进程通信
-- 适配桌面端数据操作
-
-**示例代码**:
-```typescript
-// apps/desktop/src/database/{domain}/{module}/{module}.controller.ts
-export class ModuleDesktopController {
-  constructor(
-    private readonly moduleController: ModuleController
-  ) {}
-
-  async create(createVo: ModuleVO.CreateModuleVo): Promise<ModuleVO.ModuleItemVo> {
-    return await this.moduleController.create(createVo);
-  }
-
-  async list(filter: ModuleVO.ModuleListFilterVo): Promise<ModuleVO.ModuleItemVo[]> {
-    return await this.moduleController.list(filter);
-  }
-
-  async process(id: string): Promise<ModuleVO.ModuleItemVo> {
-    return await this.moduleController.process(id);
-  }
-}
-
-// IPC 处理器注册
-export function registerModuleIpcHandlers(moduleController: ModuleDesktopController) {
-  ipcMain.handle("{module}:create", async (event, createVo) => {
-    return await moduleController.create(createVo);
-  });
-
-  ipcMain.handle("{module}:list", async (event, filter) => {
-    return await moduleController.list(filter);
-  });
-
-  ipcMain.handle("{module}:process", async (event, id) => {
-    return await moduleController.process(id);
-  });
 }
 ```
 
@@ -678,9 +571,9 @@ export function registerModuleIpcHandlers(moduleController: ModuleDesktopControl
 - [ ] Service 实现业务规则正确
 
 #### 4. 控制器验证
-- [ ] Business Controller 处理 VO ↔ DTO 转换
-- [ ] Server Controller 提供 HTTP REST API
-- [ ] Desktop Controller 提供 IPC 异步接口
+- [ ] RouteController 处理 VO ↔ DTO 转换
+- [ ] RouteController 路径已注册到 `initIpcRouter` / electron-ipc-restful
+- [ ] `@true-north/api` 路径与 RouteController 对齐（dev-tools 可同步）
 - [ ] 异常处理机制完善
 
 #### 5. 字段控制验证

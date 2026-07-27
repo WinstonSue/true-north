@@ -1,8 +1,9 @@
 'use client';
 
-import { Card, Grid } from '@arco-design/web-react';
+import { Card } from '@sue/design-web-react';
+import { Grid } from '@true-north/components-ui';
 import { useExpenses } from '../context';
-import { IconArrowRise, IconArrowFall } from '@arco-design/web-react/icon';
+import { IconArrowRise, IconArrowFall } from '@true-north/components-ui';
 
 const GridItem = Grid.Col;
 

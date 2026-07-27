@@ -1,6 +1,6 @@
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { useGoalDetailContext } from '../context';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import { GoalTaskList, CreateTask } from './TaskList';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';

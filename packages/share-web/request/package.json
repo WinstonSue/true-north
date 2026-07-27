@@ -5,6 +5,7 @@
   "types": "index.ts",
   "dependencies": {
     "axios": "^0.24.0",
+    "@true-north/components-ui": "workspace:*",
     "@true-north/share-types": "workspace:*"
   },
   "devDependencies": {}

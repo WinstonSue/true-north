@@ -1,5 +1,6 @@
 import React from 'react';
-import { Result, Button } from '@arco-design/web-react';
+import { Button } from '@sue/design-web-react';
+import { Result } from '@true-north/components-ui';
 import locale from './locale';
 import useLocale from '@/utils/useLocale';
 import styles from './style/index.module.less';

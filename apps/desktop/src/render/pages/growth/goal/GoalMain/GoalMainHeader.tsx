@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { FlexibleContainer } from 'francis-component-react';
-import { Modal, Message, Tag, Dropdown, Menu } from '@arco-design/web-react';
-import { Button, Breadcrumb } from '@arco-design/web-react';
+import { FlexibleContainer } from '@true-north/components-ui';
+import { Modal, message, Tag, Dropdown, Menu } from '@sue/design-web-react';
+import { Button, Breadcrumb } from '@sue/design-web-react';
 import {
   IconEdit,
   IconDelete,
@@ -9,7 +9,7 @@ import {
   IconMore,
   IconCheck,
   IconClose,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { GoalService } from '@true-north/web-service';
 import { useGoalContext } from '../context';
 import { GoalStatus } from '@true-north/enum';
@@ -99,11 +99,11 @@ const GoalMainHeader: React.FC = () => {
         doneAt: new Date().toISOString(),
         abandonedAt: null,
       });
-      Message.success('目标已标记为完成');
+      message.success('目标已标记为完成');
       await refreshData();
     } catch (error) {
       console.error('标记完成失败:', error);
-      Message.error('标记完成失败');
+      message.error('标记完成失败');
     }
   };
 
@@ -117,11 +117,11 @@ const GoalMainHeader: React.FC = () => {
       onOk: async () => {
         try {
           await GoalService.abandon(selectedGoal.id);
-          Message.success('目标已放弃');
+          message.success('目标已放弃');
           await refreshData();
         } catch (error) {
           console.error('放弃失败:', error);
-          Message.error('放弃失败');
+          message.error('放弃失败');
         }
       },
     });
@@ -137,11 +137,11 @@ const GoalMainHeader: React.FC = () => {
       onOk: async () => {
         try {
           await GoalService.delete(selectedGoal.id);
-          Message.success('删除成功');
+          message.success('删除成功');
           await refreshData();
         } catch (error) {
           console.error('删除失败:', error);
-          Message.error('删除失败');
+          message.error('删除失败');
         }
       },
     });
@@ -216,8 +216,11 @@ const GoalMainHeader: React.FC = () => {
           </Button>
         )}
 
-        <Dropdown droplist={renderActionMenu()} position="br">
-          <Button type="outline" status="default" icon={<IconMore />} />
+        <Dropdown
+          dropdownRender={() => renderActionMenu()}
+          placement="bottomRight"
+        >
+          <Button icon={<IconMore />} />
         </Dropdown>
       </Fixed>
     </Fixed>

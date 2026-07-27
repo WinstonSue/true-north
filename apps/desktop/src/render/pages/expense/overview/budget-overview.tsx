@@ -1,4 +1,4 @@
-import { Card, Progress, Button } from '@arco-design/web-react';
+import { Card, Progress, Button } from '@sue/design-web-react';
 import { useExpenses } from '../context';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { useCreateBudget } from '../budget/CreateBudget';

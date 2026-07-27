@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Space,
-  Select,
-  Input,
-  Button,
-  Typography,
-  Spin,
-} from '@arco-design/web-react';
-import { IconDownload, IconFaceSmileFill } from '@arco-design/web-react/icon';
+import { Space, Select, Input, Button, Spin } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
+import { IconDownload, IconFaceSmileFill } from '@true-north/components-ui';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
@@ -59,7 +53,7 @@ export default function ChatPanel() {
         </Space>
       </div>
       <div className={styles['chat-panel-content']}>
-        <Spin loading={loading} style={{ width: '100%' }}>
+        <Spin spinning={loading} style={{ width: '100%' }}>
           <MessageList data={messageList} />
         </Spin>
       </div>

@@ -1,4 +1,5 @@
-import { Table, Button, Modal, Card, Divider } from '@arco-design/web-react';
+import type { ColumnProps } from '@true-north/components-ui';
+import { Table, Button, Modal, Card, Divider } from '@sue/design-web-react';
 import dayjs from 'dayjs';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { useTodoAllContext } from './context';
@@ -7,7 +8,7 @@ import { TodoService } from '@true-north/web-service';
 import { openModal } from '@/hooks/OpenModal';
 import { TodoEditor } from '../../components';
 import { TodoStatus } from '@true-north/enum';
-import { ColumnProps } from '@arco-design/web-react/es/Table';
+
 import { TodoVo } from '@true-north/vo';
 
 export default function TodoTable() {

@@ -3,13 +3,10 @@ import {
   Tooltip,
   Input,
   Avatar,
-  Select,
   Dropdown,
-  Menu,
-  Divider,
-  Message,
+  message,
   Button,
-} from '@arco-design/web-react';
+} from '@sue/design-web-react';
 import {
   IconLanguage,
   IconNotification,
@@ -23,7 +20,7 @@ import {
   IconInteraction,
   IconTag,
   IconLoading,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { useSelector, useDispatch } from 'react-redux';
 import { GlobalState } from '@/store';
 import { GlobalContext } from '@/context';
@@ -52,11 +49,13 @@ function Navbar({ show }: { show: boolean }) {
     window.location.href = `/login`;
   }
 
-  function onMenuItemClick(key) {
+  function onMenuItemClick(key: string) {
     if (key === 'logout') {
       logout();
+    } else if (key === 'switch role') {
+      handleChangeRole();
     } else {
-      Message.info(`You clicked ${key}`);
+      message.info(`You clicked ${key}`);
     }
   }
 
@@ -89,56 +88,83 @@ function Navbar({ show }: { show: boolean }) {
     setRole(newRole);
   };
 
-  const droplist = (
-    <Menu onClickMenuItem={onMenuItemClick}>
-      <Menu.SubMenu
-        key="role"
-        title={
-          <>
+  const userMenu = {
+    items: [
+      {
+        key: 'role',
+        label: (
+          <span>
             <IconUser className={styles['dropdown-icon']} />
             <span className={styles['user-role']}>
               {role === 'admin'
                 ? t['menu.user.role.admin']
                 : t['menu.user.role.user']}
             </span>
-          </>
-        }
-      >
-        <Menu.Item onClick={handleChangeRole} key="switch role">
-          <IconTag className={styles['dropdown-icon']} />
-          {t['menu.user.switchRoles']}
-        </Menu.Item>
-      </Menu.SubMenu>
-      <Menu.Item key="setting">
-        <IconSettings className={styles['dropdown-icon']} />
-        {t['menu.user.setting']}
-      </Menu.Item>
-      <Menu.SubMenu
-        key="more"
-        title={
-          <div style={{ width: 80 }}>
+          </span>
+        ),
+        children: [
+          {
+            key: 'switch role',
+            label: (
+              <span>
+                <IconTag className={styles['dropdown-icon']} />
+                {t['menu.user.switchRoles']}
+              </span>
+            ),
+          },
+        ],
+      },
+      {
+        key: 'setting',
+        label: (
+          <span>
+            <IconSettings className={styles['dropdown-icon']} />
+            {t['menu.user.setting']}
+          </span>
+        ),
+      },
+      {
+        key: 'more',
+        label: (
+          <span>
             <IconExperiment className={styles['dropdown-icon']} />
             {t['message.seeMore']}
-          </div>
-        }
-      >
-        <Menu.Item key="workplace">
-          <IconDashboard className={styles['dropdown-icon']} />
-          {t['menu.dashboard.workplace']}
-        </Menu.Item>
-        <Menu.Item key="card list">
-          <IconInteraction className={styles['dropdown-icon']} />
-          {t['menu.list.cardList']}
-        </Menu.Item>
-      </Menu.SubMenu>
-
-      <Divider style={{ margin: '4px 0' }} />
-      <Menu.Item key="logout">
-        <IconPoweroff className={styles['dropdown-icon']} />
-        {t['navbar.logout']}
-      </Menu.Item>
-    </Menu>
-  );
+          </span>
+        ),
+        children: [
+          {
+            key: 'workplace',
+            label: (
+              <span>
+                <IconDashboard className={styles['dropdown-icon']} />
+                {t['menu.dashboard.workplace']}
+              </span>
+            ),
+          },
+          {
+            key: 'card list',
+            label: (
+              <span>
+                <IconInteraction className={styles['dropdown-icon']} />
+                {t['menu.list.cardList']}
+              </span>
+            ),
+          },
+        ],
+      },
+      { type: 'divider' as const },
+      {
+        key: 'logout',
+        label: (
+          <span>
+            <IconPoweroff className={styles['dropdown-icon']} />
+            {t['navbar.logout']}
+          </span>
+        ),
+      },
+    ],
+    onClick: ({ key }: { key: string }) => onMenuItemClick(key),
+  };
 
   return (
     <div className={styles.navbar}>
@@ -156,25 +182,26 @@ function Navbar({ show }: { show: boolean }) {
           />
         </li>
         <li>
-          <Select
-            triggerElement={<IconButton icon={<IconLanguage />} />}
-            options={[
-              { label: '中文', value: 'zh-CN' },
-              { label: 'English', value: 'en-US' },
-            ]}
-            value={lang}
-            triggerProps={{
-              autoAlignPopupWidth: false,
-              autoAlignPopupMinWidth: true,
-              position: 'br',
+          <Dropdown
+            trigger={['hover']}
+            placement="bottomRight"
+            menu={{
+              selectedKeys: [lang],
+              items: [
+                { key: 'zh-CN', label: '中文' },
+                { key: 'en-US', label: 'English' },
+              ],
+              onClick: ({ key }) => {
+                setLang(key);
+                const nextLang = defaultLocale[key];
+                message.info(`${nextLang['message.lang.tips']}${key}`);
+              },
             }}
-            trigger="hover"
-            onChange={(value) => {
-              setLang(value);
-              const nextLang = defaultLocale[value];
-              Message.info(`${nextLang['message.lang.tips']}${value}`);
-            }}
-          />
+          >
+            <span>
+              <IconButton icon={<IconLanguage />} />
+            </span>
+          </Dropdown>
         </li>
         <li>
           <MessageBox>
@@ -183,7 +210,7 @@ function Navbar({ show }: { show: boolean }) {
         </li>
         <li>
           <Tooltip
-            content={
+            title={
               theme === 'light'
                 ? t['settings.navbar.theme.toDark']
                 : t['settings.navbar.theme.toLight']
@@ -200,7 +227,11 @@ function Navbar({ show }: { show: boolean }) {
         </li>
         {userInfo && (
           <li>
-            <Dropdown droplist={droplist} position="br" disabled={userLoading}>
+            <Dropdown
+              menu={userMenu}
+              placement="bottomRight"
+              disabled={userLoading}
+            >
               <Avatar size={32} style={{ cursor: 'pointer' }}>
                 {userLoading ? (
                   <IconLoading />

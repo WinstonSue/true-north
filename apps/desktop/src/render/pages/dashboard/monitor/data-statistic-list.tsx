@@ -1,4 +1,5 @@
-import { Table, Tag, Typography } from '@arco-design/web-react';
+import { Table, Tag } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import React from 'react';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';

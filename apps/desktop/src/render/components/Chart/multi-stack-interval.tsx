@@ -1,11 +1,11 @@
 import React from 'react';
 import { Chart, Tooltip, Interval, Axis, Legend } from 'bizcharts';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import CustomTooltip from './customer-tooltip';
 
 function MultiInterval({ data, loading }: { data: any[]; loading: boolean }) {
   return (
-    <Spin loading={loading} style={{ width: '100%' }}>
+    <Spin spinning={loading} style={{ width: '100%' }}>
       <Chart
         height={370}
         padding="auto"

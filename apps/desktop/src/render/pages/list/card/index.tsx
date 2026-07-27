@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Tabs, Card, Input, Typography, Grid } from '@arco-design/web-react';
+import { Tabs, Card, Input } from '@sue/design-web-react';
+import { Typography, Grid } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
@@ -61,21 +62,21 @@ export default function ListCard() {
     <Card>
       <Title heading={6}>{t['menu.list.card']}</Title>
       <Tabs
-        activeTab={activeKey}
-        type="rounded"
+        activeKey={activeKey}
         onChange={setActiveKey}
-        extra={
+        tabBarExtraContent={
           <Input.Search
             style={{ width: '240px' }}
             placeholder={t[`cardList.tab.${activeKey}.placeholder`]}
           />
         }
-      >
-        <Tabs.TabPane key="all" title={t['cardList.tab.title.all']} />
-        <Tabs.TabPane key="quality" title={t['cardList.tab.title.quality']} />
-        <Tabs.TabPane key="service" title={t['cardList.tab.title.service']} />
-        <Tabs.TabPane key="rules" title={t['cardList.tab.title.rules']} />
-      </Tabs>
+        items={[
+          { key: 'all', label: t['cardList.tab.title.all'] },
+          { key: 'quality', label: t['cardList.tab.title.quality'] },
+          { key: 'service', label: t['cardList.tab.title.service'] },
+          { key: 'rules', label: t['cardList.tab.title.rules'] },
+        ]}
+      />
       <div className={styles.container}>
         {activeKey === 'all' ? (
           Object.entries(data).map(([key, list]) => (

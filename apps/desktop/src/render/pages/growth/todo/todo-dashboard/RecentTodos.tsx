@@ -1,13 +1,14 @@
 'use client';
 
-import { Typography, List, Tag, Avatar } from '@arco-design/web-react';
+import { Tag, Avatar } from '@sue/design-web-react';
+import { Typography, List } from '@true-north/components-ui';
 import { format, isToday, isTomorrow, isPast } from 'date-fns';
 import { TodoVo } from '@true-north/vo';
 import {
   IconCheckCircle,
   IconClockCircle,
   IconExclamation,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 
 const { Title, Text } = Typography;
 

@@ -16,7 +16,7 @@ tech_stack:
   frontend:
     framework: 'React 18'
     language: 'TypeScript'
-    ui_library: ['Arco Design']
+    ui_library: ['@sue/design-web-react']
     state_management: 'React Context + createInjectState'
     router: 'React Router v6'
     build_tool: 'Vite'
@@ -76,7 +76,7 @@ tech_stack:
 ### 4.3 UI 规范（复用）
 
 - 右上操作区顺序：状态 Tag（只读） | Dropdown(...) | 主要按钮。
-- Dropdown 使用 Arco `Dropdown`，删除项危险色，二次确认。
+- Dropdown 使用 `@sue/design-web-react` `Dropdown`，删除项危险色，二次确认。
 - 按钮：主要按钮用于完成/恢复，次要按钮用文字/次级样式。
 
 ## 五、后端设计（若需配合）

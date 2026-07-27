@@ -7,29 +7,30 @@ sequenceDiagram
   participant R as render
   participant P as preload
   participant M as main
-  participant S as service handlers
+  participant RC as RouteController
 
-  R->>P: window.api / IPC invoke
-  P->>M: ipcRenderer
-  M->>S: 路由到 RouteController
-  S-->>M: VO 响应
-  M-->>P: 结果
-  P-->>R: Promise
+  R->>P: electronAPI REST invoke
+  P->>M: ipcRenderer channel REST
+  M->>RC: electron-ipc-restful 路由匹配
+  RC-->>M: VO 响应
+  M-->>P: 标准响应包装
+  P-->>R: Promise data
 ```
 
 | 目录 | 运行环境 | 职责 |
 | --- | --- | --- |
-| `src/main` | Node（主进程） | 创建窗口、注册 IPC、拉起 service 路由 |
-| `src/preload` | 隔离上下文 | 向 `window` 暴露受控 API |
+| `src/main` | Node（主进程） | 创建窗口、`initIpcRouter` 注册 route-controller |
+| `src/preload` | 隔离上下文 | 向 `window.electronAPI` 暴露 REST 风格 API |
 | `src/render` | Chromium | React UI、路由、模块 Context |
-| `src/service` | Node（主进程侧） | TypeORM、业务 Service、RouteController |
+| `src/service` | Node（主进程侧） | TypeORM、业务 Service、**RouteController（IPC 入口）** |
 
 ## render 层约定
 
 - 页面：`render/pages/{domain}/`，Growth 在 `render/pages/growth/`
 - 路由：`render/router/`
 - 模块状态：使用 `createInjectState`（`render/utils/createInjectState.tsx`），每功能块独立 Provider + hook
-- 样式：CSS Modules + Less，与 Arco/Ant 组件配合
+- 样式：CSS Modules + Less / Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合；布局壳层见 `@true-north/components-ui`
+- 数据调用：优先 `@true-north/web-service` → `@true-north/api` → `share-request` → preload REST
 
 示例（Context 形态）：
 
@@ -48,8 +49,9 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
 ## service 层约定
 
 - 数据库：`service/db/`（`AppDataSource`、SQLite）
-- 装饰器路由：`@Controller`、`@Get`、`@Post` 等（`packages/business/api`）
-- 单个模块入口：`*.route-controller.ts` 暴露 HTTP 风格路径，由 IPC 层映射
+- 装饰器：`@business/decorators`（桥接 `electron-ipc-restful`，并保留 description 等元数据）
+- **单个模块 IPC/VO 入口**：`*.route-controller.ts`（不再另设 `*.controller.ts` 透传层）
+- 注册：`src/main/ipc-handlers.ts` 将各模块 RouteController **Class** 交给 `registerIpcHandlers`（构造器默认注入模块 service 单例）
 
 ## 前端页面模块（Growth）
 

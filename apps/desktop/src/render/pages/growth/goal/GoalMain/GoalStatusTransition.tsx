@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Select, Tag, Message } from '@arco-design/web-react';
+import { Select, Tag, message } from '@sue/design-web-react';
 import { GoalStatus } from '@true-north/enum';
 import { GoalService } from '@true-north/web-service';
 import type { GoalVo } from '@true-north/vo';
@@ -121,29 +121,19 @@ const GoalStatusTransition: React.FC<GoalStatusTransitionProps> = ({
       disabled={disabled || loading}
       loading={loading}
       placeholder="选择状态"
-      triggerElement={
-        <div
-          className={clsx(
-            'w-20 px-2 py-1',
-            'flex items-center justify-center',
-            'rounded bg-fill-1 hover:bg-fill-2',
-            'cursor-pointer',
-            disabled && 'cursor-not-allowed opacity-50',
-          )}
-        >
-          <Tag color={currentConfig.color}>{currentConfig.label}</Tag>
-        </div>
-      }
-    >
-      {availableStates.map((status) => {
+      className={clsx('w-24', disabled && 'opacity-50')}
+      popupMatchSelectWidth={false}
+      labelRender={() => (
+        <Tag color={currentConfig.color}>{currentConfig.label}</Tag>
+      )}
+      options={availableStates.map((status) => {
         const config = STATUS_CONFIG[status];
-        return (
-          <Select.Option key={status} value={status}>
-            <Tag color={config.color}>{config.label}</Tag>
-          </Select.Option>
-        );
+        return {
+          value: status,
+          label: <Tag color={config.color}>{config.label}</Tag>,
+        };
       })}
-    </Select>
+    />
   );
 };
 

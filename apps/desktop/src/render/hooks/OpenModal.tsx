@@ -1,5 +1,5 @@
-import { Modal } from '@arco-design/web-react';
-import type { ConfirmProps } from '@arco-design/web-react/es/Modal/confirm';
+import { Modal } from '@sue/design-web-react';
+import type { ConfirmProps } from '@true-north/components-ui';
 
 export function openModal(modalOption: ConfirmProps = {}) {
   return Modal.confirm({

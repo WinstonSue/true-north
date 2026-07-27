@@ -1,7 +1,7 @@
 import { useTaskDetailContext } from './context';
 import TaskList from '../TaskList';
 import clsx from 'clsx';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { useTaskDetail } from '.';
 import { CreateButton } from '@/components/Button/CreateButton';
 

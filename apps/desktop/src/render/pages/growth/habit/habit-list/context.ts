@@ -1,18 +1,7 @@
 import { createInjectState } from '@/utils/createInjectState';
 import React, { useState, useEffect, useCallback, ReactNode } from 'react';
-import {
-  Card,
-  Button,
-  Space,
-  Typography,
-  Empty,
-  Spin,
-  Message,
-  Modal,
-  Tag,
-  Progress,
-  Table,
-} from '@arco-design/web-react';
+import { Card, Button, Space, Empty, Spin, message, Modal, Tag, Progress, Table } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { HabitController, GoalController } from '@true-north/api';
 import {
   HabitWithoutRelationsVo,
@@ -74,7 +63,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
       });
     } catch (error) {
       console.error('获取习惯列表失败:', error);
-      Message.error('获取习惯列表失败');
+      message.error('获取习惯列表失败');
     } finally {
       setLoading(false);
     }
@@ -116,12 +105,12 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
     async (habitId: string) => {
       try {
         await HabitController.doneBatchHabit({ includeIds: [habitId] });
-        Message.success('习惯已完成');
+        message.success('习惯已完成');
         fetchHabits();
         refreshHabits();
       } catch (error) {
         console.error('完成习惯失败:', error);
-        Message.error('完成习惯失败');
+        message.error('完成习惯失败');
       }
     },
     [fetchHabits, refreshHabits],
@@ -136,12 +125,12 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
         onOk: async () => {
           try {
             await HabitController.deleteHabit(habitId);
-            Message.success('习惯已删除');
+            message.success('习惯已删除');
             fetchHabits();
             refreshHabits();
           } catch (error) {
             console.error('删除习惯失败:', error);
-            Message.error('删除习惯失败');
+            message.error('删除习惯失败');
           }
         },
       });

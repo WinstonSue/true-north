@@ -1,12 +1,12 @@
 import React from 'react';
-import { Alert, Card, Link, Typography, Tag } from '@arco-design/web-react';
-import { IconDoubleRight } from '@arco-design/web-react/icon';
+import { Alert, Card, Tag } from '@sue/design-web-react';
+import { Typography, Link } from '@true-north/components-ui';
+import { IconDoubleRight } from '@true-north/components-ui';
 import { useSelector } from 'react-redux';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import CodeBlock from './code-block';
 import styles from './style/index.module.less';
-
 export default function Welcome() {
   const t = useLocale(locale);
   const userInfo = useSelector((state: any) => state.userInfo) || {};
@@ -32,13 +32,11 @@ export default function Welcome() {
               @arco-design/pro-pages-workplace
             </Tag>
           </Typography.Text>
-
           <Typography.Title heading={6}>
             2. {t['welcome.step.title.install']}
           </Typography.Title>
           <Typography.Text>{t['welcome.step.content.install']}</Typography.Text>
           <CodeBlock code="arco block use @arco-design/pro-pages-workplace" />
-
           <Typography.Title heading={6} style={{ marginTop: 0 }}>
             3. {t['welcome.step.title.result']}
           </Typography.Title>

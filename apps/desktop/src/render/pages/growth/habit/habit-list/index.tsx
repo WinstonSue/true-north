@@ -2,10 +2,10 @@ import React from 'react';
 import DefaultPage from '@/components/Layout/DefaultPage';
 import HabitListFilter from './HabitListFilter';
 import { HabitListProvider, useHabitListContext } from './context';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import HabitListTable from './HabitListTable';
-import { Button } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { Button } from '@sue/design-web-react';
+import { IconPlus } from '@true-north/components-ui';
 import { openDrawer } from '@/layout/Drawer';
 import { CreateHabit } from '../components/CreateHabit';
 

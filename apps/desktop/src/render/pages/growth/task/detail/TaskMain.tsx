@@ -1,23 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FlexibleContainer } from 'francis-component-react';
-import {
-  Tabs,
-  Tag,
-  Dropdown,
-  Menu,
-  Button,
-  Modal,
-  Message,
-} from '@arco-design/web-react';
+import { FlexibleContainer } from '@true-north/components-ui';
+import { Tabs, Tag, Dropdown, Menu, Button, Modal, message } from '@sue/design-web-react';
 import {
   IconMore,
   IconEdit,
   IconDelete,
   IconClose,
   IconCheck,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { TaskVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
 import { TaskService } from '@true-north/web-service';
@@ -25,7 +17,6 @@ import { useTaskDetailContext } from './context';
 import clsx from 'clsx';
 
 const { Fixed, Shrink } = FlexibleContainer;
-const { TabPane } = Tabs;
 
 interface TaskMainProps {
   task: TaskVo;
@@ -62,11 +53,11 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
         status: TaskStatus.DONE,
         doneAt: new Date().toISOString(),
       });
-      Message.success('任务已标记为完成');
+      message.success('任务已标记为完成');
       await refreshData();
     } catch (error) {
       console.error('标记完成失败:', error);
-      Message.error('标记完成失败');
+      message.error('标记完成失败');
     }
   };
 
@@ -78,11 +69,11 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
         doneAt: null,
         abandonedAt: null,
       });
-      Message.success('任务已恢复');
+      message.success('任务已恢复');
       await refreshData();
     } catch (error) {
       console.error('恢复失败:', error);
-      Message.error('恢复失败');
+      message.error('恢复失败');
     }
   };
 
@@ -97,11 +88,11 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
             status: TaskStatus.ABANDONED,
             abandonedAt: new Date().toISOString(),
           });
-          Message.success('任务已放弃');
+          message.success('任务已放弃');
           await refreshData();
         } catch (error) {
           console.error('放弃失败:', error);
-          Message.error('放弃失败');
+          message.error('放弃失败');
         }
       },
     });
@@ -115,12 +106,12 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
       onOk: async () => {
         try {
           await TaskService.delete(task.id);
-          Message.success('删除成功');
+          message.success('删除成功');
           // 删除后跳转回任务列表
           window.history.back();
         } catch (error) {
           console.error('删除失败:', error);
-          Message.error('删除失败');
+          message.error('删除失败');
         }
       },
     });
@@ -189,7 +180,10 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
           </Tag>
 
           {/* ... 下拉菜单 */}
-          <Dropdown droplist={renderActionMenu()} position="br">
+          <Dropdown
+            dropdownRender={() => renderActionMenu()}
+            placement="bottomRight"
+          >
             <Button type="text" icon={<IconMore />} />
           </Dropdown>
 
@@ -200,98 +194,121 @@ const TaskMain: React.FC<TaskMainProps> = ({ task }) => {
 
       {/* 内容区域 */}
       <Shrink className={clsx('flex flex-col overflow-auto')}>
-        <Tabs activeTab={activeTab} onChange={setActiveTab} className="h-full">
-          <TabPane key="overview" title="概览">
-            <div className="p-4">
-              <div className="space-y-4">
-                {/* 基础信息 */}
-                <div className="bg-white rounded-lg p-4 border">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">
-                    基础信息
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">任务名称：</span>
-                      <span className="text-gray-900">{task.name}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">状态：</span>
-                      <Tag
-                        color={STATUS_CONFIG[task.status]?.color}
-                        size="small"
-                      >
-                        {STATUS_CONFIG[task.status]?.label}
-                      </Tag>
-                    </div>
-                    {task.description && (
-                      <div className="col-span-2">
-                        <span className="text-gray-500">描述：</span>
-                        <p className="text-gray-900 mt-1">{task.description}</p>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          className="h-full"
+          items={[
+            {
+              key: 'overview',
+              label: '概览',
+              children: (
+                <div className="p-4">
+                  <div className="space-y-4">
+                    {/* 基础信息 */}
+                    <div className="bg-white rounded-lg p-4 border">
+                      <h3 className="text-sm font-medium text-gray-900 mb-3">
+                        基础信息
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">任务名称：</span>
+                          <span className="text-gray-900">{task.name}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">状态：</span>
+                          <Tag
+                            color={STATUS_CONFIG[task.status]?.color}
+                            size="small"
+                          >
+                            {STATUS_CONFIG[task.status]?.label}
+                          </Tag>
+                        </div>
+                        {task.description && (
+                          <div className="col-span-2">
+                            <span className="text-gray-500">描述：</span>
+                            <p className="text-gray-900 mt-1">
+                              {task.description}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
+
+                    {/* 时间信息 */}
+                    <div className="bg-white rounded-lg p-4 border">
+                      <h3 className="text-sm font-medium text-gray-900 mb-3">
+                        时间信息
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        {task.startAt && (
+                          <div>
+                            <span className="text-gray-500">开始时间：</span>
+                            <span className="text-gray-900">
+                              {new Date(task.startAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                        {task.endAt && (
+                          <div>
+                            <span className="text-gray-500">结束时间：</span>
+                            <span className="text-gray-900">
+                              {new Date(task.endAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* 时间信息 */}
-                <div className="bg-white rounded-lg p-4 border">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">
-                    时间信息
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    {task.startAt && (
-                      <div>
-                        <span className="text-gray-500">开始时间：</span>
-                        <span className="text-gray-900">
-                          {new Date(task.startAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
-                    {task.endAt && (
-                      <div>
-                        <span className="text-gray-500">结束时间：</span>
-                        <span className="text-gray-900">
-                          {new Date(task.endAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
+              ),
+            },
+            {
+              key: 'subtasks',
+              label: '子任务',
+              children: (
+                <div className="p-4">
+                  <div className="text-center text-gray-500 py-8">
+                    子任务功能开发中...
                   </div>
                 </div>
-              </div>
-            </div>
-          </TabPane>
-
-          <TabPane key="subtasks" title="子任务">
-            <div className="p-4">
-              <div className="text-center text-gray-500 py-8">
-                子任务功能开发中...
-              </div>
-            </div>
-          </TabPane>
-
-          <TabPane key="todos" title="关联待办">
-            <div className="p-4">
-              <div className="text-center text-gray-500 py-8">
-                关联待办功能开发中...
-              </div>
-            </div>
-          </TabPane>
-
-          <TabPane key="tracktime" title="时间追踪">
-            <div className="p-4">
-              <div className="text-center text-gray-500 py-8">
-                <Button type="primary">跳转到计时器</Button>
-              </div>
-            </div>
-          </TabPane>
-
-          <TabPane key="activity" title="活动记录">
-            <div className="p-4">
-              <div className="text-center text-gray-500 py-8">
-                活动记录功能开发中...
-              </div>
-            </div>
-          </TabPane>
-        </Tabs>
+              ),
+            },
+            {
+              key: 'todos',
+              label: '关联待办',
+              children: (
+                <div className="p-4">
+                  <div className="text-center text-gray-500 py-8">
+                    关联待办功能开发中...
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: 'tracktime',
+              label: '时间追踪',
+              children: (
+                <div className="p-4">
+                  <div className="text-center text-gray-500 py-8">
+                    <Button type="primary">跳转到计时器</Button>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: 'activity',
+              label: '活动记录',
+              children: (
+                <div className="p-4">
+                  <div className="text-center text-gray-500 py-8">
+                    活动记录功能开发中...
+                  </div>
+                </div>
+              ),
+            },
+          ]}
+        />
       </Shrink>
     </FlexibleContainer>
   );

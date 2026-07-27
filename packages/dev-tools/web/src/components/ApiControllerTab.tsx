@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
-import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
+import { Card, Button, Space, message, Table, Tag, Alert } from '@sue/design-web-react';
+import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@true-north/components-ui';
 import MethodDetailsModal from './MethodDetailsModal';
 import { ControllerSyncStatus } from '../../../types';
 
@@ -28,10 +28,10 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
       if (result.success) {
         setApiMethodDetails(result.data);
       } else {
-        Message.error(`API 控制器方法详情检查失败: ${result.error}`);
+        message.error(`API 控制器方法详情检查失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`API 控制器方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`API 控制器方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setApiMethodDetailsLoading(false);
     }
@@ -53,14 +53,14 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
       const result = await response.json();
 
       if (result.success) {
-        Message.success(result.message || `API 控制器 ${className} 同步完成`);
+        message.success(result.message || `API 控制器 ${className} 同步完成`);
         // 重新检查状态
         await checkApiMethodDetails();
       } else {
-        Message.error(`API 控制器同步失败: ${result.error}`);
+        message.error(`API 控制器同步失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`API 控制器同步失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`API 控制器同步失败: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 

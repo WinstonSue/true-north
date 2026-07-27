@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { GoalVo } from '@true-north/vo';
 import { GoalService, TaskService } from '@true-north/web-service';
-import { Message } from '@arco-design/web-react';
+import { message } from '@sue/design-web-react';
 import { GoalStatus, GoalType, Importance, Difficulty } from '@true-north/enum';
 import { createInjectState } from '@true-north/common-web-utils';
 
@@ -98,7 +98,7 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
       }
     } catch (error) {
       console.error('获取目标数据失败:', error);
-      Message.error('获取目标数据失败');
+      message.error('获取目标数据失败');
     } finally {
       setLoading(false);
     }
@@ -112,7 +112,7 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
       // 同时获取关联任务
     } catch (error) {
       console.error('获取目标详情失败:', error);
-      Message.error('获取目标详情失败');
+      message.error('获取目标详情失败');
     }
   }, []);
 
@@ -149,7 +149,7 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
       setGoalTree((prevTree) => updateTreeWithChildren(prevTree));
     } catch (error) {
       console.error('加载子节点失败:', error);
-      Message.error('加载子节点失败');
+      message.error('加载子节点失败');
     }
   }, []);
 

@@ -6,7 +6,7 @@ import {
   exportUtils,
   MindMapData,
 } from '@true-north/components-mind/src/index';
-import { Message } from '@arco-design/web-react';
+import { message } from '@sue/design-web-react';
 import MindMapNode from './MindMapNode';
 import MenuManager, { MenuManagerRef } from './NodeMenu/MenuManager';
 import { openDrawer } from '@/layout/Drawer';
@@ -77,7 +77,7 @@ const X6MindMap: React.FC<X6MindMapProps> = ({
   const handleExport = () => {
     if (graphRef.current) {
       exportUtils.exportToPNG(graphRef.current, 'goal-mind-map');
-      Message.success('已导出PNG图片');
+      message.success('已导出PNG图片');
     }
   };
 

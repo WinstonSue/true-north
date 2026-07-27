@@ -1,14 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import {
-  Input,
-  Grid,
-  DatePicker,
-  Select,
-  Form,
-  Radio,
-  RulesProps,
-  Tag,
-} from '@arco-design/web-react';
+import { Input, DatePicker, Select, Form, Radio, Tag } from '@sue/design-web-react';
+import { Grid, RulesProps } from '@true-north/components-ui';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { GoalService } from '@true-north/web-service';
@@ -195,10 +187,7 @@ export default function GoalForm() {
           }}
         >
           <Select
-            triggerProps={{
-              autoAlignPopupWidth: false,
-              autoAlignPopupMinWidth: true,
-            }}
+            popupMatchSelectWidth={false}
             disabled={readonly}
           >
             {[...IMPORTANCE_MAP.entries()].map(([key, value]) => (
@@ -222,10 +211,7 @@ export default function GoalForm() {
         >
           <Select
             value={goalFormData.difficulty}
-            triggerProps={{
-              autoAlignPopupWidth: false,
-              autoAlignPopupMinWidth: true,
-            }}
+            popupMatchSelectWidth={false}
             disabled={readonly}
           >
             {[...DIFFICULTY_MAP.entries()].map(([key, value]) => (
@@ -280,9 +266,9 @@ function Item(props: {
           requiredSymbol={{ position: 'end' }}
           rules={props.rules}
           className={clsx(
-            '[&_.arco-form-label-item>label]:flex',
-            '[&_.arco-form-label-item>label]:items-center',
-            '[&_.arco-form-label-item>label]:gap-1',
+            '[&_.sue-form-item-label>label]:flex',
+            '[&_.sue-form-item-label>label]:items-center',
+            '[&_.sue-form-item-label>label]:gap-1',
           )}
         >
           <Form.Item
@@ -309,9 +295,9 @@ function Item(props: {
         rules={props.rules}
         requiredSymbol={{ position: 'end' }}
         className={clsx(
-          '[&_.arco-form-label-item>label]:flex',
-          '[&_.arco-form-label-item>label]:items-center',
-          '[&_.arco-form-label-item>label]:gap-1',
+          '[&_.sue-form-item-label>label]:flex',
+          '[&_.sue-form-item-label>label]:items-center',
+          '[&_.sue-form-item-label>label]:gap-1',
         )}
       >
         {props.children}

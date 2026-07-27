@@ -1,4 +1,4 @@
-import { Calendar } from '@arco-design/web-react';
+import { Calendar } from '@sue/design-web-react';
 import { CalendarProvider } from './context';
 import CalendarCell from './CalendarCell';
 import { useCalendarContext } from './context';
@@ -16,7 +16,7 @@ function CalendarPage() {
         mode={calendarMode}
         dateRender={(date) => <CalendarCell cellDate={date} />}
         headerRender={() => (
-          <PanelHeader prefixCls="arco-calendar"></PanelHeader>
+          <PanelHeader prefixCls="sue-picker"></PanelHeader>
         )}
       />
 

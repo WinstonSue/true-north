@@ -1,8 +1,8 @@
 import TaskList from '../../components/TaskList';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { FlexibleContainer } from 'francis-component-react';
-import { Collapse, Divider, Button } from '@arco-design/web-react';
+import { FlexibleContainer } from '@true-north/components-ui';
+import { Collapse, Divider, Button } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TaskService } from '@true-north/web-service';
 import { flushSync } from 'react-dom';
@@ -101,11 +101,7 @@ export default function TaskWeek() {
           bordered={false}
         >
           {expiredTaskList.length > 0 && (
-            <Collapse.Item
-              header="已过期"
-              name="expired"
-              contentStyle={{ padding: 0 }}
-            >
+            <Collapse.Panel header="已过期" key="expired">
               <TaskList
                 taskList={expiredTaskList}
                 onClickTask={async (id) => {
@@ -115,14 +111,10 @@ export default function TaskWeek() {
                   await refreshData();
                 }}
               />
-            </Collapse.Item>
+            </Collapse.Panel>
           )}
           {weekTaskList.length > 0 && (
-            <Collapse.Item
-              header="本周"
-              name="week"
-              contentStyle={{ padding: 0 }}
-            >
+            <Collapse.Panel header="本周" key="week">
               <TaskList
                 taskList={weekTaskList}
                 onClickTask={async (id) => {
@@ -132,14 +124,10 @@ export default function TaskWeek() {
                   await refreshData();
                 }}
               />
-            </Collapse.Item>
+            </Collapse.Panel>
           )}
           {weekDoneTaskList.length > 0 && (
-            <Collapse.Item
-              header="已完成"
-              name="done"
-              contentStyle={{ padding: 0 }}
-            >
+            <Collapse.Panel header="已完成" key="done">
               <TaskList
                 taskList={weekDoneTaskList}
                 onClickTask={async (id) => {
@@ -149,14 +137,10 @@ export default function TaskWeek() {
                   await refreshData();
                 }}
               />
-            </Collapse.Item>
+            </Collapse.Panel>
           )}
           {weekAbandonedTaskList.length > 0 && (
-            <Collapse.Item
-              header="已放弃"
-              name="abandoned"
-              contentStyle={{ padding: 0 }}
-            >
+            <Collapse.Panel header="已放弃" key="abandoned">
               <TaskList
                 taskList={weekAbandonedTaskList}
                 onClickTask={async (id) => {
@@ -166,7 +150,7 @@ export default function TaskWeek() {
                   await refreshData();
                 }}
               />
-            </Collapse.Item>
+            </Collapse.Panel>
           )}
         </Collapse>
       </div>

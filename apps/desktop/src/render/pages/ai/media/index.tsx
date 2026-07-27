@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '@arco-design/web-react';
+import { Button } from '@sue/design-web-react';
 
 export default function Media() {
   let mediaRecorder: MediaRecorder;

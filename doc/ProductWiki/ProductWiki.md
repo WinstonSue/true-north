@@ -81,7 +81,7 @@ erDiagram
 tech_stack_summary:
   monorepo: 'pnpm workspace + Turbo'
   client: 'Electron（apps/desktop）'
-  ui: 'React 18 + Vite + Arco/Ant Design'
+  ui: 'React 18 + Vite + @sue/design-web-react'
   persistence: 'TypeORM + SQLite（本地 service 层）'
   shared: '@true-north/vo / enum，packages/business'
 ```

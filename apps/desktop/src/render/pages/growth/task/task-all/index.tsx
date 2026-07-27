@@ -1,7 +1,7 @@
 'use client';
 
 import { TaskFilters } from './TaskFilters';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { TaskAllProvider } from './context';
 import TaskTable from './TaskTable';
 import { useTaskAllContext } from './context';

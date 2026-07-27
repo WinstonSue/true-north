@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../style/blocks.module.less';
-import { Card, Avatar, Typography, Skeleton } from '@arco-design/web-react';
+import { Card, Avatar, Skeleton } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 const { Text, Title } = Typography;
 
 export interface ProjectProps {

@@ -1,11 +1,6 @@
 import React from 'react';
-import {
-  Card,
-  Typography,
-  Tag,
-  Space,
-  Descriptions,
-} from '@arco-design/web-react';
+import { Card, Tag, Space, Descriptions } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 

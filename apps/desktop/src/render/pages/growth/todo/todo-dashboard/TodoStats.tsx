@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Card, Grid, Typography } from '@arco-design/web-react';
+import { Card } from '@sue/design-web-react';
+import { Grid, Typography } from '@true-north/components-ui';
 import { useTodoContext } from './context';
 
 const { Row, Col } = Grid;

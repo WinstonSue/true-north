@@ -12,7 +12,7 @@ tech_stack:
   renderer:
     framework: 'React 18 + TypeScript'
     build: 'Vite'
-    ui: ['Arco Design', 'Ant Design']
+    ui: ['@sue/design-web-react']
     router: 'React Router v6'
     styles: 'CSS Modules + Less + TailwindCSS'
   service_layer:

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Tooltip, Space, Switch } from '@arco-design/web-react';
+import { Button, Tooltip, Space, Switch } from '@sue/design-web-react';
 import {
   IconPlus,
   IconZoomIn,
@@ -14,7 +14,7 @@ import {
   IconPaste,
   IconDelete,
   IconShrink,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { useMindMapContext } from '../context';
 import { graphEventEmitter } from '../graph/eventEmitter';
 

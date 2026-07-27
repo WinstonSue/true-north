@@ -1,15 +1,6 @@
 import React from 'react';
-import {
-  Card,
-  Tag,
-  Button,
-  Space,
-  Typography,
-  Progress,
-  Dropdown,
-  Menu,
-  Badge,
-} from '@arco-design/web-react';
+import { Card, Tag, Button, Space, Progress, Dropdown, Menu, Badge } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import {
   IconMore,
   IconPlayArrow,
@@ -18,7 +9,7 @@ import {
   IconClose,
   IconDelete,
   IconEdit,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { HabitWithoutRelationsVo } from '@true-north/vo';
 import { HabitStatus } from '@true-north/enum';
 import { HABIT_STATUS_OPTIONS, HABIT_DIFFICULTY_OPTIONS } from '../constants';
@@ -113,7 +104,11 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       className="habit-card h-full"
       hoverable
       actions={[
-        <Dropdown key="more" droplist={renderActionMenu()} position="br">
+        <Dropdown
+          key="more"
+          dropdownRender={() => renderActionMenu()}
+          placement="bottomRight"
+        >
           <Button type="text" icon={<IconMore />} />
         </Dropdown>,
       ]}

@@ -2,9 +2,8 @@ import { defineConfig } from 'electron-vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import react from '@vitejs/plugin-react';
-import svgrPlugin from '@arco-plugins/vite-plugin-svgr';
 import tailwindcss from '@tailwindcss/vite';
-import { vitePluginForArco } from '@arco-plugins/vite-react';
+import svgr from 'vite-plugin-svgr';
 
 // 获取当前文件的目录路径
 const currentFilePath = fileURLToPath(import.meta.url);
@@ -104,14 +103,9 @@ export default defineConfig({
     plugins: [
       react(),
       tailwindcss(),
-      svgrPlugin({
-        svgrOptions: {},
-      }),
-      vitePluginForArco({
-        theme: '@arco-themes/react-francis',
-        modifyVars: {
-          // 'arcoblue-6': setting.themeColor,
-        },
+      svgr({
+        svgrOptions: { exportType: 'default' },
+        include: '**/*.svg',
       }),
     ],
     css: {

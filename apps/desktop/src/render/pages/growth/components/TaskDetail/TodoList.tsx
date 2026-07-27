@@ -1,7 +1,7 @@
 import { useTaskDetailContext } from './context';
 import TodoList from '../TodoList';
 import clsx from 'clsx';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { CreateButton } from '@/components/Button/CreateButton';
 import { useTodoDetail } from '../TodoDetail';
 

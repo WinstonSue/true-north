@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import * as z from 'zod';
-import { Form, Input, Button, Table, Message } from '@arco-design/web-react';
+import { Form, Input, Button, Table, message } from '@sue/design-web-react';
 
 const productSchema = z.object({
   name: z.string().min(1, { message: 'Product name is required' }),
@@ -29,7 +29,7 @@ export default function ERPPage() {
     };
     setProducts([...products, newProduct]);
     form.resetFields();
-    Message.success('The new product has been added to the inventory.');
+    message.success('The new product has been added to the inventory.');
   }
 
   const columns = [

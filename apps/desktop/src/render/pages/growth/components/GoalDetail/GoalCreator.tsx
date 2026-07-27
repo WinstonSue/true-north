@@ -1,11 +1,11 @@
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import {
   GoalDetailProvider,
   useGoalDetailContext,
   GoalDetailContextProps,
 } from './context';
 import GoalForm from './GoalForm';
-import { Button } from '@arco-design/web-react';
+import { Button } from '@sue/design-web-react';
 import { GoalService, GoalMapping } from '@true-north/web-service';
 
 const { Shrink, Fixed } = FlexibleContainer;

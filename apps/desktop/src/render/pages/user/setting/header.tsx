@@ -1,18 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Avatar,
-  Upload,
-  Descriptions,
-  Tag,
-  Skeleton,
-  Link,
-} from '@arco-design/web-react';
-import { IconCamera, IconPlus } from '@arco-design/web-react/icon';
+import { Button, Avatar, Upload, Descriptions, Tag, Skeleton } from '@sue/design-web-react';
+import { IconCamera, IconPlus, Link } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/header.module.less';
-
 export default function Info({
   userInfo = {},
   loading,
@@ -21,17 +12,13 @@ export default function Info({
   loading: boolean;
 }) {
   const t = useLocale(locale);
-
   const [avatar, setAvatar] = useState('');
-
   function onAvatarChange(_, file) {
     setAvatar(file.originFile ? URL.createObjectURL(file.originFile) : '');
   }
-
   useEffect(() => {
     setAvatar(userInfo.avatar);
   }, [userInfo]);
-
   const loadingImg = (
     <Skeleton
       text={{ rows: 0 }}
@@ -39,7 +26,6 @@ export default function Info({
       animation
     />
   );
-
   const loadingNode = <Skeleton text={{ rows: 1 }} animation />;
   return (
     <div className={styles['info-wrapper']}>

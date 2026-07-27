@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link, Card, Skeleton, Tag, Typography } from '@arco-design/web-react';
+import { Card, Skeleton, Tag } from '@sue/design-web-react';
+import { Typography, Link } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/announcement.module.less';
-
 function Announcement() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const t = useLocale(locale);
-
   const fetchData = () => {
     setLoading(true);
     axios
@@ -22,11 +20,9 @@ function Announcement() {
         setLoading(false);
       });
   };
-
   useEffect(() => {
     fetchData();
   }, []);
-
   function getTagColor(type) {
     switch (type) {
       case 'activity':
@@ -39,7 +35,6 @@ function Announcement() {
         return 'arcoblue';
     }
   }
-
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -63,5 +58,4 @@ function Announcement() {
     </Card>
   );
 }
-
 export default Announcement;

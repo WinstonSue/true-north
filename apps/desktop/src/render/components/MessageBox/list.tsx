@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  List,
-  Avatar,
-  Typography,
-  Button,
-  Space,
-  Result,
-  Tag,
-} from '@arco-design/web-react';
+import { Avatar, Button, Space, Tag } from '@sue/design-web-react';
+import { List, Typography, Result } from '@true-north/components-ui';
 import useLocale from '../../utils/useLocale';
 import styles from './style/index.module.less';
 
@@ -56,12 +49,12 @@ function MessageList(props: MessageListProps) {
       footer={
         <div className={styles.footer}>
           <div className={styles['footer-item']}>
-            <Button type="text" size="small" onClick={onAllBtnClick}>
+            <Button type="link" size="small" onClick={onAllBtnClick}>
               {t['message.allRead']}
             </Button>
           </div>
           <div className={styles['footer-item']}>
-            <Button type="text" size="small">
+            <Button type="link" size="small">
               {t['message.seeMore']}
             </Button>
           </div>

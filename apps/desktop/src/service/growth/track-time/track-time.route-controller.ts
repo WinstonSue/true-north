@@ -1,12 +1,13 @@
 import type { TrackTime as TrackTimeVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { CreateTrackTimeDto, UpdateTrackTimeDto, TrackTimeDto, TrackTimeFilterDto } from './dto';
-import { TrackTimeService } from './track-time.service';
+import { TrackTimeService, trackTimeService as defaultTrackTimeService } from './track-time.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
 import { TrackTimeRelatedType } from '@true-north/enum';
 
 @Controller('/trackTime')
 export class TrackTimeController {
-  constructor(private readonly trackTimeService: TrackTimeService) {}
+  /** 默认注入模块单例，供 electron-ipc-restful 无参实例化 */
+  constructor(private readonly trackTimeService: TrackTimeService = defaultTrackTimeService) {}
 
   @Post('/create', { description: '创建时间记录' })
   async create(@Body() createTrackTimeVo: TrackTimeVO.CreateTrackTimeVo): Promise<TrackTimeVO.TrackTimeVo> {

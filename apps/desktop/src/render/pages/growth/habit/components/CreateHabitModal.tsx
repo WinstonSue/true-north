@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Modal,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  InputNumber,
-  Button,
-  Space,
-  Message,
-  Divider,
-  Typography,
-} from '@arco-design/web-react';
+import { Modal, Form, Input, Select, DatePicker, InputNumber, Button, Space, message, Divider } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { HabitController } from '@true-north/api';
 import { CreateHabitVo, GoalVo } from '@true-north/vo';
 import { Difficulty } from '@true-north/enum';
@@ -49,7 +38,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
       const values = await form.validate();
 
       if (selectedGoals.length === 0) {
-        Message.error('请至少选择一个关联目标');
+        message.error('请至少选择一个关联目标');
         return;
       }
 
@@ -67,11 +56,11 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
       };
 
       await HabitController.createHabit(habitData);
-      Message.success('习惯创建成功');
+      message.success('习惯创建成功');
       onSuccess();
     } catch (error) {
       console.error('创建习惯失败:', error);
-      Message.error('创建习惯失败');
+      message.error('创建习惯失败');
     } finally {
       setLoading(false);
     }

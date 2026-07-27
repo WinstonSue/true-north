@@ -1,18 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Steps,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  InputTag,
-  Button,
-  Typography,
-  Space,
-  Card,
-  Switch,
-  Result,
-} from '@arco-design/web-react';
+import { Form, Input, Select, DatePicker, Button, Space, Card, Switch } from '@sue/design-web-react';
+import { Steps, Typography, Result, InputTag } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
@@ -25,8 +13,8 @@ function StepForm() {
   const [form] = Form.useForm();
 
   const viewForm = () => {
-    const values = form.getFields();
-    form.setFields(values);
+    const values = form.getFieldsValue();
+    form.setFieldsValue(values);
     setCurrent(1);
   };
 
@@ -37,7 +25,7 @@ function StepForm() {
 
   const toNext = async () => {
     try {
-      await form.validate();
+      await form.validateFields();
       setCurrent(current + 1);
     } catch (_) {}
   };

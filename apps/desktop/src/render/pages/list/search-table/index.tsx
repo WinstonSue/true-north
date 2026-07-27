@@ -1,14 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Table,
-  Card,
-  PaginationProps,
-  Button,
-  Space,
-  Typography,
-} from '@arco-design/web-react';
+import { Table, Card, PaginationProps, Button, Space } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import PermissionWrapper from '@/components/PermissionWrapper';
-import { IconDownload, IconPlus } from '@arco-design/web-react/icon';
+import { IconDownload, IconPlus } from '@true-north/components-ui';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import SearchForm from './form';

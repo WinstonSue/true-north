@@ -2,9 +2,9 @@
 
 import { GoalProvider } from './context';
 import React, { useState } from 'react';
-import { Layout } from '@arco-design/web-react';
+import { Layout } from '@sue/design-web-react';
 import clsx from 'clsx';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { useGoalContext } from './context';
 import { useGoalDetail } from '../components/GoalDetail';
 import GoalMain from './GoalMain';
@@ -31,9 +31,6 @@ const GoalTreeView: React.FC<GoalTreeViewProps> = () => {
         width={320}
         className={clsx('min-w-[200px] max-w-[400px]')}
         theme="light"
-        resizeBoxProps={{
-          directions: ['right'],
-        }}
       >
         <GoalAside />
       </Sider>

@@ -1,5 +1,5 @@
 import { SiteIcon } from '@true-north/components-ui';
-import { Popover, Tooltip } from '@arco-design/web-react';
+import { Popover, Tooltip } from '@sue/design-web-react';
 
 export default function IconSelector(props: {
   map: Map<number, { color: string; label: string }>;

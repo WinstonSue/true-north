@@ -1,5 +1,5 @@
 import React from 'react';
-import { Carousel } from '@arco-design/web-react';
+import { Carousel } from '@sue/design-web-react';
 
 const imageSrc = [
   '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/f7e8fc1e09c42e30682526252365be1c.jpg~tplv-uwbnlip3yd-webp.webp',

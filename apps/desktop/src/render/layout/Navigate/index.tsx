@@ -1,17 +1,21 @@
-import { Menu } from '@arco-design/web-react';
-import { useEffect, useRef, useState } from 'react';
+import { Menu } from '@sue/design-web-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { IRoute } from '@/router/routes';
 import useRouter from '@/router/useRouter';
 import { getIconFromKey } from './helpers';
 
-const MenuItem = Menu.Item;
-const SubMenu = Menu.SubMenu;
-
 interface NavigateProps {
   collapsed: boolean;
   locale: string;
 }
+
+type MenuItem = {
+  key: string;
+  label: React.ReactNode;
+  className?: string;
+  children?: MenuItem[];
+};
 
 const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
   const routeMap = useRef<Map<string, React.ReactNode[]>>(new Map());
@@ -105,72 +109,74 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
     useState<string[]>(defaultSelectedKeys);
   const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKeys);
 
-  function renderRoutes(locale) {
+  const menuItems = useMemo(() => {
     routeMap.current.clear();
-    const travel = (_routes: IRoute[], level, parentNode = []) => {
-      return _routes.map((route) => {
-        const { breadcrumb = true, ignore } = route;
-        const titleDom = (
-          <span className="inline-flex items-center gap-2">
-            {getIconFromKey(route.fullPath)}
+    menuMap.current.clear();
 
-            {collapsed && level === 1 ? null : locale[route.name] || route.name}
-          </span>
-        );
+    const travel = (
+      _routes: IRoute[],
+      level: number,
+      parentNode: React.ReactNode[] = [],
+    ): MenuItem[] => {
+      return _routes
+        .map((route) => {
+          const { breadcrumb = true, ignore } = route;
+          const titleDom = (
+            <span className="inline-flex items-center gap-2">
+              {getIconFromKey(route.fullPath)}
 
-        routeMap.current.set(
-          `/${route.fullPath}`,
-          breadcrumb ? [...parentNode, route.name] : [],
-        );
+              {collapsed && level === 1
+                ? null
+                : locale[route.name] || route.name}
+            </span>
+          );
 
-        const visibleChildren = (route.children || []).filter((child) => {
-          const { ignore, breadcrumb = true } = child;
-          if (ignore || route.ignore) {
-            routeMap.current.set(
-              `/${child.fullPath}`,
-              breadcrumb ? [...parentNode, route.name, child.name] : [],
-            );
+          routeMap.current.set(
+            `/${route.fullPath}`,
+            breadcrumb ? [...parentNode, route.name] : [],
+          );
+
+          const visibleChildren = (route.children || []).filter((child) => {
+            const { ignore, breadcrumb = true } = child;
+            if (ignore || route.ignore) {
+              routeMap.current.set(
+                `/${child.fullPath}`,
+                breadcrumb ? [...parentNode, route.name, child.name] : [],
+              );
+            }
+
+            return !ignore;
+          });
+
+          if (ignore || !route.fullPath) {
+            return null;
           }
 
-          return !ignore;
-        });
+          if (visibleChildren.length > 0) {
+            menuMap.current.set(route.fullPath, { subMenu: true });
+            return {
+              key: route.fullPath,
+              label: titleDom,
+              className: collapsed && level === 1 ? '!pr-3' : '',
+              children: travel(visibleChildren, level + 1, [
+                ...parentNode,
+                route.name,
+              ]),
+            } as MenuItem;
+          }
 
-        if (ignore) {
-          return null;
-        }
-
-        if (visibleChildren.length > 0) {
-          menuMap.current.set(route.fullPath, { subMenu: true });
-          return (
-            route.fullPath && (
-              <SubMenu
-                key={route.fullPath}
-                title={titleDom}
-                className={collapsed && level === 1 ? '!pr-3' : ''}
-              >
-                {travel(visibleChildren, level + 1, [
-                  ...parentNode,
-                  route.name,
-                ])}
-              </SubMenu>
-            )
-          );
-        }
-
-        menuMap.current.set(route.fullPath, { menuItem: true });
-
-        return (
-          <MenuItem
-            className={collapsed && level === 1 ? '!pr-3' : ''}
-            key={route.fullPath}
-          >
-            {titleDom}
-          </MenuItem>
-        );
-      });
+          menuMap.current.set(route.fullPath, { menuItem: true });
+          return {
+            key: route.fullPath,
+            label: titleDom,
+            className: collapsed && level === 1 ? '!pr-3' : '',
+          } as MenuItem;
+        })
+        .filter(Boolean) as MenuItem[];
     };
-    return travel;
-  }
+
+    return travel(fullPathRoutes, 1);
+  }, [fullPathRoutes, locale, collapsed]);
 
   function updateMenuStatus() {
     const matchingKey = findMatchingMenuKey(pathname);
@@ -187,22 +193,22 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale }) => {
     if (fullPathRoutes.length > 0) {
       updateMenuStatus();
     }
-  }, [pathname, fullPathRoutes.length]);
+  }, [pathname, fullPathRoutes.length, menuItems]);
 
   return (
     <Menu
-      collapse={collapsed}
-      onClickMenuItem={(fullPath) => {
-        to(fullPath);
+      mode="inline"
+      inlineCollapsed={collapsed}
+      items={menuItems}
+      onClick={({ key }) => {
+        to(String(key));
       }}
       selectedKeys={selectedKeys}
       openKeys={openKeys}
-      onClickSubMenu={(_, openKeys) => {
-        setOpenKeys(openKeys);
+      onOpenChange={(keys) => {
+        setOpenKeys(keys as string[]);
       }}
-    >
-      {renderRoutes(locale)(fullPathRoutes, 1)}
-    </Menu>
+    />
   );
 };
 

@@ -1,8 +1,8 @@
 function changeTheme(theme) {
   if (theme === 'dark') {
-    document.body.setAttribute('arco-theme', 'dark');
+    document.body.setAttribute('data-theme', 'dark');
   } else {
-    document.body.removeAttribute('arco-theme');
+    document.body.removeAttribute('data-theme');
   }
 }
 

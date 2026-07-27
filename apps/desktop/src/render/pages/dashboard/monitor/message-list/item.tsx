@@ -1,6 +1,7 @@
 import React from 'react';
-import { Space, Typography } from '@arco-design/web-react';
-import { IconCommand, IconStar } from '@arco-design/web-react/icon';
+import { Space } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
+import { IconCommand, IconStar } from '@true-north/components-ui';
 import cs from 'clsx';
 import styles from './style/index.module.less';
 

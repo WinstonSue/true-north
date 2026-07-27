@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Drawer, Alert, Message } from '@arco-design/web-react';
-import { IconSettings } from '@arco-design/web-react/icon';
+import { Drawer, Alert, message, Button } from '@sue/design-web-react';
+import { IconSettings } from '@true-north/components-ui';
 import copy from 'copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import { GlobalState } from '../../store';
@@ -21,7 +21,7 @@ function Setting(props: SettingProps) {
 
   function onCopySettings() {
     copy(JSON.stringify(settings, null, 2));
-    Message.success(locale['settings.copySettings.message']);
+    message.success(locale['settings.copySettings.message']);
   }
 
   return (
@@ -34,18 +34,20 @@ function Setting(props: SettingProps) {
         <IconButton icon={<IconSettings />} onClick={() => setVisible(true)} />
       )}
       <Drawer
-        width={300}
+        size={300}
         title={
           <>
             <IconSettings />
             {locale['settings.title']}
           </>
         }
-        visible={visible}
-        okText={locale['settings.copySettings']}
-        cancelText={locale['settings.close']}
-        onOk={onCopySettings}
-        onCancel={() => setVisible(false)}
+        open={visible}
+        onClose={() => setVisible(false)}
+        extra={
+          <Button type="primary" onClick={onCopySettings}>
+            {locale['settings.copySettings']}
+          </Button>
+        }
       >
         <Block title={locale['settings.themeColor']}>
           <ColorPanel />

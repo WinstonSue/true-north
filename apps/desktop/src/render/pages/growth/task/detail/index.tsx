@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Layout, Empty, Spin, Message } from '@arco-design/web-react';
+import { Layout, Empty, Spin, message } from '@sue/design-web-react';
 import { TaskService } from '@true-north/web-service';
 import { TaskVo } from '@true-north/vo';
 import TaskAside from './TaskAside';
@@ -30,7 +30,7 @@ const TaskDetailPage: React.FC = () => {
       setCurrentTask(task);
     } catch (error) {
       console.error('获取任务详情失败:', error);
-      Message.error('获取任务详情失败');
+      message.error('获取任务详情失败');
     } finally {
       setLoading(false);
     }
@@ -84,9 +84,6 @@ const TaskDetailPage: React.FC = () => {
           width={320}
           className={clsx('min-w-[200px] max-w-[400px]')}
           theme="light"
-          resizeBoxProps={{
-            directions: ['right'],
-          }}
         >
           <TaskAside currentTaskId={currentTask.id} />
         </Sider>

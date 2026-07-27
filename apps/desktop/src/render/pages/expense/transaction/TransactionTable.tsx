@@ -1,8 +1,9 @@
+import type { ColumnProps } from '@true-north/components-ui';
 'use client';
 
 import { format } from 'date-fns';
-import { Table, Tag } from '@arco-design/web-react';
-import type { ColumnProps } from '@arco-design/web-react/es/Table/interface';
+import { Table, Tag } from '@sue/design-web-react';
+
 import { useExpenses } from '../context';
 import { DEFAULT_CATEGORIES } from '../constants';
 import type { TransactionVo } from '@true-north/vo';

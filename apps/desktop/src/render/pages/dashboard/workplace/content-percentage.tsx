@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Spin, Typography } from '@arco-design/web-react';
+import { Card, Spin } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { DonutChart } from 'bizcharts';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
@@ -31,7 +32,7 @@ function PopularContent() {
       <Typography.Title heading={6}>
         {t['workplace.contentPercentage']}
       </Typography.Title>
-      <Spin loading={loading} style={{ display: 'block' }}>
+      <Spin spinning={loading} style={{ display: 'block' }}>
         <DonutChart
           autoFit
           height={340}

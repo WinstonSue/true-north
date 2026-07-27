@@ -1,4 +1,4 @@
-import { Popover } from '@arco-design/web-react';
+import { Popover } from '@sue/design-web-react';
 import { useState } from 'react';
 import TaskEditor, { TaskEditorProps } from './TaskEditor';
 import TaskCreator, { TaskCreatorProps } from './TaskCreator';
@@ -51,11 +51,11 @@ export function useTaskDetail() {
     return (
       <Popover
         trigger="click"
-        popupVisible={createPopoverVisible}
-        onVisibleChange={(visible) => {
+        open={createPopoverVisible}
+        onOpenChange={(visible) => {
           setCreatePopoverVisible(visible);
         }}
-        position="bl"
+        placement="bottomLeft"
         style={{
           maxWidth: 'unset',
         }}

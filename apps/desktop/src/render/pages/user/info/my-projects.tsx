@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Grid } from '@arco-design/web-react';
+import { Grid } from '@true-north/components-ui';
 import ProjectCard, { ProjectProps } from './blocks/project';
 
 function MyProject() {

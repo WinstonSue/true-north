@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import X6MindMap from './X6MindMap';
 import clsx from 'clsx';
 import { GoalMindMapContextProvider, useGoalMindMapContext } from './context';
@@ -18,7 +18,7 @@ const GoalMindMap: React.FC<GoalMindMapProps> = ({ className }) => {
   }, []);
 
   return (
-    <Spin loading={loading} className={clsx('w-full h-full')}>
+    <Spin spinning={loading} className={clsx('w-full h-full')}>
       {/* 脑图组件区域 */}
       {goalTree.length > 0 ? (
         <X6MindMap

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
-import { Layout, Breadcrumb, Spin } from '@arco-design/web-react';
+import { Layout, Breadcrumb, Spin } from '@sue/design-web-react';
 import cs from 'clsx';
-import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
+import { IconMenuFold, IconMenuUnfold } from '@true-north/components-ui';
 import { useSelector } from 'react-redux';
 import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -12,7 +12,7 @@ import { GlobalState } from '../store';
 import styles from './layout.module.less';
 import Navigate from './Navigate';
 import { GlobalDrawer } from './Drawer';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 
 const { Fixed, Shrink } = FlexibleContainer;
 
@@ -66,6 +66,7 @@ function PageLayout() {
             {showMenu && (
               <Fixed>
                 <Aside
+                  theme="light"
                   className={styles['layout-sider']}
                   width={menuWidth}
                   collapsed={collapsed}

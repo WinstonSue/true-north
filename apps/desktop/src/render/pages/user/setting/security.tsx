@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import cs from 'clsx';
-import { Button } from '@arco-design/web-react';
+import { Button } from '@sue/design-web-react';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';

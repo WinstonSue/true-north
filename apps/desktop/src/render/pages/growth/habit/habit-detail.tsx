@@ -1,20 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Card,
-  Button,
-  Space,
-  Typography,
-  Tag,
-  Progress,
-  Descriptions,
-  Tabs,
-  Grid,
-  Spin,
-  Message,
-  Modal,
-  Badge,
-} from '@arco-design/web-react';
+import { Card, Button, Space, Tag, Progress, Descriptions, Tabs, Spin, message, Modal, Badge } from '@sue/design-web-react';
+import { Typography, Grid } from '@true-north/components-ui';
 import {
   IconLeft,
   IconEdit,
@@ -23,7 +10,7 @@ import {
   IconPause,
   IconPlayArrow,
   IconClose,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { HabitService } from '@true-north/web-service';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
@@ -32,7 +19,6 @@ import { HabitStatus } from '@true-north/enum';
 import { DIFFICULTY_MAP } from '../constants';
 
 const { Title, Text, Paragraph } = Typography;
-const { TabPane } = Tabs;
 const { Row, Col } = Grid;
 
 export const HabitDetailPage: React.FC = () => {
@@ -54,7 +40,7 @@ export const HabitDetailPage: React.FC = () => {
       setHabit(response);
     } catch (error) {
       console.error('获取习惯详情失败:', error);
-      Message.error('获取习惯详情失败');
+      message.error('获取习惯详情失败');
     } finally {
       setLoading(false);
     }
@@ -75,11 +61,11 @@ export const HabitDetailPage: React.FC = () => {
         switch (action) {
           case 'complete':
             await HabitService.doneBatchHabit({ includeIds: [habit.id] });
-            Message.success('习惯已完成');
+            message.success('习惯已完成');
             break;
           case 'abandon':
             await HabitService.abandonHabit(habit.id);
-            Message.success('习惯已放弃');
+            message.success('习惯已放弃');
             break;
           default:
             return;
@@ -89,7 +75,7 @@ export const HabitDetailPage: React.FC = () => {
         refreshHabits();
       } catch (error) {
         console.error(`${action}习惯失败:`, error);
-        Message.error(`${action}习惯失败`);
+        message.error(`${action}习惯失败`);
       } finally {
         setActionLoading(false);
       }
@@ -107,12 +93,12 @@ export const HabitDetailPage: React.FC = () => {
       onOk: async () => {
         try {
           await HabitService.deleteHabit(habit.id);
-          Message.success('习惯已删除');
+          message.success('习惯已删除');
           navigate('/growth/habits');
           refreshHabits();
         } catch (error) {
           console.error('删除习惯失败:', error);
-          Message.error('删除习惯失败');
+          message.error('删除习惯失败');
         }
       },
     });
@@ -239,121 +225,145 @@ export const HabitDetailPage: React.FC = () => {
       <Row gutter={16}>
         {/* 左侧：基本信息和统计 */}
         <Col span={16}>
-          <Tabs defaultActiveTab="info">
-            <TabPane key="info" title="基本信息">
-              <Card>
-                <Descriptions
-                  column={2}
-                  data={[
-                    {
-                      label: '习惯名称',
-                      value: habit.name,
-                    },
-                    {
-                      label: '状态',
-                      value: (
-                        <Badge
-                          status={statusConfig?.color as any}
-                          text={statusConfig?.label}
-                        />
-                      ),
-                    },
-                    {
-                      label: '重要程度',
-                      value: habit.importance ? `${habit.importance}/5` : '-',
-                    },
-                    {
-                      label: '难度等级',
-                      value: difficultyConfig ? (
-                        <Tag color={difficultyConfig.color}>
-                          {difficultyConfig.label}
-                        </Tag>
-                      ) : (
-                        '-'
-                      ),
-                    },
-                    {
-                      label: '开始时间',
-                      value: habit.startAt
-                        ? new Date(habit.startAt).toLocaleDateString()
-                        : '-',
-                    },
-                    {
-                      label: '目标时间',
-                      value: habit.endAt
-                        ? new Date(habit.endAt).toLocaleDateString()
-                        : '长期习惯',
-                    },
-                    {
-                      label: '创建时间',
-                      value: new Date(habit.createdAt).toLocaleString(),
-                    },
-                    {
-                      label: '更新时间',
-                      value: new Date(habit.updatedAt).toLocaleString(),
-                    },
-                  ]}
-                />
+          <Tabs
+            defaultActiveKey="info"
+            items={[
+              {
+                key: 'info',
+                label: '基本信息',
+                children: (
+                  <Card>
+                    <Descriptions
+                      column={2}
+                      items={[
+                        {
+                          key: 'name',
+                          label: '习惯名称',
+                          children: habit.name,
+                        },
+                        {
+                          key: 'status',
+                          label: '状态',
+                          children: (
+                            <Badge
+                              status={statusConfig?.color as any}
+                              text={statusConfig?.label}
+                            />
+                          ),
+                        },
+                        {
+                          key: 'importance',
+                          label: '重要程度',
+                          children: habit.importance
+                            ? `${habit.importance}/5`
+                            : '-',
+                        },
+                        {
+                          key: 'difficulty',
+                          label: '难度等级',
+                          children: difficultyConfig ? (
+                            <Tag color={difficultyConfig.color}>
+                              {difficultyConfig.label}
+                            </Tag>
+                          ) : (
+                            '-'
+                          ),
+                        },
+                        {
+                          key: 'startAt',
+                          label: '开始时间',
+                          children: habit.startAt
+                            ? new Date(habit.startAt).toLocaleDateString()
+                            : '-',
+                        },
+                        {
+                          key: 'endAt',
+                          label: '目标时间',
+                          children: habit.endAt
+                            ? new Date(habit.endAt).toLocaleDateString()
+                            : '长期习惯',
+                        },
+                        {
+                          key: 'createdAt',
+                          label: '创建时间',
+                          children: new Date(habit.createdAt).toLocaleString(),
+                        },
+                        {
+                          key: 'updatedAt',
+                          label: '更新时间',
+                          children: new Date(habit.updatedAt).toLocaleString(),
+                        },
+                      ]}
+                    />
 
-                {habit.description && (
-                  <div className="mt-4">
-                    <Text className="font-medium">描述：</Text>
-                    <Paragraph className="mt-2">{habit.description}</Paragraph>
-                  </div>
-                )}
+                    {habit.description && (
+                      <div className="mt-4">
+                        <Text className="font-medium">描述：</Text>
+                        <Paragraph className="mt-2">
+                          {habit.description}
+                        </Paragraph>
+                      </div>
+                    )}
 
-                {habit.tags && habit.tags.length > 0 && (
-                  <div className="mt-4">
-                    <Text className="font-medium">标签：</Text>
-                    <div className="mt-2">
-                      {habit.tags.map((tag, index) => (
-                        <Tag key={index} className="mr-2 mb-2">
-                          {tag}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </Card>
-            </TabPane>
-
-            <TabPane key="goals" title="关联目标">
-              <Card>
-                {habit.goals && habit.goals.length > 0 ? (
-                  <div className="space-y-4">
-                    {habit.goals.map((goal) => (
-                      <Card key={goal.id} size="small" hoverable>
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <Text className="font-medium">{goal.name}</Text>
-                            {goal.description && (
-                              <Text type="secondary" className="block mt-1">
-                                {goal.description}
-                              </Text>
-                            )}
-                          </div>
-                          <div className="ml-4 text-right">
-                            <Text className="text-sm text-gray-500">进度</Text>
-                            <div className="mt-1">
-                              <Progress
-                                percent={(goal as any).progress || 0}
-                                size="small"
-                                width={100}
-                              />
-                            </div>
-                          </div>
+                    {habit.tags && habit.tags.length > 0 && (
+                      <div className="mt-4">
+                        <Text className="font-medium">标签：</Text>
+                        <div className="mt-2">
+                          {habit.tags.map((tag, index) => (
+                            <Tag key={index} className="mr-2 mb-2">
+                              {tag}
+                            </Tag>
+                          ))}
                         </div>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Text>暂无关联目标</Text>
-                  </div>
-                )}
-              </Card>
-            </TabPane>
-          </Tabs>
+                      </div>
+                    )}
+                  </Card>
+                ),
+              },
+              {
+                key: 'goals',
+                label: '关联目标',
+                children: (
+                  <Card>
+                    {habit.goals && habit.goals.length > 0 ? (
+                      <div className="space-y-4">
+                        {habit.goals.map((goal) => (
+                          <Card key={goal.id} size="small" hoverable>
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <Text className="font-medium">{goal.name}</Text>
+                                {goal.description && (
+                                  <Text type="secondary" className="block mt-1">
+                                    {goal.description}
+                                  </Text>
+                                )}
+                              </div>
+                              <div className="ml-4 text-right">
+                                <Text className="text-sm text-gray-500">
+                                  进度
+                                </Text>
+                                <div className="mt-1">
+                                  <Progress
+                                    percent={(goal as any).progress || 0}
+                                    size="small"
+                                    style={{ width: 100 }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Text>暂无关联目标</Text>
+                      </div>
+                    )}
+                  </Card>
+                ),
+              },
+            ]}
+          />
         </Col>
 
         {/* 右侧：统计信息 */}

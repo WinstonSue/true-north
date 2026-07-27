@@ -1,4 +1,4 @@
-import { Checkbox } from '@arco-design/web-react';
+import { Checkbox } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { TodoVo } from '@true-north/vo';

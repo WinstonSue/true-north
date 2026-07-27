@@ -1,6 +1,7 @@
 'use client';
 
-import { Typography, Tag } from '@arco-design/web-react';
+import { Tag } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { TodoVo } from '@true-north/vo';
 
 const { Title, Text } = Typography;

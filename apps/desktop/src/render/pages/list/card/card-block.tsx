@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import cs from 'clsx';
-import {
-  Button,
-  Switch,
-  Tag,
-  Card,
-  Descriptions,
-  Typography,
-  Dropdown,
-  Menu,
-  Skeleton,
-} from '@arco-design/web-react';
+import { Button, Switch, Tag, Card, Descriptions, Dropdown, Menu, Skeleton } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import {
   IconStarFill,
   IconThumbUpFill,
@@ -20,7 +11,7 @@ import {
   IconCheckCircleFill,
   IconCloseCircleFill,
   IconMore,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import PermissionWrapper from '@/components/PermissionWrapper';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
@@ -225,16 +216,16 @@ function CardBlock(props: CardBlockType) {
               {card.title}
               {getStatus()}
               <Dropdown
-                droplist={
+                dropdownRender={() => (
                   <Menu>
                     {['操作1', '操作2'].map((item, key) => (
                       <Menu.Item key={key.toString()}>{item}</Menu.Item>
                     ))}
                   </Menu>
-                }
-                trigger="click"
-                onVisibleChange={setVisible}
-                popupVisible={visible}
+                )}
+                trigger={['click']}
+                onOpenChange={setVisible}
+                open={visible}
               >
                 <div className={styles.more}>
                   <IconMore />

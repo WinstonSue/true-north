@@ -10,7 +10,7 @@ import {
   IconMinusCircle,
   IconFullscreen,
   IconFullscreenExit,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 
 export { Countdown, Flip, getTimeArr };
 

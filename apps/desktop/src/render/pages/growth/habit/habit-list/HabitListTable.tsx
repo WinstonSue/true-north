@@ -1,12 +1,6 @@
 import React from 'react';
-import {
-  Button,
-  Space,
-  Typography,
-  Tag,
-  Progress,
-  Table,
-} from '@arco-design/web-react';
+import { Button, Space, Tag, Progress, Table } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { HabitWithoutRelationsVo } from '@true-north/vo';
 import { HabitStatus, Difficulty } from '@true-north/enum';
 import { HABIT_STATUS_OPTIONS, HABIT_DIFFICULTY_OPTIONS } from '../constants';

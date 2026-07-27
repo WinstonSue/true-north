@@ -1,6 +1,6 @@
 import React from 'react';
 import loadable from '@loadable/component';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import styles from '../style/layout.module.less';
 
 // https://github.com/gregberge/loadable-components/pull/226

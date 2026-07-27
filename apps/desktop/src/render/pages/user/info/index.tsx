@@ -1,41 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import {
-  Typography,
-  Grid,
-  Link,
-  Result,
-  Skeleton,
-} from '@arco-design/web-react';
+import { Skeleton } from '@sue/design-web-react';
+import { Typography, Grid, Result, Link } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import UserInfoHeader from './header';
 import styles from './style/index.module.less';
 import './mock';
-import { Card } from '@arco-design/web-react';
+import { Card } from '@sue/design-web-react';
 import MyProject from './my-projects';
 import MyTeam from './my-team';
 import LatestNews from './latest-news';
-
 const { Title } = Typography;
 const { Row, Col } = Grid;
 function UserInfo() {
   const t = useLocale(locale);
   const userInfo = useSelector((state: any) => state.userInfo);
   const loading = useSelector((state: any) => state.userLoading);
-
   const [noticeLoading, setNoticeLoading] = useState(false);
-
   const getNotice = async () => {
     setNoticeLoading(true);
     await axios.get('/api/user/notice').finally(() => setNoticeLoading(false));
   };
-
   useEffect(() => {
     getNotice();
   }, []);
-
   return (
     <div>
       <UserInfoHeader userInfo={userInfo} loading={loading} />
@@ -94,5 +84,4 @@ function UserInfo() {
     </div>
   );
 }
-
 export default UserInfo;

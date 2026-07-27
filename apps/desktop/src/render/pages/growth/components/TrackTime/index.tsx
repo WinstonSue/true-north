@@ -1,4 +1,4 @@
-import { Popover } from '@arco-design/web-react';
+import { Popover } from '@sue/design-web-react';
 import clsx from 'clsx';
 import { SiteIcon } from '@true-north/components-ui';
 import TimeTracker from './TimeTracker';
@@ -36,7 +36,7 @@ function TrackTime(props: TrackTimeProps) {
   return (
     <Popover
       trigger="click"
-      position="bottom"
+      placement="bottom"
       content={
         <div style={{ width: 500 }}>
           <TimeTracker

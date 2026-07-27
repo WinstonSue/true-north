@@ -1,7 +1,19 @@
 /**
  * 业务控制器装饰器系统
- * 用于标记和管理业务控制器方法的元数据
+ * - 运行时：桥接 electron-ipc-restful，使 route-controller 可直接注册为 IPC 路由
+ * - 静态元数据：保留 description 等供 dev-tools AST / 文档使用
  */
+
+import {
+  Controller as IpcController,
+  Get as IpcGet,
+  Post as IpcPost,
+  Put as IpcPut,
+  Delete as IpcDelete,
+  Body as IpcBody,
+  Param as IpcParam,
+  Query as IpcQuery,
+} from 'electron-ipc-restful';
 
 export interface ControllerMethodMetadata {
   /** 方法名称 */
@@ -63,54 +75,50 @@ export function BusinessMethod(options: Partial<ControllerMethodMetadata> = {}) 
   };
 }
 
+type MethodOptions = { description?: string };
+
+function createBridgedMethodDecorator(
+  httpMethod: ControllerMethodMetadata['httpMethod'],
+  ipcDecorator: (path?: string) => MethodDecorator
+) {
+  return (path?: string, options?: MethodOptions) => {
+    const ipc = ipcDecorator(path ?? '');
+    const biz = BusinessMethod({
+      httpMethod,
+      path,
+      ...options,
+    });
+    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+      ipc(target, propertyKey, descriptor);
+      return biz(target, propertyKey, descriptor);
+    };
+  };
+}
+
 /**
  * HTTP GET 方法装饰器
  */
-export function Get(path?: string, options?: { description?: string }) {
-  return BusinessMethod({
-    httpMethod: 'GET',
-    path,
-    ...options,
-  });
-}
+export const Get = createBridgedMethodDecorator('GET', IpcGet);
 
 /**
  * HTTP POST 方法装饰器
  */
-export function Post(path?: string, options?: { description?: string }) {
-  return BusinessMethod({
-    httpMethod: 'POST',
-    path,
-    ...options,
-  });
-}
+export const Post = createBridgedMethodDecorator('POST', IpcPost);
 
 /**
  * HTTP PUT 方法装饰器
  */
-export function Put(path?: string, options?: { description?: string }) {
-  return BusinessMethod({
-    httpMethod: 'PUT',
-    path,
-    ...options,
-  });
-}
+export const Put = createBridgedMethodDecorator('PUT', IpcPut);
 
 /**
  * HTTP DELETE 方法装饰器
  */
-export function Delete(path?: string, options?: { description?: string }) {
-  return BusinessMethod({
-    httpMethod: 'DELETE',
-    path,
-    ...options,
-  });
-}
+export const Delete = createBridgedMethodDecorator('DELETE', IpcDelete);
 
 /**
- * HTTP PATCH 方法装饰器
+ * HTTP PATCH 方法装饰器（仅业务元数据；electron-ipc-restful 暂无 PATCH）
  */
-export function Patch(path?: string, options?: { description?: string }) {
+export function Patch(path?: string, options?: MethodOptions) {
   return BusinessMethod({
     httpMethod: 'PATCH',
     path,
@@ -129,11 +137,13 @@ export function RequireAuth() {
 
 /**
  * 控制器类装饰器
- * 用于标记业务控制器类
+ * 用于标记业务控制器类，并注册 IPC 路由前缀
  */
 export function Controller(path?: string) {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    // 存储控制器路径元数据
+    IpcController(path)(constructor);
+
+    // 存储控制器路径元数据（供本地工具使用）
     if (path) {
       Reflect.defineMetadata('controller:path', path, constructor);
     }
@@ -147,11 +157,11 @@ export function Controller(path?: string) {
 
 /**
  * 请求体参数装饰器
- * 用于标记方法参数来自请求体
  */
-export function Body() {
+export function Body(name?: string) {
   return function (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) {
-    // 存储参数元数据
+    IpcBody(name)(target, propertyKey, parameterIndex);
+
     const existingBodyParams = Reflect.getMetadata('method:bodyParams', target, propertyKey!) || [];
     existingBodyParams.push(parameterIndex);
     Reflect.defineMetadata('method:bodyParams', existingBodyParams, target, propertyKey!);
@@ -160,11 +170,11 @@ export function Body() {
 
 /**
  * 路径参数装饰器
- * 用于标记方法参数来自URL路径
  */
 export function Param(name?: string) {
   return function (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) {
-    // 存储参数元数据
+    IpcParam(name)(target, propertyKey, parameterIndex);
+
     const existingPathParams = Reflect.getMetadata('method:pathParams', target, propertyKey!) || [];
     existingPathParams.push({ index: parameterIndex, name });
     Reflect.defineMetadata('method:pathParams', existingPathParams, target, propertyKey!);
@@ -173,11 +183,11 @@ export function Param(name?: string) {
 
 /**
  * 查询参数装饰器
- * 用于标记方法参数来自查询字符串
  */
 export function Query(name?: string) {
   return function (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) {
-    // 存储参数元数据
+    IpcQuery(name)(target, propertyKey, parameterIndex);
+
     const existingQueryParams = Reflect.getMetadata('method:queryParams', target, propertyKey!) || [];
     existingQueryParams.push({ index: parameterIndex, name });
     Reflect.defineMetadata('method:queryParams', existingQueryParams, target, propertyKey!);

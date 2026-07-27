@@ -51,7 +51,7 @@ tech_stack:
     framework: "React 18"
     language: "TypeScript"
     build_tool: "Vite"
-    ui_library: ["Arco Design", "Ant Design"]
+    ui_library: ["@sue/design-web-react"]
     state_management: "Redux + Nanostores"
   shared:
     package_manager: "pnpm"
@@ -336,7 +336,7 @@ ai_instructions:
       - task: "生成页面组件"
         template: "page_template"
         output_path: "apps/desktop/src/render/pages/growth/{module}/"
-        dependencies: ["React", "Arco Design"]
+        dependencies: ["React", "@sue/design-web-react"]
         
       - task: "生成API接口"
         template: "api_template"
@@ -374,7 +374,7 @@ ai_instructions:
     - "添加基本的错误处理和参数验证"
     - "包含用户权限验证"
     - "使用TypeORM装饰器定义实体关系"
-    - "前端使用Arco Design组件库"
+    - "前端使用 @sue/design-web-react 组件库"
     - "实现基本的响应式布局"
     
   # 文件路径约定

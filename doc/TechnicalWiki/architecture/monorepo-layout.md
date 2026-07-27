@@ -45,11 +45,11 @@ service/growth/{module}/
 ├── dto/
 ├── {module}.repository.ts
 ├── {module}.service.ts
-├── {module}.route-controller.ts
+├── {module}.route-controller.ts   # VO 边界 + IPC REST（唯一 Controller）
 └── index.ts
 ```
 
-模块：`goal`、`task`、`todo`、`habit`、`track-time` 等。
+模块：`goal`、`task`、`todo`、`habit`、`track-time` 等。不再维护 IPC 透传 `*.controller.ts`。
 
 渲染层对应：`render/pages/growth/{module}/` 及 `render/pages/growth/components/`。
 
@@ -59,8 +59,10 @@ service/growth/{module}/
 | --- | --- |
 | `vo` | 前后端/IPC 边界类型（`@true-north/vo`） |
 | `enum` | 业务枚举（`@true-north/enum`） |
-| `api` | 控制器装饰器、IPC 路由注册等（如 `@business/decorators`） |
-| `web-service` | 渲染层调用 service 的客户端封装 |
+| `api` | 渲染进程静态 HTTP 客户端（路径对齐 route-controller） |
+| `web-service` | 渲染层调用封装（toast / mapping） |
+
+主进程装饰器在 `apps/desktop/src/service/decorators`（`@business/decorators`），桥接 `electron-ipc-restful`。
 
 ## 包管理
 

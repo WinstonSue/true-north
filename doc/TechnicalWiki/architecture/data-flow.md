@@ -14,17 +14,21 @@
 │   └── {module}-filter.dto.ts  # 查询/分页
 ├── {module}.repository.ts
 ├── {module}.service.ts
-├── {module}.route-controller.ts
+├── {module}.route-controller.ts  # VO 边界 + IPC REST 路由（唯一 Controller）
 └── index.ts
 ```
+
+不再维护 `*.controller.ts` IPC 透传层。
 
 ## 请求链路
 
 ```
-render（web-service / IPC）
-    ↓  VO 入参
-RouteController（参数 → DTO.import*Vo）
+render（web-service → api → share-request）
+    ↓  VO 入参 / REST path
+preload（invoke REST）
     ↓
+electron-ipc-restful → RouteController
+    ↓  参数 → DTO.import*Vo
 Service（业务规则、事务编排）
     ↓
 Repository（TypeORM QueryBuilder / save）
@@ -33,7 +37,7 @@ SQLite
     ↓
 Entity → DTO.exportVo() → VO
     ↓
-render 展示
+标准响应 { code, message, data } → render
 ```
 
 ## 类型边界
@@ -51,10 +55,12 @@ render 展示
 
 ## RouteController 职责摘要
 
+- 使用 `@business/decorators` 声明 HTTP 风格路径（运行时写入 `electron-ipc-restful` 元数据）
 - 接收 VO 查询/Body
 - 实例化 DTO 并调用 `importPageVo` / `importCreateVo` 等
 - 调用 Service，将结果 `map(exportVo)`
 - 返回 `ResponsePageVo` / 单条 VO 等标准响应类型
+- 构造器默认注入模块 service 单例，供主进程无参实例化注册
 
 参考实现：`apps/desktop/src/service/growth/todo/todo.route-controller.ts`。
 

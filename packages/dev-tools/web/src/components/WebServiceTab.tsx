@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
-import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
+import { Card, Button, Space, message, Table, Tag, Alert } from '@sue/design-web-react';
+import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@true-north/components-ui';
 import MethodDetailsModal from './MethodDetailsModal';
 import { ControllerSyncStatus } from '../../../types';
 
@@ -28,10 +28,10 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
       if (result.success) {
         setWebServiceMethodDetails(result.data);
       } else {
-        Message.error(`Web Service 方法详情检查失败: ${result.error}`);
+        message.error(`Web Service 方法详情检查失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`Web Service 方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`Web Service 方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setWebServiceMethodDetailsLoading(false);
     }
@@ -53,14 +53,14 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
       const result = await response.json();
 
       if (result.success) {
-        Message.success(result.message || `Web Service ${className} 同步完成`);
+        message.success(result.message || `Web Service ${className} 同步完成`);
         // 重新检查状态
         await checkWebServiceMethodDetails();
       } else {
-        Message.error(`Web Service 同步失败: ${result.error}`);
+        message.error(`Web Service 同步失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`Web Service 同步失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`Web Service 同步失败: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 

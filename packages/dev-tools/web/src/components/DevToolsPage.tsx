@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Typography, Divider, Tabs } from '@arco-design/web-react';
+import { Divider, Tabs } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import DesktopControllerTab from './DesktopControllerTab';
 import ApiControllerTab from './ApiControllerTab';
 import WebServiceTab from './WebServiceTab';

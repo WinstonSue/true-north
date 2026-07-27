@@ -1,7 +1,7 @@
 import { TodoList, TodoCreatorMini, TodoEditor } from '../../components';
 import { useEffect, useState } from 'react';
-import { FlexibleContainer } from 'francis-component-react';
-import { Collapse, Divider } from '@arco-design/web-react';
+import { FlexibleContainer } from '@true-north/components-ui';
+import { Collapse, Divider } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
@@ -84,11 +84,7 @@ export default function TodoToday() {
             bordered={false}
           >
             {expiredTodoList.length > 0 && (
-              <Collapse.Item
-                header="已过期"
-                name="expired"
-                contentStyle={{ padding: 0 }}
-              >
+              <Collapse.Panel header="已过期" key="expired">
                 <TodoList
                   todoList={expiredTodoList}
                   onClickTodo={async (todo) => {
@@ -98,14 +94,10 @@ export default function TodoToday() {
                     await refreshData();
                   }}
                 />
-              </Collapse.Item>
+              </Collapse.Panel>
             )}
             {todayTodoList.length > 0 && (
-              <Collapse.Item
-                header="今天"
-                name="today"
-                contentStyle={{ padding: 0 }}
-              >
+              <Collapse.Panel header="今天" key="today">
                 <TodoList
                   todoList={todayTodoList}
                   onClickTodo={async (todo) => {
@@ -115,14 +107,10 @@ export default function TodoToday() {
                     await refreshData();
                   }}
                 />
-              </Collapse.Item>
+              </Collapse.Panel>
             )}
             {todayDoneTodoList.length > 0 && (
-              <Collapse.Item
-                header="已完成"
-                name="done"
-                contentStyle={{ padding: 0 }}
-              >
+              <Collapse.Panel header="已完成" key="done">
                 <TodoList
                   todoList={todayDoneTodoList}
                   onClickTodo={async (todo) => {
@@ -132,14 +120,10 @@ export default function TodoToday() {
                     await refreshData();
                   }}
                 />
-              </Collapse.Item>
+              </Collapse.Panel>
             )}
             {todayAbandonedTodoList.length > 0 && (
-              <Collapse.Item
-                header="已放弃"
-                name="abandoned"
-                contentStyle={{ padding: 0 }}
-              >
+              <Collapse.Panel header="已放弃" key="abandoned">
                 <TodoList
                   todoList={todayAbandonedTodoList}
                   onClickTodo={async (todo) => {
@@ -149,7 +133,7 @@ export default function TodoToday() {
                     await refreshData();
                   }}
                 />
-              </Collapse.Item>
+              </Collapse.Panel>
             )}
           </Collapse>
         </Shrink>

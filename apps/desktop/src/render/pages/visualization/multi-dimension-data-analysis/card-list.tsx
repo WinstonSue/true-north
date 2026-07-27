@@ -1,19 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import {
-  Statistic,
-  Typography,
-  Spin,
-  Grid,
-  Card,
-  Skeleton,
-} from '@arco-design/web-react';
+import { Statistic, Spin, Card, Skeleton } from '@sue/design-web-react';
+import { Typography, Grid } from '@true-north/components-ui';
 import cs from 'clsx';
 import { Chart, Line, Interval, Tooltip, Interaction } from 'bizcharts';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 
-import { IconArrowRise, IconArrowFall } from '@arco-design/web-react/icon';
+import { IconArrowRise, IconArrowFall } from '@true-north/components-ui';
 import styles from './style/card-block.module.less';
 
 const { Row, Col } = Grid;
@@ -127,7 +121,7 @@ function CardBlock(props: CardProps) {
         />
       </div>
       <div className={styles.chart}>
-        <Spin style={{ width: '100%' }} loading={loading}>
+        <Spin style={{ width: '100%' }} spinning={loading}>
           {chartType === 'interval' && <SimpleInterval chartData={chartData} />}
           {chartType === 'line' && <SimpleLine chartData={chartData} />}
         </Spin>

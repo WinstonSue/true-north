@@ -1,5 +1,6 @@
 import React from 'react';
-import { Typography, Badge } from '@arco-design/web-react';
+import { Badge } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import styles from './style/index.module.less';
 
 const { Text } = Typography;

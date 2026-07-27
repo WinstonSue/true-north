@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button, Card, Typography, Space } from '@arco-design/web-react';
+import { Button, Card, Space } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import {
   IconArrowRight,
   IconStop,
   IconSwap,
   IconTags,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 

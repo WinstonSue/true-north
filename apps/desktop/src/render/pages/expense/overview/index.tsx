@@ -1,4 +1,4 @@
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { BudgetOverview } from '../overview/budget-overview';
 
 const { Fixed, Shrink } = FlexibleContainer;

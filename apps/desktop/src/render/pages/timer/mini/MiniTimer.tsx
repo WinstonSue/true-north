@@ -6,7 +6,7 @@ import {
   IconPlusCircle,
   IconFullscreen,
   IconFullscreenExit,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { getTimeArr } from '../utils';
 import styles from './MiniTimer.module.css';
 import { useTimerContext } from '../context';

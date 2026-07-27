@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Radio, Upload, Message } from '@arco-design/web-react';
-import { IconUpload } from '@arco-design/web-react/icon';
+import { Modal, Radio, Upload, message } from '@sue/design-web-react';
+import { IconUpload } from '@true-north/components-ui';
 import { Graph } from '@antv/x6';
 import { useMindMapContext } from '../context';
 import { exportToPNG, exportToSVG, exportToJSON, importJSONFromFile } from '../utils/export';
@@ -30,7 +30,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ visible, onClose }) => {
 
   const handleExport = () => {
     if (!graph) {
-      Message.error('无法导出，图形未初始化');
+      message.error('无法导出，图形未初始化');
       return;
     }
 
@@ -52,7 +52,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ visible, onClose }) => {
           link.click();
           URL.revokeObjectURL(url);
         } else {
-          Message.error('无数据可导出');
+          message.error('无数据可导出');
         }
         break;
     }
@@ -133,7 +133,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ visible, onClose, onImport })
       }
     } catch (error) {
       console.error('导入文件失败:', error);
-      Message.error('导入失败，请确保文件格式正确');
+      message.error('导入失败，请确保文件格式正确');
     }
   };
 

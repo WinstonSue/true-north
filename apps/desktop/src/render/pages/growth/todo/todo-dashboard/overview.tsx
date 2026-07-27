@@ -1,14 +1,8 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import {
-  Grid,
-  Card,
-  Typography,
-  Divider,
-  Skeleton,
-  Link,
-} from '@arco-design/web-react';
+import { Card, Divider, Skeleton } from '@sue/design-web-react';
+import { Grid, Typography, Link } from '@true-north/components-ui';
 import { useSelector } from 'react-redux';
-import { IconCaretUp } from '@arco-design/web-react/icon';
+import { IconCaretUp } from '@true-north/components-ui';
 import OverviewAreaLine from '@/components/Chart/overview-area-line';
 import axios from 'axios';
 import locale from './locale';
@@ -18,9 +12,7 @@ import IconCalendar from './assets/calendar.svg';
 import IconComments from './assets/comments.svg';
 import IconContent from './assets/content.svg';
 import IconIncrease from './assets/increase.svg';
-
 const { Row, Col } = Grid;
-
 type StatisticItemType = {
   icon?: ReactNode;
   title?: ReactNode;
@@ -28,7 +20,6 @@ type StatisticItemType = {
   loading?: boolean;
   unit?: ReactNode;
 };
-
 function StatisticItem(props: StatisticItemType) {
   const { icon, title, count, loading, unit } = props;
   return (
@@ -46,7 +37,6 @@ function StatisticItem(props: StatisticItemType) {
     </div>
   );
 }
-
 type DataType = {
   allContents?: string;
   liveContents?: string;
@@ -55,14 +45,11 @@ type DataType = {
   chartData?: { count?: number; date?: string }[];
   down?: boolean;
 };
-
 function Overview() {
   const [data, setData] = useState<DataType>({});
   const [loading, setLoading] = useState(true);
   const t = useLocale(locale);
-
   const userInfo = useSelector((state: any) => state.userInfo || {});
-
   const fetchData = () => {
     setLoading(true);
     axios
@@ -74,11 +61,9 @@ function Overview() {
         setLoading(false);
       });
   };
-
   useEffect(() => {
     fetchData();
   }, []);
-
   return (
     <Card>
       <Typography.Title heading={5}>
@@ -152,5 +137,4 @@ function Overview() {
     </Card>
   );
 }
-
 export default Overview;

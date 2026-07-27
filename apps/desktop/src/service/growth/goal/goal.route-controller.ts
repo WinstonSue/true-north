@@ -1,11 +1,12 @@
 import { Controller, Post, Put, Get, Delete, Body, Param, Query } from '@business/decorators';
 import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@true-north/vo';
 import { GoalFilterDto, GoalPageFilterDto, CreateGoalDto, UpdateGoalDto, GoalDto } from './dto';
-import { GoalService } from './goal.service';
+import { GoalService, goalService as defaultGoalService } from './goal.service';
 
 @Controller('/goal')
 export class GoalController {
-  constructor(private readonly goalService: GoalService) {}
+  /** 默认注入模块单例，供 electron-ipc-restful 无参实例化 */
+  constructor(private readonly goalService: GoalService = defaultGoalService) {}
 
   @Post('/create', { description: '创建目标' })
   async create(@Body() body: GoalVO.CreateGoalVo): Promise<GoalVO.GoalVo> {

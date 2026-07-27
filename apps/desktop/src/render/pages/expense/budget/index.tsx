@@ -1,5 +1,5 @@
-import { FlexibleContainer } from 'francis-component-react';
-import { Button } from '@arco-design/web-react';
+import { FlexibleContainer } from '@true-north/components-ui';
+import { Button } from '@sue/design-web-react';
 import { useCreateBudget } from './CreateBudget';
 import { useExpenses } from '../context';
 import BudgetTable from './BudgetTable';

@@ -1,12 +1,4 @@
-import {
-  Form,
-  Input,
-  Select,
-  Space,
-  Button,
-  InputNumber,
-  DatePicker,
-} from '@arco-design/web-react';
+import { Form, Input, Select, Space, Button, InputNumber, DatePicker } from '@sue/design-web-react';
 import { BUDGET_PERIODS, DEFAULT_CATEGORIES } from '../constants';
 import { useState, useRef } from 'react';
 import { openModal } from '@/hooks/OpenModal';

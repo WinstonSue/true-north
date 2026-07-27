@@ -1,19 +1,12 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-  Input,
-  Select,
-  Grid,
-  DatePicker,
-  Button,
-  Tag,
-  Space,
-} from '@arco-design/web-react';
+import { Input, Select, DatePicker, Button, Tag, Space } from '@sue/design-web-react';
+import { Grid } from '@true-north/components-ui';
 import {
   IconSearch,
   IconDown,
   IconUp,
   IconRefresh,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { IMPORTANCE_MAP, DIFFICULTY_MAP } from '../../constants';
 import { GoalStatus, GoalType } from '@true-north/enum';
 import { useGoalContext } from '../context';

@@ -7,7 +7,7 @@ import styles from './style/index.module.less';
 
 function Login() {
   useEffect(() => {
-    document.body.setAttribute('arco-theme', 'light');
+    document.body.setAttribute('data-theme', 'light');
   }, []);
 
   return (

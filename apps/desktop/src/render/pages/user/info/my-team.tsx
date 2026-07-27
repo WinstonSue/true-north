@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Typography, List, Skeleton } from '@arco-design/web-react';
+import { Avatar, Skeleton } from '@sue/design-web-react';
+import { Typography, List } from '@true-north/components-ui';
 import axios from 'axios';
 
 const { Text } = Typography;

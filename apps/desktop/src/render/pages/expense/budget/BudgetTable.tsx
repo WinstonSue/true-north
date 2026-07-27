@@ -1,6 +1,7 @@
+import type { ColumnProps } from '@true-north/components-ui';
 import { format } from 'date-fns';
-import { Table, Tag } from '@arco-design/web-react';
-import type { ColumnProps } from '@arco-design/web-react/es/Table/interface';
+import { Table, Tag } from '@sue/design-web-react';
+
 import { useExpenses } from '../context';
 import type { BudgetVo } from '@true-north/vo';
 import dayjs from 'dayjs';

@@ -5,7 +5,7 @@ import {
   IconPlusCircle,
   IconMinusCircle,
   IconMore,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import GoalEditor from '@/pages/growth/components/GoalDetail/GoalEditor';
 import { openDrawer } from '@/layout/Drawer';
 import styles from './style.module.less';

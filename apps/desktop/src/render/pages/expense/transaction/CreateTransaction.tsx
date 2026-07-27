@@ -1,11 +1,4 @@
-import {
-  Form,
-  Input,
-  Select,
-  Button,
-  DatePicker,
-  InputNumber,
-} from '@arco-design/web-react';
+import { Form, Input, Select, Button, DatePicker, InputNumber } from '@sue/design-web-react';
 import { DEFAULT_CATEGORIES } from '../constants';
 import { TagEditor } from '../../../components/TagSelector';
 import { useEffect, useRef } from 'react';

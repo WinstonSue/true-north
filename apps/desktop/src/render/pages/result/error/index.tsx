@@ -1,6 +1,7 @@
 import React from 'react';
-import { Typography, Result, Button, Link } from '@arco-design/web-react';
-import { IconLink } from '@arco-design/web-react/icon';
+import { Button } from '@sue/design-web-react';
+import { Typography, Result } from '@true-north/components-ui';
+import { IconLink } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
@@ -33,14 +34,14 @@ function Success() {
             <ol>
               <li>
                 {t['error.detailLine.record']}
-                <Link>
+                <Typography.Link>
                   <IconLink />
                   {t['error.detailLine.record.link']}
-                </Link>
+                </Typography.Link>
               </li>
               <li>
                 {t['error.detailLine.auth']}
-                <Link>{t['error.detailLine.auth.link']}</Link>
+                <Typography.Link>{t['error.detailLine.auth.link']}</Typography.Link>
               </li>
             </ol>
           </Typography.Paragraph>

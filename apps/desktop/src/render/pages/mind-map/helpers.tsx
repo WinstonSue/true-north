@@ -1,8 +1,8 @@
-import { Message } from '@arco-design/web-react';
+import { message } from '@sue/design-web-react';
 import { openDrawer } from '@/layout/Drawer';
 import GoalEditor from '@/pages/growth/components/GoalDetail/GoalEditor';
 import GoalCreator from '@/pages/growth/components/GoalDetail/GoalCreator';
-import { Modal } from '@arco-design/web-react';
+import { Modal } from '@sue/design-web-react';
 import { GoalService } from '@true-north/web-service';
 
 export const handleAddChild = (nodeId: string) => {
@@ -53,7 +53,7 @@ export const handleAddSibling = async (nodeId: string) => {
       });
     } catch (error) {
       console.error('获取目标信息失败:', error);
-      Message.error('获取目标信息失败');
+      message.error('获取目标信息失败');
       resolve(false);
     }
   });
@@ -90,7 +90,7 @@ export const handleCopyNode = async (nodeId: string) => {
       });
     } catch (error) {
       console.error('获取目标信息失败:', error);
-      Message.error('获取目标信息失败');
+      message.error('获取目标信息失败');
       resolve(false);
     }
   });

@@ -1,12 +1,12 @@
-import { Popover, Calendar, Select, TimePicker } from '@arco-design/web-react';
-import { IconLeft, IconRight } from '@arco-design/web-react/icon';
+import { Popover, Calendar, Select, TimePicker } from '@sue/design-web-react';
+import { IconLeft, IconRight } from '@true-north/components-ui';
 import dayjs, { Dayjs } from 'dayjs';
 import { SiteIcon } from '@true-north/components-ui';
 import { useState } from 'react';
 import { GlobalContext } from '@/context';
 import { useContext } from 'react';
 import clsx from 'clsx';
-import { RepeatSelector } from 'francis-component-react';
+import { RepeatSelector } from '@true-north/components-ui';
 import { voToForm, formToVo } from 'francis-helper-repeat';
 import type { RepeatVo } from 'francis-types-repeat';
 

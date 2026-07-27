@@ -1,15 +1,7 @@
 import React from 'react';
-import {
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  InputNumber,
-  Button,
-  Space,
-  Grid,
-} from '@arco-design/web-react';
-import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
+import { Form, Input, Select, DatePicker, InputNumber, Button, Space } from '@sue/design-web-react';
+import { Grid } from '@true-north/components-ui';
+import { IconSearch, IconRefresh } from '@true-north/components-ui';
 import { HabitPageFilterVo, GoalVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS, HABIT_DIFFICULTY_OPTIONS } from '../constants';
 

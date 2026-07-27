@@ -1,20 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  Popover,
-  Button,
-  Input,
-  DatePicker,
-  Avatar,
-  Typography,
-  Space,
-  Divider,
-} from '@arco-design/web-react';
+import { Popover, Button, Input, DatePicker, Avatar, Space, Divider } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import {
   IconPlayArrow,
   IconPause,
   IconStop,
   IconPlus,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
 

@@ -1,13 +1,5 @@
-import {
-  Input,
-  Grid,
-  DatePicker,
-  Switch,
-  Spin,
-  Select,
-  Form,
-  RulesProps,
-} from '@arco-design/web-react';
+import { Input, DatePicker, Switch, Spin, Select, Form } from '@sue/design-web-react';
+import { Grid, RulesProps } from '@true-north/components-ui';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { useTaskDetailContext } from './context';

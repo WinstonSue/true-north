@@ -1,9 +1,9 @@
 import { AxiosInstance } from 'axios';
 import { getEmbedAccessToken } from './helper';
 import { debounce } from 'lodash-es';
-import { Message } from '@arco-design/web-react';
+import { message } from '@true-north/components-ui';
 
-const debouncedError = debounce(Message.error, 500);
+const debouncedError = debounce(message.error, 500);
 
 /**
  * 服务端返回数据，要根据 body 中的 status 判断是否为成功的请求

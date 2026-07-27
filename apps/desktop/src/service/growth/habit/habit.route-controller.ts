@@ -1,11 +1,12 @@
 import type { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { CreateHabitDto, UpdateHabitDto, HabitDto, HabitFilterDto, HabitPageFilterDto } from './dto';
-import { HabitService } from './habit.service';
+import { HabitService, habitService as defaultHabitService } from './habit.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
 
 @Controller('/habit')
 export class HabitController {
-  constructor(private readonly habitService: HabitService) {}
+  /** 默认注入模块单例，供 electron-ipc-restful 无参实例化 */
+  constructor(private readonly habitService: HabitService = defaultHabitService) {}
 
   @Post('/create', { description: '创建习惯' })
   async create(@Body() createHabitVo: HabitVO.CreateHabitVo): Promise<HabitVO.HabitVo> {

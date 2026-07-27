@@ -1,10 +1,12 @@
 import type { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
-import { TaskService } from './task.service';
+import { TaskService, taskService as defaultTaskService } from './task.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@business/decorators';
 import { TaskFilterDto, TaskPageFilterDto, UpdateTaskDto, CreateTaskDto, TaskDto } from './dto';
+
 @Controller('/task')
 export class TaskController {
-  constructor(private readonly taskService: TaskService) {}
+  /** 默认注入模块单例，供 electron-ipc-restful 无参实例化 */
+  constructor(private readonly taskService: TaskService = defaultTaskService) {}
 
   @Post('/create', { description: '创建任务' })
   async create(@Body() createTaskVo: TaskVO.CreateTaskVo): Promise<TaskVO.TaskVo> {

@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from '@arco-design/web-react';
+import { Button, ButtonProps } from '@sue/design-web-react';
 import { SiteIcon } from '@true-north/components-ui';
 
 export function CreateButton({ ...props }: ButtonProps) {

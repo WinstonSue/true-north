@@ -1,4 +1,4 @@
-import { Checkbox, Modal } from '@arco-design/web-react';
+import { Checkbox, Modal } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { GoalService } from '@true-north/web-service';
 import { GoalVo } from '@true-north/vo';

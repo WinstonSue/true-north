@@ -9,7 +9,7 @@ import {
   Legend,
 } from 'bizcharts';
 import CustomTooltip from './customer-tooltip';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import DataSet from '@antv/data-set';
 
 interface AreaPolarProps {
@@ -31,7 +31,7 @@ function AreaPolar(props: AreaPolarProps) {
   });
 
   return (
-    <Spin loading={loading} style={{ width: '100%' }}>
+    <Spin spinning={loading} style={{ width: '100%' }}>
       <Chart
         height={height || 400}
         padding={0}

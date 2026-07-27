@@ -1,6 +1,6 @@
 'use client';
 
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import clsx from 'clsx';
 
 const { Fixed, Shrink } = FlexibleContainer;

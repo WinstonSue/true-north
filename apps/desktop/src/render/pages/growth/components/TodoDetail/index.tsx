@@ -1,4 +1,4 @@
-import { Popover } from '@arco-design/web-react';
+import { Popover } from '@sue/design-web-react';
 import { useState } from 'react';
 import TodoEditor, { TodoEditorProps } from './TodoEditor';
 import TodoCreatorMini, { TodoCreatorMiniProps } from './TodoCreatorMini';
@@ -52,11 +52,11 @@ export function useTodoDetail() {
     return (
       <Popover
         trigger="click"
-        popupVisible={createPopoverVisible}
-        onVisibleChange={(visible) => {
+        open={createPopoverVisible}
+        onOpenChange={(visible) => {
           setCreatePopoverVisible(visible);
         }}
-        position="bl"
+        placement="bottomLeft"
         style={{
           maxWidth: 'unset',
         }}

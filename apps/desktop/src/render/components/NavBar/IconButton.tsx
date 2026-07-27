@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { Button } from '@arco-design/web-react';
+import { Button } from '@sue/design-web-react';
 import styles from './style/icon-button.module.less';
 import cs from 'clsx';
 

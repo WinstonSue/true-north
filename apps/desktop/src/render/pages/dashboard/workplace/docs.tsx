@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link, Card, Typography } from '@arco-design/web-react';
+import { Card } from '@sue/design-web-react';
+import { Typography, Link } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/docs.module.less';
-
 const links = {
   react: 'https://arco.design/react/docs/start',
   vue: 'https://arco.design/vue/docs/start',
@@ -12,7 +12,6 @@ const links = {
 };
 function QuickOperation() {
   const t = useLocale(locale);
-
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -29,5 +28,4 @@ function QuickOperation() {
     </Card>
   );
 }
-
 export default QuickOperation;

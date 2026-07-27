@@ -1,27 +1,44 @@
 import React from 'react';
-import { Trigger, Typography } from '@arco-design/web-react';
+import { Popover } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { SketchPicker } from 'react-color';
-import { generate, getRgbStr } from '@arco-design/color';
+import { generate } from '@ant-design/colors';
 import { useSelector, useDispatch } from 'react-redux';
 import { GlobalState } from '../../store';
 import useLocale from '@/utils/useLocale';
 import styles from './style/color-panel.module.less';
 
+function hexToRgb(hex: string) {
+  const normalized = hex.replace('#', '');
+  const full =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : normalized;
+  const num = parseInt(full, 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `${r},${g},${b}`;
+}
+
 function ColorPanel() {
   const theme =
-    document.querySelector('body').getAttribute('arco-theme') || 'light';
+    document.querySelector('body')?.getAttribute('data-theme') || 'light';
   const settings = useSelector((state: GlobalState) => state.settings);
   const locale = useLocale();
   const themeColor = settings.themeColor;
-  const list = generate(themeColor, { list: true });
+  const list = generate(themeColor, { theme: theme === 'dark' ? 'dark' : 'default' });
   const dispatch = useDispatch();
 
   return (
     <div>
-      <Trigger
+      <Popover
         trigger="hover"
-        position="bl"
-        popup={() => (
+        placement="bottomLeft"
+        content={
           <SketchPicker
             color={themeColor}
             onChangeComplete={(color) => {
@@ -31,19 +48,17 @@ function ColorPanel() {
                 payload: { settings: { ...settings, themeColor: newColor } },
               });
               const newList = generate(newColor, {
-                list: true,
-                dark: theme === 'dark',
+                theme: theme === 'dark' ? 'dark' : 'default',
               });
               newList.forEach((l, index) => {
-                const rgbStr = getRgbStr(l);
                 document.body.style.setProperty(
                   `--arcoblue-${index + 1}`,
-                  rgbStr,
+                  hexToRgb(l),
                 );
               });
             }}
           />
-        )}
+        }
       >
         <div className={styles.input}>
           <div
@@ -52,7 +67,7 @@ function ColorPanel() {
           />
           <span>{themeColor}</span>
         </div>
-      </Trigger>
+      </Popover>
       <ul className={styles.ul}>
         {list.map((item, index) => (
           <li

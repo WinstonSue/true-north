@@ -1,6 +1,7 @@
 'use client';
 
-import { Typography, Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import { Chart, Line, Axis, Tooltip, Legend } from 'bizcharts';
 import CustomTooltip from '@/components/Chart/customer-tooltip';
 
@@ -45,7 +46,7 @@ export function TodoChart({ data, loading }: TodoChartProps) {
       </div>
 
       <div className="h-80">
-        <Spin loading={loading} style={{ width: '100%', height: '100%' }}>
+        <Spin spinning={loading} style={{ width: '100%', height: '100%' }}>
           <Chart
             height={300}
             data={chartData}

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import DateTimeTool from '../DateTimeTool';
 import { useTodoDetailContext } from '../context';
 import IconSelector from '../../IconSelector';

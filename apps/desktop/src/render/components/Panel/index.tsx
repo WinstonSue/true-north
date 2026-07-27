@@ -1,5 +1,5 @@
 import React, { CSSProperties, ReactNode } from 'react';
-import { Typography } from '@arco-design/web-react';
+import { Typography } from '@true-north/components-ui';
 import cs from 'clsx';
 import styles from './style/index.module.less';
 

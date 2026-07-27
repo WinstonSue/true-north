@@ -1,14 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Card,
-  Steps,
-  Typography,
-  Grid,
-  Space,
-  Button,
-  Table,
-  Badge,
-} from '@arco-design/web-react';
+import { Card, Space, Button, Table, Badge } from '@sue/design-web-react';
+import { Steps, Typography, Grid } from '@true-north/components-ui';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';

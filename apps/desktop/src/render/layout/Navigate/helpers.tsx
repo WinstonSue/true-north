@@ -7,7 +7,7 @@ import {
   IconCheckCircle,
   IconExclamationCircle,
   IconUser,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import styles from '../layout.module.less';
 import { SiteIcon } from '@true-north/components-ui';
 

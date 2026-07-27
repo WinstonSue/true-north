@@ -1,5 +1,6 @@
 import React from 'react';
-import { Skeleton, Statistic, Typography } from '@arco-design/web-react';
+import { Skeleton, Statistic } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
 import cs from 'clsx';
 import {
   Chart,
@@ -12,7 +13,7 @@ import {
   Legend,
 } from 'bizcharts';
 
-import { IconArrowRise, IconArrowFall } from '@arco-design/web-react/icon';
+import { IconArrowRise, IconArrowFall } from '@true-north/components-ui';
 import styles from '../style/public-opinion.module.less';
 
 const { Title, Text } = Typography;

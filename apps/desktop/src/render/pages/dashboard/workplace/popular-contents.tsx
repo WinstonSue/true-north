@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, Card, Radio, Table, Typography } from '@arco-design/web-react';
-import { IconCaretDown, IconCaretUp } from '@arco-design/web-react/icon';
+import { Card, Radio, Table } from '@sue/design-web-react';
+import { Typography, Link } from '@true-north/components-ui';
+import { IconCaretDown, IconCaretUp } from '@true-north/components-ui';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/popular-contents.module.less';
-
 function PopularContent() {
   const t = useLocale(locale);
   const [type, setType] = useState(0);
@@ -13,7 +13,6 @@ function PopularContent() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-
   const fetchData = useCallback(() => {
     setLoading(true);
     axios
@@ -28,11 +27,9 @@ function PopularContent() {
         setLoading(false);
       });
   }, [page, type]);
-
   useEffect(() => {
     fetchData();
   }, [page, fetchData]);
-
   const columns = [
     {
       title: t['workplace.column.rank'],
@@ -77,7 +74,6 @@ function PopularContent() {
       },
     },
   ];
-
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -111,5 +107,4 @@ function PopularContent() {
     </Card>
   );
 }
-
 export default PopularContent;

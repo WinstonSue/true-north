@@ -1,11 +1,12 @@
 import 'reflect-metadata';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
-import { ConfigProvider, Message } from '@arco-design/web-react';
-import zhCN from '@arco-design/web-react/es/locale/zh-CN';
-import enUS from '@arco-design/web-react/es/locale/en-US';
+import { ConfigProvider, message, theme as sueTheme } from '@sue/design-web-react';
+import zhCN from '@sue/design-web-react/locale/zh_CN';
+import enUS from '@sue/design-web-react/locale/en_US';
+import '@sue/design-web-react/dist/sue.css';
 import './style/tailwind.css';
 import './style/global.less';
 import { HashRouter } from 'react-router-dom';
@@ -20,23 +21,18 @@ import { generatePermission } from './router/routes';
 import 'dayjs/locale/zh-cn';
 import '@true-north/share-types';
 import dayjs from 'dayjs';
-
+import { setMessageImpl } from '@true-north/components-ui';
 import { registerMessage } from '@true-north/web-service';
 
-registerMessage({
-  error: (params: string) => {
-    Message.error(params);
-  },
-  success: (params: string) => {
-    Message.success(params);
-  },
-  warning: (params: string) => {
-    Message.warning(params);
-  },
-  info: (params: string) => {
-    Message.info(params);
-  },
-});
+const messageApi = {
+  error: (params: string) => message.error(params),
+  success: (params: string) => message.success(params),
+  warning: (params: string) => message.warning(params),
+  info: (params: string) => message.info(params),
+};
+
+setMessageImpl(messageApi);
+registerMessage(messageApi);
 
 dayjs.locale('zh-cn');
 
@@ -50,7 +46,7 @@ if (process.env.NODE_ENV === 'development') {
 
 function LifeToolkitApp() {
   const [lang, setLang] = useStorage('arco-lang', 'en-US');
-  const [theme, setTheme] = useStorage('arco-theme', 'light');
+  const [themeMode, setThemeMode] = useStorage('arco-theme', 'light');
 
   function getArcoLocale() {
     switch (lang) {
@@ -62,6 +58,13 @@ function LifeToolkitApp() {
         return zhCN;
     }
   }
+
+  const sueThemeConfig = useMemo(
+    () => ({
+      algorithm: themeMode === 'dark' ? sueTheme.darkAlgorithm : sueTheme.defaultAlgorithm,
+    }),
+    [themeMode],
+  );
 
   function fetchUserInfo() {
     store.dispatch({
@@ -100,14 +103,14 @@ function LifeToolkitApp() {
   }, []);
 
   useEffect(() => {
-    changeTheme(theme);
-  }, [theme]);
+    changeTheme(themeMode);
+  }, [themeMode]);
 
   const contextValue = {
     lang,
     setLang,
-    theme,
-    setTheme,
+    theme: themeMode,
+    setTheme: setThemeMode,
   };
 
   return (
@@ -117,20 +120,7 @@ function LifeToolkitApp() {
         v7_relativeSplatPath: true,
       }}
     >
-      <ConfigProvider
-        locale={getArcoLocale()}
-        componentConfig={{
-          Card: {
-            bordered: false,
-          },
-          List: {
-            bordered: false,
-          },
-          Table: {
-            border: false,
-          },
-        }}
-      >
+      <ConfigProvider locale={getArcoLocale()} theme={sueThemeConfig}>
         <Provider store={store}>
           <GlobalContext.Provider value={contextValue}>
             <Router />

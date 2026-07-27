@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  Grid,
-  Typography,
-  Select,
-  DatePicker,
-  Space,
-  Spin,
-  Message,
-  Empty,
-} from '@arco-design/web-react';
+import { Card, Select, DatePicker, Space, Spin, message, Empty } from '@sue/design-web-react';
+import { Grid, Typography } from '@true-north/components-ui';
 import { HabitController } from '@true-north/api';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
@@ -34,7 +25,7 @@ export const HabitStatisticsPage: React.FC = () => {
       setHabits(response.list);
     } catch (error) {
       console.error('获取习惯列表失败:', error);
-      Message.error('获取习惯列表失败');
+      message.error('获取习惯列表失败');
     } finally {
       setLoading(false);
     }

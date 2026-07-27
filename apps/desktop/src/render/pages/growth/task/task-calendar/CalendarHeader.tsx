@@ -1,9 +1,8 @@
-import { IconLeft, IconRight } from '@arco-design/web-react/icon';
+import { IconLeft, IconRight } from '@true-north/components-ui';
 import { dayjs } from './utils';
 import { useCalendarContext } from './context';
-import { Radio, Button } from '@arco-design/web-react';
-import { FlexibleContainer } from 'francis-component-react';
-const ButtonGroup = Button.Group;
+import { Radio, Button, Space } from '@sue/design-web-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 
 function CalendarHeader(props: { prefixCls: string }) {
   const { prefixCls } = props;
@@ -28,7 +27,7 @@ function CalendarHeader(props: { prefixCls: string }) {
 
       <FlexibleContainer.Fixed className="flex items-center gap-4">
         <Radio.Group
-          type="button"
+          optionType="button"
           options={[
             {
               label: '年',
@@ -39,10 +38,10 @@ function CalendarHeader(props: { prefixCls: string }) {
               value: 'month',
             },
           ]}
-          onChange={setCalendarMode}
+          onChange={(e) => setCalendarMode(e.target.value)}
           value={calendarMode}
         />
-        <ButtonGroup>
+        <Space.Compact>
           <Button
             className=""
             onClick={() => changePageShowDate('prev', calendarMode)}
@@ -58,7 +57,7 @@ function CalendarHeader(props: { prefixCls: string }) {
           <Button onClick={() => changePageShowDate('next', calendarMode)}>
             {<IconRight />}
           </Button>
-        </ButtonGroup>
+        </Space.Compact>
       </FlexibleContainer.Fixed>
     </FlexibleContainer>
   );

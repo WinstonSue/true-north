@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PublicOpinionCard, { PublicOpinionCardProps } from './card';
 import axios from 'axios';
-import { Grid } from '@arco-design/web-react';
+import { Grid } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from '../locale';
 

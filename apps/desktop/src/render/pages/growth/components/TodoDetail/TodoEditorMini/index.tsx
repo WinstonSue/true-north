@@ -1,4 +1,4 @@
-import { FlexibleContainer } from 'francis-component-react';
+import { FlexibleContainer } from '@true-north/components-ui';
 import { TodoVo } from '@true-north/vo';
 import { TodoDetailProvider } from '../context';
 import TodoEditorMain from './TodoEditorMain';

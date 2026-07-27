@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconPlayCircle, IconPauseCircle } from '@arco-design/web-react/icon';
+import { IconPlayCircle, IconPauseCircle } from '@true-north/components-ui';
 
 interface PlayControllerProps {
   state: boolean;

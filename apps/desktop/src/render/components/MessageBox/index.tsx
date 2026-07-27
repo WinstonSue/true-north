@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { groupBy } from 'lodash-es';
-import {
-  Trigger,
-  Badge,
-  Tabs,
-  Avatar,
-  Spin,
-  Button,
-} from '@arco-design/web-react';
+import { Popover, Badge, Tabs, Avatar, Spin, Button } from '@sue/design-web-react';
 import {
   IconMessage,
   IconCustomerService,
   IconFile,
   IconDesktop,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import useLocale from '../../utils/useLocale';
 import MessageList, { MessageListType } from './list';
 import styles from './style/index.module.less';
@@ -55,11 +48,11 @@ function DropContent() {
   }, []);
 
   useEffect(() => {
-    const groupData: { [key: string]: MessageListType } = groupBy(
+    const nextGroupData: { [key: string]: MessageListType } = groupBy(
       sourceData,
       'type',
     );
-    setGroupData(groupData);
+    setGroupData(nextGroupData);
   }, [sourceData]);
 
   const tabList = [
@@ -85,48 +78,50 @@ function DropContent() {
     },
   ];
 
+  const items = useMemo(
+    () =>
+      tabList.map((item) => {
+        const { key, title } = item;
+        const data = groupData[key] || [];
+        const unReadData = data.filter((entry) => !entry.status);
+        return {
+          key,
+          label: (
+            <span>
+              {title}
+              {unReadData.length ? `(${unReadData.length})` : ''}
+            </span>
+          ),
+          children: (
+            <MessageList
+              data={data}
+              unReadData={unReadData}
+              onItemClick={(entry) => {
+                readMessage([entry]);
+              }}
+              onAllBtnClick={(unread) => {
+                readMessage(unread);
+              }}
+            />
+          ),
+        };
+      }),
+    [groupData, t],
+  );
+
   return (
     <div className={styles['message-box']}>
-      <Spin loading={loading} style={{ display: 'block' }}>
+      <Spin spinning={loading} style={{ display: 'block' }}>
         <Tabs
-          overflow="dropdown"
-          type="rounded"
-          defaultActiveTab="message"
-          destroyOnHide
-          extra={
-            <Button type="text" onClick={() => setSourceData([])}>
+          defaultActiveKey="message"
+          destroyInactiveTabPane
+          tabBarExtraContent={
+            <Button type="link" onClick={() => setSourceData([])}>
               {t['message.empty']}
             </Button>
           }
-        >
-          {tabList.map((item) => {
-            const { key, title, avatar } = item;
-            const data = groupData[key] || [];
-            const unReadData = data.filter((item) => !item.status);
-            return (
-              <Tabs.TabPane
-                key={key}
-                title={
-                  <span>
-                    {title}
-                    {unReadData.length ? `(${unReadData.length})` : ''}
-                  </span>
-                }
-              >
-                <MessageList
-                  data={data}
-                  unReadData={unReadData}
-                  onItemClick={(item) => {
-                    readMessage([item]);
-                  }}
-                  onAllBtnClick={(unReadData) => {
-                    readMessage(unReadData);
-                  }}
-                />
-              </Tabs.TabPane>
-            );
-          })}
-        </Tabs>
+          items={items}
+        />
       </Spin>
     </div>
   );
@@ -134,17 +129,16 @@ function DropContent() {
 
 function MessageBox({ children }) {
   return (
-    <Trigger
+    <Popover
       trigger="hover"
-      popup={() => <DropContent />}
-      position="br"
-      unmountOnExit={false}
-      popupAlign={{ bottom: 4 }}
+      content={<DropContent />}
+      placement="bottomRight"
+      destroyOnHidden={false}
     >
       <Badge count={9} dot>
         {children}
       </Badge>
-    </Trigger>
+    </Popover>
   );
 }
 

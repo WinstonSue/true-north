@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Card, Grid, Table, Space, Typography } from '@arco-design/web-react';
+import { Card, Table, Space } from '@sue/design-web-react';
+import { Grid, Typography } from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import axios from 'axios';
 import locale from './locale';

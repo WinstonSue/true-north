@@ -1,4 +1,4 @@
-import { TreeSelect } from '@arco-design/web-react';
+import { TreeSelect } from '@sue/design-web-react';
 import { useEffect, useState } from 'react';
 import { GoalService } from '@true-north/web-service';
 import type { GoalVo } from '@true-north/vo';

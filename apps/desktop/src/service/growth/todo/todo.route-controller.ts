@@ -8,15 +8,16 @@ import {
   CreateTodoDto,
   UpdateTodoDto,
 } from './dto';
-import { TodoService } from './todo.service';
+import { TodoService, todoService as defaultTodoService, todoRepeatService as defaultTodoRepeatService } from './todo.service';
 import { TodoRepeatService } from './todo-repeat.service';
 import { TodoRelatedType } from '@true-north/enum';
 
 @Controller('/todo')
 export class TodoController {
+  /** 默认注入模块单例，供 electron-ipc-restful 无参实例化 */
   constructor(
-    private readonly todoService: TodoService,
-    private readonly todoRepeatService: TodoRepeatService
+    private readonly todoService: TodoService = defaultTodoService,
+    private readonly todoRepeatService: TodoRepeatService = defaultTodoRepeatService
   ) {}
 
   @Get('/page', { description: '分页查询待办' })

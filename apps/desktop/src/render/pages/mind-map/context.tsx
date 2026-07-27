@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { GoalVo } from '@true-north/vo';
 import { GoalService } from '@true-north/web-service';
-import { Message } from '@arco-design/web-react';
+import { message } from '@sue/design-web-react';
 import { GoalType, GoalStatus } from '@true-north/enum';
 import { createInjectState } from '@true-north/common-web-utils';
-import { Modal } from '@arco-design/web-react';
+import { Modal } from '@sue/design-web-react';
 
 export const [GoalMindMapContextProvider, useGoalMindMapContext] =
   createInjectState<{
@@ -30,7 +30,7 @@ export const [GoalMindMapContextProvider, useGoalMindMapContext] =
         setGoalTree(data);
       } catch (error) {
         console.error('获取目标数据失败:', error);
-        Message.error('获取目标数据失败');
+        message.error('获取目标数据失败');
       } finally {
         setLoading(false);
       }

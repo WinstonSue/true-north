@@ -1,4 +1,4 @@
-import { Space } from '@arco-design/web-react';
+import { Space } from '@sue/design-web-react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import ChatPanel from './chat-panel';

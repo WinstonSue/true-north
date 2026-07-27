@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
-import { Progress, Tag, Spin } from '@arco-design/web-react';
+import { Progress, Tag, Spin } from '@sue/design-web-react';
 import { TodoProvider, useTodoContext } from './context';
 import { TodoChart } from './TodoChart';
 import { TodoPriorityMatrix } from './TodoPriorityMatrix';

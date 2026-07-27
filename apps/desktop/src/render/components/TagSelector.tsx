@@ -1,6 +1,6 @@
 'use client';
 
-import { Select } from '@arco-design/web-react';
+import { Select } from '@sue/design-web-react';
 
 const options = [
   {

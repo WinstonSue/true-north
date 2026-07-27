@@ -1,25 +1,18 @@
 import React from 'react';
-import {
-  Link,
-  Card,
-  Divider,
-  Message,
-  Typography,
-} from '@arco-design/web-react';
+import { Card, Divider, message } from '@sue/design-web-react';
+import { Typography, Link } from '@true-north/components-ui';
 import {
   IconFile,
   IconStorage,
   IconSettings,
   IconMobile,
   IconFire,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/shortcuts.module.less';
-
 function Shortcuts() {
   const t = useLocale(locale);
-
   const shortcuts = [
     {
       title: t['workplace.contentMgmt'],
@@ -47,7 +40,6 @@ function Shortcuts() {
       icon: <IconFire />,
     },
   ];
-
   const recentShortcuts = [
     {
       title: t['workplace.contentStatistic'],
@@ -65,9 +57,8 @@ function Shortcuts() {
       icon: <IconSettings />,
     },
   ];
-
   function onClickShortcut(key) {
-    Message.info({
+    message.info({
       content: (
         <span>
           You clicked <b>{key}</b>
@@ -75,7 +66,6 @@ function Shortcuts() {
       ),
     });
   }
-
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -113,5 +103,4 @@ function Shortcuts() {
     </Card>
   );
 }
-
 export default Shortcuts;

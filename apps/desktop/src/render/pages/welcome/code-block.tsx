@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Tooltip, Message } from '@arco-design/web-react';
-import { IconCopy } from '@arco-design/web-react/icon';
+import { Button, Tooltip, message } from '@sue/design-web-react';
+import { IconCopy } from '@true-north/components-ui';
 import clipboard from '@/utils/clipboard';
 import styles from './style/code-block.module.less';
 
@@ -20,7 +20,7 @@ export default function CodeBlock(props: CodeBlockProps) {
           icon={<IconCopy />}
           onClick={() => {
             clipboard(code);
-            Message.success('复制成功');
+            message.success('复制成功');
           }}
         />
       </Tooltip>

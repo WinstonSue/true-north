@@ -1,31 +1,20 @@
-import {
-  Form,
-  Input,
-  Checkbox,
-  Link,
-  Button,
-  Space,
-} from '@arco-design/web-react';
-import { FormInstance } from '@arco-design/web-react/es/Form';
-import { IconLock, IconUser } from '@arco-design/web-react/icon';
+import { Form, Input, Checkbox, Button, Space } from '@sue/design-web-react';
+import { FormInstance } from '@sue/design-web-react';
+import { IconLock, IconUser, Link } from '@true-north/components-ui';
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import useStorage from '@/utils/useStorage';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
 import styles from './style/index.module.less';
-
 export default function LoginForm() {
   const formRef = useRef<FormInstance>();
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [loginParams, setLoginParams, removeLoginParams] =
     useStorage('loginParams');
-
   const t = useLocale(locale);
-
   const [rememberPassword, setRememberPassword] = useState(!!loginParams);
-
   function afterLoginSuccess(params) {
     // 记住密码
     if (rememberPassword) {
@@ -38,7 +27,6 @@ export default function LoginForm() {
     // 跳转首页
     window.location.href = '/';
   }
-
   function login(params) {
     setErrorMessage('');
     setLoading(true);
@@ -56,13 +44,11 @@ export default function LoginForm() {
         setLoading(false);
       });
   }
-
   function onSubmitClick() {
     formRef.current.validate().then((values) => {
       login(values);
     });
   }
-
   // 读取 localStorage，设置初始值
   useEffect(() => {
     const rememberPassword = !!loginParams;
@@ -72,7 +58,6 @@ export default function LoginForm() {
       formRef.current.setFieldsValue(parseParams);
     }
   }, [loginParams]);
-
   return (
     <div className={styles['login-form-wrapper']}>
       <div className={styles['login-form-title']}>{t['login.form.title']}</div>

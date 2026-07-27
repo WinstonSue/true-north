@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chart, Tooltip, Interval, Axis, Coordinate, G2 } from 'bizcharts';
-import { Spin } from '@arco-design/web-react';
+import { Spin } from '@sue/design-web-react';
 import CustomTooltip from './customer-tooltip';
 
 function HorizontalInterval({
@@ -40,7 +40,7 @@ function HorizontalInterval({
   });
 
   return (
-    <Spin loading={loading} style={{ width: '100%' }}>
+    <Spin spinning={loading} style={{ width: '100%' }}>
       <Chart
         height={height || 370}
         padding="auto"

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Dropdown, Menu } from '@arco-design/web-react';
+import { Dropdown, Menu } from '@sue/design-web-react';
 import {
   IconMore,
   IconEdit,
   IconDelete,
   IconPlus,
   IconCopy,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import styles from './style.module.less';
 
 interface NodeMenuProps {

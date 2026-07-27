@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Tree, Input, Button, Spin, Empty } from '@arco-design/web-react';
+import { Tree, Input, Button, Spin, Empty } from '@sue/design-web-react';
 import {
   IconSearch,
   IconPlus,
   IconEdit,
   IconDelete,
   IconCopy,
-} from '@arco-design/web-react/icon';
+} from '@true-north/components-ui';
 import { GoalVo } from '@true-north/vo';
 import { GoalStatus } from '@true-north/enum';
 import { useGoalContext } from '../context';
 import { useGoalDetail } from '../../components/GoalDetail';
 import { GoalService } from '@true-north/web-service';
-import { Modal, Message, Tag, Divider } from '@arco-design/web-react';
+import { Modal, message, Tag, Divider } from '@sue/design-web-react';
 import styles from './style.module.less';
 import clsx from 'clsx';
 import {
   FlexibleContainer,
   TextEllipsis,
   ContextMenu,
-} from 'francis-component-react';
+} from '@true-north/components-ui';
 
 const { Fixed, Shrink } = FlexibleContainer;
 
@@ -284,14 +284,14 @@ const GoalTreePanel: React.FC = ({}) => {
       onOk: async () => {
         try {
           await GoalService.delete(goal.id);
-          Message.success('删除成功');
+          message.success('删除成功');
           refreshData();
           // 如果删除的是当前选中的目标，清空选择
           if (selectedGoalId === goal.id) {
             setSelectedGoalId(null);
           }
         } catch (error) {
-          Message.error('删除失败');
+          message.error('删除失败');
         }
       },
     });
@@ -310,7 +310,7 @@ const GoalTreePanel: React.FC = ({}) => {
   };
 
   return (
-    <Spin loading={loading} className={clsx('w-full')}>
+    <Spin spinning={loading} className={clsx('w-full')}>
       {treeData.length > 0 ? (
         <Tree
           treeData={treeData}
@@ -322,10 +322,10 @@ const GoalTreePanel: React.FC = ({}) => {
           blockNode
           className={clsx(
             'w-full',
-            '[&_.arco-tree-node]:w-full',
-            '[&_.arco-tree-node-title]:w-full',
-            '[&_.arco-tree-node-title-text]:w-full',
-            '[&_.arco-tree-node-title-text]:block',
+            '[&_.sue-tree-treenode]:w-full',
+            '[&_.sue-tree-node-content-wrapper]:w-full',
+            '[&_.sue-tree-title]:w-full',
+            '[&_.sue-tree-title]:block',
           )}
         />
       ) : (

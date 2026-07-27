@@ -1,16 +1,7 @@
 import React, { useState, useRef } from 'react';
-import {
-  Typography,
-  Card,
-  Form,
-  Select,
-  Input,
-  Grid,
-  Space,
-  Button,
-  Message,
-} from '@arco-design/web-react';
-import { FormInstance } from '@arco-design/web-react/es/Form';
+import { Card, Form, Select, Input, Space, Button, message } from '@sue/design-web-react';
+import { Typography, Grid } from '@true-north/components-ui';
+import { FormInstance } from '@sue/design-web-react';
 import axios from 'axios';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';
@@ -29,7 +20,7 @@ function GroupForm() {
         data,
       })
       .then(() => {
-        Message.success(t['groupForm.submitSuccess']);
+        message.success(t['groupForm.submitSuccess']);
       })
       .finally(() => {
         setLoading(false);

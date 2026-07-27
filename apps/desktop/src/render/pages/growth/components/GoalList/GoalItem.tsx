@@ -1,7 +1,8 @@
 'use client';
 
-import { Typography, Popover, Button, Card } from '@arco-design/web-react';
-import { FlexibleContainer } from 'francis-component-react';
+import { Popover, Button, Card } from '@sue/design-web-react';
+import { Typography } from '@true-north/components-ui';
+import { FlexibleContainer } from '@true-north/components-ui';
 import IconSelector from '../IconSelector';
 import { SiteIcon } from '@true-north/components-ui';
 import { GoalService } from '@true-north/web-service';
