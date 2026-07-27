@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, DatePicker, InputNumber, Button, Space, message, Divider } from '@sue/design-web-react';
 
-import { HabitController } from '@true-north/api';
+import { HabitController } from '@true-north/web-service';
 import { CreateHabitVo, GoalVo } from '@true-north/vo';
 import { Difficulty } from '@true-north/enum';
 import { HABIT_DIFFICULTY_OPTIONS } from '../constants';

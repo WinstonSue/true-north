@@ -1,4 +1,4 @@
-import { request } from '@true-north/share-request';
+import { request } from '../request';
 import { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@true-north/vo';
 
 export default class GoalController {

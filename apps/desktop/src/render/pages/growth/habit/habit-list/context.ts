@@ -1,7 +1,7 @@
 import { createInjectState } from '@/utils/createInjectState';
 import React, { useState, useEffect, useCallback, ReactNode } from 'react';
 import { Card, Button, Space, Empty, Spin, message, Modal, Tag, Progress, Table } from '@sue/design-web-react';
-import { HabitController, GoalController } from '@true-north/api';
+import { HabitController, GoalController } from '@true-north/web-service';
 import {
   HabitWithoutRelationsVo,
   HabitPageFilterVo,

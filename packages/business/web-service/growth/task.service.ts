@@ -1,4 +1,4 @@
-import { TaskController } from '@true-north/api';
+import TaskController from '../controller/task';
 import type { Task as TaskVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';

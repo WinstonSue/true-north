@@ -23,7 +23,7 @@
 ## 请求链路
 
 ```
-render（web-service → api → share-request）
+render（web-service Service + Controller → request 适配层）
     ↓  VO 入参 / REST path
 preload（invoke REST）
     ↓

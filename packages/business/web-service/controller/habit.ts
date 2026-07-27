@@ -1,5 +1,5 @@
 import { Habit as HabitVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
-import { request } from '@true-north/share-request';
+import { request } from '../request';
 
 export default class HabitController {
   static async create(createHabitVo: HabitVO.CreateHabitVo) {

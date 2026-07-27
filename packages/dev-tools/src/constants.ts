@@ -12,7 +12,7 @@ export const ROOT = path.resolve(__dirname, '../../..');
 export const CONTROLLER_SOURCE_PATH = path.join(ROOT, 'apps/desktop/src/service/growth');
 /** @deprecated Proxy 透传层已合并进 route-controller，不再作为同步目标 */
 export const CONTROLLER_PROXY_TARGET_PATH = path.join(ROOT, 'apps/desktop/src/service/growth');
-export const CONTROLLER_API_TARGET_PATH = path.join(ROOT, 'packages/business/api/controller');
+export const CONTROLLER_API_TARGET_PATH = path.join(ROOT, 'packages/business/web-service/controller');
 export const CONTROLLER_WEB_SERVICE_TARGET_PATH = path.join(ROOT, 'packages/business/web-service');
 
 export const DTO_SOURCE_PATH = path.join(ROOT, 'apps/desktop/src/service/growth');

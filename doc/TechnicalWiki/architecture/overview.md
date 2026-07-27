@@ -22,7 +22,7 @@ tech_stack:
   shared:
     vo: '@true-north/vo'
     enum: '@true-north/enum'
-    api: 'packages/business/api'
+    web_service: 'packages/business/web-service（含 controller）'
 ```
 
 ## 分层总览

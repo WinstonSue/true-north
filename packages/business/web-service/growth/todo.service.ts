@@ -1,4 +1,4 @@
-import { TodoController } from '@true-north/api';
+import TodoController from '../controller/todo';
 import type { Todo as TodoVO } from '@true-north/vo';
 import { TodoRelatedType } from '@true-north/enum';
 import { Message } from '../message';

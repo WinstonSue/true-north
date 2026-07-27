@@ -1,4 +1,4 @@
-import { GoalController } from '@true-north/api';
+import GoalController from '../controller/goal';
 import type { Goal as GoalVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';

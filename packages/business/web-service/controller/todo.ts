@@ -1,4 +1,4 @@
-import { request } from '@true-north/share-request';
+import { request } from '../request';
 import { Todo as TodoVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { TodoRelatedType } from '@true-north/enum';
 

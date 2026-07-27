@@ -5,7 +5,7 @@ import { extractClassNameFromPath } from '../utils';
 
 /**
  * 查找所有 API 控制器对
- * SSOT: apps/desktop/.../*.route-controller.ts → packages/business/api/controller/*.ts
+ * SSOT: apps/desktop/.../*.route-controller.ts → packages/business/web-service/controller/*.ts
  */
 export function findAllControllerPairs(): Array<{ sourcePath: string; targetPath: string; className: string }> {
   const pairs: Array<{ sourcePath: string; targetPath: string; className: string }> = [];

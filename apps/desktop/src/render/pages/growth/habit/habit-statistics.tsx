@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Select, DatePicker, Space, Spin, message, Empty, Row, Col } from '@sue/design-web-react';
 
-import { HabitController } from '@true-north/api';
+import { HabitController } from '@true-north/web-service';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
 import { HabitStatus } from '@true-north/enum';

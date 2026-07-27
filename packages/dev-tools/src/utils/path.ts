@@ -48,5 +48,5 @@ export function getApiControllerPathFromServer(sourceControllerPath: string): st
 
   const fileName = parts[parts.length - 1].replace('.route-controller.ts', '.ts').replace('.controller.ts', '.ts');
 
-  return path.join(ROOT, 'packages/business/api/controller', fileName);
+  return path.join(ROOT, 'packages/business/web-service/controller', fileName);
 }

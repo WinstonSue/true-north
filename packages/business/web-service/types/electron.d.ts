@@ -1,6 +1,6 @@
 /**
  * Electron API 类型声明
- * 集中管理所有Electron相关的类型定义
+ * 集中管理所有 Electron 相关的类型定义
  */
 
 export interface ElectronAPI {
@@ -12,9 +12,9 @@ export interface ElectronAPI {
   // 文件操作
   readFile?: (filePath: string) => Promise<{ success: boolean; message: string }>;
 
-  // 事件监听
-  on?: (channel: string, callback: (data: any) => void) => boolean;
-  removeListener?: (channel: string) => boolean;
+  // 事件监听（与 preload 实现一致）
+  on?: (channel: string, listener: (...args: any[]) => void) => void;
+  removeListener?: (channel: string, listener: (...args: any[]) => void) => void;
 
   // 数据库操作
   get: <T>(path: string, params?: any) => Promise<{ data: T; code: number; message: string }>;
@@ -23,9 +23,11 @@ export interface ElectronAPI {
   remove: <T>(path: string, params?: any) => Promise<{ data: T; code: number; message: string }>;
 }
 
-// 全局Window类型扩展
+// 全局 Window 类型扩展
 declare global {
   interface Window {
     electronAPI: ElectronAPI;
   }
 }
+
+export {};

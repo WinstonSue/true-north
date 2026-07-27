@@ -1,4 +1,4 @@
-import { request } from '@true-north/share-request';
+import { request } from '../request';
 import { TrackTime as TrackTimeVO, ResponseListVo } from '@true-north/vo';
 
 export default class TrackTimeController {

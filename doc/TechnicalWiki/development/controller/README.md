@@ -17,7 +17,7 @@ render
 ## 位置与命名
 
 - 路径：`apps/desktop/src/service/growth/{module}/{module}.route-controller.ts`
-- 装饰器：`@Controller`、`@Get`、`@Post` 等（`packages/business/api`）
+- 装饰器：`@Controller`、`@Get`、`@Post` 等（`packages/business/web-service/controller`）
 - 参考：`apps/desktop/src/service/growth/todo/todo.route-controller.ts`
 
 ## 职责

@@ -7,11 +7,10 @@ true-north/
 ├── apps/
 │   └── desktop/              # Electron 应用（唯一 app）
 ├── packages/
-│   ├── business/             # vo、enum、api、web-service
+│   ├── business/             # vo、enum、web-service（含 request / electron-types）
 │   ├── common/               # 通用工具
 │   ├── common-web/           # Web 通用能力
 │   ├── components/           # 可复用组件
-│   ├── share/ share-web/     # 共享资源
 │   └── dev-tools/            # 开发工具
 ├── doc/
 │   ├── ProductWiki/          # 产品 Wiki
@@ -59,8 +58,7 @@ service/growth/{module}/
 | --- | --- |
 | `vo` | 前后端/IPC 边界类型（`@true-north/vo`） |
 | `enum` | 业务枚举（`@true-north/enum`） |
-| `api` | 渲染进程静态 HTTP 客户端（路径对齐 route-controller） |
-| `web-service` | 渲染层调用封装（toast / mapping） |
+| `web-service` | 渲染层调用封装（Service / Mapping / toast）+ HTTP Controller（路径对齐 route-controller） |
 
 主进程装饰器在 `apps/desktop/src/service/decorators`（`@business/decorators`），桥接 `electron-ipc-restful`。
 

@@ -99,7 +99,7 @@ export function initIpcRouter(): void {
 
 SSOT 为 `*.route-controller.ts`：
 
-- → `@true-north/api`（`packages/business/api/controller`）
+- → `@true-north/web-service`（`packages/business/web-service/controller`）
 - → `@true-north/web-service`（`packages/business/web-service/growth`）
 
 Desktop Proxy（`*.controller.ts`）同步已下线。
