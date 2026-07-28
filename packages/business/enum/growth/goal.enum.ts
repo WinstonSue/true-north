@@ -5,7 +5,7 @@ export enum GoalType {
 
 export enum GoalStatus {
   TODO = 'todo',
-  IN_PROGRESS = 'in_progress',
+  DOING = 'doing',
   DONE = 'done',
   ABANDONED = 'abandoned',
 }

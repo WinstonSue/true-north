@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Radio, Upload, Message } from '@arco-design/web-react';
-import { IconUpload } from '@arco-design/web-react/icon';
+import { Modal, Radio, Upload, message, UploadOutlined } from '@sue/design-web-react';
+
 import { Graph } from '@antv/x6';
 import { useMindMapContext } from '../context';
 import { exportToPNG, exportToSVG, exportToJSON, importJSONFromFile } from '../utils/export';
@@ -30,7 +30,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ visible, onClose }) => {
 
   const handleExport = () => {
     if (!graph) {
-      Message.error('无法导出，图形未初始化');
+      message.error('无法导出，图形未初始化');
       return;
     }
 
@@ -52,7 +52,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ visible, onClose }) => {
           link.click();
           URL.revokeObjectURL(url);
         } else {
-          Message.error('无数据可导出');
+          message.error('无数据可导出');
         }
         break;
     }
@@ -133,7 +133,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ visible, onClose, onImport })
       }
     } catch (error) {
       console.error('导入文件失败:', error);
-      Message.error('导入失败，请确保文件格式正确');
+      message.error('导入失败，请确保文件格式正确');
     }
   };
 
@@ -144,7 +144,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ visible, onClose, onImport })
           className="border-2 border-dashed border-gray-300 rounded-lg p-8 cursor-pointer hover:bg-gray-50 transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
-          <IconUpload className="text-4xl text-gray-400 mb-2" />
+          <UploadOutlined className="text-4xl text-gray-400 mb-2" />
           <div className="text-gray-600">
             点击或拖拽文件到此处上传
             <div className="text-xs text-gray-500 mt-1">仅支持 JSON 格式文件</div>

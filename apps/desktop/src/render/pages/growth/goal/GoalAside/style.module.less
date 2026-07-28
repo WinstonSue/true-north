@@ -1,0 +1,65 @@
+.tree-node {
+  width: 100%;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  transition: background-color 0.2s;
+
+  &:hover {
+    .node-action {
+      opacity: 1;
+    }
+  }
+
+  .node-title {
+    flex: 1;
+    font-size: 14px;
+    color: #1d2129;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .node-action {
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-left: 8px;
+    color: #86909c;
+
+    &:hover {
+      color: #165dff;
+      background-color: #e8f3ff;
+    }
+  }
+}
+
+// 全局样式覆盖
+:global {
+  .sue-tree-node-selected {
+    .goal-tree-panel .tree-node {
+      background-color: #e8f3ff !important;
+
+      .node-title {
+        color: #165dff !important;
+        font-weight: 500 !important;
+      }
+    }
+  }
+
+  .sue-tree-node:hover {
+    background-color: transparent !important;
+  }
+  .sue-tree-node-switcher-icon {
+    font-size: 16px !important;
+    .sue-tree-node-minus-icon,
+    .sue-tree-node-plus-icon {
+      width: 16px !important;
+      height: 16px !important;
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { HabitController } from '@true-north/api';
+import HabitController from '../controller/habit';
 import type { Habit as HabitVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';

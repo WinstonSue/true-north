@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+@config '../../config/tailwind.config.ts';
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    /* Only set default border-color; do not zero border-width (avoids
+       clobbering Sue/design-web component borders after sue.css). */
+    border-color: var(--color-border-1);
+  }
+
+  svg {
+    display: inline;
+  }
+}

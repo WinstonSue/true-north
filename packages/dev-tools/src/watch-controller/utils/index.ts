@@ -3,7 +3,9 @@
  */
 export function extractClassNameFromPath(relativePath: string): string {
   const fileName = relativePath.split('/').pop() || '';
-  const baseName = fileName.replace(/.controller\.(ts|js)$/, '');
+  const baseName = fileName
+    .replace(/\.route-controller\.(ts|js)$/, '')
+    .replace(/\.controller\.(ts|js)$/, '');
   return (
     baseName
       .split(/[-_]/)

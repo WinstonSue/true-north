@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Input, Button } from '@arco-design/web-react';
+import { Modal, Input, Button } from '@sue/design-web-react';
 import { useMindMapContext } from '../context';
 
 interface NodeEditorProps {

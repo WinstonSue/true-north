@@ -1,20 +1,7 @@
+import { ExportOutlined, FullscreenOutlined, ImportOutlined, RedoOutlined, ShrinkOutlined, SnippetsOutlined } from '@ant-design/icons';
 import React, { useState } from 'react';
-import { Button, Tooltip, Space, Switch } from '@arco-design/web-react';
-import {
-  IconPlus,
-  IconZoomIn,
-  IconZoomOut,
-  IconFullscreen,
-  IconExport,
-  IconImport,
-  IconUndo,
-  IconRedo,
-  IconDragDot,
-  IconCopy,
-  IconPaste,
-  IconDelete,
-  IconShrink,
-} from '@arco-design/web-react/icon';
+import { Button, Tooltip, Space, Switch, CopyOutlined, DeleteOutlined, HolderOutlined, PlusOutlined, UndoOutlined, ZoomInOutlined, ZoomOutOutlined } from '@sue/design-web-react';
+
 import { useMindMapContext } from '../context';
 import { graphEventEmitter } from '../graph/eventEmitter';
 
@@ -71,26 +58,7 @@ const MindMapToolbar: React.FC<MindMapToolbarProps> = ({
   className,
 }) => {
   // 业务数据和操作
-  const { selectedNodeId, addChild, addSibling, deleteNode, minimapVisible, setMinimapVisible } =
-    useMindMapContext();
-
-  // 添加子节点
-  const handleAddChild = () => {
-    if (!selectedNodeId) return;
-    addChild(selectedNodeId, '新节点');
-  };
-
-  // 添加兄弟节点
-  const handleAddSibling = () => {
-    if (!selectedNodeId) return;
-    addSibling(selectedNodeId, '新节点');
-  };
-
-  // 删除节点
-  const handleDeleteNode = () => {
-    if (!selectedNodeId) return;
-    deleteNode(selectedNodeId);
-  };
+  const { selectedNodeId, minimapVisible, setMinimapVisible } = useMindMapContext();
 
   // 全屏
   const handleFullscreen = () => {
@@ -142,19 +110,19 @@ const MindMapToolbar: React.FC<MindMapToolbarProps> = ({
   }) => (
     <>
       <ToolButton
-        icon={<IconZoomOut />}
+        icon={<ZoomOutOutlined />}
         content="缩小 (Ctrl -)"
         onClick={() => graphEventEmitter.zoomOut()}
         size={size}
       />
       <ToolButton
-        icon={<IconZoomIn />}
+        icon={<ZoomInOutlined />}
         content="放大 (Ctrl +)"
         onClick={() => graphEventEmitter.zoomIn()}
         size={size}
       />
       <ToolButton
-        icon={<IconDragDot />}
+        icon={<HolderOutlined />}
         content="居中内容"
         onClick={() => graphEventEmitter.centerContent()}
         size={size}
@@ -180,52 +148,24 @@ const MindMapToolbar: React.FC<MindMapToolbarProps> = ({
     );
   };
 
-  // 节点操作按钮组
-  const NodeControls = () => (
-    <>
-      <ToolButton
-        icon={<IconPlus />}
-        content="添加子节点 (Tab)"
-        onClick={handleAddChild}
-        disabled={!selectedNodeId}
-      />
-      <ToolButton
-        icon={<IconPlus />}
-        content="添加兄弟节点 (Enter)"
-        onClick={handleAddSibling}
-        disabled={!selectedNodeId}
-      />
-      <ToolButton
-        icon={<IconDelete />}
-        content="删除节点 (Delete)"
-        onClick={handleDeleteNode}
-        disabled={!selectedNodeId}
-        status="danger"
-      />
-    </>
-  );
-
   // 编辑操作按钮组
   const EditControls = () => (
     <>
-      <ToolButton icon={<IconUndo />} content="撤销 (Ctrl+Z)" onClick={handleUndo} />
-      <ToolButton icon={<IconRedo />} content="重做 (Ctrl+Y)" onClick={handleRedo} />
+      <ToolButton icon={<UndoOutlined />} content="撤销 (Ctrl+Z)" onClick={handleUndo} />
+      <ToolButton icon={<RedoOutlined />} content="重做 (Ctrl+Y)" onClick={handleRedo} />
       <ToolButton
-        icon={<IconCopy />}
+        icon={<CopyOutlined />}
         content="复制 (Ctrl+C)"
         onClick={handleCopy}
         disabled={!selectedNodeId}
       />
-      <ToolButton icon={<IconPaste />} content="粘贴 (Ctrl+V)" onClick={handlePaste} />
+      <ToolButton icon={<SnippetsOutlined />} content="粘贴 (Ctrl+V)" onClick={handlePaste} />
     </>
   );
 
   // 完整模式渲染
   return (
     <div className={`mind-map-toolbar p-2 bg-white border-b border-gray-200 ${className || ''}`}>
-      {/* 操作节点 */}
-      <NodeControls />
-
       {/* 编辑操作 */}
       <EditControls />
 
@@ -234,9 +174,9 @@ const MindMapToolbar: React.FC<MindMapToolbarProps> = ({
 
       {/* 其他功能 */}
       <MinimapControl />
-      <ToolButton icon={<IconFullscreen />} content="全屏" onClick={handleFullscreen} />
-      <ToolButton icon={<IconExport />} content="导出" onClick={handleExport} />
-      {onImport && <ToolButton icon={<IconImport />} content="导入" onClick={onImport} />}
+      <ToolButton icon={<FullscreenOutlined />} content="全屏" onClick={handleFullscreen} />
+      <ToolButton icon={<ExportOutlined />} content="导出" onClick={handleExport} />
+      {onImport && <ToolButton icon={<ImportOutlined />} content="导入" onClick={onImport} />}
     </div>
   );
 };

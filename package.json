@@ -11,17 +11,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --filter=true-north-server & turbo run dev --filter=true-north-web",
+    "dev": "turbo run dev --filter=true-north-desktop",
     "build": "turbo run build",
     "build:desktop": "turbo run build --filter=true-north-desktop",
     "clean": "turbo run clean",
     "predeploy": "npm run build",
     "pre-commit": "turbo run pre-commit",
-    "dev:server": "turbo run dev --filter=true-north-server",
-    "dev:web": "turbo run dev --filter=true-north-web",
     "dev:desktop": "turbo run dev --filter=true-north-desktop",
-    "deploy:server": "turbo run deploy --filter=true-north-server",
-    "deploy:web": "turbo run deploy --filter=true-north-web"
+    "dev:prototype": "turbo run dev --filter=true-north-prototype"
   },
   "devDependencies": {
     "@true-north/vo": "workspace:*",
@@ -45,7 +42,13 @@
   "pnpm": {
     "overrides": {
       "@types/node": "22.13.0",
-      "vite": "5.4.15"
+      "vite": "5.4.15",
+      "@sue/design-web-react>dayjs": "^1.11.13",
+      "@sue/design-web-react>@ant-design/colors": "^8.0.1",
+      "@sue/design-web-react>@ant-design/fast-color": "^3.0.1"
+    },
+    "patchedDependencies": {
+      "fe-selector@0.1.0": "patches/fe-selector@0.1.0.patch"
     }
   }
 }

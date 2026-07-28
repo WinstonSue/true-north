@@ -1,0 +1,198 @@
+{
+  "name": "@sue/design-web-react",
+  "type": "module",
+  "version": "0.0.3-beta.2",
+  "description": "Ylib Design React Component Library",
+  "license": "UNLICENSED",
+  "sideEffects": [
+    "./dist/sue.css",
+    "./dist/design-web-react-with-locales.js",
+    "./dist/design-web-react-with-locales.esm.js",
+    "./dist/design-web-react.esm.js",
+    "./dist/design-web-react.js"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./dist/*": {
+      "types": [
+        "./dist/*.d.ts",
+        "./dist/*/index.d.ts"
+      ],
+      "import": [
+        "./dist/*.js",
+        "./dist/*/index.js"
+      ],
+      "default": [
+        "./dist/*.js",
+        "./dist/*/index.js"
+      ]
+    },
+    "./dist/locale/*": {
+      "types": "./dist/locale/*.d.ts",
+      "import": "./dist/locale/*.js",
+      "default": "./dist/locale/*.js"
+    },
+    "./locale/*": {
+      "types": "./dist/locale/*.d.ts",
+      "import": "./dist/locale/*.js",
+      "default": "./dist/locale/*.js"
+    },
+    "./config-provider": {
+      "types": "./dist/config-provider/index.d.ts",
+      "import": "./dist/config-provider/index.js",
+      "default": "./dist/config-provider/index.js"
+    },
+    "./theme/internal": {
+      "types": "./dist/theme/internal.d.ts",
+      "import": "./dist/theme/internal.js",
+      "default": "./dist/theme/internal.js"
+    },
+    "./dist/sue.css": "./dist/sue.css",
+    "./dist/design-web-react-with-locales.js": "./dist/design-web-react-with-locales.js",
+    "./dist/design-web-react-with-locales.esm.js": "./dist/design-web-react-with-locales.esm.js",
+    "./dist/design-web-react.esm.js": "./dist/design-web-react.esm.js",
+    "./dist/design-web-react.js": "./dist/design-web-react.js",
+    "./package.json": "./package.json",
+    "./date-picker/*": {
+      "types": [
+        "./dist/date-picker/*.d.ts",
+        "./dist/date-picker/*/index.d.ts"
+      ],
+      "import": [
+        "./dist/date-picker/*.js",
+        "./dist/date-picker/*/index.js"
+      ],
+      "default": [
+        "./dist/date-picker/*.js",
+        "./dist/date-picker/*/index.js"
+      ]
+    },
+    "./config-provider/context": {
+      "types": "./dist/config-provider/context.d.ts",
+      "import": "./dist/config-provider/context.js",
+      "default": "./dist/config-provider/context.js"
+    },
+    "./theme/interface/components": {
+      "types": "./dist/theme/interface/components.d.ts",
+      "import": "./dist/theme/interface/components.js",
+      "default": "./dist/theme/interface/components.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "README.md",
+    "dist",
+    "global.d.ts",
+    "package.json"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "build": "pnpm run build:esm && pnpm run build:vite:parallel && pnpm run build:p",
+    "build:p": "pnpm run build:style",
+    "build:esm": "tsdown",
+    "build:with-locales": "run-p build:with-locales:esm build:with-locales:umd",
+    "build:with-locales:esm": "cross-env WITH_LOCALES_FORMAT=es vite build --config ./vite.with-locales.config.ts",
+    "build:with-locales:umd": "cross-env WITH_LOCALES_FORMAT=umd vite build --config ./vite.with-locales.config.ts",
+    "build:vite:parallel": "run-p build:umd build:full-esm build:with-locales",
+    "build:full-esm": "vite build --config ./vite.esm.config.ts",
+    "build:umd": "vite build",
+    "build:token-meta": "tsx ./scripts/token/generate-token-meta.ts",
+    "build:token-statistic": "cross-env NODE_ENV=production CSSINJS_STATISTIC=1 tsx ./scripts/token/collect-token-statistic.ts",
+    "build:token": "run-p build:token-meta build:token-statistic",
+    "build:style": "cross-env NODE_ENV=production tsx ./scripts/style/build-style.ts",
+    "prepublishOnly": "pnpm build",
+    "bump": "bumpp --commit \"chore(release): @sue/design-web-react %s\" --push --tag \"@sue/design-web-react@%s\"",
+    "parity:docs-manifest": "tsx ./scripts/parity/generate-docs-vue-manifest.ts",
+    "build:llm": "run-p build:llm-text build:llm-semantic",
+    "build:llm-text": "tsx ./scripts/llm/generate-llms.ts",
+    "build:llm-semantic": "tsx ./scripts/llm/generate-llms-semantic.ts"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "@ant-design/colors": "^8.0.1",
+    "@ant-design/cssinjs": "^2.1.2",
+    "@ant-design/cssinjs-utils": "^2.1.2",
+    "@ant-design/fast-color": "^3.0.1",
+    "@ant-design/icons": "^6.3.2",
+    "@ant-design/react-slick": "~2.0.0",
+    "@babel/runtime": "^7.29.2",
+    "@rc-component/cascader": "~1.17.0",
+    "@rc-component/checkbox": "~2.0.0",
+    "@rc-component/collapse": "~1.2.0",
+    "@rc-component/color-picker": "~3.1.1",
+    "@rc-component/dialog": "~1.10.0",
+    "@rc-component/drawer": "~1.4.2",
+    "@rc-component/dropdown": "~1.0.3",
+    "@rc-component/form": "~1.8.5",
+    "@rc-component/image": "~1.9.0",
+    "@rc-component/input": "~1.3.1",
+    "@rc-component/input-number": "~1.6.2",
+    "@rc-component/mentions": "~1.10.0",
+    "@rc-component/menu": "~1.4.1",
+    "@rc-component/motion": "^1.3.3",
+    "@rc-component/mutate-observer": "^2.0.1",
+    "@rc-component/notification": "~2.0.7",
+    "@rc-component/pagination": "~1.4.0",
+    "@rc-component/picker": "~1.11.0",
+    "@rc-component/progress": "~1.0.2",
+    "@rc-component/qrcode": "~2.0.0",
+    "@rc-component/rate": "~1.0.1",
+    "@rc-component/resize-observer": "^1.1.2",
+    "@rc-component/segmented": "~1.3.0",
+    "@rc-component/select": "~1.8.2",
+    "@rc-component/slider": "~1.1.1",
+    "@rc-component/steps": "~1.2.2",
+    "@rc-component/switch": "~1.0.3",
+    "@rc-component/table": "~1.10.4",
+    "@rc-component/tabs": "~1.11.0",
+    "@rc-component/tooltip": "~1.4.0",
+    "@rc-component/tour": "~2.4.0",
+    "@rc-component/tree": "~1.3.2",
+    "@rc-component/tree-select": "~1.11.0",
+    "@rc-component/trigger": "^3.10.1",
+    "@rc-component/upload": "~1.1.1",
+    "@rc-component/util": "^1.12.0",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
+    "scroll-into-view-if-needed": "^3.1.0",
+    "throttle-debounce": "^5.0.2"
+  },
+  "devDependencies": {
+    "@ant-design/static-style-extract": "^1.0.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/throttle-debounce": "^5.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "bumpp": "^9.11.1",
+    "cross-env": "^7.0.3",
+    "csstype": "^3.2.3",
+    "identity-obj-proxy": "^3.0.0",
+    "jsdom": "^24.1.3",
+    "npm-run-all2": "^6.2.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tinyglobby": "^0.2.17",
+    "tsdown": "^0.15.5",
+    "tsx": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vite": "catalog:dev",
+    "vitest": "^1.6.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "not ie 11",
+    "not op_mini all"
+  ]
+}

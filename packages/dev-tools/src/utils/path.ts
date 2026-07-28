@@ -20,7 +20,7 @@ export function getDesktopControllerPathFromServer(sourceControllerPath: string)
  * 从来源代码 DTO 路径获取 VO 路径
  */
 export function getVoPathFromDto(dtoFilePath: string): string {
-  // 从 packages/business/server/src/growth/goal/dto/goal-model.dto.ts
+  // 从 apps/desktop/src/service/growth/goal/dto/goal-model.dto.ts
   // 转换为 packages/business/vo/growth/goal/goal-model.vo.ts
   const relativePath = path.relative(CONTROLLER_SOURCE_PATH, dtoFilePath);
   const parts = relativePath.split(path.sep);
@@ -42,13 +42,11 @@ export function getVoPathFromDto(dtoFilePath: string): string {
  * 从来源代码控制器路径获取 API 控制器路径
  */
 export function getApiControllerPathFromServer(sourceControllerPath: string): string {
-  // 从 packages/business/server/src/growth/task/task.controller.ts
-  // 转换为 packages/business/api/controller/task/task.ts
+  // 从 apps/desktop/src/service/growth/task/task.route-controller.ts
   const relativePath = path.relative(CONTROLLER_SOURCE_PATH, sourceControllerPath);
   const parts = relativePath.split(path.sep);
 
-  // 移除最后的 .controller.ts 并替换为 .ts
-  const fileName = parts[parts.length - 1].replace('.controller.ts', '.ts');
+  const fileName = parts[parts.length - 1].replace('.route-controller.ts', '.ts').replace('.controller.ts', '.ts');
 
-  return path.join(ROOT, 'packages/business/api/controller', fileName);
+  return path.join(ROOT, 'packages/business/web-service/controller', fileName);
 }

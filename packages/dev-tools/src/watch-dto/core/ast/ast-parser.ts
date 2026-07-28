@@ -3,13 +3,7 @@
  * 提供 TypeScript DTO 文件的 AST 解析功能
  */
 
-import {
-  Project,
-  PropertyDeclaration,
-  Decorator,
-  SyntaxKind,
-  PropertySignature,
-} from 'ts-morph';
+import { Project, PropertyDeclaration, Decorator, SyntaxKind, PropertySignature } from 'ts-morph';
 import {
   ASTClassInfo,
   ASTDecorator,
@@ -199,11 +193,9 @@ export class ASTParser {
     const fullText = extendsExpression.getText();
     const expression = extendsExpression.getExpression();
     const className = expression.getText();
-    
+
     const typeArgs = extendsExpression.getTypeArguments();
-    const typeArguments = typeArgs.length > 0 
-      ? typeArgs.map((arg: any) => arg.getText())
-      : undefined;
+    const typeArguments = typeArgs.length > 0 ? typeArgs.map((arg: any) => arg.getText()) : undefined;
 
     return {
       className,

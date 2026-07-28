@@ -23,7 +23,7 @@ export function findAllControllerPairs(): Array<{ sourcePath: string; targetPath
 
         if (stat.isDirectory()) {
           files.push(...findControllerFiles(fullPath, basePath));
-        } else if (item.endsWith('.controller.ts')) {
+        } else if (item.endsWith('.route-controller.ts')) {
           const relativePath = fullPath.replace(basePath, '').replace(/^\//, '');
           files.push(relativePath);
         }
@@ -36,7 +36,10 @@ export function findAllControllerPairs(): Array<{ sourcePath: string; targetPath
 
     for (const sourceFile of sourceFiles) {
       const sourcePath = join(CONTROLLER_SOURCE_PATH, sourceFile);
-      const targetPath = join(CONTROLLER_PROXY_TARGET_PATH, sourceFile);
+      const targetPath = join(
+        CONTROLLER_PROXY_TARGET_PATH,
+        sourceFile.replace('.route-controller.ts', '.controller.ts')
+      );
       const className = extractClassNameFromPath(sourceFile);
 
       pairs.push({

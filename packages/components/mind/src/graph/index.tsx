@@ -82,15 +82,15 @@ const InternalMindMapGraph: React.FC<MindMapGraphProps> = ({
       // 注册节点点击事件
       newGraph.on('node:click', ({ node }) => {
         const nodeId = node.id.toString();
-        
+
         // 清除所有节点的选中状态
         newGraph.getNodes().forEach(n => {
           n.setData({ ...n.getData(), isSelected: false });
         });
-        
+
         // 设置当前节点为选中状态
         node.setData({ ...node.getData(), isSelected: true });
-        
+
         setSelectedNodeId(nodeId);
 
         if (onNodeClick) {
@@ -104,7 +104,7 @@ const InternalMindMapGraph: React.FC<MindMapGraphProps> = ({
         newGraph.getNodes().forEach(n => {
           n.setData({ ...n.getData(), isSelected: false });
         });
-        
+
         setSelectedNodeId(null);
       });
 

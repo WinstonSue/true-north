@@ -1,6 +1,7 @@
+import { UnorderedListOutlined } from '@ant-design/icons';
 import React, { useState } from 'react';
-import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
-import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
+import { Card, Button, Space, message, Table, Tag, Alert, CheckCircleOutlined, ExclamationCircleOutlined, ReloadOutlined, SyncOutlined } from '@sue/design-web-react';
+
 import MethodDetailsModal from './MethodDetailsModal';
 import { ControllerSyncStatus } from '../../../types';
 
@@ -28,10 +29,10 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
       if (result.success) {
         setApiMethodDetails(result.data);
       } else {
-        Message.error(`API 控制器方法详情检查失败: ${result.error}`);
+        message.error(`API 控制器方法详情检查失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`API 控制器方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`API 控制器方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setApiMethodDetailsLoading(false);
     }
@@ -53,14 +54,14 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
       const result = await response.json();
 
       if (result.success) {
-        Message.success(result.message || `API 控制器 ${className} 同步完成`);
+        message.success(result.message || `API 控制器 ${className} 同步完成`);
         // 重新检查状态
         await checkApiMethodDetails();
       } else {
-        Message.error(`API 控制器同步失败: ${result.error}`);
+        message.error(`API 控制器同步失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`API 控制器同步失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`API 控制器同步失败: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -103,11 +104,11 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
           <Space direction="vertical" size="small">
             <div>
               {record.needsSync ? (
-                <Tag color="orange" icon={<IconExclamationCircle />}>
+                <Tag color="orange" icon={<ExclamationCircleOutlined />}>
                   需要同步
                 </Tag>
               ) : (
-                <Tag color="green" icon={<IconCheckCircle />}>
+                <Tag color="green" icon={<CheckCircleOutlined />}>
                   已同步
                 </Tag>
               )}
@@ -139,14 +140,14 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
         if (!record) return null;
         return (
           <Space>
-            <Button size="small" icon={<IconList />} onClick={() => showApiMethodDetails(record)}>
+            <Button size="small" icon={<UnorderedListOutlined />} onClick={() => showApiMethodDetails(record)}>
               查看详情
             </Button>
             {record.needsSync && (
               <Button
                 size="small"
                 type="primary"
-                icon={<IconSync />}
+                icon={<SyncOutlined />}
                 onClick={() => syncApiController(record.className)}
               >
                 同步
@@ -168,7 +169,7 @@ const ApiControllerTab: React.FC<ApiControllerTabProps> = ({ isActive = false })
             <span>API 控制器方法级别差异检查</span>
             <Button
               size="small"
-              icon={<IconRefresh />}
+              icon={<ReloadOutlined />}
               loading={apiMethodDetailsLoading}
               onClick={checkApiMethodDetails}
             >

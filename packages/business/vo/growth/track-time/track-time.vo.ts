@@ -1,6 +1,8 @@
 import { BaseEntityVo } from '../../common';
 
 export type TrackTimeWithoutRelationsVo = {
+  relatedType?: string;
+  relatedId?: string;
   startAt?: string;
   endAt?: string;
   duration?: number;

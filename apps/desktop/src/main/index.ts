@@ -10,7 +10,7 @@ import electron from 'electron';
 const { app, BrowserWindow, ipcMain, shell, dialog } = electron;
 
 // 导入数据库初始化功能
-import { initDB, setupDatabaseCleanup } from '../database/init';
+import { initDB, setupDatabaseCleanup } from '../service/db/init';
 import { initIpcRouter } from './ipc-handlers';
 
 // 是否为开发环境
@@ -88,7 +88,7 @@ function createWindow() {
 
   // 加载默认URL
   if (isDev) {
-    mainWindow.loadURL(DEFAULT_URL + '#/growth/habit/habit-list');
+    mainWindow.loadURL(DEFAULT_URL + '#/growth/task/task-calendar');
   } else {
     // 生产环境直接加载 index.html，路由由前端处理
     mainWindow.loadURL(DEFAULT_URL);

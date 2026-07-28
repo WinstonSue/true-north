@@ -1,6 +1,7 @@
+import { UnorderedListOutlined } from '@ant-design/icons';
 import React, { useState } from 'react';
-import { Card, Button, Space, Message, Table, Tag, Alert } from '@arco-design/web-react';
-import { IconSync, IconCheckCircle, IconExclamationCircle, IconRefresh, IconList } from '@arco-design/web-react/icon';
+import { Card, Button, Space, message, Table, Tag, Alert, CheckCircleOutlined, ExclamationCircleOutlined, ReloadOutlined, SyncOutlined } from '@sue/design-web-react';
+
 import MethodDetailsModal from './MethodDetailsModal';
 import { ControllerSyncStatus } from '../../../types';
 
@@ -28,10 +29,10 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
       if (result.success) {
         setWebServiceMethodDetails(result.data);
       } else {
-        Message.error(`Web Service 方法详情检查失败: ${result.error}`);
+        message.error(`Web Service 方法详情检查失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`Web Service 方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`Web Service 方法详情检查失败: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setWebServiceMethodDetailsLoading(false);
     }
@@ -53,14 +54,14 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
       const result = await response.json();
 
       if (result.success) {
-        Message.success(result.message || `Web Service ${className} 同步完成`);
+        message.success(result.message || `Web Service ${className} 同步完成`);
         // 重新检查状态
         await checkWebServiceMethodDetails();
       } else {
-        Message.error(`Web Service 同步失败: ${result.error}`);
+        message.error(`Web Service 同步失败: ${result.error}`);
       }
     } catch (error) {
-      Message.error(`Web Service 同步失败: ${error instanceof Error ? error.message : String(error)}`);
+      message.error(`Web Service 同步失败: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -102,11 +103,11 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
           <Space direction="vertical" size="small">
             <div>
               {record.needsSync ? (
-                <Tag color="orange" icon={<IconExclamationCircle />}>
+                <Tag color="orange" icon={<ExclamationCircleOutlined />}>
                   需要同步
                 </Tag>
               ) : (
-                <Tag color="green" icon={<IconCheckCircle />}>
+                <Tag color="green" icon={<CheckCircleOutlined />}>
                   已同步
                 </Tag>
               )}
@@ -138,14 +139,14 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
         if (!record) return null;
         return (
           <Space>
-            <Button size="small" icon={<IconList />} onClick={() => showWebServiceMethodDetails(record)}>
+            <Button size="small" icon={<UnorderedListOutlined />} onClick={() => showWebServiceMethodDetails(record)}>
               查看详情
             </Button>
             {record.needsSync && (
               <Button
                 size="small"
                 type="primary"
-                icon={<IconSync />}
+                icon={<SyncOutlined />}
                 onClick={() => syncWebServiceController(record.className)}
               >
                 同步
@@ -167,7 +168,7 @@ const WebServiceTab: React.FC<WebServiceTabProps> = ({ isActive = false }) => {
             <span>Web Service 方法级别差异检查</span>
             <Button
               size="small"
-              icon={<IconRefresh />}
+              icon={<ReloadOutlined />}
               loading={webServiceMethodDetailsLoading}
               onClick={checkWebServiceMethodDetails}
             >

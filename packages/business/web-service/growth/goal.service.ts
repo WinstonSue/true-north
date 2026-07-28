@@ -1,4 +1,4 @@
-import { GoalController } from '@true-north/api';
+import GoalController from '../controller/goal';
 import type { Goal as GoalVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
@@ -88,6 +88,15 @@ export default class GoalService {
   static async findRoots(): Promise<any> {
     try {
       const res = await GoalController.findRoots();
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  static async findChildren(parentId: string): Promise<any> {
+    try {
+      const res = await GoalController.findChildren(parentId);
       return res;
     } catch (error: unknown) {
       Message.error(error);

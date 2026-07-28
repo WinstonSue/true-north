@@ -1,11 +1,11 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
   root: 'web',
   build: {
-    outDir: '../dist'
+    outDir: '../dist',
   },
   server: {
     port: 3001,
@@ -13,8 +13,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:3002',
-        changeOrigin: true
-      }
-    }
-  }
-})
+        changeOrigin: true,
+      },
+    },
+  },
+});

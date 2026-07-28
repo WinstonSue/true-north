@@ -1,0 +1,241 @@
+import { Input, DatePicker, Switch, Spin, Select, Form, type FormRule, Row, Col } from '@sue/design-web-react';
+
+import { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
+import { useTaskDetailContext } from './context';
+import TrackTime from '../TrackTime';
+import { useComponentLoad } from '@/hooks/lifecycle';
+import GoalTreeSelector from '../GoalTreeSelector';
+import { useTaskFormConstraints } from './hooks';
+import { TaskService, GoalService } from '@true-north/web-service';
+import { IMPORTANCE_MAP } from '../../constants';
+
+const RangePicker = DatePicker.RangePicker;
+const TextArea = Input.TextArea;
+
+export default function TaskForm() {
+  const { loading, currentTask, taskList, taskFormData, setTaskFormData } =
+    useTaskDetailContext();
+
+  const [form] = Form.useForm();
+  const [parentTask, setParentTask] = useState(null);
+  const [parentGoal, setParentGoal] = useState(null);
+
+  // 判断是否为创建模式（没有 currentTask.id）
+  const isCreateMode = !currentTask?.id;
+
+  // 创建模式下，如果有父任务id或目标id，则不显示是否子任务开关
+  const shouldHideSubTaskSwitch =
+    isCreateMode && (taskFormData?.parentId || taskFormData?.goalId);
+
+  const { handleComponentLoaded } = useComponentLoad(async () => {
+    if (currentTask?.id) {
+      form.setFieldsValue(taskFormData);
+      handleComponentLoaded();
+    }
+  });
+
+  // 获取父任务信息
+  useEffect(() => {
+    const fetchParentTask = async () => {
+      if (taskFormData?.parentId) {
+        try {
+          const parent = await TaskService.find(taskFormData.parentId);
+          setParentTask(parent);
+        } catch (error) {
+          console.error('获取父任务信息失败:', error);
+          setParentTask(null);
+        }
+      } else {
+        setParentTask(null);
+      }
+    };
+
+    fetchParentTask();
+  }, [taskFormData?.parentId]);
+
+  // 获取父目标信息
+  useEffect(() => {
+    const fetchParentGoal = async () => {
+      if (taskFormData?.goalId) {
+        try {
+          const goal = await GoalService.find(taskFormData.goalId);
+          setParentGoal(goal);
+        } catch (error) {
+          console.error('获取父目标信息失败:', error);
+          setParentGoal(null);
+        }
+      } else {
+        setParentGoal(null);
+      }
+    };
+
+    fetchParentGoal();
+  }, [taskFormData?.goalId]);
+
+  const { allowedDateRange, allowedImportance, updateByConstraints } =
+    useTaskFormConstraints(parentTask, parentGoal);
+
+  // 当父任务或父目标变化时，检查并调整当前值
+  useEffect(() => {
+    if (parentTask || parentGoal) {
+      const updates = updateByConstraints(taskFormData);
+      if (Object.keys(updates).length > 0) {
+        form.setFieldsValue(updates);
+        setTaskFormData((prev) => ({ ...prev, ...updates }));
+      }
+    }
+  }, [
+    parentTask,
+    parentGoal,
+    taskFormData,
+    form,
+    setTaskFormData,
+    updateByConstraints,
+  ]);
+
+  if (loading) {
+    return <Spin dot />;
+  }
+  if (!taskFormData) return null;
+  return (
+    <Form
+      form={form}
+      initialValues={taskFormData}
+      onValuesChange={(changedValues) => {
+        setTaskFormData((prev) => ({ ...prev, ...changedValues }));
+      }}
+    >
+      <Row gutter={[16, 16]} className="p-2">
+        <Item
+          span={24}
+          label="任务名称"
+          name="name"
+          rules={[{ required: true }]}
+        >
+          <Input placeholder="准备做什么?" />
+        </Item>
+        {/* 创建模式下如果有父任务id或目标id则不显示是否子任务开关 */}
+        {!shouldHideSubTaskSwitch && (
+          <Item span={24} label="是否子任务" name="isSubTask">
+            <Switch checked={taskFormData.isSubTask} />
+          </Item>
+        )}
+        {taskFormData.isSubTask ? (
+          <Item span={24} label="父任务" name="parentId">
+            <Select
+              options={taskList.map((task) => ({
+                label: task.name,
+                value: task.id,
+              }))}
+            />
+          </Item>
+        ) : (
+          <Item span={24} label="目标" name="goalId">
+            <GoalTreeSelector
+              placeholder="请选择父级目标"
+              excludeId={currentTask?.goalId}
+            />
+          </Item>
+        )}
+        <Item span={24} label="日期" name="planTimeRange">
+          <RangePicker
+            className="w-full rounded-md"
+            allowClear
+            showTime
+            disabledDate={(current) => {
+              if (!allowedDateRange) return false;
+              const [minDate, maxDate] = allowedDateRange;
+              return (
+                current.isBefore(dayjs(minDate)) ||
+                current.isAfter(dayjs(maxDate))
+              );
+            }}
+            placeholder={
+              allowedDateRange
+                ? [
+                    `最早: ${allowedDateRange[0]}`,
+                    `最晚: ${allowedDateRange[1]}`,
+                  ]
+                : ['开始时间', '结束时间']
+            }
+          />
+          {(parentTask || parentGoal) && allowedDateRange && (
+            <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
+              <span>
+                {parentTask ? '父任务' : '目标'}时间范围限制：
+                {allowedDateRange[0]} ~ {allowedDateRange[1]}
+              </span>
+            </div>
+          )}
+        </Item>
+        <Item span={12} label="预估时间" name="estimateTime">
+          <Input />
+        </Item>
+        <Item span={12} label="跟踪时间" name="trackTimeList">
+          <TrackTime
+            trackTimeList={taskFormData.trackTimeList || []}
+            onChange={(trackTimeList) => {
+              setTaskFormData((prev) => ({ ...prev, trackTimeList }));
+              form.setFieldValue('trackTimeList', trackTimeList);
+            }}
+            taskName={taskFormData.name}
+          />
+        </Item>
+        <Item span={24} label="重要程度" name="importance">
+          <Select
+            placeholder="请选择重要程度"
+            options={[...IMPORTANCE_MAP.entries()].map(([key, value]) => ({
+              label: value.label,
+              value: key,
+              disabled: !allowedImportance.includes(key),
+            }))}
+          />
+          {(parentTask || parentGoal) &&
+            allowedImportance.length < [...IMPORTANCE_MAP.keys()].length && (
+              <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
+                <span>⚠️</span>
+                <span>
+                  重要程度不能高于{parentTask ? '父任务' : '目标'}：
+                  {
+                    IMPORTANCE_MAP.get((parentTask || parentGoal).importance)
+                      ?.label
+                  }
+                </span>
+              </div>
+            )}
+        </Item>
+        <Item span={24} label="描述" name="description">
+          <TextArea autoSize={false} placeholder="描述一下" />
+        </Item>
+      </Row>
+    </Form>
+  );
+}
+
+function Item(props: {
+  span: number;
+  label: string;
+  children: React.ReactNode;
+  name: string;
+  rules?: FormRule[];
+}) {
+  const { size } = useTaskDetailContext();
+  const labelCol =
+    size === 'small' ? (4 * 24) / props.span : (3 * 24) / props.span;
+  const wrapperCol = 24 - labelCol;
+
+  return (
+    <Col span={props.span} className="w-full flex items-center !p-0">
+      <Form.Item
+        field={props.name}
+        label={<span className="pl-2">{props.label}</span>}
+        labelAlign="left"
+        labelCol={{ span: labelCol }}
+        wrapperCol={{ span: wrapperCol }}
+      >
+        {props.children}
+      </Form.Item>
+    </Col>
+  );
+}

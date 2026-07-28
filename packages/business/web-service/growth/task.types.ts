@@ -1,9 +1,4 @@
-import {
-  GoalVo,
-  TaskVo,
-  TrackTimeWithoutRelationsVo,
-  TodoVo,
-} from '@true-north/vo';
+import { GoalVo, TaskVo, TrackTimeWithoutRelationsVo, TodoVo } from '@true-north/vo';
 
 export type TaskFormData = {
   id?: string;

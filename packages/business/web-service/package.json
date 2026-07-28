@@ -5,8 +5,22 @@
   "types": "index.ts",
   "exports": {
     ".": {
+      "types": "./index.ts",
       "import": "./index.ts",
-      "require": "./index.ts"
+      "require": "./index.ts",
+      "default": "./index.ts"
+    },
+    "./electron-types": {
+      "types": "./types/index.ts",
+      "import": "./types/index.ts",
+      "require": "./types/index.ts",
+      "default": "./types/index.ts"
+    },
+    "./request": {
+      "types": "./request/index.ts",
+      "import": "./request/index.ts",
+      "require": "./request/index.ts",
+      "default": "./request/index.ts"
     }
   },
   "scripts": {
@@ -15,10 +29,11 @@
     "lint": "npm run eslint && npm run stylelint"
   },
   "dependencies": {
-    "@true-north/api": "workspace:*",
-    "@true-north/vo": "workspace:*",
+    "@sue/design-web-react": "0.0.3-beta",
     "@true-north/enum": "workspace:*",
-    "@true-north/share-types": "workspace:*"
+    "@true-north/vo": "workspace:*",
+    "axios": "^0.24.0",
+    "lodash-es": "^4.17.21"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

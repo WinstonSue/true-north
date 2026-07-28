@@ -87,7 +87,7 @@ export function generateChangeDetails(
       for (let i = 0; i < Math.max(targetMethod.parameters.length, sourceMethod.parameters.length); i++) {
         const targetParam = targetMethod.parameters[i];
         const sourceParam = sourceMethod.parameters[i];
-        
+
         if (targetParam === undefined) {
           result += `\n new param: (${sourceParam.name || 'unknown'}:${sourceParam.type || 'unknown'})`;
           continue;

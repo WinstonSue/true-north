@@ -58,5 +58,8 @@ yarn-error.log*
 
 database.sqlite
 
+apps/server
 
-
+/.claude/
+/.codex/
+/.cursor/

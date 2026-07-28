@@ -1,4 +1,4 @@
-import { ConfigProvider, Layout } from '@arco-design/web-react';
+import { ConfigProvider, Layout } from '@sue/design-web-react';
 import DevToolsPage from './components/DevToolsPage';
 
 const { Content } = Layout;

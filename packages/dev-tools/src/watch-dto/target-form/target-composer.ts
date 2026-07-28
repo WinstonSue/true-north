@@ -12,7 +12,7 @@ export class TargetFormComposer {
    */
   composeVo(intermediateState: IntermediateState): string {
     const className = intermediateState.metadata.className;
-    
+
     // 判断是 Create 还是 Update
     if (className.startsWith('Update')) {
       return this.composeUpdateVo(intermediateState);
@@ -49,9 +49,7 @@ export class TargetFormComposer {
    */
   private composeUpdateVo(intermediateState: IntermediateState): string {
     const voName = intermediateState.metadata.voName;
-    const baseName = intermediateState.metadata.className
-      .replace('Dto', '')
-      .replace('Update', '');
+    const baseName = intermediateState.metadata.className.replace('Dto', '').replace('Update', '');
     const createVoName = `Create${baseName}Vo`;
 
     return `export type ${voName} = Partial<${createVoName}>;`;

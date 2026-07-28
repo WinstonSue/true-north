@@ -120,13 +120,12 @@ window.electronAPI.loadURL('https://example.com').then((result) => {
 ```
 .
 ├── dist/                   # 构建输出目录
-├── src/                    # 源代码
-│   ├── main/               # 主进程代码
-│   │   └── index.ts        # 主进程入口
+├── src/
+│   ├── render/             # 渲染进程（Vite UI）
+│   ├── main/               # Electron 主进程入口与 IPC 装配
 │   ├── preload/            # 预加载脚本
-│   │   └── index.ts        # 预加载脚本入口
-│   └── types/              # 类型定义
-│       └── electron.d.ts   # Electron类型声明
+│   ├── service/            # 本地 IPC 业务域（growth、db、users、common 等）
+│   └── config/             # Tailwind 等配置
 ├── build.sh                # 构建脚本
 ├── electron.vite.config.ts # electron-vite配置
 ├── package.json            # 项目配置

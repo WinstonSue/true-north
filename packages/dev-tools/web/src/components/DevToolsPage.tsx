@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Typography, Divider, Tabs } from '@arco-design/web-react';
+import { Divider, Tabs } from '@sue/design-web-react';
+
 import DesktopControllerTab from './DesktopControllerTab';
 import ApiControllerTab from './ApiControllerTab';
 import WebServiceTab from './WebServiceTab';
-
-const { Title, Paragraph } = Typography;
 
 const DevToolsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('DesktopControllerDiff');
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-      <Title heading={2}>True North 开发工具</Title>
-      <Paragraph>通过此页面可以查看控制器差异状态，并执行同步操作。</Paragraph>
+      <h2 className="text-title-1 font-medium">True North 开发工具</h2>
+      <p>通过此页面可以查看控制器差异状态，并执行同步操作。</p>
 
       <Divider />
 
@@ -20,8 +19,8 @@ const DevToolsPage: React.FC = () => {
         activeTab={activeTab}
         onChange={(key) => {
           setActiveTab(key);
-        }}
-      >
+        }}>
+
         <Tabs.TabPane key="DesktopControllerDiff" title="Desktop 控制器差异">
           <DesktopControllerTab isActive={activeTab === 'DesktopControllerDiff'} />
         </Tabs.TabPane>
@@ -32,8 +31,8 @@ const DevToolsPage: React.FC = () => {
           <WebServiceTab isActive={activeTab === 'WebServiceDiff'} />
         </Tabs.TabPane>
       </Tabs>
-    </div>
-  );
+    </div>);
+
 };
 
 export default DevToolsPage;

@@ -2,21 +2,21 @@ import { defineConfig } from 'electron-vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import react from '@vitejs/plugin-react';
-import svgrPlugin from '@arco-plugins/vite-plugin-svgr';
 import tailwindcss from '@tailwindcss/vite';
-import { vitePluginForArco } from '@arco-plugins/vite-react';
+import svgr from 'vite-plugin-svgr';
 
 // 获取当前文件的目录路径
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDirPath = path.dirname(currentFilePath);
+const srcDir = path.resolve(currentDirPath, 'src');
 
 export default defineConfig({
   main: {
     resolve: {
       alias: {
-        '@business': path.resolve(currentDirPath, '../../packages/business/server/src'),
-        '@database': path.resolve(currentDirPath, 'src/database'),
-        '@': path.resolve(currentDirPath, 'src/main'),
+        '@business': path.resolve(srcDir, 'service'),
+        '@db': path.resolve(srcDir, 'service/db'),
+        '@': path.resolve(srcDir, 'main'),
         '@true-north/enum': path.resolve(currentDirPath, '../../packages/business/enum/index.ts'),
         '@true-north/vo': path.resolve(currentDirPath, '../../packages/business/vo/index.ts'),
       },
@@ -26,7 +26,7 @@ export default defineConfig({
       outDir: 'dist/main',
       rollupOptions: {
         input: {
-          index: path.resolve(currentDirPath, 'src/main/index.ts'),
+          index: path.resolve(srcDir, 'main/index.ts'),
         },
         external: [
           'electron',
@@ -50,14 +50,12 @@ export default defineConfig({
       },
       minify: false, // 禁用压缩以保留 TypeORM 装饰器元数据
       sourcemap: process.env.NODE_ENV !== 'production',
-      // 监听整个 src 目录的变化
       watch:
         process.env.NODE_ENV === 'development'
           ? {
               include: [
-                path.resolve(currentDirPath, 'src/main/**/*'),
-                path.resolve(currentDirPath, 'src/database/**/*'),
-                path.resolve(currentDirPath, '../../packages/business/server/**/*'),
+                path.resolve(srcDir, 'main/**/*'),
+                path.resolve(srcDir, 'service/**/*'),
               ],
             }
           : undefined,
@@ -73,7 +71,7 @@ export default defineConfig({
       outDir: 'dist/preload',
       rollupOptions: {
         input: {
-          index: path.resolve(currentDirPath, 'src/preload/index.ts'),
+          index: path.resolve(srcDir, 'preload/index.ts'),
         },
         external: [
           'electron',
@@ -101,18 +99,13 @@ export default defineConfig({
       port: 8100,
     },
     // 渲染进程配置
-    root: path.resolve(currentDirPath, 'src/render'),
+    root: path.resolve(srcDir, 'render'),
     plugins: [
       react(),
       tailwindcss(),
-      svgrPlugin({
-        svgrOptions: {},
-      }),
-      vitePluginForArco({
-        theme: '@arco-themes/react-francis',
-        modifyVars: {
-          // 'arcoblue-6': setting.themeColor,
-        },
+      svgr({
+        svgrOptions: { exportType: 'default' },
+        include: '**/*.svg',
       }),
     ],
     css: {
@@ -127,11 +120,11 @@ export default defineConfig({
       alias: [
         {
           find: /^@\/(.*)$/,
-          replacement: path.resolve(currentDirPath, '../../packages/business/web/src/$1'),
+          replacement: path.resolve(srcDir, 'render/$1'),
         },
         {
           find: '@',
-          replacement: path.resolve(currentDirPath, 'src/render'),
+          replacement: path.resolve(srcDir, 'render'),
         },
         {
           find: '@true-north/enum',
@@ -155,7 +148,7 @@ export default defineConfig({
     build: {
       outDir: 'dist/renderer',
       rollupOptions: {
-        input: path.resolve(currentDirPath, 'src/render/index.html'),
+        input: path.resolve(srcDir, 'render/index.html'),
         external: [/^react-dnd/, /^dnd-core/, /^immutability-helper/],
       },
       minify: false, // 禁用压缩以保留 TypeORM 装饰器元数据

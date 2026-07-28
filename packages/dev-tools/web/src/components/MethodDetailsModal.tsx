@@ -1,6 +1,6 @@
 import React from 'react';
-import { Modal, Button } from '@arco-design/web-react';
-import { IconSync } from '@arco-design/web-react/icon';
+import { Modal, Button, SyncOutlined } from '@sue/design-web-react';
+
 import { MethodChange } from '../../../types';
 
 interface MethodDetailsModalProps {
@@ -25,7 +25,7 @@ const MethodDetailsModal: React.FC<MethodDetailsModalProps> = ({ visible, onClos
           {controller.needsSync && (
             <Button
               type="primary"
-              icon={<IconSync />}
+              icon={<SyncOutlined />}
               onClick={() => {
                 onSync(controller.className);
                 onClose();

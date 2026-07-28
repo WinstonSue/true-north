@@ -1,4 +1,4 @@
-import { TaskController } from '@true-north/api';
+import TaskController from '../controller/task';
 import type { Task as TaskVO } from '@true-north/vo';
 import { Message } from '../message';
 import { MethodOptions } from '../type';
@@ -78,6 +78,20 @@ export default class TaskService {
   static async findByFilter(taskListFiltersVo?: TaskVO.TaskFilterVo) {
     try {
       const res = await TaskController.findByFilter(taskListFiltersVo);
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+    }
+  }
+
+  /**
+   * getTree
+   * @param taskFilterVo 过滤条件
+   * @returns 任务树结构
+   */
+  static async getTree(taskFilterVo?: TaskVO.TaskFilterVo) {
+    try {
+      const res = await TaskController.getTree(taskFilterVo);
       return res;
     } catch (error: unknown) {
       Message.error(error);
