@@ -1,0 +1,6 @@
+.sectionRow { margin-top: 16px; }
+.taskListItem { min-height: 48px; padding-inline: 0 !important; text-align: left; }
+.taskListItem + .taskListItem { border-top: 1px solid var(--sue-color-border-secondary); }
+.taskListItem b, .taskListItem small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.taskListItem small { margin-top: 4px; color: var(--sue-color-text-tertiary); }
+.scheduleList { margin-top: 16px; }

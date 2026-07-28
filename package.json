@@ -17,7 +17,8 @@
     "clean": "turbo run clean",
     "predeploy": "npm run build",
     "pre-commit": "turbo run pre-commit",
-    "dev:desktop": "turbo run dev --filter=true-north-desktop"
+    "dev:desktop": "turbo run dev --filter=true-north-desktop",
+    "dev:prototype": "turbo run dev --filter=true-north-prototype"
   },
   "devDependencies": {
     "@true-north/vo": "workspace:*",
@@ -41,7 +42,13 @@
   "pnpm": {
     "overrides": {
       "@types/node": "22.13.0",
-      "vite": "5.4.15"
+      "vite": "5.4.15",
+      "@sue/design-web-react>dayjs": "^1.11.13",
+      "@sue/design-web-react>@ant-design/colors": "^8.0.1",
+      "@sue/design-web-react>@ant-design/fast-color": "^3.0.1"
+    },
+    "patchedDependencies": {
+      "fe-selector@0.1.0": "patches/fe-selector@0.1.0.patch"
     }
   }
 }

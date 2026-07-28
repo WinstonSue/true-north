@@ -1,0 +1,7 @@
+.sectionRow { margin-top: 16px; }
+.todoToolbar > * { min-width: 0; }
+.inlineTag { margin-inline-start: 8px; }
+.statistics { margin: 0; }
+.templateList b, .templateList small { display: block; }
+.templateList small { color: var(--sue-color-text-tertiary); }
+@media (max-width: 575px) { .todoToolbar { align-items: flex-start; } .todoToolbar :global(.sue-tabs), .todoToolbar :global(.sue-tabs-nav) { min-width: 0; max-width: 100%; overflow-x: auto; } }

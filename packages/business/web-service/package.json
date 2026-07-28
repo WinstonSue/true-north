@@ -29,9 +29,9 @@
     "lint": "npm run eslint && npm run stylelint"
   },
   "dependencies": {
-    "@sue/design-web-react": "file:../../../vendor/sue-design-web-react",
-    "@true-north/vo": "workspace:*",
+    "@sue/design-web-react": "0.0.3-beta",
     "@true-north/enum": "workspace:*",
+    "@true-north/vo": "workspace:*",
     "axios": "^0.24.0",
     "lodash-es": "^4.17.21"
   },
