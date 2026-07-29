@@ -1,0 +1,301 @@
+{
+  "id": "growth.habit",
+  "kind": "module",
+  "title": "习惯管理",
+  "document": "growth/habit/README.md",
+  "parentId": "growth",
+  "route": "/growth/habit",
+  "positioning": "以目标为约束的养成中心，使用打卡和贡献权重形成反馈闭环。",
+  "dependencies": [
+    "growth.goal"
+  ],
+  "entities": [
+    {
+      "id": "habit",
+      "name": "习惯",
+      "fields": [
+        {
+          "id": "goalIds",
+          "name": "关联目标",
+          "type": "reference[]",
+          "required": true,
+          "description": "习惯至少关联一个活跃目标。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.0",
+              "date": "2026-07-28",
+              "event": "baseline",
+              "summary": "建立字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        },
+        {
+          "id": "status",
+          "name": "状态",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "active",
+            "paused",
+            "completed",
+            "abandoned"
+          ],
+          "description": "习惯生命周期状态。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.0",
+              "date": "2026-07-28",
+              "event": "baseline",
+              "summary": "建立字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        },
+        {
+          "id": "contributionWeight",
+          "name": "贡献权重",
+          "type": "number",
+          "required": true,
+          "description": "按目标维度记录的贡献权重。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.0",
+              "date": "2026-07-28",
+              "event": "baseline",
+              "summary": "建立字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        },
+        {
+          "id": "frequency",
+          "name": "执行频率",
+          "type": "object",
+          "required": true,
+          "description": "每日、工作日或按周/月执行的频率。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.0",
+              "date": "2026-07-28",
+              "event": "baseline",
+              "summary": "建立字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        }
+      ],
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立产品对象基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete"
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "list",
+      "name": "习惯列表",
+      "prototypePage": "habit",
+      "scenario": "日常打卡与进度查看",
+      "reference": "growth.habit.view.list",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立视图基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ]
+    },
+    {
+      "id": "detail",
+      "name": "习惯详情",
+      "prototypePage": "habit",
+      "scenario": "查看关联目标和日志",
+      "reference": "growth.habit.view.detail",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立视图基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ]
+    },
+    {
+      "id": "statistics",
+      "name": "习惯统计",
+      "prototypePage": "habit",
+      "scenario": "复盘完成率与贡献",
+      "reference": "growth.habit.view.statistics",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立视图基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ]
+    },
+    {
+      "id": "calendar",
+      "name": "打卡日历",
+      "prototypePage": "habit",
+      "scenario": "观察习惯完成密度",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "none",
+      "reference": "growth.habit.view.calendar",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立 roadmap 视图基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "none"
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "goal-required",
+      "name": "目标必填",
+      "entities": [
+        "habit"
+      ],
+      "description": "每个习惯至少关联一个活跃目标。",
+      "views": [
+        "list",
+        "detail"
+      ],
+      "reference": "growth.habit.rule.goal-required",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立规则基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ]
+    },
+    {
+      "id": "weight-limit",
+      "name": "贡献权重上限",
+      "entities": [
+        "habit"
+      ],
+      "description": "每个目标的关联习惯权重需在产品约束内。",
+      "views": [
+        "detail"
+      ],
+      "reference": "growth.habit.rule.weight-limit",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立规则基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "id": "growth.habit.overview",
+      "heading": "## 目标与价值"
+    },
+    {
+      "id": "growth.habit.structure",
+      "heading": "## 业务流程"
+    },
+    {
+      "id": "growth.habit.view.list",
+      "heading": "### 习惯列表"
+    },
+    {
+      "id": "growth.habit.view.detail",
+      "heading": "### 习惯详情"
+    },
+    {
+      "id": "growth.habit.view.statistics",
+      "heading": "### 习惯统计"
+    },
+    {
+      "id": "growth.habit.view.calendar",
+      "heading": "### 打卡日历"
+    },
+    {
+      "id": "growth.habit.interaction",
+      "heading": "## 交互语义"
+    },
+    {
+      "id": "growth.habit.rules",
+      "heading": "## 业务规则"
+    },
+    {
+      "id": "growth.habit.rule.goal-required",
+      "heading": "### 目标必填"
+    },
+    {
+      "id": "growth.habit.rule.weight-limit",
+      "heading": "### 贡献权重上限"
+    },
+    {
+      "id": "growth.habit.metrics",
+      "heading": "## 复盘指标"
+    }
+  ],
+  "productStatus": "roadmap",
+  "prototypeCoverage": "complete",
+  "changeLog": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 ProductWiki 结构化基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete"
+    }
+  ]
+}

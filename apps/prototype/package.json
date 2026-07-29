@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc --noEmit && vite build"
+    "build": "pnpm product-wiki:check && tsc --noEmit && vite build",
+    "product-wiki:check": "node scripts/product-wiki.mjs --check",
+    "product-wiki:sync": "node scripts/product-wiki.mjs --write"
   },
   "dependencies": {
     "@sue/design-web-react": "0.0.3-beta",

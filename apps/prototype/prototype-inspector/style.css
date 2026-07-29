@@ -1,3 +1,9 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
 #prototype-inspector {
   position: relative;
   display: flex;
@@ -5,10 +11,12 @@
   width: 100vw;
   color: var(--sue-color-text);
 }
-#root {
+.prototypeInspectorFrame {
   width: 100%;
   height: 100%;
   flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
 }
 #prototype-inspector [data-prototype-inspector-ui] button {
   display: inline-grid;
@@ -112,6 +120,12 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 11px;
   overflow-wrap: anywhere;
+}
+.prototypeInspectorChange {
+  margin: 10px 0 0;
+  color: var(--sue-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
 }
 .prototypeInspectorEmpty {
   margin: 16px 0 24px;

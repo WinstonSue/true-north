@@ -1,23 +1,25 @@
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { Check, Copy, Inspect, X, createElement, type IconNode } from 'lucide';
-import { generateCssSelector, init, type ElementContext, type ElementSelectorController } from 'fe-selector/core';
-import { findProductWikiTopicForElement, type ProductWikiTopic } from '../shared/product-wiki';
+import type { ElementContext } from 'fe-selector/core';
+import { resolveProductReference, type ProductRef, type ResolvedProductReference } from '../src/product-wiki';
+import { inspectorMessage, type InspectorSelection, type InspectorSelector } from './protocol';
 import './style.css';
 
 type InspectorHandle = { destroy: () => void };
 
 const ROOT_ID = 'prototype-inspector';
+const FRAME_ID = 'prototype-frame';
 
 export function bootstrapPrototypeInspector(): InspectorHandle {
   const root = document.getElementById(ROOT_ID);
-  if (!root) throw new Error('#prototype-inspector is required');
+  const frame = document.getElementById(FRAME_ID) as HTMLIFrameElement | null;
+  if (!root || !frame) throw new Error(`#${ROOT_ID} and #${FRAME_ID} are required`);
   root.querySelectorAll('[data-prototype-inspector-ui]').forEach((element) => element.remove());
 
   const toolRail = document.createElement('div');
   toolRail.className = 'prototypeInspectorToolRail';
   toolRail.dataset.prototypeInspectorUi = 'true';
-
   const trigger = iconButton('检查页面元素', Inspect);
   trigger.className = 'prototypeInspectorTrigger';
   const panel = document.createElement('aside');
@@ -28,50 +30,82 @@ export function bootstrapPrototypeInspector(): InspectorHandle {
   toolRail.append(trigger);
   root.append(panel, toolRail);
 
-  let controller: ElementSelectorController | undefined;
-  let selectionVersion = 0;
+  let frameReady = false;
+  let selecting = false;
+  let activeSelectionId: number | undefined;
 
-  const destroyController = () => {
-    controller?.destroy();
-    controller = undefined;
+  const sendToFrame = (message: unknown) => {
+    if (!frameReady || !frame.contentWindow) return;
+    frame.contentWindow.postMessage(message, window.location.origin);
   };
-
+  const setSelecting = (next: boolean) => {
+    selecting = next;
+    if (next) trigger.setAttribute('aria-pressed', 'true');
+    else trigger.removeAttribute('aria-pressed');
+    root.classList.toggle('is-selecting', next);
+    sendToFrame({ type: 'opt-ui:set-activation', payload: { alwaysOn: next } });
+  };
+  const setPanelOpen = (open: boolean) => {
+    sendToFrame({ type: inspectorMessage.panel, payload: { open } });
+  };
   const close = () => {
-    selectionVersion += 1;
-    destroyController();
+    activeSelectionId = undefined;
+    setSelecting(false);
+    setPanelOpen(false);
     panel.hidden = true;
     trigger.hidden = false;
-    trigger.removeAttribute('aria-pressed');
-    root.classList.remove('is-selecting');
+  };
+  const select = (selection: InspectorSelection) => {
+    activeSelectionId = selection.id;
+    setSelecting(false);
+    trigger.hidden = true;
+    panel.hidden = false;
+    setPanelOpen(true);
+    renderPanel(panel, selection.context, topicFor(selection.productRef), close);
   };
 
   trigger.addEventListener('click', () => {
-    selectionVersion += 1;
-    destroyController();
-    controller = init({
-      activationKey: 'alt',
-      isSelectable: (element) => !element.closest('[data-prototype-inspector-ui]'),
-      onSelect: (context, element) => {
-        const version = ++selectionVersion;
-        destroyController();
-        trigger.hidden = true;
-        root.classList.remove('is-selecting');
-        renderPanel(panel, context, findProductWikiTopicForElement(element), close);
-        panel.hidden = false;
-
-        void generateCssSelector(element).then((cssSelector) => {
-          if (version !== selectionVersion || !cssSelector) return;
-          renderPanel(panel, { ...context, cssSelector }, findProductWikiTopicForElement(element), close);
-        });
-      },
-    });
-    controller.activate();
-    trigger.setAttribute('aria-pressed', 'true');
-    root.classList.add('is-selecting');
+    setSelecting(true);
   });
 
+  const onMessage = (event: MessageEvent<unknown>) => {
+    if (event.origin !== window.location.origin || event.source !== frame.contentWindow) return;
+    const message = event.data as { type?: string; payload?: unknown } | null;
+    if (!message?.type) return;
+    if (message.type === 'opt-ui:ready') {
+      frameReady = true;
+      frame.contentWindow?.postMessage({ type: 'opt-ui:ping' }, window.location.origin);
+      if (selecting) sendToFrame({ type: 'opt-ui:set-activation', payload: { alwaysOn: true } });
+      return;
+    }
+    if (message.type === inspectorMessage.cancel) {
+      close();
+      return;
+    }
+    if (message.type === inspectorMessage.selection) {
+      select(message.payload as InspectorSelection);
+      return;
+    }
+    if (message.type === inspectorMessage.selector) {
+      const payload = message.payload as InspectorSelector;
+      if (!payload.cssSelector || payload.id !== activeSelectionId) return;
+      const current = panel.dataset.selectionContext;
+      const productReference = panel.dataset.selectionProductRef as ProductRef | undefined;
+      if (!current) return;
+      renderPanel(panel, { ...(JSON.parse(current) as ElementContext), cssSelector: payload.cssSelector }, topicFor(productReference), close);
+    }
+  };
+  window.addEventListener('message', onMessage);
+
+  const onFrameLoad = () => {
+    frameReady = true;
+    close();
+    frame.contentWindow?.postMessage({ type: 'opt-ui:ping' }, window.location.origin);
+  };
+  frame.addEventListener('load', onFrameLoad);
+
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape' || (panel.hidden && !root.classList.contains('is-selecting'))) return;
+    if (event.key !== 'Escape' || (panel.hidden && !selecting)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     close();
@@ -80,17 +114,22 @@ export function bootstrapPrototypeInspector(): InspectorHandle {
 
   return {
     destroy: () => {
-      selectionVersion += 1;
+      activeSelectionId = undefined;
+      setSelecting(false);
+      window.removeEventListener('message', onMessage);
+      frame.removeEventListener('load', onFrameLoad);
       document.removeEventListener('keydown', onKeyDown, true);
-      destroyController();
-      root.classList.remove('is-selecting');
       panel.remove();
       toolRail.remove();
     },
   };
 }
 
-function renderPanel(panel: HTMLElement, context: ElementContext, topic: ProductWikiTopic | undefined, close: () => void) {
+function renderPanel(panel: HTMLElement, context: ElementContext, topic: ResolvedProductReference | undefined, close: () => void) {
+  panel.dataset.selectionContext = JSON.stringify(context);
+  if (topic) panel.dataset.selectionProductRef = topic.id;
+  else delete panel.dataset.selectionProductRef;
+
   const header = document.createElement('header');
   header.className = 'prototypeInspectorHeader';
   const title = document.createElement('div');
@@ -106,20 +145,35 @@ function renderPanel(panel: HTMLElement, context: ElementContext, topic: Product
   panel.replaceChildren(header, content);
 }
 
-function wikiTopic(topic: ProductWikiTopic) {
+function topicFor(productReference: ProductRef | undefined) {
+  return productReference ? resolveProductReference(productReference) : undefined;
+}
+
+function wikiTopic(topic: ResolvedProductReference) {
   const section = document.createElement('section');
   section.className = 'prototypeInspectorTopic';
   const meta = document.createElement('div');
   meta.className = 'prototypeInspectorTags';
-  meta.append(tag(topic.module), tag(topic.title));
+  meta.append(tag(topic.module), tag(topic.title), tag(`产品：${statusLabel(topic.productStatus)}`), tag(`原型：${coverageLabel(topic.prototypeCoverage)}`));
   const path = document.createElement('span');
   path.className = 'prototypeInspectorPath';
   path.textContent = topic.path;
   const article = document.createElement('article');
   article.className = 'prototypeInspectorMarkdown';
   article.innerHTML = DOMPurify.sanitize(marked.parse(topic.markdown, { gfm: true }) as string);
-  section.append(meta, path, article);
+  const change = document.createElement('p');
+  change.className = 'prototypeInspectorChange';
+  change.textContent = `最近变更 ${topic.latestChange.version} · ${topic.latestChange.date} · ${topic.latestChange.summary}`;
+  section.append(meta, path, change, article);
   return section;
+}
+
+function statusLabel(status: ResolvedProductReference['productStatus']) {
+  return ({ roadmap: '路线图', released: '已发布', deprecated: '已废弃' })[status];
+}
+
+function coverageLabel(coverage: ResolvedProductReference['prototypeCoverage']) {
+  return ({ none: '未覆盖', partial: '部分覆盖', complete: '完整覆盖' })[coverage];
 }
 
 function emptyTopic() {
@@ -144,7 +198,7 @@ function technicalDetails(context: ElementContext) {
     field('源码位置', sourceLocation(context), true, true),
     field('Props', formatValue(context.props), false, true),
     field('计算样式', formatValue(context.computedStyles), false, true),
-    field('HTML', context.html, false, true),
+    field('HTML', context.html, false, true)
   );
   details.append(summary, body);
   return details;

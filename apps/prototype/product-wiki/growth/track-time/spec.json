@@ -1,0 +1,139 @@
+{
+  "id": "growth.track-time",
+  "kind": "module",
+  "title": "专注与时间追踪",
+  "document": "growth/track-time/README.md",
+  "parentId": "growth",
+  "route": "/growth/focus",
+  "positioning": "记录围绕任务的专注投入，并为复盘提供时间证据。",
+  "productStatus": "roadmap",
+  "prototypeCoverage": "partial",
+  "changeLog": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立专注计时原型基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial"
+    }
+  ],
+  "dependencies": [
+    "growth.task"
+  ],
+  "entities": [
+    {
+      "id": "track-time",
+      "name": "专注记录",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立专注记录对象基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ],
+      "fields": [
+        {
+          "id": "taskId",
+          "name": "关联任务",
+          "type": "reference",
+          "required": false,
+          "description": "专注记录可关联一个任务。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial",
+          "changeLog": [
+            {
+              "version": "v0.1.0",
+              "date": "2026-07-28",
+              "event": "baseline",
+              "summary": "建立关联任务字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "partial"
+            }
+          ]
+        },
+        {
+          "id": "minutes",
+          "name": "专注时长",
+          "type": "number",
+          "required": true,
+          "description": "单次专注投入的分钟数。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.0",
+              "date": "2026-07-28",
+              "event": "baseline",
+              "summary": "建立专注时长字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "focus",
+      "name": "专注计时",
+      "prototypePage": "focus",
+      "scenario": "选择任务并记录专注投入",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "reference": "growth.track-time.overview",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立专注计时视图基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete"
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "task-optional",
+      "name": "任务可选关联",
+      "entities": [
+        "track-time"
+      ],
+      "description": "专注记录可独立存在，也可归属一个任务。",
+      "views": [
+        "focus"
+      ],
+      "reference": "growth.track-time.rule.task-optional",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立任务关联规则基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "id": "growth.track-time.overview",
+      "heading": "## 目标与价值"
+    },
+    {
+      "id": "growth.track-time.rule.task-optional",
+      "heading": "### 任务可选关联"
+    }
+  ]
+}

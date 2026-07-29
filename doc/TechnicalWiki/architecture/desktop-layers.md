@@ -71,7 +71,7 @@ render/pages/
 └── ...
 ```
 
-业务规则与模块产品说明见 [ProductWiki · Growth](../../ProductWiki/growth/ProductWiki.md)。
+业务规则与模块产品说明见 [ProductWiki · Growth](../../../apps/prototype/product-wiki/growth/README.md)。
 
 ## 相关文档
 

@@ -2,7 +2,7 @@
 
 | 文档 | 路径 | 说明 |
 | --- | --- | --- |
-| 产品 Wiki | [ProductWiki/ProductWiki.md](./ProductWiki/ProductWiki.md) | 产品定位、业务域、设计规范 |
+| 产品 Wiki | [apps/prototype/product-wiki](../apps/prototype/product-wiki/README.md) | 与原型同仓维护的产品定位、业务域与设计规范 |
 | 技术 Wiki | [TechnicalWiki/TechnicalWiki.md](./TechnicalWiki/TechnicalWiki.md) | Monorepo、Desktop 分层、代码规范 |
 | 版本交付 | [v0.1.0/PRD.md](./v0.1.0/PRD.md) · [TDD](./v0.1.0/TDD.md) | 交付文档位于 `doc/{version}/`（当前示例 v0.1.0） |
 

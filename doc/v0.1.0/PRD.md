@@ -1,6 +1,6 @@
 # True North v0.1.0 PRD
 
-> 版本定位：对齐 `doc/ProductWiki` 现有设计，交付基础可用的 Growth 套件 (Goal / Task / Todo / Habit) 以及共用交互骨架。本 PRD 仅描述 v0.1.0 范围，后续增量功能在模块级 PRD/TDD 中扩展。
+> 版本定位：对齐 `apps/prototype/product-wiki` 现有设计，交付基础可用的 Growth 套件 (Goal / Task / Todo / Habit) 以及共用交互骨架。本 PRD 仅描述 v0.1.0 范围，后续增量功能在模块级 PRD/TDD 中扩展。
 
 ---
 
@@ -104,5 +104,5 @@
 
 ## 6. 附录
 
-- 设计稿：参考 `doc/ProductWiki/growth` 各模块的视图矩阵与交互描述。
+- 设计稿：参考 `apps/prototype/product-wiki/growth` 各模块的视图矩阵与交互描述。
 - 截图说明：目标详情页右上角状态 Tag + “已完成”按钮 + `...` 操作菜单![目标详情页截图](./A9B9A91B-B4EB-44A7-84BA-FECE4363EFC9.jpg)

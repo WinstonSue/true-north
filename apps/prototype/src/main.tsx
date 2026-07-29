@@ -5,7 +5,8 @@ import '@sue/design-web-react/dist/sue.css';
 import { AlarmClock, Goal as GoalIcon } from 'lucide-react';
 import { Button, ConfigProvider, Flex, Menu, Space, Tag, message } from '@sue/design-web-react';
 import { EntityDrawer } from './shared/components';
-import { bootstrapPrototypeInspector } from './prototype-inspector';
+import { productRef } from './product-wiki';
+import { bootstrapPrototypeInspectorBridge } from '../prototype-inspector/bridge';
 import { AiDecompositionDrawer } from './pages/goal/AiDecompositionDrawer';
 import { GoalsPage } from './pages/goal';
 import { MindMapPage } from './pages/goal/MindMapPage';
@@ -29,7 +30,8 @@ import type {
   Todo,
   View,
 } from './shared/types';
-import { addDays, daysBetween, nextOccurrence, repeatLabel } from './shared/utils';
+import { addDays, daysBetween, frequencyLabel, matchesFrequency, nextOccurrence, repeatLabel } from './shared/utils';
+import './App.css';
 import styles from './App.module.css';
 
 function App() {
@@ -142,6 +144,9 @@ function App() {
     notify('已保存并同步相关视图');
   };
   const scoreHabit = (habit: Habit, score: Score) => {
+    if (!matchesFrequency(TODAY, habit.frequency)) {
+      return message.warning(`今天不是“${habit.title}”的执行日（${frequencyLabel(habit.frequency)}）`);
+    }
     const hadToday = habit.logs.some((log) => log.date === TODAY);
     const nextStreak = score === 'miss' ? 0 : hadToday ? habit.streak : habit.streak + 1;
     setHabits((items) =>
@@ -162,7 +167,7 @@ function App() {
   return (
     <ConfigProvider locale={zhCN} theme={{ token: { colorPrimary: '#1677ff', controlHeight: 32, borderRadius: 6 } }}>
       <Flex className={styles.appShell} container="full">
-        <Flex vertical className={styles.sidebar} container="fixed" data-product-wiki="global-overview">
+        <Flex vertical className={styles.sidebar} container="fixed" data-product-ref={productRef('global.overview')}>
           <Flex className={styles.brand} align="center" gap={10}>
             <span>
               <GoalIcon size={17} />
@@ -270,10 +275,11 @@ function App() {
   );
 }
 
+const inspectorBridge = bootstrapPrototypeInspectorBridge();
+if (import.meta.hot) import.meta.hot.dispose(inspectorBridge.destroy);
+
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
-const inspector = bootstrapPrototypeInspector();
-if (import.meta.hot) import.meta.hot.dispose(inspector.destroy);

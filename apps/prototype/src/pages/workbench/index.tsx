@@ -1,9 +1,10 @@
 import { Button, Card, Col, Flex, Row, Statistic } from '@sue/design-web-react';
 import { CheckCircle2, CircleDot, Flame, Plus } from 'lucide-react';
 import { PageHeader, PriorityTag } from '../../shared/components';
+import { productRef } from '../../product-wiki';
 import { TODAY } from '../../shared/mock-data';
 import type { Goal, Habit, Score, Task, Todo, View } from '../../shared/types';
-import { goalName } from '../../shared/utils';
+import { frequencyLabel, goalName } from '../../shared/utils';
 import styles from './index.module.css';
 
 type Props = {
@@ -21,11 +22,10 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
   return (
     <>
       <PageHeader
-        wikiId="growth-overview"
+        productReference={productRef('growth.overview')}
         title="工作台"
-        detail="聚焦今天的行动，并保持目标、任务和习惯联动。"
         action={
-          <span data-product-wiki="todo-interaction">
+          <span data-product-ref={productRef('growth.todo.interaction')}>
             <Button type="primary" icon={<Plus size={15} />} onClick={() => setView('todo')}>
               新建待办
             </Button>
@@ -34,21 +34,21 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
       />
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <div data-product-wiki="goal-overview">
+          <div data-product-ref={productRef('growth.goal.overview')}>
             <Card>
               <Statistic title="活跃目标" value={goals.filter((goal) => goal.status === 'doing').length} suffix="个" />
             </Card>
           </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <div data-product-wiki="todo-overview">
+          <div data-product-ref={productRef('growth.todo.overview')}>
             <Card>
               <Statistic title="今日待办" value={due.length} suffix="项" />
             </Card>
           </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <div data-product-wiki="focus-track-time">
+          <div data-product-ref={productRef('growth.track-time.overview')}>
             <Card>
               <Statistic
                 title="专注投入"
@@ -59,7 +59,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
           </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <div data-product-wiki="habit-metrics">
+          <div data-product-ref={productRef('growth.habit.metrics')}>
             <Card>
               <Statistic title="习惯连续" value={Math.max(...habits.map((habit) => habit.streak))} suffix="天" />
             </Card>
@@ -68,7 +68,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
       </Row>
       <Row gutter={[16, 16]} className={styles.sectionRow}>
         <Col xs={24} lg={14}>
-          <div data-product-wiki="todo-overview">
+          <div data-product-ref={productRef('growth.todo.overview')}>
             <Card
               title="今日待办"
               extra={
@@ -80,7 +80,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
               <div className={styles.list}>
                 {due.map((todo) => (
                   <Flex className={styles.listRow} align="center" gap={10} key={todo.id}>
-                    <span data-product-wiki="todo-interaction">
+                    <span data-product-ref={productRef('growth.todo.interaction')}>
                       <Button
                         type="text"
                         shape="circle"
@@ -95,7 +95,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
                         {todo.due} · {todo.reminder !== 'none' ? '已设置提醒' : '无提醒'}
                       </small>
                     </Flex>
-                    <span data-product-wiki="todo-priority">
+                    <span data-product-ref={productRef('growth.todo.priority')}>
                       <PriorityTag importance={todo.importance} urgency={todo.urgency} />
                     </span>
                   </Flex>
@@ -105,7 +105,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
           </div>
         </Col>
         <Col xs={24} lg={10}>
-          <div data-product-wiki="habit-overview">
+          <div data-product-ref={productRef('growth.habit.overview')}>
             <Card
               title="习惯打卡"
               extra={
@@ -123,10 +123,10 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
                     <Flex vertical className={styles.listItemContent} gap={4}>
                       <b>{habit.title}</b>
                       <small>
-                        连续 {habit.streak} 天 · {goalName(goals, habit.goalIds[0])}
+                        {frequencyLabel(habit.frequency)} · 连续 {habit.streak} 天 · {goalName(goals, habit.goalIds[0])}
                       </small>
                     </Flex>
-                    <span data-product-wiki="habit-interaction">
+                    <span data-product-ref={productRef('growth.habit.interaction')}>
                       <Button size="small" onClick={() => scoreHabit(habit, 'perfect')}>
                         完成
                       </Button>

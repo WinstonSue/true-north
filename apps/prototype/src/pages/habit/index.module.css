@@ -1,2 +1,3 @@
 .habitGoal { min-height: 22px; color: var(--sue-color-text-secondary); }
+.habitFrequency { margin: 0 0 12px; color: var(--sue-color-text-secondary); }
 .cardActions { margin-top: 14px; }

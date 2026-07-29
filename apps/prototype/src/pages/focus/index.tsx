@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, Button, Card, Col, Flex, Row, Select, Space, Tooltip, message } from '@sue/design-web-react';
 import { Pause, Play, TimerReset } from 'lucide-react';
 import { PageHeader } from '../../shared/components';
+import { productRef } from '../../product-wiki';
 import type { FocusSession, Task } from '../../shared/types';
 import styles from './index.module.css';
 
@@ -25,10 +26,10 @@ export function FocusPage({ tasks, sessions, setSessions, updateTask }: Props) {
   };
   return (
     <>
-      <PageHeader wikiId="focus-track-time" title="专注计时" detail="选择任务后开始专注，结束时自动生成时间记录。" />
+      <PageHeader productReference={productRef('growth.track-time.overview')} title="专注计时" />
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <div data-product-wiki="focus-track-time">
+          <div data-product-ref={productRef('growth.track-time.overview')}>
             <Card>
               <Flex vertical className={styles.timerCard} align="center" gap={22}>
                 <Select
@@ -59,7 +60,7 @@ export function FocusPage({ tasks, sessions, setSessions, updateTask }: Props) {
           </div>
         </Col>
         <Col xs={24} lg={12}>
-          <div data-product-wiki="focus-track-time">
+          <div data-product-ref={productRef('growth.track-time.overview')}>
             <Card title="今日时间记录">
               {sessions.length ? (
                 sessions.map((session) => (
