@@ -4,7 +4,7 @@ import { PriorityTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
 import { TODAY } from '../../shared/mock-data';
 import type { Goal, Habit, Task, Todo } from '../../shared/types';
-import { compareTodoPlan, formatTodoPlan, frequencyLabel, goalName } from '../../shared/utils';
+import { compareTodoPlan, formatTodoPlan, goalName, repeatLabel } from '../../shared/utils';
 import styles from './index.module.css';
 
 type Props = {
@@ -112,7 +112,7 @@ export function Workbench({ goals, tasks, todos, habits, onNavigate, completeTod
                     <Flex vertical className={styles.listItemContent} gap={4}>
                       <b>{habit.title}</b>
                       <small>
-                        {frequencyLabel(habit.frequency)} · 连续 {habit.streak} 天 · {goalName(goals, habit.goalIds[0])}
+                        {repeatLabel(habit.repeat)} · 连续 {habit.streak} 天 · {goalName(goals, habit.goalIds[0])}
                       </small>
                     </Flex>
                     <HabitTodoActions habit={habit} todos={todos} completeTodo={completeTodo} markTodoIncomplete={markTodoIncomplete} />
@@ -129,7 +129,10 @@ export function Workbench({ goals, tasks, todos, habits, onNavigate, completeTod
 
 function HabitTodoActions({ habit, todos, completeTodo, markTodoIncomplete }: { habit: Habit; todos: Todo[]; completeTodo: (todo: Todo) => void; markTodoIncomplete: (todo: Todo) => void }) {
   const todo = todos.find((item) => item.habitId === habit.id && item.status !== 'done' && item.status !== 'abandoned');
-  if (!todo || habit.status !== 'active') return <span>下一次待办已安排</span>;
+  if (habit.status === 'completed') return <span>执行规则已结束</span>;
+  if (habit.status === 'paused') return <span>已暂停打卡</span>;
+  if (habit.status === 'abandoned') return <span>已放弃习惯</span>;
+  if (!todo) return <span>下一次待办已安排</span>;
   return <span data-product-ref={productRef('growth.habit.interaction')}>
     <Flex gap={6}>
       <Button size="small" type="primary" onClick={() => completeTodo(todo)}>完成</Button>

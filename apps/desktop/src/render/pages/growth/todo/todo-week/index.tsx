@@ -7,6 +7,7 @@ import { flushSync } from 'react-dom';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import { useTodoHooks } from '../hooks';
 import { TodoStatus } from '@true-north/enum';
+import dayjs from 'dayjs';
 
 export default function TodoWeek() {
   const { weekStart, weekEnd } = useTodoHooks();
@@ -18,6 +19,8 @@ export default function TodoWeek() {
   );
 
   async function refreshData() {
+    const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+
     const { list: todos } = await TodoService.list({
       status: TodoStatus.TODO,
       planDateStart: weekStart,
@@ -34,7 +37,7 @@ export default function TodoWeek() {
 
     const { list: expiredTodos } = await TodoService.list({
       status: TodoStatus.TODO,
-      planDateEnd: weekStart,
+      planDateEnd: yesterday,
     });
     setExpiredTodoList(expiredTodos);
 

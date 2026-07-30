@@ -21,17 +21,7 @@
           "required": false,
           "description": "非子任务关联目标。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "parentId",
@@ -40,17 +30,7 @@
           "required": false,
           "description": "子任务关联父任务。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "status",
@@ -65,25 +45,7 @@
           ],
           "description": "任务执行状态。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            },
-            {
-              "version": "v0.1.1",
-              "date": "2026-07-30",
-              "event": "changed",
-              "summary": "移除受阻状态。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "estimated",
@@ -92,31 +54,11 @@
           "required": true,
           "description": "用于排程和时间对比。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         }
       ],
       "productStatus": "roadmap",
-      "prototypeCoverage": "complete",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立产品对象基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "complete"
-        }
-      ]
+      "prototypeCoverage": "complete"
     }
   ],
   "views": [
@@ -127,17 +69,7 @@
       "scenario": "聚焦当日执行与逾期事项",
       "reference": "growth.task.view.today",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-29",
-          "event": "baseline",
-          "summary": "建立今日任务视图。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "week",
@@ -146,17 +78,7 @@
       "scenario": "分组管理当前周执行",
       "reference": "growth.task.view.week",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "all",
@@ -165,17 +87,7 @@
       "scenario": "全量筛选与治理",
       "reference": "growth.task.view.all",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "statistics",
@@ -184,17 +96,7 @@
       "scenario": "复盘任务执行状态",
       "reference": "growth.task.view.statistics",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-29",
-          "event": "baseline",
-          "summary": "建立任务执行概览。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "calendar",
@@ -203,17 +105,7 @@
       "scenario": "查看任务日期安排",
       "reference": "growth.task.view.calendar",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "detail",
@@ -222,17 +114,7 @@
       "scenario": "独立运营任务及其关联对象",
       "productStatus": "roadmap",
       "prototypeCoverage": "partial",
-      "reference": "growth.task.view.detail",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立 prototype 抽屉覆盖基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "reference": "growth.task.view.detail"
     }
   ],
   "rules": [
@@ -250,17 +132,7 @@
       ],
       "reference": "growth.task.rule.single-parent",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立规则基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "time-inheritance",
@@ -276,17 +148,7 @@
       ],
       "reference": "growth.task.rule.time-inheritance",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立规则基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     }
   ],
   "references": [
@@ -336,15 +198,5 @@
     }
   ],
   "productStatus": "roadmap",
-  "prototypeCoverage": "complete",
-  "changeLog": [
-    {
-      "version": "v0.1.0",
-      "date": "2026-07-28",
-      "event": "baseline",
-      "summary": "建立 ProductWiki 结构化基线。",
-      "productStatus": "roadmap",
-      "prototypeCoverage": "complete"
-    }
-  ]
+  "prototypeCoverage": "complete"
 }

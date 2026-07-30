@@ -73,7 +73,6 @@ export function GoalsPage({
       .filter((goal) => goal.parentId === parentId && visibleGoalIds.has(goal.id))
       .map((goal) => (
         <div
-          data-product-ref={productRef('growth.goal.view.tree')}
           key={goal.id}
           className={styles.treeItem}
           style={{ paddingLeft: depth * 16 }}
@@ -205,7 +204,7 @@ export function GoalsPage({
                     <Statistic title="关联习惯" value={relatedHabits.length} suffix="项" />
                   </Col>
                 </Row>
-                <div data-product-ref={productRef('growth.goal.view.detail')}>
+                <div>
                   <Tabs
                     items={[
                       {

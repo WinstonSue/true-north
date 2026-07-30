@@ -90,7 +90,7 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
     todo.status !== 'done' && todo.status !== 'abandoned' ? (
       <>
         <Button icon={<Check size={15} />} size="small" title="完成" aria-label={`完成 ${todo.title}`} onClick={() => completeTodo(todo)} />
-        {todo.habitId && (
+        {(todo.habitId || todo.repeat) && (
           <Button icon={<X size={15} />} size="small" title="标记未完成" aria-label={`标记 ${todo.title} 未完成`} onClick={() => markTodoIncomplete(todo)} />
         )}
       </>
@@ -99,7 +99,7 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
     {
       title: '',
       render: (_: unknown, todo: Todo) => (
-        <span data-product-ref={productRef('growth.todo.interaction')}>
+        <span>
           <Checkbox checked={selected.includes(todo.id)} onChange={(event) => toggleSelected(todo.id, event.target.checked)} />
         </span>
       ),
@@ -107,7 +107,7 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
     {
       title: '待办',
       render: (_: unknown, todo: Todo) => (
-        <span data-product-ref={productRef('growth.todo.interaction')}>
+        <span>
           <Button type="link" onClick={() => setDrawer({ kind: 'todo', id: todo.id })}>{todo.title}</Button>
         </span>
       ),
@@ -127,7 +127,7 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
     {
       title: '状态',
       render: (_: unknown, todo: Todo) => (
-        <Flex gap={8} data-product-ref={productRef('growth.todo.interaction')}>
+        <Flex gap={8}>
           <StateTag status={todo.status} />
           <TodoActions todo={todo} />
         </Flex>
@@ -205,7 +205,7 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
                   <Flex vertical className={styles.calendarCell} gap={3}>
                     {dayTodos.map((todo) => (
                       <Button className={styles.calendarTodo} key={todo.id} size="small" type="text" title={todo.title} onClick={(event) => { event.stopPropagation(); setDrawer({ kind: 'todo', id: todo.id }); }}>
-                        <span className={styles.calendarTodoTitle}>{todo.plannedStartTime} {todo.title}</span>
+                        <span className={styles.calendarTodoTitle}>{formatTodoPlan(todo)} {todo.title}</span>
                         <StateTag status={todo.status} />
                       </Button>
                     ))}

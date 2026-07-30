@@ -33,7 +33,10 @@ body {
   width: 40px;
   min-height: 100vh;
   flex: 0 0 40px;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
   padding-top: 12px;
   border-left: 1px solid var(--sue-color-border-secondary);
   background: var(--sue-color-bg-container);
@@ -131,6 +134,70 @@ body {
   margin: 16px 0 24px;
   color: var(--sue-color-text-secondary);
   text-align: center;
+}
+.prototypeInspectorVersionControl {
+  display: grid;
+  gap: 6px;
+}
+.prototypeInspectorVersionControl > span,
+.prototypeInspectorVersionSummary,
+.prototypeInspectorVersionEntryMeta {
+  color: var(--sue-color-text-secondary);
+  font-size: 12px;
+}
+.prototypeInspectorVersionControl select {
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--sue-color-border-secondary);
+  border-radius: var(--sue-border-radius-sm);
+  color: var(--sue-color-text);
+  background: var(--sue-color-bg-container);
+}
+.prototypeInspectorVersionSummary {
+  margin: 12px 0;
+}
+.prototypeInspectorVersionList {
+  display: grid;
+  gap: 18px;
+}
+.prototypeInspectorVersionGroup {
+  min-width: 0;
+}
+.prototypeInspectorVersionGroup h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+.prototypeInspectorVersionEntries {
+  border-top: 1px solid var(--sue-color-border-secondary);
+}
+.prototypeInspectorVersionEntry {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--sue-color-border-secondary);
+}
+.prototypeInspectorVersionEntryHeading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+.prototypeInspectorVersionEntryHeading b {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prototypeInspectorVersionEntryMeta {
+  display: block;
+  margin-top: 5px;
+}
+.prototypeInspectorVersionEntry p {
+  margin: 5px 0 0;
+  color: var(--sue-color-text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 .prototypeInspectorMarkdown {
   margin-top: 16px;

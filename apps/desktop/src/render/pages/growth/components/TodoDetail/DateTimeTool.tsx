@@ -1,18 +1,20 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef } from 'react';
 import {
   Popover,
   Calendar,
   Select,
+  Switch,
   TimePicker,
   LeftOutlined,
   RightOutlined,
 } from '@sue/design-web-react';
 import dayjs, { type Dayjs } from 'dayjs';
 import SiteIcon from '@/components/SiteIcon';
-import RepeatSelector from '@true-north/components-repeat';
+import RepeatSelector, { createDefaultRepeatSetting } from '@true-north/components-repeat';
 import { GlobalContext } from '@/context';
 import clsx from 'clsx';
 import type { RepeatVo } from '@true-north/components-repeat/types';
+import type { RepeatSelectorValue } from '@true-north/components-repeat';
 
 const { RangePicker } = TimePicker;
 
@@ -51,6 +53,11 @@ export default function DateTimeTool(props: {
   const { lang } = useContext(GlobalContext);
   const { formData, onChangeData } = props;
   const [mode, setMode] = useState<'month' | 'year'>('month');
+  const disabledRepeatConfigRef = useRef<RepeatVo>();
+
+  const updateRepeatConfig = (repeatConfig: RepeatVo | undefined) => {
+    onChangeData({ ...formData, repeatConfig });
+  };
 
   return (
     <Popover
@@ -142,16 +149,30 @@ export default function DateTimeTool(props: {
             />
           </div>
           <div className="px-3">
-            <RepeatSelector
-              lang={lang as 'en-US' | 'zh-CN'}
-              value={formData.repeatConfig}
-              onChange={(value) => {
-                onChangeData({
-                  ...formData,
-                  repeatConfig: value,
-                });
-              }}
-            />
+            <div className="flex items-center justify-between">
+              <span>重复</span>
+              <Switch
+                checked={Boolean(formData.repeatConfig)}
+                onChange={(enabled) => {
+                  if (!enabled) {
+                    disabledRepeatConfigRef.current = formData.repeatConfig;
+                    updateRepeatConfig(undefined);
+                    return;
+                  }
+                  updateRepeatConfig(disabledRepeatConfigRef.current ?? createDefaultRepeatSetting());
+                }}
+              />
+            </div>
+            {formData.repeatConfig && (
+              <RepeatSelector
+                lang={lang as 'en-US' | 'zh-CN'}
+                value={formData.repeatConfig as RepeatSelectorValue}
+                onChange={(value) => {
+                  disabledRepeatConfigRef.current = value;
+                  updateRepeatConfig(value);
+                }}
+              />
+            )}
           </div>
         </div>
       }

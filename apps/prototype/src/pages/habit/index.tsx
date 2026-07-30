@@ -3,7 +3,7 @@ import { Flame, Plus } from 'lucide-react';
 import { StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
 import type { DrawerState, Goal, Habit, Todo } from '../../shared/types';
-import { frequencyLabel, goalName } from '../../shared/utils';
+import { goalName, repeatLabel } from '../../shared/utils';
 import styles from './index.module.css';
 
 type Props = {
@@ -29,7 +29,7 @@ export function HabitsPage({ habits, goals, todos, setDrawer, completeTodo, mark
                   {habit.goalIds.map((id) => goalName(goals, id)).join(' · ')}
                 </p>
                 <p data-product-ref={productRef('growth.habit.rules')} className={styles.habitFrequency}>
-                  执行频率：{frequencyLabel(habit.frequency)}
+                  执行规则：{repeatLabel(habit.repeat)}
                 </p>
                 <div data-product-ref={productRef('growth.habit.metrics')}>
                   <Statistic title="当前连续" value={habit.streak} suffix="天" prefix={<Flame size={16} />} />
@@ -56,7 +56,9 @@ export function HabitsPage({ habits, goals, todos, setDrawer, completeTodo, mark
 
 function HabitTodoActions({ habit, todos, completeTodo, markTodoIncomplete }: { habit: Habit; todos: Todo[]; completeTodo: (todo: Todo) => void; markTodoIncomplete: (todo: Todo) => void }) {
   const todo = todos.find((item) => item.habitId === habit.id && item.status !== 'done' && item.status !== 'abandoned');
-  if (habit.status !== 'active') return <span>已暂停打卡</span>;
+  if (habit.status === 'completed') return <span>执行规则已结束</span>;
+  if (habit.status === 'paused') return <span>已暂停打卡</span>;
+  if (habit.status === 'abandoned') return <span>已放弃习惯</span>;
   if (!todo) return <span>下一次待办已安排</span>;
   return <Space>
     <Button size="small" type="primary" onClick={() => completeTodo(todo)}>完成</Button>

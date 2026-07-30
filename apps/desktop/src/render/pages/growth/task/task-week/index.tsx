@@ -10,9 +10,6 @@ import SiteIcon from '@/components/SiteIcon';
 import { useTaskDetail, TaskEditor } from '../../components';
 import { TaskStatus } from '@true-north/enum';
 
-const weekStart = dayjs().startOf('week').format('YYYY-MM-DD');
-const weekEnd = dayjs().endOf('week').format('YYYY-MM-DD');
-
 export default function TaskWeek() {
   const [weekTaskList, setWeekTaskList] = useState<TaskWithoutRelationsVo[]>(
     [],
@@ -28,27 +25,35 @@ export default function TaskWeek() {
   >([]);
 
   async function refreshData() {
+    const today = dayjs();
+    const yesterday = today.subtract(1, 'day').format('YYYY-MM-DD');
+    const weekStart = today.startOf('week').format('YYYY-MM-DD');
+    const weekEnd = today.endOf('week').format('YYYY-MM-DD');
+
     const { list: todos } = await TaskService.findByFilter({
       status: TaskStatus.TODO,
-      // TODO: 需要根据新的 API 调整时间过滤参数
+      endDateStart: weekStart,
+      endDateEnd: weekEnd,
     });
     setWeekTaskList(todos);
 
     const { list: doneTasks } = await TaskService.findByFilter({
       status: TaskStatus.DONE,
-      // TODO: 需要根据新的 API 调整时间过滤参数
+      doneDateStart: weekStart,
+      doneDateEnd: weekEnd,
     });
     setWeekDoneTaskList(doneTasks);
 
     const { list: expiredTasks } = await TaskService.findByFilter({
       status: TaskStatus.TODO,
-      // TODO: 需要根据新的 API 调整时间过滤参数
+      endDateEnd: yesterday,
     });
     setExpiredTaskList(expiredTasks);
 
     const { list: abandonedTasks } = await TaskService.findByFilter({
       status: TaskStatus.ABANDONED,
-      // TODO: 需要根据新的 API 调整时间过滤参数
+      abandonedDateStart: weekStart,
+      abandonedDateEnd: weekEnd,
     });
     setWeekAbandonedTaskList(abandonedTasks);
 

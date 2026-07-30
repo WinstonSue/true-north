@@ -1,5 +1,5 @@
-import { HOLIDAYS_2026 } from './mock-data';
-import type { Goal, HabitFrequency, RepeatMode, Todo } from './types';
+import type { Goal, Todo } from './types';
+import { RepeatEndMode, RepeatMode, type RepeatPayload } from '@true-north/components-repeat/types';
 
 export type ExecutionScope = 'today' | 'week';
 export type ExecutionGroupKey = 'overdue' | 'current' | 'done' | 'abandoned';
@@ -25,10 +25,10 @@ export function daysBetween(start: string, end: string) {
   return Math.round((dateOf(end).getTime() - dateOf(start).getTime()) / 86400000);
 }
 export function getExecutionRange(scope: ExecutionScope, today: string) {
-  if (scope === 'today') return { start: today, end: today, label: '今日' };
+  if (scope === 'today') return { start: today, end: today, label: '未完成' };
 
   const start = addDays(today, -dateOf(today).getDay());
-  return { start, end: addDays(start, 6), label: '本周' };
+  return { start, end: addDays(start, 6), label: '未完成' };
 }
 export function groupExecutionItems<T extends ExecutionItem>(
   items: T[],
@@ -62,14 +62,17 @@ export function statusLabel(status: string) {
         archived: '已归档',
         abandoned: '已放弃',
         in_progress: '进行中',
-        active: '进行中',
+        active: '开始',
         completed: '已完成',
       } as Record<string, string>
     )[status] || status
   );
 }
 export function formatTodoPlan(todo: Pick<Todo, 'planned' | 'plannedStartTime' | 'plannedEndTime'>) {
-  return `${todo.planned} ${todo.plannedStartTime}-${todo.plannedEndTime}`;
+  const time = todo.plannedStartTime === todo.plannedEndTime
+    ? todo.plannedStartTime
+    : `${todo.plannedStartTime}-${todo.plannedEndTime}`;
+  return `${todo.planned} ${time}`;
 }
 export function compareTodoPlan(left: Todo, right: Todo) {
   return `${left.planned} ${left.plannedStartTime}`.localeCompare(`${right.planned} ${right.plannedStartTime}`);
@@ -77,43 +80,20 @@ export function compareTodoPlan(left: Todo, right: Todo) {
 export function goalName(goals: Goal[], id?: string) {
   return goals.find((goal) => goal.id === id)?.title || '独立事项';
 }
-function isWorkday(value: string) {
-  const day = dateOf(value).getDay();
-  return day > 0 && day < 6 && !HOLIDAYS_2026.has(value);
-}
-export function matchesFrequency(value: string, frequency: HabitFrequency) {
-  const day = dateOf(value).getDay();
-  if (frequency.mode === 'daily') return true;
-  if (frequency.mode === 'weekly') return frequency.weekdays.includes(day === 0 ? 7 : day);
-  if (frequency.mode === 'monthly')
-    return (
-      dateOf(value).getDate() ===
-      Math.min(frequency.monthlyDay, new Date(dateOf(value).getFullYear(), dateOf(value).getMonth() + 1, 0).getDate())
-    );
-  if (frequency.mode === 'weekdays') return day > 0 && day < 6;
-  if (frequency.mode === 'weekend') return day === 0 || day === 6;
-  return isWorkday(value);
-}
-export function nextHabitOccurrence(after: string, frequency: HabitFrequency) {
-  for (let offset = 1; offset <= 370; offset += 1) {
-    const candidate = addDays(after, offset);
-    if (matchesFrequency(candidate, frequency)) return candidate;
-  }
-  return addDays(after, 1);
-}
-export function nextHabitOccurrenceOnOrAfter(from: string, frequency: HabitFrequency) {
-  if (matchesFrequency(from, frequency)) return from;
-  return nextHabitOccurrence(from, frequency);
-}
-export function frequencyLabel(frequency: HabitFrequency) {
-  return (
-    {
-      daily: '每天',
-      weekly: `每周 ${frequency.weekdays.map((day) => ['一', '二', '三', '四', '五', '六', '日'][day - 1]).join('、')}`,
-      monthly: `每月 ${frequency.monthlyDay} 日`,
-      weekdays: '工作日',
-      weekend: '周末',
-      workdays: '法定工作日',
-    } as Record<RepeatMode, string>
-  )[frequency.mode];
+export function repeatLabel(repeat: RepeatPayload) {
+  const mode = {
+    [RepeatMode.DAILY]: '每天',
+    [RepeatMode.WEEKLY]: '每周',
+    [RepeatMode.MONTHLY]: '每月',
+    [RepeatMode.YEARLY]: '每年',
+    [RepeatMode.WEEKDAYS]: '工作日',
+    [RepeatMode.WEEKEND]: '周末',
+    [RepeatMode.WORKDAYS]: '法定工作日',
+    [RepeatMode.REST_DAY]: '法定休息日',
+    [RepeatMode.CUSTOM]: '自定义周期',
+    [RepeatMode.NONE]: '不重复',
+  }[repeat.repeatMode];
+  if (repeat.repeatEndMode === RepeatEndMode.FOR_TIMES) return `${mode}，共 ${repeat.repeatTimes} 次`;
+  if (repeat.repeatEndMode === RepeatEndMode.TO_DATE) return `${mode}，至 ${repeat.repeatEndDate}`;
+  return mode;
 }

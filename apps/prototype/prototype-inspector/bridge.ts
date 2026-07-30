@@ -5,7 +5,7 @@ import {
   type ElementContext,
   type ElementSelectorController,
 } from 'fe-selector/core';
-import { findProductReferenceForElement } from '../src/product-wiki';
+import { findProductReferenceTargetForElement } from '../src/product-wiki';
 import { inspectorMessage, type InspectorSelection } from './protocol';
 
 type BridgeHandle = { destroy: () => void };
@@ -28,16 +28,17 @@ export function bootstrapPrototypeInspectorBridge(): BridgeHandle {
   const onClick = (event: MouseEvent) => {
     if (!selecting || !(event.target instanceof Element)) return;
     const id = ++selectionId;
-    const productReference = findProductReferenceForElement(event.target);
+    const productReferenceTarget = findProductReferenceTargetForElement(event.target);
+    const selectedElement = productReferenceTarget?.element || event.target;
     const payload: InspectorSelection = {
       id,
-      context: cloneContext(extractElementContext(event.target)),
-      productRef: productReference?.id,
+      context: cloneContext(extractElementContext(selectedElement)),
+      productRef: productReferenceTarget?.productReference.id,
     };
     post({ type: inspectorMessage.selection, payload });
     controller.clearSelected();
 
-    void generateCssSelector(event.target).then((cssSelector) => {
+    void generateCssSelector(selectedElement).then((cssSelector) => {
       post({ type: inspectorMessage.selector, payload: { id, cssSelector } });
     });
   };

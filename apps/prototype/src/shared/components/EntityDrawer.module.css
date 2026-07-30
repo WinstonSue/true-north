@@ -1,6 +1,4 @@
 .entityForm { padding-bottom: 12px; }
 .entityForm :global(.sue-form-item) { margin-bottom: 18px; }
 .formHint { color: var(--sue-color-text-tertiary); }
-.weightList { display: flex; flex-direction: column; gap: 8px; }
-.weightList > div span { width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.weightList :global(.sue-slider) { flex: 1; }
+.repeatControl { max-width: 100%; }

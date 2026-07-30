@@ -1,1 +1,7 @@
-export { default, RepeatSelector, type RepeatSelectorProps } from './RepeatSelector';
+export {
+  default,
+  RepeatSelector,
+  createDefaultRepeatSetting,
+  type RepeatSelectorProps,
+  type RepeatSelectorValue,
+} from './RepeatSelector';

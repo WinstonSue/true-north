@@ -3,14 +3,27 @@ import type { ProductReferenceId } from './references.generated';
 export type ProductSpecKind = 'global' | 'domain' | 'module';
 export type ProductStatus = 'roadmap' | 'released' | 'deprecated';
 export type PrototypeCoverage = 'none' | 'partial' | 'complete';
+export type ProductFeatureScope = 'module' | 'entity' | 'field' | 'view' | 'rule';
+export type ProductChangeEvent = 'baseline' | 'introduced' | 'changed' | 'released' | 'deprecated' | 'removed';
 export type ProductChangeLogEntry = {
   version: string;
   date: string;
-  event: 'baseline' | 'introduced' | 'changed' | 'released' | 'deprecated';
+  event: ProductChangeEvent;
   summary: string;
   productStatus: ProductStatus;
   prototypeCoverage: PrototypeCoverage;
+  feature: ProductFeatureSnapshot;
 };
+export type ProductFeatureSnapshot = {
+  key: string;
+  scope: ProductFeatureScope;
+  moduleId: string;
+  moduleTitle: string;
+  name: string;
+  parentName?: string;
+  reference?: string;
+};
+export type ProductChangeLog = { changes: ProductChangeLogEntry[] };
 
 export type ProductFieldSpec = {
   id: string;
@@ -21,10 +34,9 @@ export type ProductFieldSpec = {
   description: string;
   productStatus: ProductStatus;
   prototypeCoverage: PrototypeCoverage;
-  changeLog: ProductChangeLogEntry[];
 };
 
-export type ProductEntitySpec = { id: string; name: string; productStatus: ProductStatus; prototypeCoverage: PrototypeCoverage; changeLog: ProductChangeLogEntry[]; fields: ProductFieldSpec[] };
+export type ProductEntitySpec = { id: string; name: string; productStatus: ProductStatus; prototypeCoverage: PrototypeCoverage; fields: ProductFieldSpec[] };
 export type ProductViewSpec = {
   id: string;
   name: string;
@@ -33,7 +45,6 @@ export type ProductViewSpec = {
   productStatus: ProductStatus;
   prototypeCoverage: PrototypeCoverage;
   reference: string;
-  changeLog: ProductChangeLogEntry[];
 };
 export type ProductRuleSpec = {
   id: string;
@@ -44,7 +55,6 @@ export type ProductRuleSpec = {
   reference: string;
   productStatus: ProductStatus;
   prototypeCoverage: PrototypeCoverage;
-  changeLog: ProductChangeLogEntry[];
 };
 export type ProductDocumentationReference = { id: ProductReferenceId; heading: string };
 
@@ -58,7 +68,6 @@ export type ProductSpec = {
   positioning?: string;
   productStatus: ProductStatus;
   prototypeCoverage: PrototypeCoverage;
-  changeLog: ProductChangeLogEntry[];
   dependencies?: string[];
   entities?: ProductEntitySpec[];
   views?: ProductViewSpec[];
@@ -75,5 +84,5 @@ export type ResolvedProductReference = {
   spec: ProductSpec;
   productStatus: ProductStatus;
   prototypeCoverage: PrototypeCoverage;
-  latestChange: ProductChangeLogEntry;
+  latestChange?: ProductChangeLogEntry;
 };

@@ -26,7 +26,7 @@ import type {
   Task,
   Todo,
 } from './shared/types';
-import { nextHabitOccurrence, nextHabitOccurrenceOnOrAfter } from './shared/utils';
+import { firstOccurrenceOnOrAfter, nextOccurrence, settleRepeatingTodo } from './shared/repeat';
 import './App.css';
 import styles from './App.module.css';
 
@@ -43,7 +43,7 @@ function createHabitTodo(habit: Habit, planned: string): Todo {
     urgency: habit.importance,
     planned,
     plannedStartTime: '09:00',
-    plannedEndTime: '10:00',
+    plannedEndTime: '09:00',
     history: [`${planned} 由习惯周期生成`],
   };
 }
@@ -52,6 +52,14 @@ function recordHabitResult(habit: Habit, date: string, completed: boolean): Habi
   const logs = [...habit.logs.filter((log) => log.date !== date), { date, completed }];
   const streak = completed ? habit.streak + 1 : 0;
   return { ...habit, streak, longest: Math.max(habit.longest, streak), logs };
+}
+
+function nextHabitDate(habit: Habit, onOrAfter: string): string | undefined {
+  const latestLog = [...habit.logs].sort((left, right) => left.date.localeCompare(right.date)).at(-1);
+  if (!latestLog) return firstOccurrenceOnOrAfter(onOrAfter, habit.repeat);
+  const next = nextOccurrence(latestLog.date, habit.repeat, habit.logs.length);
+  if (!next) return undefined;
+  return next >= onOrAfter ? next : firstOccurrenceOnOrAfter(onOrAfter, habit.repeat, habit.logs.length);
 }
 
 function App() {
@@ -87,7 +95,10 @@ function App() {
   const resolveHabitTodo = (todo: Todo, completed: boolean) => {
     const habit = habits.find((item) => item.id === todo.habitId);
     if (!habit || !isPendingTodo(todo)) return;
-    const next = createHabitTodo(habit, nextHabitOccurrence(todo.planned, habit.frequency));
+    const settledHabit = recordHabitResult(habit, todo.planned, completed);
+    const nextDate = nextHabitDate(settledHabit, todo.planned);
+    const next = nextDate ? createHabitTodo(settledHabit, nextDate) : undefined;
+    const nextHabit = next ? settledHabit : { ...settledHabit, status: 'completed' as const };
     setTodos((items) => {
       if (!items.some((item) => item.id === todo.id && isPendingTodo(item))) return items;
       const settled = items.map((item): Todo =>
@@ -95,18 +106,26 @@ function App() {
           ? { ...item, status: completed ? 'done' : 'abandoned', history: [...item.history, completed ? '完成习惯待办' : '标记习惯未完成'] }
           : item,
       );
-      return settled.some((item) => item.id === next.id) ? settled : [...settled, next];
+      return next && !settled.some((item) => item.id === next.id) ? [...settled, next] : settled;
     });
-    setHabits((items) => items.map((item) => (item.id === habit.id ? recordHabitResult(item, todo.planned, completed) : item)));
-    notify(completed ? '习惯已完成，已安排下一次待办' : '已记录未完成，已安排下一次待办');
+    setHabits((items) => items.map((item) => (item.id === habit.id ? nextHabit : item)));
+    notify(next ? (completed ? '习惯已完成，已安排下一次待办' : '已记录未完成，已安排下一次待办') : '习惯已结算，重复计划已结束');
+  };
+  const resolveRepeatingTodo = (todo: Todo, completed: boolean) => {
+    if (!todo.repeat || !isPendingTodo(todo)) return;
+    const next = settleRepeatingTodo(todo, completed);
+    setTodos((items) => items.map((item) => (item.id === todo.id ? next : item)));
+    notify(next.planned === todo.planned ? '周期待办已结算，重复计划已结束' : '周期待办已结算，已安排下一次');
   };
   const completeTodo = (todo: Todo) => {
     if (todo.habitId) return resolveHabitTodo(todo, true);
+    if (todo.repeat) return resolveRepeatingTodo(todo, true);
     updateTodo(todo.id, { status: 'done' }, '完成待办');
     notify('待办已完成');
   };
   const markTodoIncomplete = (todo: Todo) => {
     if (todo.habitId) return resolveHabitTodo(todo, false);
+    if (todo.repeat) return resolveRepeatingTodo(todo, false);
     updateTodo(todo.id, { status: 'abandoned' }, '标记未完成');
     notify('待办已标记为未完成');
   };
@@ -147,26 +166,41 @@ function App() {
     notify('已保存并同步相关视图');
   };
   useEffect(() => {
-    const missing = habits
+    const candidates = habits
       .filter((habit) => habit.status === 'active')
-      .filter((habit) => !todos.some((todo) => todo.habitId === habit.id && isPendingTodo(todo)))
-      .map((habit) => createHabitTodo(habit, nextHabitOccurrenceOnOrAfter(TODAY, habit.frequency)));
+      .filter((habit) => !todos.some((todo) => todo.habitId === habit.id && isPendingTodo(todo)));
+    const missing = candidates.flatMap((habit) => {
+      const planned = nextHabitDate(habit, TODAY);
+      return planned ? [createHabitTodo(habit, planned)] : [];
+    });
+    const completedHabitIds = new Set(
+      candidates.filter((habit) => !nextHabitDate(habit, TODAY)).map((habit) => habit.id)
+    );
+    if (completedHabitIds.size) {
+      setHabits((items) =>
+        items.map((habit) => (completedHabitIds.has(habit.id) ? { ...habit, status: 'completed' } : habit))
+      );
+    }
     if (!missing.length) return;
     setTodos((items) => [...items, ...missing.filter((todo) => !items.some((item) => item.id === todo.id))]);
   }, [habits, todos]);
 
   useEffect(() => {
-    const overdue = todos.filter((todo) => todo.habitId && isPendingTodo(todo) && todo.planned < TODAY);
-    if (!overdue.length) return;
     const habitById = new Map(habits.map((habit) => [habit.id, habit]));
+    const overdue = todos.filter((todo) => {
+      const habit = todo.habitId ? habitById.get(todo.habitId) : undefined;
+      return habit?.status === 'active' && isPendingTodo(todo) && todo.planned < TODAY;
+    });
+    if (!overdue.length) return;
     setTodos((items) =>
       items.flatMap((todo) => {
         const habit = todo.habitId ? habitById.get(todo.habitId) : undefined;
         if (!habit || !overdue.some((item) => item.id === todo.id)) return [todo];
-        const nextDate = nextHabitOccurrenceOnOrAfter(TODAY, habit.frequency);
+        const settledHabit = recordHabitResult(habit, todo.planned, false);
+        const nextDate = nextHabitDate(settledHabit, TODAY);
         return [
           { ...todo, status: 'abandoned', history: [...todo.history, '逾期未确认，自动记为未完成'] },
-          createHabitTodo(habit, nextDate),
+          ...(nextDate ? [createHabitTodo(settledHabit, nextDate)] : []),
         ];
       }),
     );
@@ -174,10 +208,25 @@ function App() {
       items.map((habit) =>
         overdue
           .filter((todo) => todo.habitId === habit.id)
-          .reduce((nextHabit, todo) => recordHabitResult(nextHabit, todo.planned, false), habit),
+          .reduce((nextHabit, todo) => {
+            const settledHabit = recordHabitResult(nextHabit, todo.planned, false);
+            return nextHabitDate(settledHabit, TODAY)
+              ? settledHabit
+              : { ...settledHabit, status: 'completed' as const };
+          }, habit),
       ),
     );
   }, [habits, todos]);
+
+  useEffect(() => {
+    const overdue = todos.filter((todo) => todo.repeat && isPendingTodo(todo) && todo.planned < TODAY);
+    if (!overdue.length) return;
+    setTodos((items) =>
+      items.map((todo) =>
+        overdue.some((item) => item.id === todo.id) ? settleRepeatingTodo(todo, false, TODAY) : todo
+      )
+    );
+  }, [todos]);
 
   return (
     <ConfigProvider locale={zhCN} theme={{ token: { colorPrimary: '#1677ff', controlHeight: 32, borderRadius: 6 } }}>

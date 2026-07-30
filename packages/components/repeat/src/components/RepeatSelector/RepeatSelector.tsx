@@ -12,15 +12,15 @@ import {
   TimeUnit,
   WeekDay,
   YearlyType,
-  type RepeatSettingPayload,
+  type RepeatPayload,
 } from '../../types';
 import {
-  parseRepeatSetting,
+  parseRepeatRule,
   type RepeatConfigMonthly,
   type RepeatFormCustom,
   type RepeatFormYearly,
   type RepeatModeForm,
-  type RepeatSetting,
+  type RepeatRule,
   type ValidationIssue,
 } from '../../core';
 import locale from './locale';
@@ -31,9 +31,10 @@ type RepeatSelectorEndForm =
   | { repeatEndMode: RepeatEndMode.FOR_TIMES; repeatTimes: number }
   | { repeatEndMode: RepeatEndMode.TO_DATE; repeatEndDate: Dayjs };
 
-type RepeatSelectorValue = RepeatModeForm & RepeatSelectorEndForm;
+type RepeatSelectorFormValue = RepeatModeForm & RepeatSelectorEndForm & { repeatStartDate: Dayjs };
 
 type EditableRepeatValue = RepeatModeForm & {
+  repeatStartDate: Dayjs;
   repeatEndMode?: RepeatEndMode;
   repeatTimes?: number;
   repeatEndDate?: Dayjs;
@@ -41,9 +42,13 @@ type EditableRepeatValue = RepeatModeForm & {
 
 export type RepeatSelectorProps = {
   lang: 'en-US' | 'zh-CN';
-  value?: RepeatSettingPayload;
-  onChange: (value: RepeatSettingPayload) => void;
+  value: RepeatSelectorValue;
+  onChange: (value: RepeatSelectorValue) => void;
   onInvalid?: (issues: ValidationIssue[]) => void;
+};
+
+export type RepeatSelectorValue = Omit<RepeatPayload, 'repeatMode'> & {
+  repeatMode: Exclude<RepeatMode, RepeatMode.NONE>;
 };
 
 const weekdayOptions = [
@@ -57,7 +62,6 @@ const weekdayOptions = [
 ];
 
 const modeOptions = [
-  RepeatMode.NONE,
   RepeatMode.DAILY,
   RepeatMode.WEEKLY,
   RepeatMode.WEEKDAYS,
@@ -155,25 +159,35 @@ function defaultModeForm(mode: RepeatMode): RepeatModeForm {
   }
 }
 
-function toEditableRepeatValue(value: RepeatSetting): EditableRepeatValue {
+/** Creates the complete rule callers use when enabling recurrence. */
+export function createDefaultRepeatSetting(repeatStartDate: string): RepeatSelectorValue {
+  return {
+    repeatMode: RepeatMode.DAILY,
+    repeatEndMode: RepeatEndMode.FOREVER,
+    repeatStartDate,
+  };
+}
+
+function toEditableRepeatValue(value: RepeatRule): EditableRepeatValue {
   switch (value.repeatEndMode) {
     case RepeatEndMode.TO_DATE:
-      return { ...value, repeatEndDate: dayjs(value.repeatEndDate) };
+      return { ...value, repeatStartDate: dayjs(value.repeatStartDate), repeatEndDate: dayjs(value.repeatEndDate) };
     case RepeatEndMode.FOR_TIMES:
-      return { ...value, repeatTimes: value.repeatTimes };
+      return { ...value, repeatStartDate: dayjs(value.repeatStartDate), repeatTimes: value.repeatTimes };
     case RepeatEndMode.FOREVER:
-      return { ...value, repeatEndMode: RepeatEndMode.FOREVER };
+      return { ...value, repeatStartDate: dayjs(value.repeatStartDate), repeatEndMode: RepeatEndMode.FOREVER };
   }
 }
 
 function defaultEditableRepeatValue(): EditableRepeatValue {
   return {
-    repeatMode: RepeatMode.NONE,
+    repeatMode: RepeatMode.DAILY,
     repeatEndMode: RepeatEndMode.FOREVER,
+    repeatStartDate: dayjs(),
   };
 }
 
-function toPayload(value: RepeatSelectorValue): RepeatSettingPayload {
+function toPayload(value: RepeatSelectorFormValue): RepeatSelectorValue {
   const repeatConfig = 'repeatConfig' in value ? value.repeatConfig : undefined;
   switch (value.repeatEndMode) {
     case RepeatEndMode.TO_DATE:
@@ -182,29 +196,39 @@ function toPayload(value: RepeatSelectorValue): RepeatSettingPayload {
         repeatConfig,
         repeatEndMode: value.repeatEndMode,
         repeatEndDate: value.repeatEndDate.format('YYYY-MM-DD'),
-      };
+        repeatStartDate: value.repeatStartDate.format('YYYY-MM-DD'),
+      } as RepeatSelectorValue;
     case RepeatEndMode.FOR_TIMES:
       return {
         repeatMode: value.repeatMode,
         repeatConfig,
         repeatEndMode: value.repeatEndMode,
         repeatTimes: value.repeatTimes,
-      };
+        repeatStartDate: value.repeatStartDate.format('YYYY-MM-DD'),
+      } as RepeatSelectorValue;
     case RepeatEndMode.FOREVER:
-      return { repeatMode: value.repeatMode, repeatConfig, repeatEndMode: value.repeatEndMode };
+      return {
+        repeatMode: value.repeatMode,
+        repeatConfig,
+        repeatEndMode: value.repeatEndMode,
+        repeatStartDate: value.repeatStartDate.format('YYYY-MM-DD'),
+      } as RepeatSelectorValue;
   }
 }
 
 export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelectorProps) {
-  const t = locale[lang];
-  const parsedValue = useMemo(() => (value ? parseRepeatSetting(value) : undefined), [value]);
+  const t: Record<string, string> = locale[lang];
+  const parsedValue = useMemo(() => parseRepeatRule(value), [value]);
 
   useEffect(() => {
     if (parsedValue && parsedValue.ok === false) onInvalid?.(parsedValue.issues);
   }, [onInvalid, parsedValue]);
 
-  const form = parsedValue?.ok ? toEditableRepeatValue(parsedValue.value) : defaultEditableRepeatValue();
+  const form = parsedValue.ok && parsedValue.value.repeatMode !== RepeatMode.NONE
+    ? toEditableRepeatValue(parsedValue.value)
+    : defaultEditableRepeatValue();
   const endMode = form.repeatEndMode ?? RepeatEndMode.FOREVER;
+  const yearlyConfig = form.repeatMode === RepeatMode.YEARLY ? form.repeatConfig : undefined;
 
   const currentEndForm = (): RepeatSelectorEndForm => {
     switch (endMode) {
@@ -218,7 +242,7 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
   };
 
   const emit = (modeForm: object, endForm: RepeatSelectorEndForm = currentEndForm()) => {
-    onChange(toPayload({ ...modeForm, ...endForm } as RepeatSelectorValue));
+    onChange(toPayload({ ...modeForm, ...endForm, repeatStartDate: form.repeatStartDate } as RepeatSelectorFormValue));
   };
 
   const updateMode = (repeatMode: RepeatMode) => {
@@ -451,6 +475,17 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
 
   return (
     <Flex vertical gap={12} className={styles.root}>
+      <Flex vertical gap={4}>
+        <span className={styles.label}>{t['repeat.startDate']}</span>
+        <DatePicker
+          className={styles.control}
+          placeholder={t['repeat.startDate']}
+          value={form.repeatStartDate}
+          onChange={(repeatStartDate) =>
+            onChange(toPayload({ ...form, repeatStartDate: repeatStartDate ?? form.repeatStartDate } as RepeatSelectorFormValue))
+          }
+        />
+      </Flex>
       <Select
         className={styles.control}
         value={form.repeatMode}
@@ -475,11 +510,11 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
           emit({ repeatMode: RepeatMode.MONTHLY, repeatConfig })
         )}
 
-      {form.repeatMode === RepeatMode.YEARLY && (
+      {yearlyConfig && (
         <Flex vertical gap={8}>
           <Radio.Group
             optionType="button"
-            value={form.repeatConfig.yearlyType}
+            value={yearlyConfig.yearlyType}
             onChange={(event) => {
               const yearlyType = event.target.value as YearlyType;
               if (yearlyType === YearlyType.MONTH) {
@@ -502,12 +537,12 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
             <Radio value={YearlyType.ORDINAL_WEEK}>{t['repeat.yearly.byWeek']}</Radio>
           </Radio.Group>
 
-          {form.repeatConfig.yearlyType === YearlyType.MONTH && (
+          {yearlyConfig.yearlyType === YearlyType.MONTH && (
             <>
               <Select
                 className={styles.control}
                 mode="multiple"
-                value={form.repeatConfig[YearlyType.MONTH].month}
+                value={yearlyConfig[YearlyType.MONTH].month}
                 options={Array.from({ length: 12 }, (_, index) => index + 1).map((month) => ({
                   value: month,
                   label: t[`month.${month}`],
@@ -516,23 +551,23 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
                   emit({
                     repeatMode: RepeatMode.YEARLY,
                     repeatConfig: {
-                      ...form.repeatConfig,
+                      ...yearlyConfig,
                       [YearlyType.MONTH]: {
-                        ...form.repeatConfig[YearlyType.MONTH],
+                        ...yearlyConfig[YearlyType.MONTH],
                         month: month as number[],
                       },
                     },
                   })
                 }
               />
-              {renderMonthlyEditor(form.repeatConfig[YearlyType.MONTH], (monthlyConfig) =>
+              {renderMonthlyEditor(yearlyConfig[YearlyType.MONTH], (monthlyConfig) =>
                 emit({
                   repeatMode: RepeatMode.YEARLY,
                   repeatConfig: {
-                    ...form.repeatConfig,
+                    ...yearlyConfig,
                     [YearlyType.MONTH]: {
                       ...monthlyConfig,
-                      month: form.repeatConfig[YearlyType.MONTH].month,
+                      month: yearlyConfig[YearlyType.MONTH].month,
                     },
                   },
                 })
@@ -540,19 +575,19 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
             </>
           )}
 
-          {form.repeatConfig.yearlyType === YearlyType.ORDINAL_WEEK && (
+          {yearlyConfig.yearlyType === YearlyType.ORDINAL_WEEK && (
             <Flex gap={8} align="center" wrap>
               <span className={styles.label}>{t['repeat.everyYear']}</span>
               <Select
-                value={form.repeatConfig[YearlyType.ORDINAL_WEEK].ordinalWeek}
+                value={yearlyConfig[YearlyType.ORDINAL_WEEK].ordinalWeek}
                 options={ordinalWeekOptions.map((ordinal) => ({ value: ordinal, label: t[ordinalKeys[ordinal]] }))}
                 onChange={(ordinalWeek) =>
                   emit({
                     repeatMode: RepeatMode.YEARLY,
                     repeatConfig: {
-                      ...form.repeatConfig,
+                      ...yearlyConfig,
                       [YearlyType.ORDINAL_WEEK]: {
-                        ...form.repeatConfig[YearlyType.ORDINAL_WEEK],
+                        ...yearlyConfig[YearlyType.ORDINAL_WEEK],
                         ordinalWeek: ordinalWeek as OrdinalWeek,
                       },
                     },
@@ -562,15 +597,15 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
               <Select
                 className={styles.flexControl}
                 mode="multiple"
-                value={form.repeatConfig[YearlyType.ORDINAL_WEEK].ordinalWeekdays}
+                value={yearlyConfig[YearlyType.ORDINAL_WEEK].ordinalWeekdays}
                 options={weekdayOptions.map((weekday) => ({ value: weekday, label: t[weekdayKeys[weekday]] }))}
                 onChange={(ordinalWeekdays) =>
                   emit({
                     repeatMode: RepeatMode.YEARLY,
                     repeatConfig: {
-                      ...form.repeatConfig,
+                      ...yearlyConfig,
                       [YearlyType.ORDINAL_WEEK]: {
-                        ...form.repeatConfig[YearlyType.ORDINAL_WEEK],
+                        ...yearlyConfig[YearlyType.ORDINAL_WEEK],
                         ordinalWeekdays: ordinalWeekdays as WeekDay[],
                       },
                     },
@@ -656,39 +691,37 @@ export function RepeatSelector({ lang, value, onChange, onInvalid }: RepeatSelec
         </Flex>
       )}
 
-      {form.repeatMode !== RepeatMode.NONE && (
-        <Flex vertical gap={8}>
-          <Radio.Group value={endMode} onChange={(event) => updateEndMode(event.target.value as RepeatEndMode)}>
-            <Radio value={RepeatEndMode.FOREVER}>{t['repeat.end.forever']}</Radio>
-            <Radio value={RepeatEndMode.FOR_TIMES}>{t['repeat.end.forTimes']}</Radio>
-            <Radio value={RepeatEndMode.TO_DATE}>{t['repeat.end.toDate']}</Radio>
-          </Radio.Group>
+      <Flex vertical gap={8}>
+        <Radio.Group value={endMode} onChange={(event) => updateEndMode(event.target.value as RepeatEndMode)}>
+          <Radio value={RepeatEndMode.FOREVER}>{t['repeat.end.forever']}</Radio>
+          <Radio value={RepeatEndMode.FOR_TIMES}>{t['repeat.end.forTimes']}</Radio>
+          <Radio value={RepeatEndMode.TO_DATE}>{t['repeat.end.toDate']}</Radio>
+        </Radio.Group>
 
-          {endMode === RepeatEndMode.FOR_TIMES && (
-            <InputNumber
-              className={styles.control}
-              min={1}
-              max={999}
-              value={form.repeatTimes ?? 1}
-              prefix={t['repeat.end.timesPrefix']}
-              suffix={t['repeat.end.timesSuffix']}
-              onChange={(repeatTimes) =>
-                emit(form, { repeatEndMode: RepeatEndMode.FOR_TIMES, repeatTimes: Number(repeatTimes) || 1 })
-              }
-            />
-          )}
+        {endMode === RepeatEndMode.FOR_TIMES && (
+          <InputNumber
+            className={styles.control}
+            min={1}
+            max={999}
+            value={form.repeatTimes ?? 1}
+            prefix={t['repeat.end.timesPrefix']}
+            suffix={t['repeat.end.timesSuffix']}
+            onChange={(repeatTimes) =>
+              emit(form, { repeatEndMode: RepeatEndMode.FOR_TIMES, repeatTimes: Number(repeatTimes) || 1 })
+            }
+          />
+        )}
 
-          {endMode === RepeatEndMode.TO_DATE && (
-            <DatePicker
-              className={styles.control}
-              value={form.repeatEndDate ?? dayjs()}
-              onChange={(repeatEndDate) =>
-                emit(form, { repeatEndMode: RepeatEndMode.TO_DATE, repeatEndDate: repeatEndDate ?? dayjs() })
-              }
-            />
-          )}
-        </Flex>
-      )}
+        {endMode === RepeatEndMode.TO_DATE && (
+          <DatePicker
+            className={styles.control}
+            value={form.repeatEndDate ?? dayjs()}
+            onChange={(repeatEndDate) =>
+              emit(form, { repeatEndMode: RepeatEndMode.TO_DATE, repeatEndDate: repeatEndDate ?? dayjs() })
+            }
+          />
+        )}
+      </Flex>
     </Flex>
   );
 }

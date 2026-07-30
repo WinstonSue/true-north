@@ -105,4 +105,3 @@
 ## 6. 附录
 
 - 设计稿：参考 `apps/prototype/product-wiki/growth` 各模块的视图矩阵与交互描述。
-- 截图说明：目标详情页右上角状态 Tag + “已完成”按钮 + `...` 操作菜单![目标详情页截图](./A9B9A91B-B4EB-44A7-84BA-FECE4363EFC9.jpg)

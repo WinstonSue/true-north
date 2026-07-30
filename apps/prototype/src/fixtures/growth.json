@@ -17,7 +17,7 @@
     { "id": "habit-h1-2026-07-27", "title": "睡前阅读 30 分钟", "description": "由习惯“睡前阅读 30 分钟”的周期执行自动生成。", "habitId": "h1", "status": "todo", "importance": 4, "urgency": 4, "planned": "2026-07-27", "plannedStartTime": "21:00", "plannedEndTime": "21:30", "history": ["2026-07-27 由习惯周期生成"] }
   ],
   "habits": [
-    { "id": "h1", "title": "睡前阅读 30 分钟", "goalIds": ["g4"], "status": "active", "importance": 4, "difficulty": 2, "weights": { "g4": 4 }, "frequency": { "mode": "daily", "weekdays": [], "monthlyDay": 1 }, "tags": ["阅读", "晚间"], "streak": 12, "longest": 21, "logs": [{ "date": "2026-07-26", "completed": true }] },
-    { "id": "h2", "title": "每日产品复盘", "goalIds": ["g3"], "status": "active", "importance": 5, "difficulty": 3, "weights": { "g3": 5 }, "frequency": { "mode": "weekdays", "weekdays": [], "monthlyDay": 1 }, "tags": ["产品", "复盘"], "streak": 6, "longest": 14, "logs": [] }
+    { "id": "h1", "title": "睡前阅读 30 分钟", "goalIds": ["g4"], "status": "active", "importance": 4, "difficulty": 2, "repeat": { "repeatMode": "daily", "repeatEndMode": "forever", "repeatStartDate": "2026-07-01" }, "streak": 12, "longest": 21, "logs": [{ "date": "2026-07-26", "completed": true }] },
+    { "id": "h2", "title": "每日产品复盘", "goalIds": ["g3"], "status": "active", "importance": 5, "difficulty": 3, "repeat": { "repeatMode": "weekdays", "repeatEndMode": "forever", "repeatStartDate": "2026-07-01" }, "streak": 6, "longest": 14, "logs": [] }
   ]
 }

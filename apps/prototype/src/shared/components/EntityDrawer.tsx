@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import dayjs, { type Dayjs } from 'dayjs';
 import {
   Alert,
   Button,
-  Checkbox,
   Col,
   DatePicker,
   Drawer,
@@ -15,9 +14,12 @@ import {
   Row,
   Select,
   Slider,
+  Switch,
   Tag,
   TimePicker,
 } from '@sue/design-web-react';
+import { createDefaultRepeatSetting, RepeatSelector, type RepeatSelectorValue } from '@true-north/components-repeat';
+import { RepeatMode } from '@true-north/components-repeat/types';
 import { goalTypes, NEXT_DAY, TODAY } from '../mock-data';
 import { productRef } from '../../product-wiki';
 import type {
@@ -26,14 +28,14 @@ import type {
   Goal,
   GoalStatus,
   Habit,
-  HabitFrequency,
   SaveEntity,
   Task,
   TaskStatus,
   Todo,
   TodoStatus,
 } from '../types';
-import { frequencyLabel, goalName, statusLabel } from '../utils';
+import { asTodoRepeat } from '../repeat';
+import { statusLabel } from '../utils';
 import styles from './EntityDrawer.module.css';
 
 type Props = {
@@ -58,8 +60,10 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, onClose, onS
           : habits.find((item) => item.id === drawer.id);
   const [draft, setDraft] = useState<Goal | Task | Todo | Habit>(() => existing || createDraft(drawer.kind, goals));
   const [error, setError] = useState('');
+  const [repeatError, setRepeatError] = useState('');
   const patch = (value: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...value }) as typeof draft);
   const submit = () => {
+    if (repeatError) return setError(repeatError);
     const entity = !existing && drawer.kind === 'task' ? ({ ...draft, status: 'todo' } as Task) : draft;
     const validation = validateDraft(drawer.kind, entity, goals, tasks);
     if (validation) return setError(validation);
@@ -115,9 +119,12 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, onClose, onS
               tasks={tasks}
               habits={habits}
               isNew={!existing}
+              onRepeatInvalid={setRepeatError}
             />
           )}
-          {drawer.kind === 'habit' && <HabitFields draft={draft as Habit} patch={patch} goals={goals} />}
+          {drawer.kind === 'habit' && (
+            <HabitFields draft={draft as Habit} patch={patch} goals={goals} onRepeatInvalid={setRepeatError} />
+          )}
           {error && <Alert type="error" showIcon title={error} />}
         </Form>
       </div>
@@ -166,7 +173,7 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
       urgency: 3,
       planned: TODAY,
       plannedStartTime: '09:00',
-      plannedEndTime: '10:00',
+      plannedEndTime: '09:00',
       history: ['刚刚创建'],
     };
   return {
@@ -176,9 +183,7 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
     status: 'active',
     importance: 3,
     difficulty: 2,
-    weights: goals.length ? { [goals[0].id]: 3 } : {},
-    frequency: { mode: 'daily', weekdays: [], monthlyDay: 1 },
-    tags: [],
+    repeat: createDefaultRepeatSetting(TODAY),
     streak: 0,
     longest: 0,
     logs: [],
@@ -216,8 +221,8 @@ function validateDraft(kind: DrawerKind, draft: Goal | Task | Todo | Habit, goal
   }
   if (kind === 'todo') {
     const item = draft as Todo;
-    if (!item.plannedStartTime || !item.plannedEndTime || item.plannedStartTime >= item.plannedEndTime)
-      return '计划结束时间必须晚于开始时间';
+    if (!item.plannedStartTime || !item.plannedEndTime || item.plannedStartTime > item.plannedEndTime)
+      return '计划结束时间不能早于开始时间';
     const sourceCount = [item.taskId, item.goalId, item.habitId].filter(Boolean).length;
     if (sourceCount > 1) return '系统待办只能关联一个来源';
     const parent = item.taskId
@@ -231,9 +236,7 @@ function validateDraft(kind: DrawerKind, draft: Goal | Task | Todo | Habit, goal
     if (!item.goalIds.length) return '习惯至少需要关联一个目标';
     const related = goals.filter((goal) => item.goalIds.includes(goal.id));
     if (related.some((goal) => item.difficulty > goal.difficulty)) return '习惯难度不能高于任一关联目标';
-    if (Object.values(item.weights).reduce((sum, value) => sum + value, 0) > item.goalIds.length * 10)
-      return '贡献权重总和超出目标数量上限';
-    if (item.frequency.mode === 'weekly' && !item.frequency.weekdays.length) return '每周执行至少选择一天';
+    if (item.repeat.repeatMode === RepeatMode.NONE) return '习惯必须设置重复规则';
   }
   return undefined;
 }
@@ -274,20 +277,76 @@ function timeOf(value: string): Dayjs {
   const [hour, minute] = value.split(':').map(Number);
   return dayjs().hour(hour).minute(minute).second(0);
 }
-function TimeRangeField({ start, end, onChange }: { start: string; end: string; onChange: (start: string, end: string) => void }) {
+function toTimeMinutes(value: string): number {
+  const [hour, minute] = value.split(':').map(Number);
+  return hour * 60 + minute;
+}
+function timeFromMinutes(value: number): string {
+  const hour = Math.floor(value / 60);
+  const minute = value % 60;
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+function defaultTimeRange(point: string) {
+  const latest = 23 * 60 + 55;
+  const start = toTimeMinutes(point);
+  const end = Math.min(start + 60, latest);
+  if (end > start) return { start: point, end: timeFromMinutes(end) };
+  return { start: timeFromMinutes(latest - 60), end: timeFromMinutes(latest) };
+}
+function PlannedTimeField({
+  start,
+  end,
+  onChange,
+}: {
+  start: string;
+  end: string;
+  onChange: (start: string, end: string) => void;
+}) {
+  const isRange = start !== end;
   return (
     <Form.Item label="计划时间" required>
-      <TimePicker.RangePicker
-        allowClear={false}
-        format="HH:mm"
-        minuteStep={5}
-        value={[timeOf(start), timeOf(end)]}
-        style={{ width: '100%' }}
-        onChange={(range) => {
-          if (!range?.[0] || !range[1]) return;
-          onChange(range[0].format('HH:mm'), range[1].format('HH:mm'));
-        }}
-      />
+      <Flex vertical gap={8}>
+        <Radio.Group
+          optionType="button"
+          value={isRange ? 'range' : 'point'}
+          onChange={(event) => {
+            if (event.target.value === 'point') return onChange(start, start);
+            const range = defaultTimeRange(start);
+            onChange(range.start, range.end);
+          }}
+        >
+          <Radio value="point">时间点</Radio>
+          <Radio value="range">时间范围</Radio>
+        </Radio.Group>
+        {isRange ? (
+          <TimePicker.RangePicker
+            allowClear={false}
+            format="HH:mm"
+            minuteStep={5}
+            value={[timeOf(start), timeOf(end)]}
+            style={{ width: '100%' }}
+            onChange={(range) => {
+              if (!range?.[0] || !range[1]) return;
+              const nextStart = range[0].format('HH:mm');
+              const nextEnd = range[1].format('HH:mm');
+              if (nextStart < nextEnd) onChange(nextStart, nextEnd);
+            }}
+          />
+        ) : (
+          <TimePicker
+            allowClear={false}
+            format="HH:mm"
+            minuteStep={5}
+            value={timeOf(start)}
+            style={{ width: '100%' }}
+            onChange={(time) => {
+              if (!time) return;
+              const point = time.format('HH:mm');
+              onChange(point, point);
+            }}
+          />
+        )}
+      </Flex>
     </Form.Item>
   );
 }
@@ -312,7 +371,9 @@ function GoalFields({ draft, patch, goals }: { draft: Goal; patch: (value: Parti
           <Select
             allowClear
             value={draft.parentId}
-            options={goals.filter((goal) => goal.id !== draft.id).map((goal) => ({ value: goal.id, label: goal.title }))}
+            options={goals
+              .filter((goal) => goal.id !== draft.id)
+              .map((goal) => ({ value: goal.id, label: goal.title }))}
             onChange={(value) => updateParent(value as string | undefined)}
           />
         </Form.Item>
@@ -428,7 +489,11 @@ function TaskFields({
           />
         </Col>
         <Col span={12}>
-          <DateField label="计划开始时间" value={draft.plannedStart} onChange={(plannedStart) => patch({ plannedStart })} />
+          <DateField
+            label="计划开始时间"
+            value={draft.plannedStart}
+            onChange={(plannedStart) => patch({ plannedStart })}
+          />
         </Col>
         <Col span={12}>
           <DateField label="计划结束时间" value={draft.plannedEnd} onChange={(plannedEnd) => patch({ plannedEnd })} />
@@ -488,6 +553,7 @@ function TodoFields({
   tasks,
   habits,
   isNew,
+  onRepeatInvalid,
 }: {
   draft: Todo;
   patch: (value: Partial<Todo>) => void;
@@ -495,7 +561,10 @@ function TodoFields({
   tasks: Task[];
   habits: Habit[];
   isNew: boolean;
+  onRepeatInvalid: (message: string) => void;
 }) {
+  const disabledRepeatRef = useRef<Todo['repeat']>(undefined);
+  const repeatSetting = draft.repeat;
   const sourceName = draft.taskId
     ? `任务 · ${tasks.find((task) => task.id === draft.taskId)?.title || '已删除任务'}`
     : draft.goalId
@@ -517,11 +586,52 @@ function TodoFields({
         <Col span={12}>
           <ImportanceControl label="紧急程度" value={draft.urgency} onChange={(urgency) => patch({ urgency })} />
         </Col>
-        <Col span={12}>
-          <DateField label="计划日期" value={draft.planned} onChange={(planned) => patch({ planned })} />
-        </Col>
-        <Col span={12}>
-          <TimeRangeField
+        {!sourceName && (
+          <Col span={24}>
+            <div className={styles.repeatControl} data-product-ref={productRef('growth.repeat.interaction')}>
+              <Flex align="center" justify="space-between">
+                <span>重复</span>
+                <Switch
+                  checked={Boolean(draft.repeat)}
+                  onChange={(enabled) => {
+                    onRepeatInvalid('');
+                    if (!enabled) {
+                      disabledRepeatRef.current = draft.repeat;
+                      patch({ repeat: undefined });
+                      return;
+                    }
+                    patch({
+                      repeat: disabledRepeatRef.current ?? asTodoRepeat(createDefaultRepeatSetting(draft.planned)),
+                    });
+                  }}
+                />
+              </Flex>
+              {repeatSetting && (
+                <RepeatSelector
+                  lang="zh-CN"
+                  value={repeatSetting as RepeatSelectorValue}
+                  onChange={(setting) => {
+                    onRepeatInvalid('');
+                    const repeat = asTodoRepeat(setting, draft.repeat?.settledTimes);
+                    disabledRepeatRef.current = repeat;
+                    patch({
+                      repeat,
+                      planned: draft.repeat?.settledTimes ? draft.planned : repeat.repeatStartDate,
+                    });
+                  }}
+                  onInvalid={() => onRepeatInvalid('请完成有效的重复规则后再保存')}
+                />
+              )}
+            </div>
+          </Col>
+        )}
+        {!draft.repeat && (
+          <Col span={24}>
+            <DateField label="计划日期" value={draft.planned} onChange={(planned) => patch({ planned })} />
+          </Col>
+        )}
+        <Col span={24}>
+          <PlannedTimeField
             start={draft.plannedStartTime}
             end={draft.plannedEndTime}
             onChange={(plannedStartTime, plannedEndTime) => patch({ plannedStartTime, plannedEndTime })}
@@ -532,7 +642,10 @@ function TodoFields({
         <Form.Item label="状态">
           <Select
             value={draft.status}
-            options={['todo', 'in_progress', 'done', 'abandoned'].map((value) => ({ value, label: statusLabel(value) }))}
+            options={['todo', 'in_progress', 'done', 'abandoned'].map((value) => ({
+              value,
+              label: statusLabel(value),
+            }))}
             onChange={(value) => patch({ status: value as TodoStatus })}
           />
         </Form.Item>
@@ -543,7 +656,18 @@ function TodoFields({
     </>
   );
 }
-function HabitFields({ draft, patch, goals }: { draft: Habit; patch: (value: Partial<Habit>) => void; goals: Goal[] }) {
+function HabitFields({
+  draft,
+  patch,
+  goals,
+  onRepeatInvalid,
+}: {
+  draft: Habit;
+  patch: (value: Partial<Habit>) => void;
+  goals: Goal[];
+  onRepeatInvalid: (message: string) => void;
+}) {
+  const repeatSetting = draft.repeat;
   return (
     <>
       <Form.Item label="关联目标" required>
@@ -553,10 +677,7 @@ function HabitFields({ draft, patch, goals }: { draft: Habit; patch: (value: Par
           options={goals
             .filter((goal) => goal.status !== 'archived')
             .map((goal) => ({ value: goal.id, label: goal.title }))}
-          onChange={(goalIds) => {
-            const ids = goalIds as string[];
-            patch({ goalIds: ids, weights: Object.fromEntries(ids.map((id) => [id, draft.weights[id] || 3])) });
-          }}
+          onChange={(goalIds) => patch({ goalIds: goalIds as string[] })}
         />
       </Form.Item>
       <Row gutter={12}>
@@ -571,23 +692,17 @@ function HabitFields({ draft, patch, goals }: { draft: Habit; patch: (value: Par
           />
         </Col>
       </Row>
-      <HabitFrequencyFields
-        value={draft.frequency}
-        onChange={(frequency) => patch({ frequency })}
-      />
-      <Form.Item label="贡献权重">
-        <div className={styles.weightList}>
-          {draft.goalIds.map((id) => (
-            <Flex key={id} align="center" gap={10}>
-              <span>{goalName(goals, id)}</span>
-              <Slider
-                min={1}
-                max={10}
-                value={draft.weights[id] || 1}
-                onChange={(value) => patch({ weights: { ...draft.weights, [id]: Number(value) } })}
-              />
-            </Flex>
-          ))}
+      <Form.Item label="执行规则" required>
+        <div className={styles.repeatControl} data-product-ref={productRef('growth.repeat.interaction')}>
+          <RepeatSelector
+            lang="zh-CN"
+            value={repeatSetting as RepeatSelectorValue}
+            onChange={(setting) => {
+              onRepeatInvalid('');
+              patch({ repeat: setting });
+            }}
+            onInvalid={() => onRepeatInvalid('请完成有效的重复规则后再保存')}
+          />
         </div>
       </Form.Item>
       <Form.Item label="状态">
@@ -596,16 +711,9 @@ function HabitFields({ draft, patch, goals }: { draft: Habit; patch: (value: Par
           options={['active', 'paused', 'completed', 'abandoned'].map((value) => ({
             value,
             label: statusLabel(value),
+            disabled: value === 'completed',
           }))}
           onChange={(status) => patch({ status: status as Habit['status'] })}
-        />
-      </Form.Item>
-      <Form.Item label="标签">
-        <Select
-          mode="tags"
-          value={draft.tags}
-          onChange={(tags) => patch({ tags: tags as string[] })}
-          placeholder="输入后回车创建标签"
         />
       </Form.Item>
       <Alert
@@ -613,56 +721,6 @@ function HabitFields({ draft, patch, goals }: { draft: Habit; patch: (value: Par
         showIcon
         title={`当前连续 ${draft.streak} 天、最长 ${draft.longest} 天与日志为计算字段，仅通过打卡更新。`}
       />
-    </>
-  );
-}
-
-function HabitFrequencyFields({
-  value,
-  onChange,
-}: {
-  value: HabitFrequency;
-  onChange: (frequency: HabitFrequency) => void;
-}) {
-  return (
-    <>
-      <Form.Item label="执行频率">
-        <Select
-          value={value.mode}
-          options={[
-            ['daily', '每天'],
-            ['weekly', '每周'],
-            ['monthly', '每月'],
-            ['weekdays', '工作日'],
-            ['weekend', '周末'],
-            ['workdays', '法定工作日'],
-          ].map(([mode, label]) => ({ value: mode, label }))}
-          onChange={(mode) => onChange({ ...value, mode: mode as HabitFrequency['mode'] })}
-        />
-      </Form.Item>
-      {value.mode === 'weekly' && (
-        <Form.Item label="执行星期" required>
-          <Checkbox.Group
-            value={value.weekdays}
-            options={['周一', '周二', '周三', '周四', '周五', '周六', '周日'].map((label, index) => ({
-              label,
-              value: index + 1,
-            }))}
-            onChange={(weekdays) => onChange({ ...value, weekdays: weekdays as number[] })}
-          />
-        </Form.Item>
-      )}
-      {value.mode === 'monthly' && (
-        <Form.Item label="每月日期">
-          <InputNumber
-            min={1}
-            max={31}
-            value={value.monthlyDay}
-            onChange={(monthlyDay) => onChange({ ...value, monthlyDay: Number(monthlyDay) || 1 })}
-          />
-        </Form.Item>
-      )}
-      <Alert type="info" showIcon title={`频率预览：${frequencyLabel(value)}`} />
     </>
   );
 }

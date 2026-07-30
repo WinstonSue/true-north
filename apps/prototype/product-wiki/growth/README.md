@@ -7,15 +7,8 @@
 - 类型：domain
 - 产品状态：路线图
 - 原型覆盖：完整覆盖
-- 最近变更：v0.1.0 2026-07-28: 建立 ProductWiki 结构化基线。
 - 产品定位：围绕目标、任务、待办、习惯与时间追踪形成个人成长闭环。
 - 依赖：`global`
-
-### 对象变更记录
-
-| 对象 | 版本 | 日期 | 事件 | 产品状态 | 原型覆盖 | 摘要 |
-| --- | --- | --- | --- | --- | --- |
-| 模块 | v0.1.0 | 2026-07-28 | baseline | 路线图 | 完整覆盖 | 建立 ProductWiki 结构化基线。 |
 
 <!-- product-wiki:managed:end -->
 
@@ -41,6 +34,7 @@
 - [任务管理](./task/README.md)：安排阶段性工作。
 - [待办管理](./todo/README.md)：完成今日和近期动作。
 - [习惯管理](./habit/README.md)：维持重复投入。
+- [重复规则](./repeat/README.md)：统一安排重复行为与周期待办。
 - [专注与时间追踪](./track-time/README.md)：记录投入证据。
 
 对应实现资料见 [Growth TechnicalWiki](../../../../doc/TechnicalWiki/growth/README.md)。

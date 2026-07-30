@@ -1,6 +1,8 @@
 import { extractProductReference } from './resolver';
 import type { ProductRef } from './reference';
-import type { ProductSpec, ResolvedProductReference } from './types';
+import productChangeLog from '../../product-wiki/changelog.json';
+import type { ProductChangeLog, ProductChangeLogEntry, ProductSpec, ResolvedProductReference } from './types';
+import { featureKey, getProductVersionChanges, getProductVersions, latestProductChange } from './version-history';
 
 const specificationModules = import.meta.glob('../../product-wiki/**/spec.json', { eager: true, import: 'default' });
 const documentModules = import.meta.glob('../../product-wiki/**/README.md', {
@@ -11,6 +13,12 @@ const documentModules = import.meta.glob('../../product-wiki/**/README.md', {
 
 export const productSpecs = Object.values(specificationModules) as ProductSpec[];
 export const productSpecsById = new Map(productSpecs.map((spec) => [spec.id, spec]));
+export const productHistory = productChangeLog as ProductChangeLog;
+export const productVersions = getProductVersions(productHistory);
+
+export function productVersionChanges(version: string): readonly ProductChangeLogEntry[] {
+  return getProductVersionChanges(productHistory, version);
+}
 
 export function productEnumValues(moduleId: string, entityId: string, fieldId: string): readonly string[] {
   return productSpecsById.get(moduleId)?.entities?.find((entity) => entity.id === entityId)?.fields.find((field) => field.id === fieldId)?.values || [];
@@ -35,15 +43,31 @@ export function resolveProductReference(reference: ProductRef): ResolvedProductR
       prototypeCoverage: spec.views?.find((view) => view.reference === entry.id)?.prototypeCoverage
         ?? spec.rules?.find((rule) => rule.reference === entry.id)?.prototypeCoverage
         ?? spec.prototypeCoverage,
-      latestChange: (spec.views?.find((view) => view.reference === entry.id)?.changeLog
-        ?? spec.rules?.find((rule) => rule.reference === entry.id)?.changeLog
-        ?? spec.changeLog).at(-1)!,
+      latestChange: latestProductChange(productHistory, featureKeysForReference(spec, entry.id)),
     };
   }
   return undefined;
 }
 
+function featureKeysForReference(specification: ProductSpec, reference: string): readonly string[] {
+  const view = specification.views?.find((item) => item.reference === reference);
+  if (view) return [featureKey(specification.id, 'view', view.id)];
+  const rule = specification.rules?.find((item) => item.reference === reference);
+  if (rule) return [featureKey(specification.id, 'rule', rule.id)];
+  return [featureKey(specification.id, 'module', specification.id)];
+}
+
 export function findProductReferenceForElement(element: Element) {
-  const reference = element.closest<HTMLElement>('[data-product-ref]')?.dataset.productRef;
-  return reference ? resolveProductReference(reference as ProductRef) : undefined;
+  return findProductReferenceTargetForElement(element)?.productReference;
+}
+
+export function findProductReferenceTargetForElement(element: Element) {
+  let candidate: Element | null = element;
+  while (candidate) {
+    const reference = candidate.getAttribute('data-product-ref');
+    const productReference = reference ? resolveProductReference(reference as ProductRef) : undefined;
+    if (productReference) return { element: candidate, productReference };
+    candidate = candidate.parentElement;
+  }
+  return undefined;
 }

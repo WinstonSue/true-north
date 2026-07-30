@@ -1,0 +1,1267 @@
+{
+  "changes": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 ProductWiki 结构化基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "global:module:global",
+        "scope": "module",
+        "moduleId": "global",
+        "moduleTitle": "True North ProductWiki",
+        "name": "True North ProductWiki"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立产品对象基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "global:entity:user",
+        "scope": "entity",
+        "moduleId": "global",
+        "moduleTitle": "True North ProductWiki",
+        "name": "用户"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "global:field:user.role",
+        "scope": "field",
+        "moduleId": "global",
+        "moduleTitle": "True North ProductWiki",
+        "name": "角色",
+        "parentName": "用户"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "global:rule:global.relationships",
+        "scope": "rule",
+        "moduleId": "global",
+        "moduleTitle": "True North ProductWiki",
+        "name": "成长实体关联",
+        "reference": "global.rules"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 ProductWiki 结构化基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:module:growth.goal",
+        "scope": "module",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "目标管理"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立产品对象基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:entity:goal",
+        "scope": "entity",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "目标"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:field:goal.type",
+        "scope": "field",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "类型",
+        "parentName": "目标"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:field:goal.status",
+        "scope": "field",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "状态",
+        "parentName": "目标"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:field:goal.importance",
+        "scope": "field",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "重要度",
+        "parentName": "目标"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:field:goal.difficulty",
+        "scope": "field",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "难度",
+        "parentName": "目标"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:field:goal.parentId",
+        "scope": "field",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "父目标",
+        "parentName": "目标"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.goal:view:tree",
+        "scope": "view",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "目标树",
+        "reference": "growth.goal.view.tree"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.goal:view:detail",
+        "scope": "view",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "目标详情",
+        "reference": "growth.goal.view.detail"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.goal:view:mindmap",
+        "scope": "view",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "目标脑图",
+        "reference": "growth.goal.view.mindmap"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 roadmap 视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "none",
+      "feature": {
+        "key": "growth.goal:view:dashboard",
+        "scope": "view",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "目标健康面板",
+        "reference": "growth.goal.view.dashboard"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.goal:rule:time-frame",
+        "scope": "rule",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "时间范围",
+        "reference": "growth.goal.rule.time-frame"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.goal:rule:type",
+        "scope": "rule",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "类型规则",
+        "reference": "growth.goal.rule.type"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.goal:rule:priority-inheritance",
+        "scope": "rule",
+        "moduleId": "growth.goal",
+        "moduleTitle": "目标管理",
+        "name": "优先级继承",
+        "reference": "growth.goal.rule.priority-inheritance"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 ProductWiki 结构化基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.habit:module:growth.habit",
+        "scope": "module",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "习惯管理"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立产品对象基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.habit:entity:habit",
+        "scope": "entity",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "习惯"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.habit:field:habit.goalIds",
+        "scope": "field",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "关联目标",
+        "parentName": "习惯"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.habit:field:habit.status",
+        "scope": "field",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "状态",
+        "parentName": "习惯"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.habit:field:habit.repeat",
+        "scope": "field",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "重复规则",
+        "parentName": "习惯"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "changed",
+      "summary": "接入统一重复规则组件并补充开始日期与结束条件。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.habit:field:habit.repeat",
+        "scope": "field",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "重复规则",
+        "parentName": "习惯"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-29",
+      "event": "baseline",
+      "summary": "补充周期待办与二值打卡基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.habit:field:habit.cycleTodo",
+        "scope": "field",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "周期待办",
+        "parentName": "习惯"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.habit:view:list",
+        "scope": "view",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "习惯列表",
+        "reference": "growth.habit.view.list"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.habit:view:detail",
+        "scope": "view",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "习惯详情",
+        "reference": "growth.habit.view.detail"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.habit:view:statistics",
+        "scope": "view",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "习惯统计",
+        "reference": "growth.habit.view.statistics"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 roadmap 视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "none",
+      "feature": {
+        "key": "growth.habit:view:calendar",
+        "scope": "view",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "打卡日历",
+        "reference": "growth.habit.view.calendar"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.habit:rule:goal-required",
+        "scope": "rule",
+        "moduleId": "growth.habit",
+        "moduleTitle": "习惯管理",
+        "name": "目标必填",
+        "reference": "growth.habit.rule.goal-required"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立重复规则 ProductWiki 模块。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.repeat:module:growth.repeat",
+        "scope": "module",
+        "moduleId": "growth.repeat",
+        "moduleTitle": "重复规则",
+        "name": "重复规则"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立统一重复规则对象。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.repeat:entity:repeat-rule",
+        "scope": "entity",
+        "moduleId": "growth.repeat",
+        "moduleTitle": "重复规则",
+        "name": "重复规则"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立重复规则开始日期。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.repeat:field:repeat-rule.repeatStartDate",
+        "scope": "field",
+        "moduleId": "growth.repeat",
+        "moduleTitle": "重复规则",
+        "name": "开始日期",
+        "parentName": "重复规则"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立重复模式枚举。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.repeat:field:repeat-rule.repeatMode",
+        "scope": "field",
+        "moduleId": "growth.repeat",
+        "moduleTitle": "重复规则",
+        "name": "重复模式",
+        "parentName": "重复规则"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立重复结束条件。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.repeat:field:repeat-rule.repeatEndMode",
+        "scope": "field",
+        "moduleId": "growth.repeat",
+        "moduleTitle": "重复规则",
+        "name": "结束条件",
+        "parentName": "重复规则"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立规则校验约束。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.repeat:rule:valid-configuration",
+        "scope": "rule",
+        "moduleId": "growth.repeat",
+        "moduleTitle": "重复规则",
+        "name": "配置有效性",
+        "reference": "growth.repeat.rule.valid-configuration"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立模板生命周期规则。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.repeat:rule:template-lifecycle",
+        "scope": "rule",
+        "moduleId": "growth.repeat",
+        "moduleTitle": "重复规则",
+        "name": "模板推进",
+        "reference": "growth.repeat.rule.template-lifecycle"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 ProductWiki 结构化基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth:module:growth",
+        "scope": "module",
+        "moduleId": "growth",
+        "moduleTitle": "个人成长系统",
+        "name": "个人成长系统"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 ProductWiki 结构化基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.task:module:growth.task",
+        "scope": "module",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "任务管理"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立产品对象基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.task:entity:task",
+        "scope": "entity",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "任务"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.task:field:task.goalId",
+        "scope": "field",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "关联目标",
+        "parentName": "任务"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.task:field:task.parentId",
+        "scope": "field",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "父任务",
+        "parentName": "任务"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.task:field:task.status",
+        "scope": "field",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "状态",
+        "parentName": "任务"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "changed",
+      "summary": "移除受阻状态。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.task:field:task.status",
+        "scope": "field",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "状态",
+        "parentName": "任务"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.task:field:task.estimated",
+        "scope": "field",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "预计耗时",
+        "parentName": "任务"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-29",
+      "event": "baseline",
+      "summary": "建立今日任务视图。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:view:today",
+        "scope": "view",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "今日任务",
+        "reference": "growth.task.view.today"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:view:week",
+        "scope": "view",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "本周任务",
+        "reference": "growth.task.view.week"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:view:all",
+        "scope": "view",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "全部任务",
+        "reference": "growth.task.view.all"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-29",
+      "event": "baseline",
+      "summary": "建立任务执行概览。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:view:statistics",
+        "scope": "view",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "任务统计",
+        "reference": "growth.task.view.statistics"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:view:calendar",
+        "scope": "view",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "月度排程",
+        "reference": "growth.task.view.calendar"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 prototype 抽屉覆盖基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:view:detail",
+        "scope": "view",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "任务详情",
+        "reference": "growth.task.view.detail"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:rule:single-parent",
+        "scope": "rule",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "关联互斥",
+        "reference": "growth.task.rule.single-parent"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.task:rule:time-inheritance",
+        "scope": "rule",
+        "moduleId": "growth.task",
+        "moduleTitle": "任务管理",
+        "name": "时间继承",
+        "reference": "growth.task.rule.time-inheritance"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立 ProductWiki 结构化基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:module:growth.todo",
+        "scope": "module",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "待办管理"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立产品对象基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:entity:todo",
+        "scope": "entity",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:field:todo.relatedType",
+        "scope": "field",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "创建来源",
+        "parentName": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:field:todo.importance",
+        "scope": "field",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "重要性",
+        "parentName": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立待办日内计划开始时间字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:field:todo.plannedStartTime",
+        "scope": "field",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "计划开始时间",
+        "parentName": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立待办日内计划结束时间字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:field:todo.plannedEndTime",
+        "scope": "field",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "计划结束时间",
+        "parentName": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:field:todo.urgency",
+        "scope": "field",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "紧急性",
+        "parentName": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:field:todo.status",
+        "scope": "field",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "状态",
+        "parentName": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "接入周期待办模板与结算次数。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:field:todo.repeat",
+        "scope": "field",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "重复规则",
+        "parentName": "待办"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.todo:view:today",
+        "scope": "view",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "今日待办",
+        "reference": "growth.todo.view.today"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.todo:view:week",
+        "scope": "view",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "本周待办",
+        "reference": "growth.todo.view.week"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.todo:view:calendar",
+        "scope": "view",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "待办日历",
+        "reference": "growth.todo.view.calendar"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.todo:view:all",
+        "scope": "view",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "全部待办",
+        "reference": "growth.todo.view.all"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.todo:view:statistics",
+        "scope": "view",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "待办统计",
+        "reference": "growth.todo.view.statistics"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.todo:rule:related-inheritance",
+        "scope": "rule",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "关联约束继承",
+        "reference": "growth.todo.rule.related-inheritance"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.todo:rule:batch-limit",
+        "scope": "rule",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "批量操作上限",
+        "reference": "growth.todo.rule.batch-limit"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-30",
+      "event": "baseline",
+      "summary": "建立周期待办模板推进规则。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.todo:rule:repeat-template",
+        "scope": "rule",
+        "moduleId": "growth.todo",
+        "moduleTitle": "待办管理",
+        "name": "周期待办模板推进",
+        "reference": "growth.todo.rule.repeat-template"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立专注计时原型基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.track-time:module:growth.track-time",
+        "scope": "module",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "专注与时间追踪"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-29",
+      "event": "changed",
+      "summary": "将专注计时调整为可从顶栏和任务唤起的全局组件。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.track-time:module:growth.track-time",
+        "scope": "module",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "专注与时间追踪"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立专注记录对象基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.track-time:entity:track-time",
+        "scope": "entity",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "专注记录"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-29",
+      "event": "changed",
+      "summary": "全局计时器支持任务关联与独立专注记录。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.track-time:entity:track-time",
+        "scope": "entity",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "专注记录"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立关联任务字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": {
+        "key": "growth.track-time:field:track-time.taskId",
+        "scope": "field",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "关联任务",
+        "parentName": "专注记录"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-29",
+      "event": "changed",
+      "summary": "全局计时器支持选择或清空关联任务。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.track-time:field:track-time.taskId",
+        "scope": "field",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "关联任务",
+        "parentName": "专注记录"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立专注时长字段基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.track-time:field:track-time.minutes",
+        "scope": "field",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "专注时长",
+        "parentName": "专注记录"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立专注计时视图基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.track-time:view:focus",
+        "scope": "view",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "专注计时",
+        "reference": "growth.track-time.overview"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-29",
+      "event": "changed",
+      "summary": "以全局迷你浮层和全屏模式替代独立计时页面。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.track-time:view:focus",
+        "scope": "view",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "专注计时",
+        "reference": "growth.track-time.overview"
+      }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-28",
+      "event": "baseline",
+      "summary": "建立任务关联规则基线。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": {
+        "key": "growth.track-time:rule:task-optional",
+        "scope": "rule",
+        "moduleId": "growth.track-time",
+        "moduleTitle": "专注与时间追踪",
+        "name": "任务可选关联",
+        "reference": "growth.track-time.rule.task-optional"
+      }
+    }
+  ]
+}

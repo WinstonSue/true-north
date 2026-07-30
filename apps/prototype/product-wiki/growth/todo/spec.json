@@ -9,7 +9,8 @@
   "dependencies": [
     "growth.goal",
     "growth.task",
-    "growth.habit"
+    "growth.habit",
+    "growth.repeat"
   ],
   "entities": [
     {
@@ -29,17 +30,7 @@
           ],
           "description": "手动创建的待办固定为独立事项；仅系统生成待办可关联目标、任务或习惯，且只能有一个来源。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "importance",
@@ -48,55 +39,25 @@
           "required": true,
           "description": "1 至 5，参与优先级矩阵。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "plannedStartTime",
           "name": "计划开始时间",
           "type": "time",
           "required": true,
-          "description": "待办在计划日期内的开始时间，格式为 HH:mm。",
+          "description": "待办在计划日期内的开始时间，格式为 HH:mm；与计划结束时间相等时表示一个时间点。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.1",
-              "date": "2026-07-30",
-              "event": "baseline",
-              "summary": "建立待办日内计划开始时间字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "plannedEndTime",
           "name": "计划结束时间",
           "type": "time",
           "required": true,
-          "description": "待办在计划日期内的结束时间，必须晚于计划开始时间，格式为 HH:mm。",
+          "description": "待办在计划日期内的结束时间，格式为 HH:mm；等于开始时间表示时间点，作为时间范围时必须晚于开始时间。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.1",
-              "date": "2026-07-30",
-              "event": "baseline",
-              "summary": "建立待办日内计划结束时间字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "urgency",
@@ -105,17 +66,7 @@
           "required": true,
           "description": "1 至 5，参与优先级矩阵。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
+          "prototypeCoverage": "complete"
         },
         {
           "id": "status",
@@ -130,31 +81,20 @@
           ],
           "description": "待办执行状态。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "complete",
-          "changeLog": [
-            {
-              "version": "v0.1.0",
-              "date": "2026-07-28",
-              "event": "baseline",
-              "summary": "建立字段基线。",
-              "productStatus": "roadmap",
-              "prototypeCoverage": "complete"
-            }
-          ]
-        }
-      ],
-      "productStatus": "roadmap",
-      "prototypeCoverage": "complete",
-      "changeLog": [
+          "prototypeCoverage": "complete"
+        },
         {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立产品对象基线。",
+          "id": "repeat",
+          "name": "重复规则",
+          "type": "object",
+          "required": false,
+          "description": "独立待办可选用统一重复规则；启用后作为单模板推进当前实例并记录已结算次数。",
           "productStatus": "roadmap",
           "prototypeCoverage": "complete"
         }
-      ]
+      ],
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete"
     }
   ],
   "views": [
@@ -165,17 +105,7 @@
       "scenario": "聚焦当日行动",
       "reference": "growth.todo.view.today",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "week",
@@ -184,17 +114,7 @@
       "scenario": "安排周度执行",
       "reference": "growth.todo.view.week",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "calendar",
@@ -203,17 +123,7 @@
       "scenario": "查看长期排程",
       "reference": "growth.todo.view.calendar",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "all",
@@ -222,17 +132,7 @@
       "scenario": "筛选与批量治理",
       "reference": "growth.todo.view.all",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "statistics",
@@ -241,17 +141,7 @@
       "scenario": "复盘效率和优先级分布",
       "reference": "growth.todo.view.statistics",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立视图基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     }
   ],
   "rules": [
@@ -268,17 +158,7 @@
       ],
       "reference": "growth.todo.rule.related-inheritance",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立规则基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
     },
     {
       "id": "batch-limit",
@@ -292,17 +172,23 @@
       ],
       "reference": "growth.todo.rule.batch-limit",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
-      "changeLog": [
-        {
-          "version": "v0.1.0",
-          "date": "2026-07-28",
-          "event": "baseline",
-          "summary": "建立规则基线。",
-          "productStatus": "roadmap",
-          "prototypeCoverage": "partial"
-        }
-      ]
+      "prototypeCoverage": "partial"
+    },
+    {
+      "id": "repeat-template",
+      "name": "周期待办模板推进",
+      "entities": [
+        "todo"
+      ],
+      "description": "独立周期待办只维护当前实例；完成、未完成或逾期后推进下一次，达到结束条件则保留最终状态。",
+      "views": [
+        "today",
+        "week",
+        "all"
+      ],
+      "reference": "growth.todo.rule.repeat-template",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete"
     }
   ],
   "references": [
@@ -351,20 +237,14 @@
       "heading": "### 批量操作上限"
     },
     {
+      "id": "growth.todo.rule.repeat-template",
+      "heading": "### 周期待办模板推进"
+    },
+    {
       "id": "growth.todo.metrics",
       "heading": "## 复盘指标"
     }
   ],
   "productStatus": "roadmap",
-  "prototypeCoverage": "complete",
-  "changeLog": [
-    {
-      "version": "v0.1.0",
-      "date": "2026-07-28",
-      "event": "baseline",
-      "summary": "建立 ProductWiki 结构化基线。",
-      "productStatus": "roadmap",
-      "prototypeCoverage": "complete"
-    }
-  ]
+  "prototypeCoverage": "complete"
 }

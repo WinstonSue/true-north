@@ -63,17 +63,33 @@ export class TaskRepository extends BaseRepositoryImpl<Task, TaskFilterDto> impl
 
       const { doneDateStart, doneDateEnd } = filter;
       if (doneDateStart && doneDateEnd) {
-        qb = qb.andWhere('task.completedAt BETWEEN :ds AND :de', {
+        qb = qb.andWhere('task.doneAt BETWEEN :ds AND :de', {
           ds: new Date(`${doneDateStart}T00:00:00`),
           de: new Date(`${doneDateEnd}T23:59:59`),
         });
       } else if (doneDateStart) {
-        qb = qb.andWhere('task.completedAt >= :ds', {
+        qb = qb.andWhere('task.doneAt >= :ds', {
           ds: new Date(`${doneDateStart}T00:00:00`),
         });
       } else if (doneDateEnd) {
-        qb = qb.andWhere('task.completedAt <= :de', {
+        qb = qb.andWhere('task.doneAt <= :de', {
           de: new Date(`${doneDateEnd}T23:59:59`),
+        });
+      }
+
+      const { abandonedDateStart, abandonedDateEnd } = filter;
+      if (abandonedDateStart && abandonedDateEnd) {
+        qb = qb.andWhere('task.abandonedAt BETWEEN :ads AND :ade', {
+          ads: new Date(`${abandonedDateStart}T00:00:00`),
+          ade: new Date(`${abandonedDateEnd}T23:59:59`),
+        });
+      } else if (abandonedDateStart) {
+        qb = qb.andWhere('task.abandonedAt >= :ads', {
+          ads: new Date(`${abandonedDateStart}T00:00:00`),
+        });
+      } else if (abandonedDateEnd) {
+        qb = qb.andWhere('task.abandonedAt <= :ade', {
+          ade: new Date(`${abandonedDateEnd}T23:59:59`),
         });
       }
 
