@@ -2,8 +2,7 @@ import 'reflect-metadata';
 import { Entity, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Difficulty, HabitStatus, Importance } from '@true-north/enum';
 import { BaseEntity } from '@business/common';
-import { RepeatMode, RepeatEndMode } from 'francis-types-repeat';
-import type { RepeatConfig } from 'francis-types-repeat';
+import { RepeatMode, RepeatEndMode, type RepeatConfigPayload } from '@true-north/components-repeat/types';
 import { Goal } from '../goal/goal.entity';
 import { Todo } from '../todo/todo.entity';
 
@@ -57,10 +56,17 @@ export class HabitWithoutRelations extends BaseEntity {
     nullable: true,
     transformer: {
       to: (value) => JSON.stringify(value),
-      from: (value) => JSON.parse(value),
+      from: (value) => {
+        if (value === null || value === undefined) return undefined;
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      },
     },
   })
-  repeatConfig?: RepeatConfig;
+  repeatConfig?: RepeatConfigPayload;
 
   /** 习惯结束模式 */
   @Column({

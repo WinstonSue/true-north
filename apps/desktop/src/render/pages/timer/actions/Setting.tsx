@@ -42,7 +42,7 @@ const Setting: React.FC<SettingProps> = ({ onConfirm, className }) => {
       />
       <Modal
         title="基本设置"
-        visible={settingVisible}
+        open={settingVisible}
         onOk={onOkModal}
         onCancel={() => setSettingVisible(false)}
       >

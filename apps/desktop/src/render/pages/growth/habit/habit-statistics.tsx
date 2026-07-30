@@ -19,7 +19,7 @@ export const HabitStatisticsPage: React.FC = () => {
   const fetchHabits = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await HabitController.getHabitList({});
+      const response = await HabitController.findByFilter({});
       setHabits(response.list);
     } catch (error) {
       console.error('获取习惯列表失败:', error);
@@ -99,10 +99,10 @@ export const HabitStatisticsPage: React.FC = () => {
       streakDistribution,
       totalHabits: filteredHabits.length,
       activeHabits: filteredHabits.filter(
-        (h) => h.status === HabitStatus.ACTIVE
+        (h) => h.status === HabitStatus.DOING
       ).length,
       completedHabits: filteredHabits.filter(
-        (h) => h.status === HabitStatus.COMPLETED
+        (h) => h.status === HabitStatus.DONE
       ).length,
       averageCompletion:
       completionStats.length > 0 ?

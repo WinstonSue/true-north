@@ -38,7 +38,7 @@ export function TodoPriorityMatrix({ todoList }: TodoPriorityMatrixProps) {
   }: {title: string;color: string;tasks: TodoVo[];description: string;}) =>
   <div className="bg-fill-1 rounded-lg p-4 h-full">
       <div className="flex items-center justify-between mb-2">
-        <Tag color={color} size="small">
+        <Tag color={color} >
           {tasks.length}
         </Tag>
         <span className="text-text-1" style={{ fontSize: 12, fontWeight: 500 }}>

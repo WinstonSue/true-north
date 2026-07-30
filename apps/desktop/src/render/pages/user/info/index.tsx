@@ -68,7 +68,7 @@ function UserInfo() {
               <h6 className="text-title-1 font-medium">{t['userInfo.title.notice']}</h6>
             </div>
             {noticeLoading ?
-            <Skeleton text={{ rows: 10 }} animation /> :
+            <Skeleton paragraph={{ rows: 10 }} animation /> :
 
             <Flex
               vertical

@@ -43,7 +43,7 @@ export const HabitDetailPage: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await HabitService.getHabitDetail(id);
+      const response = await HabitService.find(id);
       setHabit(response);
     } catch (error) {
       console.error('获取习惯详情失败:', error);
@@ -67,11 +67,11 @@ export const HabitDetailPage: React.FC = () => {
 
         switch (action) {
           case 'complete':
-            await HabitService.doneBatchHabit({ includeIds: [habit.id] });
+            await HabitService.update(habit.id, { status: HabitStatus.DONE });
             message.success('习惯已完成');
             break;
           case 'abandon':
-            await HabitService.abandonHabit(habit.id);
+            await HabitService.abandon(habit.id);
             message.success('习惯已放弃');
             break;
           default:
@@ -99,7 +99,7 @@ export const HabitDetailPage: React.FC = () => {
       content: '删除后无法恢复，确定要删除这个习惯吗？',
       onOk: async () => {
         try {
-          await HabitService.deleteHabit(habit.id);
+          await HabitService.delete(habit.id);
           message.success('习惯已删除');
           navigate('/growth/habits');
           refreshHabits();
@@ -173,7 +173,7 @@ export const HabitDetailPage: React.FC = () => {
 
           <Space>
             {/* 状态操作按钮 */}
-            {habit.status === HabitStatus.ACTIVE &&
+            {habit.status === HabitStatus.DOING &&
             <>
                 <Button
                 type="primary"
@@ -193,7 +193,7 @@ export const HabitDetailPage: React.FC = () => {
               </>
             }
 
-            {habit.status === HabitStatus.PAUSED &&
+            {habit.status === HabitStatus.ABANDONED &&
             <Button
               type="primary"
               icon={<CaretRightOutlined />}
@@ -204,8 +204,8 @@ export const HabitDetailPage: React.FC = () => {
               </Button>
             }
 
-            {(habit.status === HabitStatus.ACTIVE ||
-            habit.status === HabitStatus.PAUSED) &&
+            {(habit.status === HabitStatus.DOING ||
+            habit.status === HabitStatus.ABANDONED) &&
             <Button
               icon={<CloseOutlined />}
               loading={actionLoading}
@@ -218,7 +218,7 @@ export const HabitDetailPage: React.FC = () => {
             <Button icon={<EditOutlined />}>编辑</Button>
             <Button
               type="primary"
-              status="danger"
+              danger
               icon={<DeleteOutlined />}
               onClick={handleDelete}>
 
@@ -276,17 +276,17 @@ export const HabitDetailPage: React.FC = () => {
 
                   },
                   {
-                    key: 'startAt',
+                    key: 'repeatStartDate',
                     label: '开始时间',
-                    children: habit.startAt ?
-                    new Date(habit.startAt).toLocaleDateString() :
+                    children: habit.repeatStartDate ?
+                    new Date(habit.repeatStartDate).toLocaleDateString() :
                     '-'
                   },
                   {
-                    key: 'endAt',
+                    key: 'repeatEndDate',
                     label: '目标时间',
-                    children: habit.endAt ?
-                    new Date(habit.endAt).toLocaleDateString() :
+                    children: habit.repeatEndDate ?
+                    new Date(habit.repeatEndDate).toLocaleDateString() :
                     '长期习惯'
                   },
                   {
@@ -413,16 +413,16 @@ export const HabitDetailPage: React.FC = () => {
 
             {/* 时间信息 */}
             <div className="space-y-2 text-sm">
-              {habit.startAt &&
+              {habit.repeatStartDate &&
               <div className="flex justify-between">
                   <span className="text-text-3">开始时间:</span>
-                  <span>{new Date(habit.startAt).toLocaleDateString()}</span>
+                  <span>{new Date(habit.repeatStartDate).toLocaleDateString()}</span>
                 </div>
               }
-              {habit.endAt &&
+              {habit.repeatEndDate &&
               <div className="flex justify-between">
                   <span className="text-text-3">目标时间:</span>
-                  <span>{new Date(habit.endAt).toLocaleDateString()}</span>
+                  <span>{new Date(habit.repeatEndDate).toLocaleDateString()}</span>
                 </div>
               }
               {habit.doneAt &&

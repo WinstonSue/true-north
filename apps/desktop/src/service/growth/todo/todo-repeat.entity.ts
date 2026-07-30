@@ -1,8 +1,7 @@
 import 'reflect-metadata';
 import { Entity, OneToMany, Column } from 'typeorm';
 import { Todo } from '../todo/todo.entity';
-import { RepeatMode, RepeatEndMode } from 'francis-types-repeat';
-import type { RepeatConfig } from 'francis-types-repeat';
+import { RepeatMode, RepeatEndMode, type RepeatConfigPayload } from '@true-north/components-repeat/types';
 import { TodoStatus } from '@true-north/enum';
 import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -22,10 +21,17 @@ export class TodoRepeatWithoutRelations extends BaseEntity {
     nullable: true,
     transformer: {
       to: (value) => JSON.stringify(value),
-      from: (value) => JSON.parse(value),
+      from: (value) => {
+        if (value === null || value === undefined) return undefined;
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      },
     },
   })
-  repeatConfig?: RepeatConfig;
+  repeatConfig?: RepeatConfigPayload;
 
   /** 重复结束模式 */
   @Column({

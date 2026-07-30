@@ -112,7 +112,7 @@ function TodoDashboardContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <Spin size="large" />
+        <Spin  />
       </div>
     );
   }
@@ -128,7 +128,7 @@ function TodoDashboardContent() {
               <div className="w-12 h-12 bg-primary-light-1 rounded-lg flex items-center justify-center">
                 <div className="w-6 h-6 bg-primary rounded"></div>
               </div>
-              <Tag color="blue" size="small">
+              <Tag color="blue" >
                 全部
               </Tag>
             </div>
@@ -168,7 +168,7 @@ function TodoDashboardContent() {
                 <div className="w-6 h-6 bg-warning rounded"></div>
               </div>
               {stats.overdue > 0 && (
-                <Tag color="red" size="small">
+                <Tag color="red" >
                   {stats.overdue} 逾期
                 </Tag>
               )}
@@ -185,7 +185,7 @@ function TodoDashboardContent() {
               <div className="w-12 h-12 bg-danger-light-1 rounded-lg flex items-center justify-center">
                 <div className="w-6 h-6 bg-danger rounded"></div>
               </div>
-              <Tag color="red" size="small">
+              <Tag color="red" >
                 紧急重要
               </Tag>
             </div>

@@ -2,6 +2,8 @@ import { BaseEntityVo } from '../../common';
 import { GoalVo } from '../goal/goal-model.vo';
 import { HabitStatus, Difficulty, Importance } from '@true-north/enum';
 import { TodoVo } from '../todo/todo-model.vo';
+import type { RepeatConfigPayload } from '@true-north/components-repeat/types';
+import { RepeatEndMode, RepeatMode } from '@true-north/components-repeat/types';
 
 export type HabitWithoutRelationsVo = {
   name: string;
@@ -11,7 +13,7 @@ export type HabitWithoutRelationsVo = {
   tags: string[];
   difficulty: Difficulty;
   repeatMode: RepeatMode;
-  repeatConfig?: RepeatConfig;
+  repeatConfig?: RepeatConfigPayload;
   repeatEndMode: RepeatEndMode;
   repeatEndDate?: string;
   repeatTimes?: number;

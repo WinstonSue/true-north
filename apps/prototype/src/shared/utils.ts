@@ -1,5 +1,14 @@
 import { HOLIDAYS_2026 } from './mock-data';
-import type { Goal, HabitFrequency, RecurrenceRule, RepeatMode } from './types';
+import type { Goal, HabitFrequency, RepeatMode, Todo } from './types';
+
+export type ExecutionScope = 'today' | 'week';
+export type ExecutionGroupKey = 'overdue' | 'current' | 'done' | 'abandoned';
+export type ExecutionItem = { status: string };
+export type ExecutionGroup<T> = {
+  key: ExecutionGroupKey;
+  title: string;
+  items: T[];
+};
 
 function iso(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -15,6 +24,33 @@ export function addDays(value: string, amount: number) {
 export function daysBetween(start: string, end: string) {
   return Math.round((dateOf(end).getTime() - dateOf(start).getTime()) / 86400000);
 }
+export function getExecutionRange(scope: ExecutionScope, today: string) {
+  if (scope === 'today') return { start: today, end: today, label: '今日' };
+
+  const start = addDays(today, -dateOf(today).getDay());
+  return { start, end: addDays(start, 6), label: '本周' };
+}
+export function groupExecutionItems<T extends ExecutionItem>(
+  items: T[],
+  scope: ExecutionScope,
+  today: string,
+  getTimeRange: (item: T) => { start: string; end: string },
+): ExecutionGroup<T>[] {
+  const { start, end, label } = getExecutionRange(scope, today);
+  const pending = (item: T) => item.status !== 'done' && item.status !== 'abandoned';
+  const inRange = (item: T) => {
+    const range = getTimeRange(item);
+    return range.start <= end && range.end >= start;
+  };
+  const isOverdue = (item: T) => getTimeRange(item).end < start;
+
+  return [
+    { key: 'overdue', title: '已过期', items: items.filter((item) => pending(item) && isOverdue(item)) },
+    { key: 'current', title: label, items: items.filter((item) => pending(item) && inRange(item)) },
+    { key: 'done', title: '已完成', items: items.filter((item) => item.status === 'done' && inRange(item)) },
+    { key: 'abandoned', title: '已放弃', items: items.filter((item) => item.status === 'abandoned' && inRange(item)) },
+  ];
+}
 export function statusLabel(status: string) {
   return (
     (
@@ -24,7 +60,6 @@ export function statusLabel(status: string) {
         done: '已完成',
         paused: '已暂停',
         archived: '已归档',
-        blocked: '受阻',
         abandoned: '已放弃',
         in_progress: '进行中',
         active: '进行中',
@@ -32,6 +67,12 @@ export function statusLabel(status: string) {
       } as Record<string, string>
     )[status] || status
   );
+}
+export function formatTodoPlan(todo: Pick<Todo, 'planned' | 'plannedStartTime' | 'plannedEndTime'>) {
+  return `${todo.planned} ${todo.plannedStartTime}-${todo.plannedEndTime}`;
+}
+export function compareTodoPlan(left: Todo, right: Todo) {
+  return `${left.planned} ${left.plannedStartTime}`.localeCompare(`${right.planned} ${right.plannedStartTime}`);
 }
 export function goalName(goals: Goal[], id?: string) {
   return goals.find((goal) => goal.id === id)?.title || '独立事项';
@@ -53,12 +94,16 @@ export function matchesFrequency(value: string, frequency: HabitFrequency) {
   if (frequency.mode === 'weekend') return day === 0 || day === 6;
   return isWorkday(value);
 }
-export function nextOccurrence(value: string, rule: RecurrenceRule) {
-  for (let offset = 1; offset < 400; offset += 1) {
-    const next = addDays(value, offset);
-    if (matchesFrequency(next, rule)) return next;
+export function nextHabitOccurrence(after: string, frequency: HabitFrequency) {
+  for (let offset = 1; offset <= 370; offset += 1) {
+    const candidate = addDays(after, offset);
+    if (matchesFrequency(candidate, frequency)) return candidate;
   }
-  return undefined;
+  return addDays(after, 1);
+}
+export function nextHabitOccurrenceOnOrAfter(from: string, frequency: HabitFrequency) {
+  if (matchesFrequency(from, frequency)) return from;
+  return nextHabitOccurrence(from, frequency);
 }
 export function frequencyLabel(frequency: HabitFrequency) {
   return (
@@ -71,12 +116,4 @@ export function frequencyLabel(frequency: HabitFrequency) {
       workdays: '法定工作日',
     } as Record<RepeatMode, string>
   )[frequency.mode];
-}
-export function repeatLabel(rule: RecurrenceRule) {
-  const base = frequencyLabel(rule);
-  return rule.endMode === 'forever'
-    ? `${base}，永不结束`
-    : rule.endMode === 'times'
-      ? `${base}，共 ${rule.times || 1} 次`
-      : `${base}，至 ${rule.endDate}`;
 }

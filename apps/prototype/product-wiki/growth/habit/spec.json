@@ -5,9 +5,10 @@
   "document": "growth/habit/README.md",
   "parentId": "growth",
   "route": "/growth/habit",
-  "positioning": "以目标为约束的养成中心，使用打卡和贡献权重形成反馈闭环。",
+  "positioning": "以目标为约束的养成中心，使用周期待办和二值打卡形成反馈闭环。",
   "dependencies": [
-    "growth.goal"
+    "growth.goal",
+    "growth.todo"
   ],
   "entities": [
     {
@@ -91,6 +92,25 @@
               "date": "2026-07-28",
               "event": "baseline",
               "summary": "建立字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        },
+        {
+          "id": "cycleTodo",
+          "name": "周期待办",
+          "type": "reference",
+          "required": true,
+          "description": "活跃习惯维护一个当前周期待办；完成、确认未完成或逾期后自动安排下一次。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.0",
+              "date": "2026-07-29",
+              "event": "baseline",
+              "summary": "补充周期待办与二值打卡基线。",
               "productStatus": "roadmap",
               "prototypeCoverage": "complete"
             }

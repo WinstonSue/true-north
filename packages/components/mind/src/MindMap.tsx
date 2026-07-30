@@ -73,7 +73,7 @@ const InternalMindMap: React.FC<EnhancedMindMapProps> = ({
 
       {/* 节点编辑器 */}
       <NodeEditor
-        visible={nodeEditorVisible}
+        open={nodeEditorVisible}
         nodeId={selectedNodeId}
         onClose={() => setNodeEditorVisible(false)}
       />
@@ -81,11 +81,11 @@ const InternalMindMap: React.FC<EnhancedMindMapProps> = ({
       <MiniMapContainer />
 
       {/* 导出模态框 */}
-      <ExportModal visible={exportModalVisible} onClose={() => setExportModalVisible(false)} />
+      <ExportModal open={exportModalVisible} onClose={() => setExportModalVisible(false)} />
 
       {/* 导入模态框 */}
       <ImportModal
-        visible={importModalVisible}
+        open={importModalVisible}
         onClose={() => setImportModalVisible(false)}
         onImport={handleImport}
       />

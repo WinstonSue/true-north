@@ -60,7 +60,7 @@ export default function ERPPage() {
       >
         <Form.Item
           label="Product Name"
-          field="name"
+          name="name"
           rules={[{ required: true, message: 'Product name is required' }]}
         >
           <Input placeholder="Enter product name" />
@@ -68,7 +68,7 @@ export default function ERPPage() {
 
         <Form.Item
           label="Price"
-          field="price"
+          name="price"
           rules={[
             { required: true, message: 'Price is required' },
             {
@@ -86,7 +86,7 @@ export default function ERPPage() {
 
         <Form.Item
           label="Quantity"
-          field="quantity"
+          name="quantity"
           rules={[
             { required: true, message: 'Quantity is required' },
             {

@@ -9,11 +9,10 @@ import {
 } from '@sue/design-web-react';
 import dayjs, { type Dayjs } from 'dayjs';
 import SiteIcon from '@/components/SiteIcon';
-import RepeatSelector from '@/components/RepeatSelector';
+import RepeatSelector from '@true-north/components-repeat';
 import { GlobalContext } from '@/context';
 import clsx from 'clsx';
-import { voToForm, formToVo } from 'francis-helper-repeat';
-import type { RepeatVo } from 'francis-types-repeat';
+import type { RepeatVo } from '@true-north/components-repeat/types';
 
 const { RangePicker } = TimePicker;
 
@@ -145,11 +144,11 @@ export default function DateTimeTool(props: {
           <div className="px-3">
             <RepeatSelector
               lang={lang as 'en-US' | 'zh-CN'}
-              value={formData.repeatConfig && voToForm(formData.repeatConfig)}
+              value={formData.repeatConfig}
               onChange={(value) => {
                 onChangeData({
                   ...formData,
-                  repeatConfig: formToVo(value) as RepeatVo | undefined,
+                  repeatConfig: value,
                 });
               }}
             />

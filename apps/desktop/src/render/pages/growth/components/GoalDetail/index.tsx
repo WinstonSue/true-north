@@ -28,7 +28,6 @@ export function useGoalDetail() {
       ...rest,
       title: '编辑目标',
       size: 800,
-      footer: null,
       content: (
         <GoalEditor
           {...contentProps}
@@ -50,7 +49,6 @@ export function useGoalDetail() {
       ...rest,
       title: '新建目标',
       size: 800,
-      footer: null,
       content: (
         <GoalCreator
           {...contentProps}

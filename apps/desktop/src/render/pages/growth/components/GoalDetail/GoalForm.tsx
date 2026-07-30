@@ -271,7 +271,7 @@ function Item(props: {
           )}
         >
           <Form.Item
-            field={props.name}
+            name={props.name}
             rules={props.rules}
             noStyle={{ showErrorTip: true }}
           >
@@ -286,7 +286,7 @@ function Item(props: {
   return (
     <Col span={props.span} className="w-full flex items-center !p-0">
       <Form.Item
-        field={props.name}
+        name={props.name}
         label={<span className="pl-2">{props.label}</span>}
         labelAlign="left"
         labelCol={{ span: labelCol }}

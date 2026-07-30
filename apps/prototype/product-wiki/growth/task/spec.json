@@ -60,7 +60,6 @@
           "values": [
             "todo",
             "doing",
-            "blocked",
             "done",
             "abandoned"
           ],
@@ -75,12 +74,20 @@
               "summary": "建立字段基线。",
               "productStatus": "roadmap",
               "prototypeCoverage": "complete"
+            },
+            {
+              "version": "v0.1.1",
+              "date": "2026-07-30",
+              "event": "changed",
+              "summary": "移除受阻状态。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
             }
           ]
         },
         {
           "id": "estimated",
-          "name": "预估时间",
+          "name": "预计耗时",
           "type": "number",
           "required": true,
           "description": "用于排程和时间对比。",
@@ -114,6 +121,25 @@
   ],
   "views": [
     {
+      "id": "today",
+      "name": "今日任务",
+      "prototypePage": "task",
+      "scenario": "聚焦当日执行与逾期事项",
+      "reference": "growth.task.view.today",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-29",
+          "event": "baseline",
+          "summary": "建立今日任务视图。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ]
+    },
+    {
       "id": "week",
       "name": "本周任务",
       "prototypePage": "task",
@@ -146,6 +172,25 @@
           "date": "2026-07-28",
           "event": "baseline",
           "summary": "建立视图基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "partial"
+        }
+      ]
+    },
+    {
+      "id": "statistics",
+      "name": "任务统计",
+      "prototypePage": "task",
+      "scenario": "复盘任务执行状态",
+      "reference": "growth.task.view.statistics",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-29",
+          "event": "baseline",
+          "summary": "建立任务执行概览。",
           "productStatus": "roadmap",
           "prototypeCoverage": "partial"
         }
@@ -199,6 +244,7 @@
       ],
       "description": "任务应关联目标或父任务，避免形成双重上级。",
       "views": [
+        "today",
         "week",
         "all"
       ],
@@ -224,6 +270,7 @@
       ],
       "description": "子任务时间范围受父级目标或任务约束。",
       "views": [
+        "today",
         "week",
         "calendar"
       ],
@@ -252,12 +299,20 @@
       "heading": "## 业务流程"
     },
     {
+      "id": "growth.task.view.today",
+      "heading": "### 今日任务"
+    },
+    {
       "id": "growth.task.view.week",
       "heading": "### 本周任务"
     },
     {
       "id": "growth.task.view.all",
       "heading": "### 全部任务"
+    },
+    {
+      "id": "growth.task.view.statistics",
+      "heading": "### 任务统计"
     },
     {
       "id": "growth.task.view.calendar",

@@ -57,7 +57,7 @@ export default function HabitListTable() {
         (option) => option.value === difficulty
       );
       return difficultyConfig ?
-      <Tag color={difficultyConfig.color} size="small">
+      <Tag color={difficultyConfig.color} >
             {difficultyConfig.label}
           </Tag> :
       null;
@@ -82,7 +82,7 @@ export default function HabitListTable() {
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm font-medium">{completionRate}%</span>
             </div>
-            <Progress percent={completionRate} size="small" />
+            <Progress percent={completionRate}  />
           </div>);
 
     }
@@ -117,7 +117,7 @@ export default function HabitListTable() {
     width: 150,
     render: (_: any, record: HabitWithoutRelationsVo) =>
     <Space>
-          {record.status === HabitStatus.ACTIVE &&
+          {record.status === HabitStatus.DOING &&
       <Button
         type="primary"
         size="small"
@@ -129,7 +129,7 @@ export default function HabitListTable() {
           <Button
         size="small"
         onClick={() => handleHabitDelete(record.id)}
-        status="danger">
+        danger>
 
             删除
           </Button>

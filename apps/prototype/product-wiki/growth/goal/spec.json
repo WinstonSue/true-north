@@ -19,10 +19,7 @@
           "required": true,
           "values": [
             "vision",
-            "result",
-            "process",
-            "metric",
-            "milestone"
+            "result"
           ],
           "description": "目标的规划类型。",
           "productStatus": "roadmap",
@@ -178,7 +175,7 @@
     {
       "id": "mindmap",
       "name": "目标脑图",
-      "prototypePage": "mindmap",
+      "prototypePage": "goal",
       "scenario": "理解目标与任务关系",
       "reference": "growth.goal.view.mindmap",
       "productStatus": "roadmap",
@@ -216,17 +213,17 @@
   ],
   "rules": [
     {
-      "id": "parent-time-frame",
-      "name": "父子时间范围",
+      "id": "time-frame",
+      "name": "时间范围",
       "entities": [
         "goal"
       ],
-      "description": "子目标的时间范围不得超出父目标。",
+      "description": "目标的计划时间范围由开始和结束日期确定，并约束层级排期。",
       "views": [
         "tree",
         "detail"
       ],
-      "reference": "growth.goal.rule.parent-time-frame",
+      "reference": "growth.goal.rule.time-frame",
       "productStatus": "roadmap",
       "prototypeCoverage": "partial",
       "changeLog": [
@@ -237,6 +234,30 @@
           "summary": "建立规则基线。",
           "productStatus": "roadmap",
           "prototypeCoverage": "partial"
+        }
+      ]
+    },
+    {
+      "id": "type",
+      "name": "类型规则",
+      "entities": [
+        "goal"
+      ],
+      "description": "目标仅分为规划和指标，并受直接父子层级约束。",
+      "views": [
+        "detail"
+      ],
+      "reference": "growth.goal.rule.type",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "changeLog": [
+        {
+          "version": "v0.1.0",
+          "date": "2026-07-28",
+          "event": "baseline",
+          "summary": "建立规则基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete"
         }
       ]
     },
@@ -295,8 +316,12 @@
       "heading": "## 交互语义"
     },
     {
-      "id": "growth.goal.rule.parent-time-frame",
-      "heading": "### 父子时间范围"
+      "id": "growth.goal.rule.time-frame",
+      "heading": "### 时间范围"
+    },
+    {
+      "id": "growth.goal.rule.type",
+      "heading": "### 类型规则"
     },
     {
       "id": "growth.goal.rule.priority-inheritance",

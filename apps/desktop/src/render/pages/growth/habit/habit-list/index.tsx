@@ -13,7 +13,6 @@ export const HabitListPage: React.FC = () => {
     const instance = Drawer.open({
       title: '新增习惯',
       size: 800,
-      footer: null,
       content: (
         <CreateHabit
           goals={goals}

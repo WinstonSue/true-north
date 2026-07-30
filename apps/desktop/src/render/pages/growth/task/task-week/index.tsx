@@ -95,7 +95,7 @@ export default function TaskWeek() {
         <Collapse
           defaultActiveKey={['expired', 'week']}
           className={`${styles['custom-collapse']} mt-2`}
-          bordered={false}
+
         >
           {expiredTaskList.length > 0 && (
             <Collapse.Panel header="已过期" key="expired">
@@ -153,7 +153,7 @@ export default function TaskWeek() {
       </div>
       {currentTask && (
         <>
-          <Divider type="vertical" className="!h-full" />
+          <Divider vertical className="!h-full" />
           <div className="w-full py-2">
             <TaskEditor
               size="small"

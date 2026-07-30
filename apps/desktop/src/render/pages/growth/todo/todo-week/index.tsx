@@ -93,7 +93,7 @@ export default function TodoWeek() {
             <Collapse
               defaultActiveKey={['expired', 'week']}
               className={`${styles['custom-collapse']} mt-2`}
-              bordered={false}
+
             >
               {expiredTodoList.length > 0 && (
                 <Collapse.Panel header="已过期" key="expired">
@@ -152,7 +152,7 @@ export default function TodoWeek() {
         </Flex>
         {currentTodo && (
           <>
-            <Divider type="vertical" className="!h-full" />{' '}
+            <Divider vertical className="!h-full" />{' '}
             <Flex container="fill" className="w-full py-2">
               <TodoEditor
                 todo={currentTodo}

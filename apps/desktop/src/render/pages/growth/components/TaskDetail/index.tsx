@@ -18,7 +18,6 @@ export function useTaskDetail() {
       ...rest,
       title: '编辑任务',
       size: 800,
-      footer: null,
       content: (
         <TaskEditor
           {...contentProps}
@@ -40,7 +39,6 @@ export function useTaskDetail() {
       ...rest,
       title: '新建任务',
       size: 800,
-      footer: null,
       content: (
         <TaskCreator
           {...contentProps}

@@ -1,10 +1,10 @@
 import { Button, Card, Col, Flex, Row, Statistic } from '@sue/design-web-react';
 import { CheckCircle2, CircleDot, Flame, Plus } from 'lucide-react';
-import { PageHeader, PriorityTag } from '../../shared/components';
+import { PriorityTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
 import { TODAY } from '../../shared/mock-data';
-import type { Goal, Habit, Score, Task, Todo, View } from '../../shared/types';
-import { frequencyLabel, goalName } from '../../shared/utils';
+import type { Goal, Habit, Task, Todo } from '../../shared/types';
+import { compareTodoPlan, formatTodoPlan, frequencyLabel, goalName } from '../../shared/utils';
 import styles from './index.module.css';
 
 type Props = {
@@ -12,26 +12,15 @@ type Props = {
   tasks: Task[];
   todos: Todo[];
   habits: Habit[];
-  setView: (view: View) => void;
+  onNavigate: (path: string) => void;
   completeTodo: (todo: Todo) => void;
-  scoreHabit: (habit: Habit, score: Score) => void;
+  markTodoIncomplete: (todo: Todo) => void;
 };
 
-export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, scoreHabit }: Props) {
-  const due = todos.filter((todo) => todo.status !== 'done' && todo.planned <= TODAY);
+export function Workbench({ goals, tasks, todos, habits, onNavigate, completeTodo, markTodoIncomplete }: Props) {
+  const due = todos.filter((todo) => todo.status !== 'done' && todo.planned <= TODAY).sort(compareTodoPlan);
   return (
     <>
-      <PageHeader
-        productReference={productRef('growth.overview')}
-        title="工作台"
-        action={
-          <span data-product-ref={productRef('growth.todo.interaction')}>
-            <Button type="primary" icon={<Plus size={15} />} onClick={() => setView('todo')}>
-              新建待办
-            </Button>
-          </span>
-        }
-      />
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
           <div data-product-ref={productRef('growth.goal.overview')}>
@@ -72,9 +61,10 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
             <Card
               title="今日待办"
               extra={
-                <Button type="link" onClick={() => setView('todo')}>
-                  全部待办
-                </Button>
+                <Flex align="center" gap={8}>
+                  <Button size="small" icon={<Plus size={15} />} onClick={() => onNavigate('/todos')}>新建待办</Button>
+                  <Button type="link" onClick={() => onNavigate('/todos')}>全部待办</Button>
+                </Flex>
               }
             >
               <div className={styles.list}>
@@ -91,8 +81,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
                     <Flex vertical className={styles.listItemContent} gap={4}>
                       <b>{todo.title}</b>
                       <small>
-                        {todo.recurrenceId ? '周期执行 · ' : ''}
-                        {todo.due} · {todo.reminder !== 'none' ? '已设置提醒' : '无提醒'}
+                        {formatTodoPlan(todo)}
                       </small>
                     </Flex>
                     <span data-product-ref={productRef('growth.todo.priority')}>
@@ -109,7 +98,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
             <Card
               title="习惯打卡"
               extra={
-                <Button type="link" onClick={() => setView('habit')}>
+                <Button type="link" onClick={() => onNavigate('/habits')}>
                   查看统计
                 </Button>
               }
@@ -126,11 +115,7 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
                         {frequencyLabel(habit.frequency)} · 连续 {habit.streak} 天 · {goalName(goals, habit.goalIds[0])}
                       </small>
                     </Flex>
-                    <span data-product-ref={productRef('growth.habit.interaction')}>
-                      <Button size="small" onClick={() => scoreHabit(habit, 'perfect')}>
-                        完成
-                      </Button>
-                    </span>
+                    <HabitTodoActions habit={habit} todos={todos} completeTodo={completeTodo} markTodoIncomplete={markTodoIncomplete} />
                   </Flex>
                 ))}
               </div>
@@ -140,4 +125,15 @@ export function Workbench({ goals, tasks, todos, habits, setView, completeTodo, 
       </Row>
     </>
   );
+}
+
+function HabitTodoActions({ habit, todos, completeTodo, markTodoIncomplete }: { habit: Habit; todos: Todo[]; completeTodo: (todo: Todo) => void; markTodoIncomplete: (todo: Todo) => void }) {
+  const todo = todos.find((item) => item.habitId === habit.id && item.status !== 'done' && item.status !== 'abandoned');
+  if (!todo || habit.status !== 'active') return <span>下一次待办已安排</span>;
+  return <span data-product-ref={productRef('growth.habit.interaction')}>
+    <Flex gap={6}>
+      <Button size="small" type="primary" onClick={() => completeTodo(todo)}>完成</Button>
+      <Button size="small" onClick={() => markTodoIncomplete(todo)}>未完成</Button>
+    </Flex>
+  </span>;
 }

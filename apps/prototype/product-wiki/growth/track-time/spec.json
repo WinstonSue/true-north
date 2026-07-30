@@ -4,10 +4,9 @@
   "title": "专注与时间追踪",
   "document": "growth/track-time/README.md",
   "parentId": "growth",
-  "route": "/growth/focus",
-  "positioning": "记录围绕任务的专注投入，并为复盘提供时间证据。",
+  "positioning": "作为全局专注计时器，记录围绕任务的投入，并为复盘提供时间证据。",
   "productStatus": "roadmap",
-  "prototypeCoverage": "partial",
+  "prototypeCoverage": "complete",
   "changeLog": [
     {
       "version": "v0.1.0",
@@ -16,6 +15,14 @@
       "summary": "建立专注计时原型基线。",
       "productStatus": "roadmap",
       "prototypeCoverage": "partial"
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-07-29",
+      "event": "changed",
+      "summary": "将专注计时调整为可从顶栏和任务唤起的全局组件。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete"
     }
   ],
   "dependencies": [
@@ -26,7 +33,7 @@
       "id": "track-time",
       "name": "专注记录",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
+      "prototypeCoverage": "complete",
       "changeLog": [
         {
           "version": "v0.1.0",
@@ -35,6 +42,14 @@
           "summary": "建立专注记录对象基线。",
           "productStatus": "roadmap",
           "prototypeCoverage": "partial"
+        },
+        {
+          "version": "v0.1.1",
+          "date": "2026-07-29",
+          "event": "changed",
+          "summary": "全局计时器支持任务关联与独立专注记录。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete"
         }
       ],
       "fields": [
@@ -45,7 +60,7 @@
           "required": false,
           "description": "专注记录可关联一个任务。",
           "productStatus": "roadmap",
-          "prototypeCoverage": "partial",
+          "prototypeCoverage": "complete",
           "changeLog": [
             {
               "version": "v0.1.0",
@@ -54,6 +69,14 @@
               "summary": "建立关联任务字段基线。",
               "productStatus": "roadmap",
               "prototypeCoverage": "partial"
+            },
+            {
+              "version": "v0.1.1",
+              "date": "2026-07-29",
+              "event": "changed",
+              "summary": "全局计时器支持选择或清空关联任务。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
             }
           ]
         },
@@ -83,8 +106,8 @@
     {
       "id": "focus",
       "name": "专注计时",
-      "prototypePage": "focus",
-      "scenario": "选择任务并记录专注投入",
+      "prototypePage": "global-focus-timer",
+      "scenario": "从顶栏或任务唤起全局计时，并在迷你与全屏模式间切换",
       "productStatus": "roadmap",
       "prototypeCoverage": "complete",
       "reference": "growth.track-time.overview",
@@ -94,6 +117,14 @@
           "date": "2026-07-28",
           "event": "baseline",
           "summary": "建立专注计时视图基线。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete"
+        },
+        {
+          "version": "v0.1.1",
+          "date": "2026-07-29",
+          "event": "changed",
+          "summary": "以全局迷你浮层和全屏模式替代独立计时页面。",
           "productStatus": "roadmap",
           "prototypeCoverage": "complete"
         }

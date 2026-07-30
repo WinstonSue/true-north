@@ -60,7 +60,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   const renderActionMenu = () => {
     const menuItems = [];
 
-    if (habit.status === HabitStatus.ACTIVE) {
+    if (habit.status === HabitStatus.DOING) {
       menuItems.push(
         <Menu.Item key="complete" onClick={onComplete}>
           <CheckOutlined /> 标记完成
@@ -71,7 +71,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       );
     }
 
-    if (habit.status === HabitStatus.PAUSED) {
+    if (habit.status === HabitStatus.ABANDONED) {
       menuItems.push(
         <Menu.Item key="resume" onClick={onResume}>
           <CaretRightOutlined /> 恢复习惯
@@ -80,8 +80,8 @@ export const HabitCard: React.FC<HabitCardProps> = ({
     }
 
     if (
-    habit.status === HabitStatus.ACTIVE ||
-    habit.status === HabitStatus.PAUSED)
+    habit.status === HabitStatus.DOING ||
+    habit.status === HabitStatus.ABANDONED)
     {
       menuItems.push(
         <Menu.Item key="abandon" onClick={onAbandon}>
@@ -141,22 +141,22 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       {/* 标签和难度 */}
       <div className="flex flex-wrap gap-1 mb-3">
         {difficultyConfig &&
-        <Tag color={difficultyConfig.color} size="small">
+        <Tag color={difficultyConfig.color} >
             {difficultyConfig.label}
           </Tag>
         }
         {habit.importance &&
-        <Tag color="blue" size="small">
+        <Tag color="blue" >
             重要度: {habit.importance}
           </Tag>
         }
         {habit.tags?.slice(0, 2).map((tag, index) =>
-        <Tag key={index} size="small">
+        <Tag key={index} >
             {tag}
           </Tag>
         )}
         {habit.tags && habit.tags.length > 2 &&
-        <Tag size="small">+{habit.tags.length - 2}</Tag>
+        <Tag >+{habit.tags.length - 2}</Tag>
         }
       </div>
 
@@ -168,7 +168,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
             <span className="text-sm">完成率</span>
             <span className="text-sm font-medium">{completionRate}%</span>
           </div>
-          <Progress percent={completionRate} size="small" />
+          <Progress percent={completionRate}  />
         </div>
 
         {/* 统计信息 */}
@@ -189,17 +189,17 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
         {/* 时间信息 */}
         <div className="text-xs text-gray-500 space-y-1">
-          {habit.startAt &&
-          <div>开始时间: {new Date(habit.startAt).toLocaleDateString()}</div>
+          {habit.repeatStartDate &&
+          <div>开始时间: {new Date(habit.repeatStartDate).toLocaleDateString()}</div>
           }
-          {habit.endAt &&
-          <div>目标时间: {new Date(habit.endAt).toLocaleDateString()}</div>
+          {habit.repeatEndDate &&
+          <div>目标时间: {new Date(habit.repeatEndDate).toLocaleDateString()}</div>
           }
         </div>
       </div>
 
       {/* 快捷操作按钮 */}
-      {habit.status === HabitStatus.ACTIVE &&
+      {habit.status === HabitStatus.DOING &&
       <div className="mt-3 pt-3 border-t border-gray-100">
           <Space className="w-full">
             <Button
@@ -211,14 +211,14 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
               完成
             </Button>
-            <Button size="small" icon={<PauseOutlined />} onClick={onPause}>
+            <Button  icon={<PauseOutlined />} onClick={onPause}>
               暂停
             </Button>
           </Space>
         </div>
       }
 
-      {habit.status === HabitStatus.PAUSED &&
+      {habit.status === HabitStatus.ABANDONED &&
       <div className="mt-3 pt-3 border-t border-gray-100">
           <Button
           type="primary"

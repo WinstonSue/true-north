@@ -1,31 +1,25 @@
 import { Button, Card, Col, Flex, Progress, Row, Space, Statistic } from '@sue/design-web-react';
 import { Flame, Plus } from 'lucide-react';
-import { PageHeader, StateTag } from '../../shared/components';
+import { StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
-import type { DrawerState, Goal, Habit, Score } from '../../shared/types';
+import type { DrawerState, Goal, Habit, Todo } from '../../shared/types';
 import { frequencyLabel, goalName } from '../../shared/utils';
 import styles from './index.module.css';
 
 type Props = {
   habits: Habit[];
   goals: Goal[];
+  todos: Todo[];
   setDrawer: (drawer: DrawerState) => void;
-  scoreHabit: (habit: Habit, score: Score) => void;
+  completeTodo: (todo: Todo) => void;
+  markTodoIncomplete: (todo: Todo) => void;
 };
-export function HabitsPage({ habits, goals, setDrawer, scoreHabit }: Props) {
+export function HabitsPage({ habits, goals, todos, setDrawer, completeTodo, markTodoIncomplete }: Props) {
   return (
     <>
-      <PageHeader
-        productReference={productRef('growth.habit.overview')}
-        title="习惯追踪"
-        action={
-          <span data-product-ref={productRef('growth.habit.interaction')}>
-            <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'habit' })}>
-              新建习惯
-            </Button>
-          </span>
-        }
-      />
+      <Flex className={styles.habitToolbar} align="center" justify="end" data-product-ref={productRef('growth.habit.interaction')}>
+        <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'habit' })}>新建习惯</Button>
+      </Flex>
       <Row gutter={[16, 16]}>
         {habits.map((habit) => (
           <Col xs={24} md={12} xl={8} key={habit.id}>
@@ -43,14 +37,7 @@ export function HabitsPage({ habits, goals, setDrawer, scoreHabit }: Props) {
                 </div>
                 <Flex justify="space-between" align="center" className={styles.cardActions}>
                   <span data-product-ref={productRef('growth.habit.interaction')}>
-                    <Space>
-                      <Button size="small" onClick={() => scoreHabit(habit, 'perfect')}>
-                        完美
-                      </Button>
-                      <Button size="small" onClick={() => scoreHabit(habit, 'good')}>
-                        良好
-                      </Button>
-                    </Space>
+                    <HabitTodoActions habit={habit} todos={todos} completeTodo={completeTodo} markTodoIncomplete={markTodoIncomplete} />
                   </span>
                   <span data-product-ref={productRef('growth.habit.interaction')}>
                     <Button type="link" onClick={() => setDrawer({ kind: 'habit', id: habit.id })}>
@@ -65,4 +52,14 @@ export function HabitsPage({ habits, goals, setDrawer, scoreHabit }: Props) {
       </Row>
     </>
   );
+}
+
+function HabitTodoActions({ habit, todos, completeTodo, markTodoIncomplete }: { habit: Habit; todos: Todo[]; completeTodo: (todo: Todo) => void; markTodoIncomplete: (todo: Todo) => void }) {
+  const todo = todos.find((item) => item.habitId === habit.id && item.status !== 'done' && item.status !== 'abandoned');
+  if (habit.status !== 'active') return <span>已暂停打卡</span>;
+  if (!todo) return <span>下一次待办已安排</span>;
+  return <Space>
+    <Button size="small" type="primary" onClick={() => completeTodo(todo)}>完成</Button>
+    <Button size="small" onClick={() => markTodoIncomplete(todo)}>未完成</Button>
+  </Space>;
 }

@@ -103,7 +103,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
   const handleHabitComplete = useCallback(
     async (habitId: string) => {
       try {
-        await HabitController.doneBatchHabit({ includeIds: [habitId] });
+        await HabitController.update(habitId, { status: HabitStatus.DONE });
         message.success('习惯已完成');
         fetchHabits();
         refreshHabits();
@@ -123,7 +123,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
         content: '删除后无法恢复，确定要删除这个习惯吗？',
         onOk: async () => {
           try {
-            await HabitController.deleteHabit(habitId);
+            await HabitController.delete(habitId);
             message.success('习惯已删除');
             fetchHabits();
             refreshHabits();

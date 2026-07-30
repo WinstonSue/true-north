@@ -45,7 +45,7 @@ export default function LoginForm() {
     });
   }
   function onSubmitClick() {
-    formRef.current.validate().then((values) => {
+    formRef.current.validateFields().then((values) => {
       login(values);
     });
   }
@@ -72,7 +72,7 @@ export default function LoginForm() {
         initialValues={{ userName: 'admin', password: 'admin' }}>
 
         <Form.Item
-          field="userName"
+          name="userName"
           rules={[{ required: true, message: t['login.form.userName.errMsg'] }]}>
 
           <Input
@@ -82,7 +82,7 @@ export default function LoginForm() {
 
         </Form.Item>
         <Form.Item
-          field="password"
+          name="password"
           rules={[{ required: true, message: t['login.form.password.errMsg'] }]}>
 
           <Input.Password

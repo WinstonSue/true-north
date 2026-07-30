@@ -67,7 +67,7 @@ const GoalTreePanel: React.FC = ({}) => {
 
     const config = statusConfig[status];
     return (
-      <Tag color={config.color} size="small">
+      <Tag color={config.color} >
         {config.text}
       </Tag>
     );

@@ -5,6 +5,7 @@ import { Task } from './task.entity';
 import { TaskStatus } from '@true-north/enum';
 import { TodoRepository } from '../todo/todo.repository';
 import { TodoRepeatRepository } from '../todo/todo-repeat.repository';
+import { TodoService } from '../todo/todo.service';
 
 export class TaskService {
   protected taskRepository: TaskRepository;

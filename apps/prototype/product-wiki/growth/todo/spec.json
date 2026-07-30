@@ -5,10 +5,11 @@
   "document": "growth/todo/README.md",
   "parentId": "growth",
   "route": "/growth/todo",
-  "positioning": "承接目标和任务的最小执行颗粒，帮助用户安排今天要做的事。",
+  "positioning": "承接手动事项和系统生成行动的最小执行颗粒，帮助用户安排今天要做的事。",
   "dependencies": [
     "growth.goal",
-    "growth.task"
+    "growth.task",
+    "growth.habit"
   ],
   "entities": [
     {
@@ -17,15 +18,16 @@
       "fields": [
         {
           "id": "relatedType",
-          "name": "关联类型",
+          "name": "创建来源",
           "type": "enum",
           "required": true,
           "values": [
             "task",
             "goal",
+            "habit",
             "none"
           ],
-          "description": "待办可关联任务、目标或独立存在。",
+          "description": "手动创建的待办固定为独立事项；仅系统生成待办可关联目标、任务或习惯，且只能有一个来源。",
           "productStatus": "roadmap",
           "prototypeCoverage": "complete",
           "changeLog": [
@@ -53,6 +55,44 @@
               "date": "2026-07-28",
               "event": "baseline",
               "summary": "建立字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        },
+        {
+          "id": "plannedStartTime",
+          "name": "计划开始时间",
+          "type": "time",
+          "required": true,
+          "description": "待办在计划日期内的开始时间，格式为 HH:mm。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.1",
+              "date": "2026-07-30",
+              "event": "baseline",
+              "summary": "建立待办日内计划开始时间字段基线。",
+              "productStatus": "roadmap",
+              "prototypeCoverage": "complete"
+            }
+          ]
+        },
+        {
+          "id": "plannedEndTime",
+          "name": "计划结束时间",
+          "type": "time",
+          "required": true,
+          "description": "待办在计划日期内的结束时间，必须晚于计划开始时间，格式为 HH:mm。",
+          "productStatus": "roadmap",
+          "prototypeCoverage": "complete",
+          "changeLog": [
+            {
+              "version": "v0.1.1",
+              "date": "2026-07-30",
+              "event": "baseline",
+              "summary": "建立待办日内计划结束时间字段基线。",
               "productStatus": "roadmap",
               "prototypeCoverage": "complete"
             }
@@ -221,7 +261,7 @@
       "entities": [
         "todo"
       ],
-      "description": "关联目标或任务时，待办需遵守其时间和重要度约束。",
+      "description": "系统生成待办可关联目标、任务或习惯，来源不可通过手动编辑改写；关联目标或任务时需遵守其时间和重要度约束。",
       "views": [
         "today",
         "all"

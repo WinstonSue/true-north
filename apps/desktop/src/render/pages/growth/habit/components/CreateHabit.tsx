@@ -34,7 +34,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
   // 处理表单提交
   const handleSubmit = async () => {
     try {
-      const values = await form.validate();
+      const values = await form.validateFields();
 
       if (selectedGoals.length === 0) {
         message.error('请至少选择一个关联目标');
@@ -49,12 +49,12 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         importance: values.importance || 3,
         difficulty: values.difficulty || Difficulty.Challenger,
         tags: values.tags || [],
-        startAt: dayjs(values.startAt).format('YYYY-MM-DD'),
-        endAt: dayjs(values.endAt).format('YYYY-MM-DD'),
+        repeatStartDate: dayjs(values.repeatStartDate).format('YYYY-MM-DD'),
+        repeatEndDate: dayjs(values.repeatEndDate).format('YYYY-MM-DD'),
         goalIds: selectedGoals
       };
 
-      await HabitController.createHabit(habitData);
+      await HabitController.create(habitData);
       message.success('习惯创建成功');
       onSuccess();
     } catch (error) {
@@ -76,7 +76,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         {/* 基础信息 */}
         <Form.Item
           label="习惯名称"
-          field="name"
+          name="name"
           rules={[
           { required: true, message: '请输入习惯名称' },
           {
@@ -91,7 +91,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
 
         <Form.Item
           label="习惯描述"
-          field="description"
+          name="description"
           rules={[{ maxLength: 200, message: '描述长度不能超过200个字符' }]}>
 
           <TextArea
@@ -148,7 +148,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
 
         {/* 属性设置 */}
         <div className="grid grid-cols-2 gap-4">
-          <Form.Item label="重要程度" field="importance" initialValue={3}>
+          <Form.Item label="重要程度" name="importance" initialValue={3}>
             <Select
               placeholder="选择重要程度"
               options={[...IMPORTANCE_MAP.entries()].map(([value, option]) => ({
@@ -161,7 +161,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
 
           <Form.Item
             label="难度等级"
-            field="difficulty"
+            name="difficulty"
             initialValue={Difficulty.Challenger}>
 
             <Select
@@ -176,7 +176,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         </div>
 
         {/* 标签 */}
-        <Form.Item label="标签" field="tags">
+        <Form.Item label="标签" name="tags">
           <Select
             mode="multiple"
             placeholder="添加标签，最多5个"
@@ -191,7 +191,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <Form.Item
             label="开始日期"
-            field="startAt"
+            name="repeatStartDate"
             rules={[{ required: true, message: '请选择开始日期' }]}>
 
             <DatePicker
@@ -200,11 +200,11 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
 
           </Form.Item>
 
-          <Form.Item label="目标日期" field="endAt">
+          <Form.Item label="目标日期" name="repeatEndDate">
             <DatePicker
               style={{ width: '100%' }}
               disabledDate={(date) => {
-                const startDate = form.getFieldValue('startAt');
+                const startDate = form.getFieldValue('repeatStartDate');
                 return startDate ?
                 date.isBefore(startDate, 'day') :
                 date.isBefore(new Date(), 'day');

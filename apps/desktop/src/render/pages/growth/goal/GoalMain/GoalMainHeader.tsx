@@ -198,7 +198,7 @@ const GoalMainHeader: React.FC = () => {
         {/* 主要按钮：已完成 */}
         {selectedGoal && selectedGoal.status !== GoalStatus.DONE && (
           <Button
-            type="outline"
+            type="default"
             size="default"
             status="success"
             icon={<CheckOutlined />}

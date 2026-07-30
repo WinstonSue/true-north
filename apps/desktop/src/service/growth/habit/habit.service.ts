@@ -3,6 +3,7 @@ import { TodoRepository } from '../todo/todo.repository';
 import { CreateHabitDto, UpdateHabitDto, HabitFilterDto, HabitPageFilterDto, HabitDto } from './dto';
 import { Habit } from './habit.entity';
 import { HabitStatus, TodoStatus } from '@true-north/enum';
+import { assertRepeat } from '@true-north/components-repeat/helpers';
 
 export class HabitService {
   habitRepository: HabitRepository;
@@ -15,6 +16,7 @@ export class HabitService {
 
   // ====== 基础 CRUD ======
   async create(createHabitDto: CreateHabitDto): Promise<HabitDto> {
+    this.assertValidRepeat(createHabitDto);
     const entity = await this.habitRepository.create(createHabitDto.exportCreateEntity());
     const habitDto = new HabitDto();
     habitDto.importEntity(entity);
@@ -26,6 +28,15 @@ export class HabitService {
   }
 
   async update(updateHabitDto: UpdateHabitDto): Promise<HabitDto> {
+    const current = await this.habitRepository.find(updateHabitDto.id);
+    this.assertValidRepeat({
+      repeatMode: updateHabitDto.repeatMode ?? current.repeatMode,
+      repeatConfig: updateHabitDto.repeatConfig ?? current.repeatConfig,
+      repeatEndMode: updateHabitDto.repeatEndMode ?? current.repeatEndMode,
+      repeatEndDate: updateHabitDto.repeatEndDate ?? current.repeatEndDate,
+      repeatTimes: updateHabitDto.repeatTimes ?? current.repeatTimes,
+      repeatStartDate: updateHabitDto.repeatStartDate ?? current.repeatStartDate,
+    });
     const entity = await this.habitRepository.update(updateHabitDto.exportUpdateEntity());
     const habitDto = new HabitDto();
     habitDto.importEntity(entity);
@@ -34,19 +45,26 @@ export class HabitService {
 
   async find(id: string): Promise<HabitDto> {
     const entity = await this.habitRepository.find(id);
-    return HabitDto.importEntity(entity);
+    const dto = HabitDto.importEntity(entity);
+    this.assertValidRepeat(dto);
+    return dto;
   }
 
   async findWithRelations(id: string): Promise<HabitDto> {
     const entity = await this.habitRepository.findWithRelations(id);
     const habitDto = new HabitDto();
     habitDto.importEntity(entity);
+    this.assertValidRepeat(habitDto);
     return habitDto;
   }
 
   async findByFilter(filter: HabitFilterDto): Promise<HabitDto[]> {
     const entities = await this.habitRepository.findByFilter(filter);
-    return entities.map((entity) => HabitDto.importEntity(entity));
+    return entities.map((entity) => {
+      const dto = HabitDto.importEntity(entity);
+      this.assertValidRepeat(dto);
+      return dto;
+    });
   }
 
   async page(
@@ -54,7 +72,11 @@ export class HabitService {
   ): Promise<{ list: HabitDto[]; total: number; pageNum: number; pageSize: number }> {
     const { list, total, pageNum, pageSize } = await this.habitRepository.page(filter);
     return {
-      list: list.map((entity) => HabitDto.importEntity(entity)),
+      list: list.map((entity) => {
+        const dto = HabitDto.importEntity(entity);
+        this.assertValidRepeat(dto);
+        return dto;
+      }),
       total,
       pageNum,
       pageSize,
@@ -68,6 +90,24 @@ export class HabitService {
 
   async restore(id: string): Promise<void> {
     await this.update(Object.assign(new UpdateHabitDto(), { status: HabitStatus.DOING }));
+  }
+
+  private assertValidRepeat(value: {
+    repeatMode?: unknown;
+    repeatConfig?: unknown;
+    repeatEndMode?: unknown;
+    repeatEndDate?: unknown;
+    repeatTimes?: unknown;
+    repeatStartDate?: unknown;
+  }): void {
+    assertRepeat({
+      repeatMode: value.repeatMode,
+      repeatConfig: value.repeatConfig,
+      repeatEndMode: value.repeatEndMode,
+      repeatEndDate: value.repeatEndDate,
+      repeatTimes: value.repeatTimes,
+      repeatStartDate: value.repeatStartDate,
+    });
   }
 }
 

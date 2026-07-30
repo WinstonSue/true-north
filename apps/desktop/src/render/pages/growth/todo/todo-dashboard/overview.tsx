@@ -25,7 +25,7 @@ function StatisticItem(props: StatisticItemType) {
     <div className={styles.item}>
       <div className={styles.icon}>{icon}</div>
       <div>
-        <Skeleton loading={loading} text={{ rows: 2, width: 60 }} animation>
+        <Skeleton loading={loading} paragraph={{ rows: 2, width: 60 }} animation>
           <div className={styles.title}>{title}</div>
           <div className={styles.count}>
             {count}
@@ -80,7 +80,7 @@ function Overview() {
             unit={t['workplace.pecs']} />
 
         </Col>
-        <Divider type="vertical" className={styles.divider} />
+        <Divider vertical className={styles.divider} />
         <Col flex={1}>
           <StatisticItem
             icon={<IconContent />}
@@ -90,7 +90,7 @@ function Overview() {
             unit={t['workplace.pecs']} />
 
         </Col>
-        <Divider type="vertical" className={styles.divider} />
+        <Divider vertical className={styles.divider} />
         <Col flex={1}>
           <StatisticItem
             icon={<IconComments />}
@@ -100,7 +100,7 @@ function Overview() {
             unit={t['workplace.pecs']} />
 
         </Col>
-        <Divider type="vertical" className={styles.divider} />
+        <Divider vertical className={styles.divider} />
         <Col flex={1}>
           <StatisticItem
             icon={<IconIncrease />}

@@ -149,7 +149,7 @@ function TodoCreatorMain(props: {
       </div>
       <div className="flex justify-end mt-4">
         <CreateButton
-          type="outline"
+          type="default"
           size="small"
           onClick={() => {
             onSubmit();

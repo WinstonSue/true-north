@@ -122,7 +122,7 @@ export function RecentTodos({ todoList }: RecentTodosProps) {
               {todo.tags && todo.tags.length > 0 &&
           <div className="flex gap-1">
                   {todo.tags.slice(0, 2).map((tag) =>
-            <Tag key={tag} size="small">
+            <Tag key={tag} >
                       {tag}
                     </Tag>
             )}
@@ -181,11 +181,11 @@ export function RecentTodos({ todoList }: RecentTodosProps) {
                       {todo.name}
                     </span>
                     <div className="flex gap-2">
-                      <Tag color={getDateColor(todo.planDate)} size="small">
+                      <Tag color={getDateColor(todo.planDate)} >
                         {getDateLabel(todo.planDate)}
                       </Tag>
                       {todo.importance === 1 && todo.urgency === 1 &&
-                  <Tag color="red" size="small">
+                  <Tag color="red" >
                           高优先级
                         </Tag>
                   }

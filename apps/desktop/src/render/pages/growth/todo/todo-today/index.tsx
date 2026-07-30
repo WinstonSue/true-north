@@ -78,7 +78,7 @@ export default function TodoToday() {
           <Collapse
             defaultActiveKey={['expired', 'today']}
             className={clsx(styles['custom-collapse'])}
-            bordered={false}
+
           >
             {expiredTodoList.length > 0 && (
               <Collapse.Panel header="已过期" key="expired">
@@ -137,7 +137,7 @@ export default function TodoToday() {
       </Flex>
       {currentTodo && (
         <>
-          <Divider type="vertical" className="!h-full" />
+          <Divider vertical className="!h-full" />
           <Flex container="fill" className="w-1/2 py-2">
             <TodoEditor
               todo={currentTodo}

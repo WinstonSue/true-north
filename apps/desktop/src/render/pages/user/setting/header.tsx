@@ -20,11 +20,11 @@ export default function Info({
   }, [userInfo]);
   const loadingImg =
   <Skeleton
-    text={{ rows: 0 }}
+    paragraph={{ rows: 0 }}
     style={{ width: '100px', height: '100px' }}
     animation />;
 
-  const loadingNode = <Skeleton text={{ rows: 1 }} animation />;
+  const loadingNode = <Skeleton paragraph={{ rows: 1 }} animation />;
   return (
     <div className={styles['info-wrapper']}>
       <Upload showUploadList={false} onChange={onAvatarChange}>

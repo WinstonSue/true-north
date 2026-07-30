@@ -1,8 +1,13 @@
-import { Alert, Button, Card, Col, Flex, Progress, Row, Space, Statistic, Tabs } from '@sue/design-web-react';
-import { ChevronRight, Plus, Sparkles } from 'lucide-react';
-import { PageHeader, PriorityTag, StateTag } from '../../shared/components';
+import { useMemo, useState } from 'react';
+import dayjs from 'dayjs';
+import { Alert, Button, Card, Col, DatePicker, Flex, Input, Row, Select, Space, Statistic, Tabs, Tooltip } from '@sue/design-web-react';
+import { ChevronRight, Plus, SlidersHorizontal, Sparkles, X } from 'lucide-react';
+import { PriorityTag, StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
-import type { DrawerState, Goal, Habit, Task } from '../../shared/types';
+import { goalTypes } from '../../shared/mock-data';
+import type { DrawerState, Goal, GoalStatus, GoalType, Habit, Task } from '../../shared/types';
+import { statusLabel } from '../../shared/utils';
+import { GoalManagementHeader } from './GoalManagementHeader';
 import styles from './index.module.css';
 
 type Props = {
@@ -23,13 +28,49 @@ export function GoalsPage({
   setDrawer,
   onOpenAiDecomposition,
 }: Props) {
+  const [keyword, setKeyword] = useState('');
+  const [statuses, setStatuses] = useState<GoalStatus[]>([]);
+  const [types, setTypes] = useState<GoalType[]>([]);
+  const [filterStart, setFilterStart] = useState<string>();
+  const [filterEnd, setFilterEnd] = useState<string>();
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const current = goals.find((goal) => goal.id === selectedGoal) || goals[0];
   const children = goals.filter((goal) => goal.parentId === current.id);
   const relatedTasks = tasks.filter((task) => task.goalId === current.id);
   const relatedHabits = habits.filter((habit) => habit.goalIds.includes(current.id));
+  const normalizedKeyword = keyword.trim().toLocaleLowerCase();
+  const visibleGoalIds = useMemo(() => {
+    const goalsById = new Map(goals.map((goal) => [goal.id, goal]));
+    const ids = new Set<string>();
+    goals
+      .filter(
+        (goal) =>
+          (!normalizedKeyword || goal.title.toLocaleLowerCase().includes(normalizedKeyword)) &&
+          (!statuses.length || statuses.includes(goal.status)) &&
+          (!types.length || types.includes(goal.type)) &&
+          (!filterStart || goal.end >= filterStart) &&
+          (!filterEnd || goal.start <= filterEnd)
+      )
+      .forEach((goal) => {
+        let item: Goal | undefined = goal;
+        while (item) {
+          ids.add(item.id);
+          item = item.parentId ? goalsById.get(item.parentId) : undefined;
+        }
+      });
+    return ids;
+  }, [filterEnd, filterStart, goals, normalizedKeyword, statuses, types]);
+  const hasFilters = Boolean(normalizedKeyword || statuses.length || types.length || filterStart || filterEnd);
+  const clearFilters = () => {
+    setKeyword('');
+    setStatuses([]);
+    setTypes([]);
+    setFilterStart(undefined);
+    setFilterEnd(undefined);
+  };
   const renderTree = (parentId?: string, depth = 0): React.ReactNode =>
     goals
-      .filter((goal) => goal.parentId === parentId)
+      .filter((goal) => goal.parentId === parentId && visibleGoalIds.has(goal.id))
       .map((goal) => (
         <div
           data-product-ref={productRef('growth.goal.view.tree')}
@@ -43,45 +84,92 @@ export function GoalsPage({
             onClick={() => setSelectedGoal(goal.id)}
             icon={<ChevronRight size={14} />}
           >
-            {goal.title}
+            <span className={styles.treeGoalLabel}>{goal.title}</span>
+            <small className={styles.treeTimeRange} data-product-ref={productRef('growth.goal.rule.time-frame')}>
+              {`${goal.start} 至 ${goal.end}`}
+            </small>
           </Button>
           {renderTree(goal.id, depth + 1)}
         </div>
       ));
   return (
     <>
-      <PageHeader
-        productReference={productRef('growth.goal.overview')}
-        title="目标管理"
-        action={
-          <div data-product-ref={productRef('growth.goal.interaction')}>
-            <Space>
-              <Button icon={<Sparkles size={15} />} onClick={onOpenAiDecomposition}>
-                AI 拆解此目标
-              </Button>
-              <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'goal' })}>
-                新建目标
-              </Button>
-            </Space>
-          </div>
-        }
-      />
+      <GoalManagementHeader />
       <Row gutter={[16, 16]} align="top">
         <Col xs={24} lg={8}>
           <div data-product-ref={productRef('growth.goal.view.tree')}>
             <Card
               title="目标树"
               extra={
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<Plus size={15} />}
-                  aria-label="新建目标"
-                  onClick={() => setDrawer({ kind: 'goal' })}
-                />
+                <Space size={0}>
+                  {hasFilters && (
+                    <Tooltip title="清空筛选">
+                      <Button type="text" size="small" icon={<X size={15} />} aria-label="清空筛选" onClick={clearFilters} />
+                    </Tooltip>
+                  )}
+                  <Tooltip title={filtersExpanded ? '收起筛选' : '展开筛选'}>
+                    <Button
+                      type={hasFilters ? 'primary' : 'text'}
+                      size="small"
+                      icon={<SlidersHorizontal size={15} />}
+                      aria-label={filtersExpanded ? '收起筛选' : '展开筛选'}
+                      aria-expanded={filtersExpanded}
+                      onClick={() => setFiltersExpanded((value) => !value)}
+                    />
+                  </Tooltip>
+                  <Tooltip title="新建目标">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<Plus size={15} />}
+                      aria-label="新建目标"
+                      onClick={() => setDrawer({ kind: 'goal' })}
+                    />
+                  </Tooltip>
+                </Space>
               }
             >
-              {renderTree()}
+              <Flex vertical gap={12}>
+                {filtersExpanded && (
+                  <Flex vertical gap={8}>
+                    <Input value={keyword} placeholder="搜索目标名称" allowClear onChange={(event) => setKeyword(event.target.value)} />
+                    <Flex wrap gap={8}>
+                      <Select
+                        mode="multiple"
+                        value={statuses}
+                        placeholder="全部状态"
+                        style={{ minWidth: 132 }}
+                        options={['todo', 'doing', 'done', 'paused', 'archived'].map((value) => ({
+                          value,
+                          label: statusLabel(value),
+                        }))}
+                        onChange={(value) => setStatuses(value as GoalStatus[])}
+                      />
+                      <Select
+                        mode="multiple"
+                        value={types}
+                        placeholder="全部类型"
+                        style={{ minWidth: 132 }}
+                        options={goalTypes}
+                        onChange={(value) => setTypes(value as GoalType[])}
+                      />
+                      <DatePicker
+                        allowClear
+                        placeholder="开始日期"
+                        value={filterStart ? dayjs(filterStart) : undefined}
+                        onChange={(date) => setFilterStart(date?.format('YYYY-MM-DD'))}
+                      />
+                      <DatePicker
+                        allowClear
+                        placeholder="结束日期"
+                        value={filterEnd ? dayjs(filterEnd) : undefined}
+                        onChange={(date) => setFilterEnd(date?.format('YYYY-MM-DD'))}
+                      />
+                    </Flex>
+                  </Flex>
+                )}
+                {visibleGoalIds.size ? renderTree() : <Alert type="info" showIcon title="没有匹配的目标" />}
+              </Flex>
             </Card>
           </div>
         </Col>
@@ -101,27 +189,22 @@ export function GoalsPage({
               }
             >
               <Flex vertical gap={16}>
-                <div data-product-ref={productRef('growth.goal.rule.parent-time-frame')}>
-                  <Space>
-                    <StateTag status={current.status} />
-                    <PriorityTag importance={current.importance} />
-                  </Space>
-                </div>
+                <Space>
+                  <StateTag status={current.status} />
+                  <PriorityTag importance={current.importance} />
+                </Space>
+                <small className={styles.timeRange} data-product-ref={productRef('growth.goal.rule.time-frame')}>
+                  {`时间范围：${current.start} 至 ${current.end}`}
+                </small>
                 <p className={styles.goalDescription}>{current.description}</p>
-                <div data-product-ref={productRef('growth.goal.rule.parent-time-frame')}>
-                  <Row gutter={[16, 16]}>
-                    <Col span={8}>
-                      <Statistic title="当前进度" value={current.progress} suffix="%" />
-                    </Col>
-                    <Col span={8}>
-                      <Statistic title="关联任务" value={relatedTasks.length} suffix="项" />
-                    </Col>
-                    <Col span={8}>
-                      <Statistic title="关联习惯" value={relatedHabits.length} suffix="项" />
-                    </Col>
-                  </Row>
-                  <Progress percent={current.progress} />
-                </div>
+                <Row gutter={[16, 16]}>
+                  <Col span={12}>
+                    <Statistic title="关联任务" value={relatedTasks.length} suffix="项" />
+                  </Col>
+                  <Col span={12}>
+                    <Statistic title="关联习惯" value={relatedHabits.length} suffix="项" />
+                  </Col>
+                </Row>
                 <div data-product-ref={productRef('growth.goal.view.detail')}>
                   <Tabs
                     items={[

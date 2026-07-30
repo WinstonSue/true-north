@@ -9,8 +9,13 @@ import {
   TodoDto,
 } from './dto';
 import { TodoRepeat } from './todo-repeat.entity';
-import { calculateNextDate, isValidDate } from 'francis-helper-repeat';
-import { RepeatEndMode } from 'francis-types-repeat';
+import {
+  assertRepeat,
+  calculateNextDate,
+  isValidDate,
+  RepeatValidationError,
+} from '@true-north/components-repeat/helpers';
+import { RepeatEndMode } from '@true-north/components-repeat/types';
 import { TodoStatus, TodoRelatedType } from '@true-north/enum';
 import dayjs from 'dayjs';
 
@@ -24,6 +29,7 @@ export class TodoRepeatService {
   // ====== 基础 CRUD ======
 
   async create(createTodoRepeatDto: CreateTodoRepeatDto): Promise<TodoRepeatDto> {
+    this.assertValidRepeat(createTodoRepeatDto);
     // 在创建前，确保 currentDate 符合重复规则
     createTodoRepeatDto = this.fixCurrentDate(createTodoRepeatDto);
 
@@ -43,7 +49,9 @@ export class TodoRepeatService {
   }
 
   async update(updateTodoRepeatDto: UpdateTodoRepeatDto): Promise<TodoRepeatDto> {
-    console.log('========updateTodoRepeatDto', updateTodoRepeatDto);
+    const currentEntity = await this.todoRepeatRepository.findWithRelations(updateTodoRepeatDto.id);
+    updateTodoRepeatDto.importUpdateEntity(currentEntity);
+    this.assertValidRepeat(updateTodoRepeatDto);
     const entity = await this.todoRepeatRepository.update(updateTodoRepeatDto.exportUpdateEntity());
     const todoRepeatDto = new TodoRepeatDto();
     todoRepeatDto.importEntity(entity);
@@ -54,6 +62,7 @@ export class TodoRepeatService {
     const entity = await this.todoRepeatRepository.findWithRelations(id);
     const todoRepeatDto = new TodoRepeatDto();
     todoRepeatDto.importEntity(entity);
+    this.assertValidRepeat(todoRepeatDto);
     return todoRepeatDto;
   }
 
@@ -62,6 +71,7 @@ export class TodoRepeatService {
     return entities.map((entity) => {
       const todoRepeatDto = new TodoRepeatDto();
       todoRepeatDto.importEntity(entity);
+      this.assertValidRepeat(todoRepeatDto);
       return todoRepeatDto;
     });
   }
@@ -78,6 +88,7 @@ export class TodoRepeatService {
       list: result.list.map((entity) => {
         const todoRepeatDto = new TodoRepeatDto();
         todoRepeatDto.importEntity(entity);
+        this.assertValidRepeat(todoRepeatDto);
         return todoRepeatDto;
       }),
     };
@@ -88,6 +99,27 @@ export class TodoRepeatService {
   async batchUpdate(includeIds: string[], updateTodoRepeatDto: UpdateTodoRepeatDto): Promise<TodoRepeatDto[]> {
     const filterDto = new TodoRepeatFilterDto();
     filterDto.includeIds = includeIds;
+    const updatesRepeatRule = [
+      updateTodoRepeatDto.repeatMode,
+      updateTodoRepeatDto.repeatConfig,
+      updateTodoRepeatDto.repeatEndMode,
+      updateTodoRepeatDto.repeatEndDate,
+      updateTodoRepeatDto.repeatTimes,
+      updateTodoRepeatDto.repeatStartDate,
+    ].some((value) => value !== undefined);
+    if (updatesRepeatRule) {
+      const currentItems = await this.todoRepeatRepository.findByFilter(filterDto);
+      currentItems.forEach((current) => {
+        this.assertValidRepeat({
+          repeatMode: updateTodoRepeatDto.repeatMode ?? current.repeatMode,
+          repeatConfig: updateTodoRepeatDto.repeatConfig ?? current.repeatConfig,
+          repeatEndMode: updateTodoRepeatDto.repeatEndMode ?? current.repeatEndMode,
+          repeatEndDate: updateTodoRepeatDto.repeatEndDate ?? current.repeatEndDate,
+          repeatTimes: updateTodoRepeatDto.repeatTimes ?? current.repeatTimes,
+          repeatStartDate: updateTodoRepeatDto.repeatStartDate ?? current.repeatStartDate,
+        });
+      });
+    }
     const result = await this.todoRepeatRepository.updateByFilter(filterDto, updateTodoRepeatDto as any);
     return result as any;
   }
@@ -128,16 +160,19 @@ export class TodoRepeatService {
     // 验证当前日期是否符合重复规则
     todoRepeatDto = this.fixCurrentDate(todoRepeatDto);
 
-    let currentDate = dayjs(todoRepeatDto.currentDate);
-    let nextDate: dayjs.Dayjs;
+    const currentDate = dayjs(todoRepeatDto.currentDate);
 
     // 当前日期符合规则，计算下一个日期
-    const calculatedNextDate = calculateNextDate(currentDate, repeatConfig);
+    const calculatedNextDateResult = calculateNextDate(currentDate, repeatConfig);
+    if (calculatedNextDateResult.ok === false) {
+      throw new RepeatValidationError(calculatedNextDateResult.issues);
+    }
+    const calculatedNextDate = calculatedNextDateResult.value;
 
     if (!calculatedNextDate) {
       throw new Error('No next date found');
     }
-    nextDate = calculatedNextDate;
+    const nextDate = calculatedNextDate;
 
     const updateTodoRepeatDto = new UpdateTodoRepeatDto();
     updateTodoRepeatDto.id = todoRepeatDto.id;
@@ -247,11 +282,19 @@ export class TodoRepeatService {
       };
 
       const currentDate = dayjs(todoRepeatDto.currentDate);
-      const isCurrentDateValid = isValidDate(currentDate, repeatConfig);
+      const isCurrentDateValidResult = isValidDate(currentDate, repeatConfig);
+      if (isCurrentDateValidResult.ok === false) {
+        throw new RepeatValidationError(isCurrentDateValidResult.issues);
+      }
+      const isCurrentDateValid = isCurrentDateValidResult.value;
 
       if (!isCurrentDateValid) {
         // 如果当前日期不符合规则，找到下一个符合条件的日期
-        const validNextDate = calculateNextDate(currentDate.subtract(1, 'day'), repeatConfig);
+        const validNextDateResult = calculateNextDate(currentDate.subtract(1, 'day'), repeatConfig);
+        if (validNextDateResult.ok === false) {
+          throw new RepeatValidationError(validNextDateResult.issues);
+        }
+        const validNextDate = validNextDateResult.value;
 
         if (validNextDate) {
           todoRepeatDto.currentDate = validNextDate.format('YYYY-MM-DD');
@@ -260,5 +303,23 @@ export class TodoRepeatService {
     }
 
     return todoRepeatDto;
+  }
+
+  private assertValidRepeat(value: {
+    repeatMode?: unknown;
+    repeatConfig?: unknown;
+    repeatEndMode?: unknown;
+    repeatEndDate?: unknown;
+    repeatTimes?: unknown;
+    repeatStartDate?: unknown;
+  }): void {
+    assertRepeat({
+      repeatMode: value.repeatMode,
+      repeatConfig: value.repeatConfig,
+      repeatEndMode: value.repeatEndMode,
+      repeatEndDate: value.repeatEndDate,
+      repeatTimes: value.repeatTimes,
+      repeatStartDate: value.repeatStartDate,
+    });
   }
 }

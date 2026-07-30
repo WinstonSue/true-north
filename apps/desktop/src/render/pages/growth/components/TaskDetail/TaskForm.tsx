@@ -228,7 +228,7 @@ function Item(props: {
   return (
     <Col span={props.span} className="w-full flex items-center !p-0">
       <Form.Item
-        field={props.name}
+        name={props.name}
         label={<span className="pl-2">{props.label}</span>}
         labelAlign="left"
         labelCol={{ span: labelCol }}

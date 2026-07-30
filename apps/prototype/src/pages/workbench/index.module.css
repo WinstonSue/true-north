@@ -6,4 +6,3 @@
 .listRow b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .listRow small { color: var(--sue-color-text-tertiary); }
 .habitIcon { display: grid; width: 30px; height: 30px; place-items: center; color: var(--sue-color-warning-text); border-radius: var(--sue-border-radius-sm); background: var(--sue-color-warning-bg); }
-@media (max-width: 575px) { .listRow { align-items: flex-start; padding: 10px 0; } .listRow :global(.sue-tag) { display: none; } }

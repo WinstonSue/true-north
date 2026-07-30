@@ -64,7 +64,7 @@ function TaskItem(props: TaskItemProps) {
               }}
               iconOnly
               type="text"
-              size="mini"
+              size="small"
               icon={<SiteIcon id="more-for-task" />}
               className="!flex justify-center items-center !text-text" />
 

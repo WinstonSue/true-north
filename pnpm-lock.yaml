@@ -95,6 +95,9 @@ importers:
       '@true-north/components-mind':
         specifier: workspace:*
         version: link:../../packages/components/mind
+      '@true-north/components-repeat':
+        specifier: workspace:*
+        version: link:../../packages/components/repeat
       '@true-north/enum':
         specifier: workspace:*
         version: link:../../packages/business/enum
@@ -107,6 +110,9 @@ importers:
       bizcharts:
         specifier: ^4.1.11
         version: 4.1.23(@babel/core@7.28.4)(react@18.3.1)
+      chinese-holiday-calendar:
+        specifier: 0.0.4
+        version: 0.0.4
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -131,13 +137,7 @@ importers:
       electron-ipc-restful:
         specifier: 0.0.1
         version: 0.0.1(electron@36.0.0)
-      francis-helper-repeat:
-        specifier: 0.0.6
-        version: 0.0.6
       francis-mapped-types:
-        specifier: 0.0.1
-        version: 0.0.1
-      francis-types-repeat:
         specifier: 0.0.1
         version: 0.0.1
       insert-css:
@@ -330,6 +330,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
+      react-router-dom:
+        specifier: ^6.30.1
+        version: 6.30.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@types/react':
         specifier: ^18.2.0
@@ -351,12 +354,12 @@ importers:
 
   packages/business/vo:
     dependencies:
+      '@true-north/components-repeat':
+        specifier: workspace:*
+        version: link:../../components/repeat
       '@true-north/enum':
         specifier: workspace:*
         version: link:../enum
-      francis-helper-repeat:
-        specifier: 0.0.6
-        version: 0.0.6
 
   packages/business/web-service:
     dependencies:
@@ -439,6 +442,52 @@ importers:
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
+
+  packages/components/repeat:
+    dependencies:
+      '@sue/design-web-react':
+        specifier: 0.0.3-beta
+        version: 0.0.3-beta(date-fns@3.6.0)(luxon@3.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      chinese-holiday-calendar:
+        specifier: 0.0.4
+        version: 0.0.4
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.21
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.0.0
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.5.0
+        version: 29.5.14
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
+      '@types/node':
+        specifier: 22.13.0
+        version: 22.13.0
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.3.24
+      '@types/react-dom':
+        specifier: ^18.2.0
+        version: 18.3.7(@types/react@18.3.24)
+      jest:
+        specifier: ^29.5.0
+        version: 29.7.0(@types/node@22.13.0)(ts-node@10.9.2(@swc/core@1.13.5)(@types/node@22.13.0)(typescript@5.9.2))
+      ts-jest:
+        specifier: ^29.1.0
+        version: 29.4.2(@babel/core@7.28.4)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.4))(jest-util@29.7.0)(jest@29.7.0(@types/node@22.13.0)(ts-node@10.9.2(@swc/core@1.13.5)(@types/node@22.13.0)(typescript@5.9.2)))(typescript@5.9.2)
+      typescript:
+        specifier: ^5.1.3
+        version: 5.9.2
 
   packages/dev-tools:
     dependencies:
@@ -2593,7 +2642,7 @@ packages:
     resolution: {integrity: sha512-Uy0+khmZqUrUGm5dmMqVlnvufZRSK0FbYzVgp0UMstm+F5+W2/jnEEQyc9vo1ZR/E5ZI/B1WjjoTqBqwJL6Krw==}
 
   '@sue/design-web-react@0.0.3-beta':
-    resolution: {integrity: sha512-Bs8GJZVYCK0MRcsWzJ26qv8jAthWw9R0G0sZy5sxZIXi9V4/LAISgT50MJVoLLpjFDhO/0dBLAOtwC21RMANIA==, tarball: https://packages.aliyun.com/69f800449b7ce0afb00bda0e/npm/npm-registry/@sue/design-web-react/-/@sue/design-web-react-0.0.3-beta.tgz}
+    resolution: {integrity: sha512-c/iO9hd1rCoM12olMWG7vwHyE0UJFINzoewWjV/e3oqHMuBZ11NDn4gXXiedwQBhtGE0CHw0HepSq+uXja6mig==, tarball: https://packages.aliyun.com/69f800449b7ce0afb00bda0e/npm/npm-registry/@sue/design-web-react/-/@sue/design-web-react-0.0.3-beta.tgz}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -3872,14 +3921,8 @@ packages:
   brace-expansion@1.1.12:
     resolution: {integrity: sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==}
 
-  brace-expansion@1.1.16:
-    resolution: {integrity: sha512-IDw48K2/2kRkg9LdJxurvq3lV3aBgq0REY89duEqFRthjlPdXHKMj7EnQOXVckxzgisinf3nHfrcE2FufFLXMw==}
-
   brace-expansion@2.0.2:
     resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
-
-  brace-expansion@2.1.2:
-    resolution: {integrity: sha512-w5JZcKgdhDOgOwm8H+KgbosopHMuGcl6qbulwjtz3SM7I7P3yW1eAjzMPLrIE+NQ9vjgANKHWeMHnrT0OXW1oA==}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -5052,14 +5095,8 @@ packages:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
 
-  francis-helper-repeat@0.0.6:
-    resolution: {integrity: sha512-nzGTN0NTqnmhQgCPogQrWmx/FToRIpzgjqxStEW/A/gGGcL1k0aH/ZZ6lUG5CknuEeqexPMs9Zmq6qyQzNmuDA==}
-
   francis-mapped-types@0.0.1:
     resolution: {integrity: sha512-T1g8lZaCczwsBSYYwbZnGS7DRXELLYoyTbpSqnzgRxqxjaozSb7LLMqaPFpFmtM+d6SCPCGqtPmsL7YZWWMnOg==}
-
-  francis-types-repeat@0.0.1:
-    resolution: {integrity: sha512-NLZwrk5PUFjTdm1k4CREg8QrW+VS9sdxRE3HiITcKwW7+lp9xE6W6gGDerAFbqGNfg2LddhJXtDWwu/ZEmjobA==}
 
   fresh@0.5.2:
     resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
@@ -6225,10 +6262,6 @@ packages:
 
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
-
-  minimatch@5.1.6:
-    resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
-    engines: {node: '>=10'}
 
   minimatch@5.1.9:
     resolution: {integrity: sha512-7o1wEA2RyMP7Iu7GNba9vc0RWWGACJOCZBJX2GJWip0ikV+wcOsgVuY9uE8CPiyQhkGFSlhuSkZPavN7u1c2Fw==}
@@ -13004,16 +13037,7 @@ snapshots:
       balanced-match: 1.0.2
       concat-map: 0.0.1
 
-  brace-expansion@1.1.16:
-    dependencies:
-      balanced-match: 1.0.2
-      concat-map: 0.0.1
-
   brace-expansion@2.0.2:
-    dependencies:
-      balanced-match: 1.0.2
-
-  brace-expansion@2.1.2:
     dependencies:
       balanced-match: 1.0.2
 
@@ -13695,7 +13719,7 @@ snapshots:
 
   dir-compare@4.2.0:
     dependencies:
-      minimatch: 3.1.2
+      minimatch: 3.1.5
       p-limit: 3.1.0
 
   dir-glob@3.0.1:
@@ -13784,7 +13808,7 @@ snapshots:
 
   dotignore@0.1.2:
     dependencies:
-      minimatch: 3.1.2
+      minimatch: 3.1.5
 
   dunder-proto@1.0.1:
     dependencies:
@@ -14392,7 +14416,7 @@ snapshots:
 
   filelist@1.0.4:
     dependencies:
-      minimatch: 5.1.6
+      minimatch: 5.1.9
 
   fill-range@7.1.1:
     dependencies:
@@ -14470,18 +14494,9 @@ snapshots:
 
   forwarded@0.2.0: {}
 
-  francis-helper-repeat@0.0.6:
-    dependencies:
-      chinese-holiday-calendar: 0.0.4
-      dayjs: 1.11.18
-      francis-types-repeat: 0.0.1
-      lodash: 4.17.21
-
   francis-mapped-types@0.0.1:
     dependencies:
       class-transformer: 0.5.1
-
-  francis-types-repeat@0.0.1: {}
 
   fresh@0.5.2: {}
 
@@ -15874,15 +15889,11 @@ snapshots:
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 1.1.16
-
-  minimatch@5.1.6:
-    dependencies:
-      brace-expansion: 2.0.2
+      brace-expansion: 1.1.12
 
   minimatch@5.1.9:
     dependencies:
-      brace-expansion: 2.1.2
+      brace-expansion: 2.0.2
 
   minimatch@9.0.5:
     dependencies:
@@ -17918,7 +17929,7 @@ snapshots:
     dependencies:
       '@istanbuljs/schema': 0.1.3
       glob: 7.2.3
-      minimatch: 3.1.2
+      minimatch: 3.1.5
 
   throttle-debounce@3.0.1: {}
 

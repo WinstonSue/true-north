@@ -19,7 +19,6 @@ export function useTodoDetail() {
       ...rest,
       title: '编辑待办',
       size: 800,
-      footer: null,
       content: (
         <TodoEditor
           {...contentProps}
@@ -41,7 +40,6 @@ export function useTodoDetail() {
       ...rest,
       title: '新建待办',
       size: 800,
-      footer: null,
       content: (
         <TodoCreator
           {...contentProps}

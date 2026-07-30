@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import {
   Alert,
   Button,
@@ -15,8 +15,8 @@ import {
   Row,
   Select,
   Slider,
-  Switch,
   Tag,
+  TimePicker,
 } from '@sue/design-web-react';
 import { goalTypes, NEXT_DAY, TODAY } from '../mock-data';
 import { productRef } from '../../product-wiki';
@@ -27,16 +27,13 @@ import type {
   GoalStatus,
   Habit,
   HabitFrequency,
-  RecurrenceRule,
-  RecurringTodoTemplate,
-  Reminder,
   SaveEntity,
   Task,
   TaskStatus,
   Todo,
   TodoStatus,
 } from '../types';
-import { addDays, frequencyLabel, goalName, repeatLabel, statusLabel } from '../utils';
+import { frequencyLabel, goalName, statusLabel } from '../utils';
 import styles from './EntityDrawer.module.css';
 
 type Props = {
@@ -45,12 +42,12 @@ type Props = {
   tasks: Task[];
   todos: Todo[];
   habits: Habit[];
-  templates: RecurringTodoTemplate[];
   onClose: () => void;
   onSave: SaveEntity;
+  onFocusTask: (task: Task) => void;
 };
 
-export function EntityDrawer({ drawer, goals, tasks, todos, habits, templates, onClose, onSave }: Props) {
+export function EntityDrawer({ drawer, goals, tasks, todos, habits, onClose, onSave, onFocusTask }: Props) {
   const existing =
     drawer.kind === 'goal'
       ? goals.find((item) => item.id === drawer.id)
@@ -60,24 +57,17 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, templates, o
           ? todos.find((item) => item.id === drawer.id)
           : habits.find((item) => item.id === drawer.id);
   const [draft, setDraft] = useState<Goal | Task | Todo | Habit>(() => existing || createDraft(drawer.kind, goals));
-  const existingTemplate =
-    drawer.kind === 'todo' && existing && 'recurrenceId' in existing
-      ? templates.find((template) => template.id === existing.recurrenceId)
-      : undefined;
-  const [repeatEnabled, setRepeatEnabled] = useState(Boolean(existingTemplate));
-  const [repeat, setRepeat] = useState<RecurrenceRule>(
-    existingTemplate?.rule || { mode: 'weekly', weekdays: [1], monthlyDay: 1, endMode: 'forever' }
-  );
   const [error, setError] = useState('');
   const patch = (value: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...value }) as typeof draft);
   const submit = () => {
-    const validation = validateDraft(drawer.kind, draft, goals, tasks);
+    const entity = !existing && drawer.kind === 'task' ? ({ ...draft, status: 'todo' } as Task) : draft;
+    const validation = validateDraft(drawer.kind, entity, goals, tasks);
     if (validation) return setError(validation);
-    onSave(drawer.kind, draft, drawer.kind === 'todo' && repeatEnabled && !existing ? repeat : undefined);
+    onSave(drawer.kind, entity);
   };
   const name = ({ goal: '目标', task: '任务', todo: '待办', habit: '习惯' } as Record<DrawerKind, string>)[drawer.kind];
   const productReference = {
-    goal: productRef('growth.goal.rule.parent-time-frame'),
+    goal: productRef('growth.goal.interaction'),
     task: productRef('growth.task.rule.single-parent'),
     todo: productRef('growth.todo.interaction'),
     habit: productRef('growth.habit.rules'),
@@ -85,7 +75,7 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, templates, o
   return (
     <Drawer
       open
-      title={`${existing ? '编辑' : '新建'}${name}`}
+      title={<span data-product-ref={productReference}>{`${existing ? '编辑' : '新建'}${name}`}</span>}
       onClose={onClose}
       size="large"
       destroyOnHidden
@@ -107,18 +97,24 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, templates, o
             />
           </Form.Item>
           {drawer.kind === 'goal' && <GoalFields draft={draft as Goal} patch={patch} goals={goals} />}
-          {drawer.kind === 'task' && <TaskFields draft={draft as Task} patch={patch} goals={goals} tasks={tasks} />}
+          {drawer.kind === 'task' && (
+            <TaskFields
+              draft={draft as Task}
+              patch={patch}
+              goals={goals}
+              tasks={tasks}
+              isNew={!existing}
+              onFocusTask={onFocusTask}
+            />
+          )}
           {drawer.kind === 'todo' && (
             <TodoFields
               draft={draft as Todo}
               patch={patch}
               goals={goals}
               tasks={tasks}
-              repeatEnabled={repeatEnabled}
-              setRepeatEnabled={setRepeatEnabled}
-              repeat={repeat}
-              setRepeat={setRepeat}
-              existingTemplate={existingTemplate}
+              habits={habits}
+              isNew={!existing}
             />
           )}
           {drawer.kind === 'habit' && <HabitFields draft={draft as Habit} patch={patch} goals={goals} />}
@@ -136,13 +132,12 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
       id,
       title: '',
       description: '',
-      type: 'result',
+      type: 'vision',
       status: 'todo',
       importance: 3,
       difficulty: 2,
       start: TODAY,
       end: '2026-12-31',
-      progress: 0,
       history: ['刚刚创建'],
     };
   if (kind === 'task')
@@ -156,7 +151,8 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
       difficulty: 2,
       start: TODAY,
       end: NEXT_DAY,
-      planned: TODAY,
+      plannedStart: TODAY,
+      plannedEnd: TODAY,
       estimated: 1,
       actual: 0,
     };
@@ -169,8 +165,8 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
       importance: 3,
       urgency: 3,
       planned: TODAY,
-      due: TODAY,
-      reminder: 'none',
+      plannedStartTime: '09:00',
+      plannedEndTime: '10:00',
       history: ['刚刚创建'],
     };
   return {
@@ -182,7 +178,6 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
     difficulty: 2,
     weights: goals.length ? { [goals[0].id]: 3 } : {},
     frequency: { mode: 'daily', weekdays: [], monthlyDay: 1 },
-    reminder: 'none',
     tags: [],
     streak: 0,
     longest: 0,
@@ -194,10 +189,14 @@ function validateDraft(kind: DrawerKind, draft: Goal | Task | Todo | Habit, goal
   if (kind === 'goal') {
     const item = draft as Goal;
     const parent = goals.find((goal) => goal.id === item.parentId);
+    const children = goals.filter((goal) => goal.parentId === item.id);
     if (item.start > item.end) return '结束日期不能早于开始日期';
+    if (!parent && item.type !== 'vision') return '无父目标的目标只能选择规划类型';
     if (parent && (item.start < parent.start || item.end > parent.end)) return '子目标时间范围必须落入父目标';
     if (parent && item.importance > parent.importance) return '子目标重要度不能高于父目标';
-    if (parent?.type === 'result' && item.type !== 'result') return '成果型父目标下只能创建成果型子目标';
+    if (parent?.type === 'result' && item.type !== 'result') return '指标父目标下只能创建指标子目标';
+    if (item.type === 'result' && children.some((child) => child.type !== 'result'))
+      return '指标目标下不能包含规划子目标，请先调整子目标类型';
   }
   if (kind === 'task') {
     const item = draft as Task;
@@ -213,14 +212,18 @@ function validateDraft(kind: DrawerKind, draft: Goal | Task | Todo | Habit, goal
         item.difficulty > parent.difficulty)
     )
       return '任务的时间、重要度和难度不能超出关联上游';
+    if (item.plannedStart > item.plannedEnd) return '计划结束时间不能早于计划开始时间';
   }
   if (kind === 'todo') {
     const item = draft as Todo;
+    if (!item.plannedStartTime || !item.plannedEndTime || item.plannedStartTime >= item.plannedEndTime)
+      return '计划结束时间必须晚于开始时间';
+    const sourceCount = [item.taskId, item.goalId, item.habitId].filter(Boolean).length;
+    if (sourceCount > 1) return '系统待办只能关联一个来源';
     const parent = item.taskId
       ? tasks.find((task) => task.id === item.taskId)
       : goals.find((goal) => goal.id === item.goalId);
-    if (item.planned > item.due) return '截止日期不能早于计划日期';
-    if (parent && (item.planned < parent.start || item.due > parent.end || item.importance > parent.importance))
+    if (parent && (item.planned < parent.start || item.planned > parent.end || item.importance > parent.importance))
       return '待办的时间和重要度必须继承关联上游';
   }
   if (kind === 'habit') {
@@ -267,26 +270,62 @@ function DateField({ label, value, onChange }: { label: string; value: string; o
     </Form.Item>
   );
 }
+function timeOf(value: string): Dayjs {
+  const [hour, minute] = value.split(':').map(Number);
+  return dayjs().hour(hour).minute(minute).second(0);
+}
+function TimeRangeField({ start, end, onChange }: { start: string; end: string; onChange: (start: string, end: string) => void }) {
+  return (
+    <Form.Item label="计划时间" required>
+      <TimePicker.RangePicker
+        allowClear={false}
+        format="HH:mm"
+        minuteStep={5}
+        value={[timeOf(start), timeOf(end)]}
+        style={{ width: '100%' }}
+        onChange={(range) => {
+          if (!range?.[0] || !range[1]) return;
+          onChange(range[0].format('HH:mm'), range[1].format('HH:mm'));
+        }}
+      />
+    </Form.Item>
+  );
+}
 function GoalFields({ draft, patch, goals }: { draft: Goal; patch: (value: Partial<Goal>) => void; goals: Goal[] }) {
+  const parent = goals.find((goal) => goal.id === draft.parentId);
+  const availableTypes = parent
+    ? parent.type === 'result'
+      ? goalTypes.filter((type) => type.value === 'result')
+      : goalTypes
+    : goalTypes.filter((type) => type.value === 'vision');
+  const updateParent = (parentId?: string) => {
+    const nextParent = goals.find((goal) => goal.id === parentId);
+    if (!nextParent) return patch({ parentId: undefined, type: 'vision' });
+    patch(nextParent.type === 'result' ? { parentId, type: 'result' } : { parentId });
+  };
+  const typeRuleReference = productRef('growth.goal.rule.type');
+  const timeFrameReference = productRef('growth.goal.rule.time-frame');
   return (
     <>
-      <Form.Item label="父级目标">
-        <Select
-          allowClear
-          value={draft.parentId}
-          options={goals.filter((goal) => goal.id !== draft.id).map((goal) => ({ value: goal.id, label: goal.title }))}
-          onChange={(value) => patch({ parentId: value as string | undefined })}
-        />
-      </Form.Item>
-      <Form.Item label="目标类型" required>
-        <Radio.Group value={draft.type} onChange={(event) => patch({ type: event.target.value })}>
-          {goalTypes.map((type) => (
-            <Radio key={type.value} value={type.value}>
-              {type.label}
-            </Radio>
-          ))}
-        </Radio.Group>
-      </Form.Item>
+      <div data-product-ref={typeRuleReference}>
+        <Form.Item label="父级目标">
+          <Select
+            allowClear
+            value={draft.parentId}
+            options={goals.filter((goal) => goal.id !== draft.id).map((goal) => ({ value: goal.id, label: goal.title }))}
+            onChange={(value) => updateParent(value as string | undefined)}
+          />
+        </Form.Item>
+        <Form.Item label="目标类型" required>
+          <Radio.Group value={draft.type} onChange={(event) => patch({ type: event.target.value })}>
+            {availableTypes.map((type) => (
+              <Radio key={type.value} value={type.value}>
+                {type.label}
+              </Radio>
+            ))}
+          </Radio.Group>
+        </Form.Item>
+      </div>
       <Row gutter={12}>
         <Col span={12}>
           <ImportanceControl value={draft.importance} onChange={(importance) => patch({ importance })} />
@@ -299,10 +338,14 @@ function GoalFields({ draft, patch, goals }: { draft: Goal; patch: (value: Parti
           />
         </Col>
         <Col span={12}>
-          <DateField label="开始日期" value={draft.start} onChange={(start) => patch({ start })} />
+          <div data-product-ref={timeFrameReference}>
+            <DateField label="开始日期" value={draft.start} onChange={(start) => patch({ start })} />
+          </div>
         </Col>
         <Col span={12}>
-          <DateField label="结束日期" value={draft.end} onChange={(end) => patch({ end })} />
+          <div data-product-ref={timeFrameReference}>
+            <DateField label="结束日期" value={draft.end} onChange={(end) => patch({ end })} />
+          </div>
         </Col>
       </Row>
       <Form.Item label="状态">
@@ -315,9 +358,6 @@ function GoalFields({ draft, patch, goals }: { draft: Goal; patch: (value: Parti
           onChange={(value) => patch({ status: value as GoalStatus })}
         />
       </Form.Item>
-      <Form.Item label="手动进度">
-        <Slider min={0} max={100} value={draft.progress} onChange={(value) => patch({ progress: Number(value) })} />
-      </Form.Item>
       <Form.Item label="描述">
         <Input.TextArea value={draft.description} onChange={(event) => patch({ description: event.target.value })} />
       </Form.Item>
@@ -329,11 +369,15 @@ function TaskFields({
   patch,
   goals,
   tasks,
+  isNew,
+  onFocusTask,
 }: {
   draft: Task;
   patch: (value: Partial<Task>) => void;
   goals: Goal[];
   tasks: Task[];
+  isNew: boolean;
+  onFocusTask: (task: Task) => void;
 }) {
   const subTask = Boolean(draft.parentId);
   return (
@@ -384,16 +428,23 @@ function TaskFields({
           />
         </Col>
         <Col span={12}>
-          <DateField label="开始日期" value={draft.start} onChange={(start) => patch({ start })} />
+          <DateField label="计划开始时间" value={draft.plannedStart} onChange={(plannedStart) => patch({ plannedStart })} />
         </Col>
         <Col span={12}>
-          <DateField label="结束日期" value={draft.end} onChange={(end) => patch({ end })} />
+          <DateField label="计划结束时间" value={draft.plannedEnd} onChange={(plannedEnd) => patch({ plannedEnd })} />
         </Col>
+        {!isNew && (
+          <Col span={12}>
+            <DateField label="开始时间" value={draft.start} onChange={(start) => patch({ start })} />
+          </Col>
+        )}
+        {!isNew && (
+          <Col span={12}>
+            <DateField label="结束时间" value={draft.end} onChange={(end) => patch({ end })} />
+          </Col>
+        )}
         <Col span={12}>
-          <DateField label="计划日期" value={draft.planned} onChange={(planned) => patch({ planned })} />
-        </Col>
-        <Col span={12}>
-          <Form.Item label="预估工时">
+          <Form.Item label="预计耗时">
             <InputNumber
               min={0.5}
               step={0.5}
@@ -404,24 +455,26 @@ function TaskFields({
           </Form.Item>
         </Col>
       </Row>
-      <Form.Item label="状态">
-        <Select
-          value={draft.status}
-          options={['todo', 'doing', 'blocked', 'done', 'abandoned'].map((value) => ({
-            value,
-            label: statusLabel(value),
-          }))}
-          onChange={(value) => patch({ status: value as TaskStatus })}
-        />
-      </Form.Item>
-      {draft.status === 'blocked' && (
-        <Form.Item label="阻塞原因" required>
-          <Input value={draft.blockedReason} onChange={(event) => patch({ blockedReason: event.target.value })} />
+      {!isNew && (
+        <Form.Item label="状态">
+          <Select
+            value={draft.status}
+            options={['todo', 'doing', 'done', 'abandoned'].map((value) => ({
+              value,
+              label: statusLabel(value),
+            }))}
+            onChange={(value) => patch({ status: value as TaskStatus })}
+          />
         </Form.Item>
       )}
-      <Form.Item label="实际工时">
-        <Input disabled value={`${draft.actual} 小时（由 TrackTime 自动回写）`} />
-      </Form.Item>
+      {!isNew && (
+        <Form.Item label="实际耗时">
+          <Flex align="center" justify="space-between" gap={12}>
+            <span>{draft.actual} 小时</span>
+            <Button onClick={() => onFocusTask(draft)}>开始专注计时</Button>
+          </Flex>
+        </Form.Item>
+      )}
       <Form.Item label="描述">
         <Input.TextArea value={draft.description} onChange={(event) => patch({ description: event.target.value })} />
       </Form.Item>
@@ -433,60 +486,28 @@ function TodoFields({
   patch,
   goals,
   tasks,
-  repeatEnabled,
-  setRepeatEnabled,
-  repeat,
-  setRepeat,
-  existingTemplate,
+  habits,
+  isNew,
 }: {
   draft: Todo;
   patch: (value: Partial<Todo>) => void;
   goals: Goal[];
   tasks: Task[];
-  repeatEnabled: boolean;
-  setRepeatEnabled: (value: boolean) => void;
-  repeat: RecurrenceRule;
-  setRepeat: (value: RecurrenceRule) => void;
-  existingTemplate?: RecurringTodoTemplate;
+  habits: Habit[];
+  isNew: boolean;
 }) {
-  const relation = draft.taskId ? 'task' : draft.goalId ? 'goal' : 'none';
+  const sourceName = draft.taskId
+    ? `任务 · ${tasks.find((task) => task.id === draft.taskId)?.title || '已删除任务'}`
+    : draft.goalId
+      ? `目标 · ${goals.find((goal) => goal.id === draft.goalId)?.title || '已删除目标'}`
+      : draft.habitId
+        ? `习惯 · ${habits.find((habit) => habit.id === draft.habitId)?.title || '已删除习惯'}`
+        : undefined;
   return (
     <>
-      <Form.Item label="关联来源">
-        <Radio.Group
-          value={relation}
-          onChange={(event) => {
-            const value = event.target.value;
-            patch(
-              value === 'task'
-                ? { taskId: tasks[0]?.id, goalId: undefined }
-                : value === 'goal'
-                  ? { taskId: undefined, goalId: goals[0]?.id }
-                  : { taskId: undefined, goalId: undefined }
-            );
-          }}
-        >
-          <Radio value="none">独立待办</Radio>
-          <Radio value="goal">目标</Radio>
-          <Radio value="task">任务</Radio>
-        </Radio.Group>
-      </Form.Item>
-      {relation === 'goal' && (
-        <Form.Item label="关联目标">
-          <Select
-            value={draft.goalId}
-            options={goals.map((goal) => ({ value: goal.id, label: goal.title }))}
-            onChange={(value) => patch({ goalId: value as string })}
-          />
-        </Form.Item>
-      )}
-      {relation === 'task' && (
-        <Form.Item label="关联任务">
-          <Select
-            value={draft.taskId}
-            options={tasks.map((task) => ({ value: task.id, label: task.title }))}
-            onChange={(value) => patch({ taskId: value as string })}
-          />
+      {sourceName && (
+        <Form.Item label="系统来源">
+          <Input disabled value={sourceName} />
         </Form.Item>
       )}
       <Row gutter={12}>
@@ -500,118 +521,26 @@ function TodoFields({
           <DateField label="计划日期" value={draft.planned} onChange={(planned) => patch({ planned })} />
         </Col>
         <Col span={12}>
-          <DateField label="截止日期" value={draft.due} onChange={(due) => patch({ due })} />
+          <TimeRangeField
+            start={draft.plannedStartTime}
+            end={draft.plannedEndTime}
+            onChange={(plannedStartTime, plannedEndTime) => patch({ plannedStartTime, plannedEndTime })}
+          />
         </Col>
       </Row>
-      <Form.Item label="提醒策略">
-        <Select
-          value={draft.reminder}
-          options={[
-            { value: 'none', label: '不提醒' },
-            { value: 'time', label: '时间提醒' },
-            { value: 'location', label: '地点提醒（演示）' },
-            { value: 'habit-sync', label: '习惯同步提醒' },
-          ]}
-          onChange={(reminder) => patch({ reminder: reminder as Reminder })}
-        />
-      </Form.Item>
-      <Form.Item label="状态">
-        <Select
-          value={draft.status}
-          options={['todo', 'in_progress', 'done', 'abandoned'].map((value) => ({ value, label: statusLabel(value) }))}
-          onChange={(value) => patch({ status: value as TodoStatus })}
-        />
-      </Form.Item>
-      <Form.Item label="周期执行">
-        <Flex gap={10} align="center">
-          <Switch checked={repeatEnabled} disabled={Boolean(existingTemplate)} onChange={setRepeatEnabled} />
-          {existingTemplate ? (
-            <Tag color={existingTemplate.active ? 'blue' : 'default'}>
-              {existingTemplate.active ? '周期模板运行中' : '周期模板已暂停'}
-            </Tag>
-          ) : (
-            <span>完成当前实例后生成下一条</span>
-          )}
-        </Flex>
-      </Form.Item>
-      {repeatEnabled && <RecurrenceFields rule={repeat} setRule={setRepeat} />}
-      {existingTemplate && (
-        <Alert
-          type="info"
-          showIcon
-          title={`当前实例来自周期模板：${repeatLabel(existingTemplate.rule)}。编辑周期规则仅适用于新建待办，当前模板可在待办页暂停或恢复。`}
-        />
+      {!isNew && (
+        <Form.Item label="状态">
+          <Select
+            value={draft.status}
+            options={['todo', 'in_progress', 'done', 'abandoned'].map((value) => ({ value, label: statusLabel(value) }))}
+            onChange={(value) => patch({ status: value as TodoStatus })}
+          />
+        </Form.Item>
       )}
       <Form.Item label="描述">
         <Input.TextArea value={draft.description} onChange={(event) => patch({ description: event.target.value })} />
       </Form.Item>
     </>
-  );
-}
-function RecurrenceFields({ rule, setRule }: { rule: RecurrenceRule; setRule: (rule: RecurrenceRule) => void }) {
-  return (
-    <div className={styles.repeatBox}>
-      <Form.Item label="执行规则">
-        <Select
-          value={rule.mode}
-          options={[
-            ['daily', '每天'],
-            ['weekly', '每周'],
-            ['monthly', '每月'],
-            ['weekdays', '工作日'],
-            ['weekend', '周末'],
-            ['workdays', '法定工作日'],
-          ].map(([value, label]) => ({ value, label }))}
-          onChange={(mode) => setRule({ ...rule, mode: mode as RecurrenceRule['mode'] })}
-        />
-      </Form.Item>
-      {rule.mode === 'weekly' && (
-        <Form.Item label="执行星期">
-          <Checkbox.Group
-            value={rule.weekdays}
-            options={['周一', '周二', '周三', '周四', '周五', '周六', '周日'].map((label, index) => ({
-              label,
-              value: index + 1,
-            }))}
-            onChange={(weekdays) => setRule({ ...rule, weekdays: weekdays as number[] })}
-          />
-        </Form.Item>
-      )}
-      {rule.mode === 'monthly' && (
-        <Form.Item label="每月日期">
-          <InputNumber
-            min={1}
-            max={31}
-            value={rule.monthlyDay}
-            onChange={(monthlyDay) => setRule({ ...rule, monthlyDay: Number(monthlyDay) || 1 })}
-          />
-        </Form.Item>
-      )}
-      <Form.Item label="结束条件">
-        <Radio.Group value={rule.endMode} onChange={(event) => setRule({ ...rule, endMode: event.target.value })}>
-          <Radio value="forever">永不结束</Radio>
-          <Radio value="times">执行次数</Radio>
-          <Radio value="date">截止日期</Radio>
-        </Radio.Group>
-      </Form.Item>
-      {rule.endMode === 'times' && (
-        <Form.Item label="总次数">
-          <InputNumber
-            min={1}
-            value={rule.times || 10}
-            onChange={(times) => setRule({ ...rule, times: Number(times) || 1 })}
-          />
-        </Form.Item>
-      )}
-      {rule.endMode === 'date' && (
-        <DateField
-          label="结束日期"
-          value={rule.endDate || addDays(TODAY, 30)}
-          onChange={(endDate) => setRule({ ...rule, endDate })}
-        />
-      )}
-      <Alert type="info" showIcon title={`规则预览：${repeatLabel(rule)}`} />
-    </div>
   );
 }
 function HabitFields({ draft, patch, goals }: { draft: Habit; patch: (value: Partial<Habit>) => void; goals: Goal[] }) {
@@ -669,17 +598,6 @@ function HabitFields({ draft, patch, goals }: { draft: Habit; patch: (value: Par
             label: statusLabel(value),
           }))}
           onChange={(status) => patch({ status: status as Habit['status'] })}
-        />
-      </Form.Item>
-      <Form.Item label="提醒设置">
-        <Select
-          value={draft.reminder}
-          options={[
-            { value: 'none', label: '不提醒' },
-            { value: 'time', label: '时间提醒' },
-            { value: 'habit-sync', label: '习惯同步提醒' },
-          ]}
-          onChange={(reminder) => patch({ reminder: reminder as Reminder })}
         />
       </Form.Item>
       <Form.Item label="标签">
