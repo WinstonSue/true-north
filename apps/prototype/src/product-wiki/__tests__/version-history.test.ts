@@ -26,6 +26,11 @@ const history: ProductChangeLog = {
 };
 
 describe('ProductWiki version history', () => {
+  it('allows an empty history when desktop baseline capabilities are not versioned here', () => {
+    expect(getProductVersions({ changes: [] })).toEqual([]);
+    expect(getProductVersionChanges({ changes: [] }, 'v0.1.0')).toEqual([]);
+  });
+
   it('sorts distinct versions semantically and keeps every matching record', () => {
     expect(getProductVersions(history)).toEqual(['v0.10.0', 'v0.2.0', 'v0.1.0']);
     expect(getProductVersionChanges(history, 'v0.1.0')).toHaveLength(2);

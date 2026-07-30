@@ -27,11 +27,11 @@
           "prototypeCoverage": "complete"
         },
         {
-          "id": "minutes",
-          "name": "专注时长",
+          "id": "duration",
+          "name": "专注时长（秒）",
           "type": "number",
           "required": true,
-          "description": "单次专注投入的分钟数。",
+          "description": "单次专注投入的秒数；展示层可换算为小时和分钟。",
           "productStatus": "roadmap",
           "prototypeCoverage": "complete"
         }

@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { Alert, Button, Card, Col, DatePicker, Flex, Input, Row, Select, Space, Statistic, Tabs, Tooltip } from '@sue/design-web-react';
-import { ChevronRight, Plus, SlidersHorizontal, Sparkles, X } from 'lucide-react';
+import { Alert, Button, Card, Col, DatePicker, Dropdown, Flex, Input, Modal, Row, Select, Space, Statistic, Tabs, Tooltip } from '@sue/design-web-react';
+import { Check, ChevronRight, Ellipsis, Plus, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 import { PriorityTag, StateTag } from '../../shared/components';
+import { goalDeleteBlocker } from '../../shared/lifecycle';
 import { productRef } from '../../product-wiki';
 import { goalTypes } from '../../shared/mock-data';
-import type { DrawerState, Goal, GoalStatus, GoalType, Habit, Task } from '../../shared/types';
+import type { DrawerState, Goal, GoalStatus, GoalType, Habit, Task, Todo } from '../../shared/types';
 import { statusLabel } from '../../shared/utils';
 import { GoalManagementHeader } from './GoalManagementHeader';
 import styles from './index.module.css';
@@ -13,19 +14,27 @@ import styles from './index.module.css';
 type Props = {
   goals: Goal[];
   tasks: Task[];
+  todos: Todo[];
   habits: Habit[];
   selectedGoal: string;
   setSelectedGoal: (id: string) => void;
   setDrawer: (drawer: DrawerState) => void;
+  updateGoal: (id: string, patch: Partial<Goal>) => void;
+  deleteGoal: (id: string) => void;
+  onOpenTaskDetail: (id: string) => void;
   onOpenAiDecomposition: () => void;
 };
 export function GoalsPage({
   goals,
   tasks,
+  todos,
   habits,
   selectedGoal,
   setSelectedGoal,
   setDrawer,
+  updateGoal,
+  deleteGoal,
+  onOpenTaskDetail,
   onOpenAiDecomposition,
 }: Props) {
   const [keyword, setKeyword] = useState('');
@@ -34,6 +43,7 @@ export function GoalsPage({
   const [filterStart, setFilterStart] = useState<string>();
   const [filterEnd, setFilterEnd] = useState<string>();
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [undoCompletion, setUndoCompletion] = useState<{ id: string; status: GoalStatus }>();
   const current = goals.find((goal) => goal.id === selectedGoal) || goals[0];
   const children = goals.filter((goal) => goal.parentId === current.id);
   const relatedTasks = tasks.filter((task) => task.goalId === current.id);
@@ -67,6 +77,36 @@ export function GoalsPage({
     setTypes([]);
     setFilterStart(undefined);
     setFilterEnd(undefined);
+  };
+  const relatedImpact = (goal: Goal) => {
+    const impacts = [
+      goals.filter((item) => item.parentId === goal.id).length && '子目标',
+      tasks.filter((item) => item.goalId === goal.id).length && '任务',
+      todos.filter((item) => item.goalId === goal.id).length && '待办',
+      habits.filter((item) => item.goalIds.includes(goal.id)).length && '习惯',
+    ].filter(Boolean);
+    return impacts.length ? `关联${impacts.join('、')}的状态不会被自动修改。` : '当前目标没有关联行动。';
+  };
+  const completeGoal = () => {
+    const previousStatus = current.status;
+    Modal.confirm({
+      title: '标记目标完成',
+      content: `完成后将保留关联关系。${relatedImpact(current)}`,
+      onOk: () => {
+        updateGoal(current.id, { status: 'done', history: [...current.history, '标记目标完成'] });
+        setUndoCompletion({ id: current.id, status: previousStatus });
+      },
+    });
+  };
+  const abandonGoal = () => Modal.confirm({
+    title: '放弃目标',
+    content: `放弃后可以通过编辑重新调整。${relatedImpact(current)}`,
+    onOk: () => updateGoal(current.id, { status: 'abandoned', history: [...current.history, '放弃目标'] }),
+  });
+  const requestDelete = () => {
+    const blocker = goalDeleteBlocker(current.id, goals, tasks, todos, habits);
+    if (blocker) return Modal.warning({ title: '无法删除目标', content: blocker });
+    Modal.confirm({ title: '删除目标', content: '删除后无法恢复，是否继续？', okType: 'danger', onOk: () => deleteGoal(current.id) });
   };
   const renderTree = (parentId?: string, depth = 0): React.ReactNode =>
     goals
@@ -138,7 +178,7 @@ export function GoalsPage({
                         value={statuses}
                         placeholder="全部状态"
                         style={{ minWidth: 132 }}
-                        options={['todo', 'doing', 'done', 'paused', 'archived'].map((value) => ({
+                        options={['todo', 'doing', 'done', 'abandoned'].map((value) => ({
                           value,
                           label: statusLabel(value),
                         }))}
@@ -176,37 +216,40 @@ export function GoalsPage({
           <div data-product-ref={productRef('growth.goal.view.detail')}>
             <Card
               title={current.title}
-              extra={
-                <div data-product-ref={productRef('growth.goal.interaction')}>
-                  <Space>
-                    <Button onClick={() => setDrawer({ kind: 'goal', id: current.id })}>编辑</Button>
-                    <Button type="primary" icon={<Sparkles size={15} />} onClick={onOpenAiDecomposition}>
-                      AI 拆解
-                    </Button>
-                  </Space>
-                </div>
-              }
+              extra={<div data-product-ref={productRef('growth.goal.interaction')}><Space>
+                <StateTag status={current.status} />
+                <Dropdown placement="bottomRight" trigger={['click']} menu={{ items: [
+                  { key: 'edit', label: '编辑', onClick: () => setDrawer({ kind: 'goal', id: current.id }) },
+                  { key: 'abandon', label: '放弃', disabled: current.status === 'abandoned', onClick: abandonGoal },
+                  { key: 'delete', label: '删除', danger: true, onClick: requestDelete },
+                ] }}>
+                  <Button type="text" icon={<Ellipsis size={17} />} aria-label="目标更多操作" />
+                </Dropdown>
+                {current.status === 'done' || current.status === 'abandoned'
+                  ? <Button type="primary" onClick={() => updateGoal(current.id, { status: 'todo' })}>恢复目标</Button>
+                  : <Button type="primary" icon={<Check size={15} />} onClick={completeGoal}>标记完成</Button>}
+              </Space></div>}
             >
               <Flex vertical gap={16}>
-                <Space>
-                  <StateTag status={current.status} />
-                  <PriorityTag importance={current.importance} />
-                </Space>
-                <small className={styles.timeRange} data-product-ref={productRef('growth.goal.rule.time-frame')}>
-                  {`时间范围：${current.start} 至 ${current.end}`}
-                </small>
-                <p className={styles.goalDescription}>{current.description}</p>
-                <Row gutter={[16, 16]}>
-                  <Col span={12}>
-                    <Statistic title="关联任务" value={relatedTasks.length} suffix="项" />
-                  </Col>
-                  <Col span={12}>
-                    <Statistic title="关联习惯" value={relatedHabits.length} suffix="项" />
-                  </Col>
-                </Row>
+                {undoCompletion?.id === current.id && <Alert type="success" showIcon title="目标已标记完成" description="如状态调整有误，可立即撤销本次完成操作。" action={<Button size="small" onClick={() => { updateGoal(undoCompletion.id, { status: undoCompletion.status }); setUndoCompletion(undefined); }}>撤销</Button>} />}
                 <div>
                   <Tabs
                     items={[
+                      {
+                        key: 'overview',
+                        label: '概览',
+                        children: <Flex vertical gap={16}>
+                          <Flex align="center" justify="space-between" wrap="wrap" gap={8}>
+                            <Space><PriorityTag importance={current.importance} /><small className={styles.timeRange} data-product-ref={productRef('growth.goal.rule.time-frame')}>{`时间范围：${current.start} 至 ${current.end}`}</small></Space>
+                            <Button icon={<Sparkles size={15} />} onClick={onOpenAiDecomposition}>AI 拆解</Button>
+                          </Flex>
+                          <p className={styles.goalDescription}>{current.description}</p>
+                          <Row gutter={[16, 16]}>
+                            <Col span={12}><Statistic title="关联任务" value={relatedTasks.length} suffix="项" /></Col>
+                            <Col span={12}><Statistic title="关联习惯" value={relatedHabits.length} suffix="项" /></Col>
+                          </Row>
+                        </Flex>,
+                      },
                       {
                         key: 'children',
                         label: `子目标 ${children.length}`,
@@ -215,23 +258,7 @@ export function GoalsPage({
                       {
                         key: 'tasks',
                         label: `关联任务 ${relatedTasks.length}`,
-                        children: <RelationList items={relatedTasks} empty="暂无关联任务" />,
-                      },
-                      {
-                        key: 'habits',
-                        label: `关联习惯 ${relatedHabits.length}`,
-                        children: <RelationList items={relatedHabits} empty="暂无关联习惯" />,
-                      },
-                      {
-                        key: 'history',
-                        label: '历史记录',
-                        children: (
-                          <div className={styles.history}>
-                            {current.history.map((item) => (
-                              <p key={item}>{item}</p>
-                            ))}
-                          </div>
-                        ),
+                        children: <RelationList items={relatedTasks} empty="暂无关联任务" onOpen={onOpenTaskDetail} />,
                       },
                     ]}
                   />
@@ -247,15 +274,17 @@ export function GoalsPage({
 function RelationList({
   items,
   empty,
+  onOpen,
 }: {
   items: Array<{ id: string; title: string; status?: string }>;
   empty: string;
+  onOpen?: (id: string) => void;
 }) {
   return items.length ? (
     <div className={styles.relationList}>
       {items.map((item) => (
         <Flex justify="space-between" align="center" key={item.id}>
-          <b>{item.title}</b>
+          {onOpen ? <Button type="link" className={styles.relationButton} onClick={() => onOpen(item.id)}>{item.title}</Button> : <b>{item.title}</b>}
           {item.status && <StateTag status={item.status} />}
         </Flex>
       ))}

@@ -31,7 +31,7 @@ Growth 等业务域的产品级约束不在本文重复，参见 [ProductWiki ·
 | [documentation/PRD-guide.md](./documentation/PRD-guide.md) | 产品需求文档写作规范 |
 | [documentation/TDD-guide.md](./documentation/TDD-guide.md) | 技术设计文档写作规范 |
 | [documentation/ProductWiki-guide.md](./documentation/ProductWiki-guide.md) | ProductWiki 写作规范 |
-| [growth/README.md](./growth/README.md) | Growth 域当前实现入口与路由 |
+| [growth/README.md](./growth/README.md) | Growth 技术基线、路由与原型对齐边界 |
 
 ### 开发规范
 

@@ -306,10 +306,7 @@ function validateChangeLog(history, activeFeatures) {
   activeFeatures.forEach((feature) => {
     const changes = changesByFeature.get(feature.key) || [];
     const current = latestChange(changes);
-    if (!current) {
-      errors.push(`product-wiki/changelog.json: active feature ${feature.key} has no history entry`);
-      return;
-    }
+    if (!current) return;
     if (current.event === 'removed') errors.push(`product-wiki/changelog.json: active feature ${feature.key} cannot end with a removed event`);
     if (current.productStatus !== feature.productStatus || current.prototypeCoverage !== feature.prototypeCoverage) {
       errors.push(`product-wiki/changelog.json: latest lifecycle values for ${feature.key} must match the current specification`);

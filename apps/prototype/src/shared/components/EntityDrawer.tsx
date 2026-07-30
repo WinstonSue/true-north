@@ -35,6 +35,7 @@ import type {
   TodoStatus,
 } from '../types';
 import { asTodoRepeat } from '../repeat';
+import { validateGoalHierarchy, validateTaskHierarchy } from '../lifecycle';
 import { statusLabel } from '../utils';
 import styles from './EntityDrawer.module.css';
 
@@ -192,32 +193,10 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
 function validateDraft(kind: DrawerKind, draft: Goal | Task | Todo | Habit, goals: Goal[], tasks: Task[]) {
   if (!draft.title.trim()) return '请输入名称';
   if (kind === 'goal') {
-    const item = draft as Goal;
-    const parent = goals.find((goal) => goal.id === item.parentId);
-    const children = goals.filter((goal) => goal.parentId === item.id);
-    if (item.start > item.end) return '结束日期不能早于开始日期';
-    if (!parent && item.type !== 'vision') return '无父目标的目标只能选择规划类型';
-    if (parent && (item.start < parent.start || item.end > parent.end)) return '子目标时间范围必须落入父目标';
-    if (parent && item.importance > parent.importance) return '子目标重要度不能高于父目标';
-    if (parent?.type === 'result' && item.type !== 'result') return '指标父目标下只能创建指标子目标';
-    if (item.type === 'result' && children.some((child) => child.type !== 'result'))
-      return '指标目标下不能包含规划子目标，请先调整子目标类型';
+    return validateGoalHierarchy(draft as Goal, goals);
   }
   if (kind === 'task') {
-    const item = draft as Task;
-    if (Boolean(item.goalId) === Boolean(item.parentId)) return '任务必须关联一个目标或一个父任务';
-    const parent = item.parentId
-      ? tasks.find((task) => task.id === item.parentId)
-      : goals.find((goal) => goal.id === item.goalId);
-    if (
-      parent &&
-      (item.start < parent.start ||
-        item.end > parent.end ||
-        item.importance > parent.importance ||
-        item.difficulty > parent.difficulty)
-    )
-      return '任务的时间、重要度和难度不能超出关联上游';
-    if (item.plannedStart > item.plannedEnd) return '计划结束时间不能早于计划开始时间';
+    return validateTaskHierarchy(draft as Task, goals, tasks);
   }
   if (kind === 'todo') {
     const item = draft as Todo;
@@ -412,7 +391,7 @@ function GoalFields({ draft, patch, goals }: { draft: Goal; patch: (value: Parti
       <Form.Item label="状态">
         <Select
           value={draft.status}
-          options={['todo', 'doing', 'done', 'paused', 'archived'].map((value) => ({
+          options={['todo', 'doing', 'done', 'abandoned'].map((value) => ({
             value,
             label: statusLabel(value),
           }))}
@@ -675,7 +654,7 @@ function HabitFields({
           mode="multiple"
           value={draft.goalIds}
           options={goals
-            .filter((goal) => goal.status !== 'archived')
+            .filter((goal) => goal.status !== 'abandoned')
             .map((goal) => ({ value: goal.id, label: goal.title }))}
           onChange={(goalIds) => patch({ goalIds: goalIds as string[] })}
         />

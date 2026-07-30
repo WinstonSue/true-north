@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { RepeatPayload } from '@true-north/components-repeat/types';
 
 export type GoalType = 'vision' | 'result';
-export type GoalStatus = 'todo' | 'doing' | 'done' | 'paused' | 'archived';
+export type GoalStatus = 'todo' | 'doing' | 'done' | 'abandoned';
 export type TaskStatus = 'todo' | 'doing' | 'done' | 'abandoned';
 export type TodoStatus = 'todo' | 'in_progress' | 'done' | 'abandoned';
 export type HabitStatus = 'active' | 'paused' | 'completed' | 'abandoned';

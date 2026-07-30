@@ -4,7 +4,7 @@
   "title": "任务管理",
   "document": "growth/task/README.md",
   "parentId": "growth",
-  "route": "/growth/task",
+  "route": "/tasks",
   "positioning": "承接目标拆解，并向待办和时间追踪下发执行颗粒。",
   "dependencies": [
     "growth.goal"
@@ -113,7 +113,7 @@
       "prototypePage": "task",
       "scenario": "独立运营任务及其关联对象",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial",
+      "prototypeCoverage": "complete",
       "reference": "growth.task.view.detail"
     }
   ],
@@ -148,7 +148,7 @@
       ],
       "reference": "growth.task.rule.time-inheritance",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "prototypeCoverage": "complete"
     }
   ],
   "references": [

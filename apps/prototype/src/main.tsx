@@ -13,6 +13,7 @@ import { GoalsPage } from './pages/goal';
 import { MindMapPage } from './pages/goal/MindMapPage';
 import { Workbench } from './pages/workbench';
 import { TasksPage } from './pages/task';
+import { TaskDetailDrawer } from './pages/task-detail';
 import { TodosPage } from './pages/todo';
 import { HabitsPage } from './pages/habit';
 import { initialGoals, initialHabits, initialTasks, initialTodos, nav, TODAY } from './shared/mock-data';
@@ -75,6 +76,7 @@ function App() {
   const [selectedGoal, setSelectedGoal] = useState('g3');
   const [drawer, setDrawer] = useState<DrawerState>(null);
   const [aiDecompositionOpen, setAiDecompositionOpen] = useState(false);
+  const [taskDetailId, setTaskDetailId] = useState<string>();
   const currentNav = nav.find((item) => item.path === location.pathname)
     || nav.find((item) => location.pathname.startsWith(`${item.path}/`))
     || nav[0];
@@ -88,6 +90,17 @@ function App() {
     );
   const updateTask = (id: string, patch: Partial<Task>) =>
     setTasks((items) => items.map((task) => (task.id === id ? { ...task, ...patch } : task)));
+  const createTask = (task: Task) => setTasks((items) => [...items, task]);
+  const deleteTask = (id: string) => setTasks((items) => items.filter((task) => task.id !== id));
+  const updateGoal = (id: string, patch: Partial<Goal>) =>
+    setGoals((items) => items.map((goal) => (goal.id === id ? { ...goal, ...patch } : goal)));
+  const deleteGoal = (id: string) => {
+    const deleted = goals.find((goal) => goal.id === id);
+    const remaining = goals.filter((goal) => goal.id !== id);
+    setGoals(remaining);
+    setSelectedGoal(deleted?.parentId && remaining.some((goal) => goal.id === deleted.parentId) ? deleted.parentId : remaining[0]?.id || '');
+    notify('目标已删除');
+  };
   const openFocusTimer = useCallback((taskId?: string) => {
     setFocusTimerTaskId(taskId);
     setFocusTimerOpen(true);
@@ -286,10 +299,14 @@ function App() {
                   <GoalsPage
                     goals={goals}
                     tasks={tasks}
+                    todos={todos}
                     habits={habits}
                     selectedGoal={selectedGoal}
                     setSelectedGoal={setSelectedGoal}
                     setDrawer={setDrawer}
+                    updateGoal={updateGoal}
+                    deleteGoal={deleteGoal}
+                    onOpenTaskDetail={setTaskDetailId}
                     onOpenAiDecomposition={() => setAiDecompositionOpen(true)}
                   />
                 }
@@ -308,6 +325,7 @@ function App() {
                     setDrawer={setDrawer}
                     updateTask={updateTask}
                     onFocusTask={(task) => openFocusTimer(task.id)}
+                    onOpenTaskDetail={setTaskDetailId}
                   />
                 }
               />
@@ -334,6 +352,7 @@ function App() {
           </main>
         </Flex>
       </Flex>
+      {taskDetailId && <TaskDetailDrawer taskId={taskDetailId} goals={goals} tasks={tasks} todos={todos} updateTask={updateTask} createTask={createTask} deleteTask={deleteTask} setDrawer={setDrawer} onFocusTask={(task) => openFocusTimer(task.id)} onClose={() => setTaskDetailId(undefined)} notify={notify} />}
       {drawer && (
         <EntityDrawer
           drawer={drawer}

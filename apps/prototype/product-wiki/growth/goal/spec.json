@@ -4,7 +4,7 @@
   "title": "目标管理",
   "document": "growth/goal/README.md",
   "parentId": "growth",
-  "route": "/growth/goal",
+  "route": "/goals",
   "positioning": "提供树形层级的长期目标规划能力，是执行实体的约束源。",
   "dependencies": [],
   "entities": [
@@ -34,8 +34,7 @@
             "todo",
             "doing",
             "done",
-            "paused",
-            "archived"
+            "abandoned"
           ],
           "description": "目标生命周期状态。",
           "productStatus": "roadmap",
@@ -90,7 +89,7 @@
       "scenario": "查看和编辑单个目标",
       "reference": "growth.goal.view.detail",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "prototypeCoverage": "complete"
     },
     {
       "id": "mindmap",
@@ -125,7 +124,7 @@
       ],
       "reference": "growth.goal.rule.time-frame",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "prototypeCoverage": "complete"
     },
     {
       "id": "type",
@@ -153,7 +152,7 @@
       ],
       "reference": "growth.goal.rule.priority-inheritance",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "prototypeCoverage": "complete"
     }
   ],
   "references": [

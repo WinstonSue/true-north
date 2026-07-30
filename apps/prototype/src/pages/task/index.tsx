@@ -16,11 +16,13 @@ type Props = {
   setDrawer: (drawer: DrawerState) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
   onFocusTask: (task: Task) => void;
+  onOpenTaskDetail: (id: string) => void;
 };
 
 const taskStatuses: TaskStatus[] = ['todo', 'doing', 'done', 'abandoned'];
 
-export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusTask }: Props) {
+export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusTask, onOpenTaskDetail }: Props) {
+  const [activeTab, setActiveTab] = useState('today');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [statuses, setStatuses] = useState<TaskStatus[]>([]);
   const [relations, setRelations] = useState<string[]>([]);
@@ -70,7 +72,7 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
       title: '任务',
       dataIndex: 'title',
       render: (title: string, task: Task) => (
-        <Button className={styles.tableTitle} type="link" onClick={() => setDrawer({ kind: 'task', id: task.id })}>
+        <Button className={styles.tableTitle} type="link" onClick={() => onOpenTaskDetail(task.id)}>
           {title}
         </Button>
       ),
@@ -117,16 +119,18 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
           <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'task' })}>新建任务</Button>
         </Flex>
         <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
           items={[
             {
               key: 'today',
               label: '今日',
-              children: <TaskExecutionList scope="today" tasks={tasks} relationName={relationName} setDrawer={setDrawer} updateTask={updateTask} onFocusTask={onFocusTask} />,
+              children: <TaskExecutionList scope="today" tasks={tasks} relationName={relationName} onOpenTaskDetail={onOpenTaskDetail} updateTask={updateTask} onFocusTask={onFocusTask} />,
             },
             {
               key: 'week',
               label: '本周',
-              children: <TaskExecutionList scope="week" tasks={tasks} relationName={relationName} setDrawer={setDrawer} updateTask={updateTask} onFocusTask={onFocusTask} />,
+              children: <TaskExecutionList scope="week" tasks={tasks} relationName={relationName} onOpenTaskDetail={onOpenTaskDetail} updateTask={updateTask} onFocusTask={onFocusTask} />,
             },
             {
               key: 'calendar',
@@ -149,7 +153,7 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
                             title={task.title}
                             onClick={(event) => {
                               event.stopPropagation();
-                              setDrawer({ kind: 'task', id: task.id });
+                              onOpenTaskDetail(task.id);
                             }}
                           >
                             <span className={styles.calendarTaskTitle}>{task.title}</span>
@@ -247,14 +251,14 @@ function TaskExecutionList({
   scope,
   tasks,
   relationName,
-  setDrawer,
+  onOpenTaskDetail,
   updateTask,
   onFocusTask,
 }: {
   scope: 'today' | 'week';
   tasks: Task[];
   relationName: (task: Task) => string;
-  setDrawer: (drawer: DrawerState) => void;
+  onOpenTaskDetail: (id: string) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
   onFocusTask: (task: Task) => void;
 }) {
@@ -266,7 +270,7 @@ function TaskExecutionList({
         renderItem={(task) => (
           <Flex align="center" className={`${styles.executionItem} ${styles[task.status]}`} gap={12} key={task.id}>
             <span className={styles.statusIndicator} aria-hidden="true" />
-            <Button block className={styles.executionContent} type="text" onClick={() => setDrawer({ kind: 'task', id: task.id })}>
+            <Button block className={styles.executionContent} type="text" onClick={() => onOpenTaskDetail(task.id)}>
               <Flex align="flex-start" vertical gap={2}>
                 <span className={styles.executionTitle}>{task.title}</span>
                 <span className={styles.executionMeta}>{relationName(task)} · {task.plannedStart} - {task.plannedEnd} · 预计耗时 {task.estimated}h / 实际耗时 {task.actual}h</span>
