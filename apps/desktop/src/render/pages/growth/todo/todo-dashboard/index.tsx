@@ -7,6 +7,7 @@ import { TodoProvider, useTodoContext } from './context';
 import { TodoChart } from './TodoChart';
 import { TodoPriorityMatrix } from './TodoPriorityMatrix';
 import { RecentTodos } from './RecentTodos';
+import styles from './style.module.less';
 
 export default function TodoDashboardPage() {
   return (
@@ -111,14 +112,14 @@ function TodoDashboardContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
+      <div className={styles.loading}>
         <Spin  />
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-bg-1 h-full">
+    <div className={styles.dashboard}>
       <div className="space-y-6">
         {/* 核心统计卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

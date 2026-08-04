@@ -5,6 +5,7 @@ import { HabitController } from '@true-north/web-service';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
 import { HabitStatus } from '@true-north/enum';
+import styles from './style.module.less';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -99,10 +100,10 @@ export const HabitStatisticsPage: React.FC = () => {
       streakDistribution,
       totalHabits: filteredHabits.length,
       activeHabits: filteredHabits.filter(
-        (h) => h.status === HabitStatus.DOING
+        (h) => h.status === HabitStatus.ACTIVE
       ).length,
       completedHabits: filteredHabits.filter(
-        (h) => h.status === HabitStatus.DONE
+        (h) => h.status === HabitStatus.COMPLETED
       ).length,
       averageCompletion:
       completionStats.length > 0 ?
@@ -120,14 +121,14 @@ export const HabitStatisticsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className={styles.loading}>
         <Spin size={40} />
       </div>);
 
   }
 
   return (
-    <div className="habit-statistics-page">
+    <div className={styles.legacyPage}>
       {/* 页面头部 */}
       <Card className="mb-4">
         <div className="flex justify-between items-center">

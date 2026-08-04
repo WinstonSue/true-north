@@ -17,19 +17,20 @@
 | PUT | `/task/update/:id` | 更新任务 |
 | GET | `/task/find/:id`、`/list`、`/page` | 查询单项、列表和分页 |
 | GET | `/task/task-with-relations/:id`、`/tree` | 查询任务及关联信息、任务树 |
-| PUT | `/task/abandon/:id`、`/restore/:id` | 废弃与恢复任务 |
+| PUT | `/task/done/:id`、`/start/:id`、`/pause/:id`、`/abandon/:id`、`/restore/:id` | 受控状态流转 |
 
 `/task/tree` 返回根节点及嵌套 `children`；`/task/task-with-relations/:id` 是详情聚合入口。路由与返回对象取自当前控制器；更细粒度 DTO/VO 字段请以源码和生成包为准。
 
 ## 原型对齐边界
 
-| 原型契约 | 当前情况 | 对齐落点 |
+| 原型契约 | v0.1.0 状态 | 当前实现 |
 | --- | --- | --- |
-| 详情抽屉 | 原型在 `pages/task-detail/` 使用当前根任务子树 | Desktop render 在任务页内挂载抽屉，不新增独立任务详情路由。 |
-| 详情数据 | 有树和任务关联查询基础接口 | 树定位当前根任务；Todo 按 `taskIds` 查询；TrackTime 按 `relatedType/relatedId` 查询。 |
-| 唯一直接归属 | `goalId`、`parentId` 都可为空或同时设置 | Create/Update Service 强制二选一，并校验归属对象和无循环层级。 |
-| 时间、重要度、难度继承 | 当前模型缺少难度，未统一校验 | Task 使用上游目标或父任务作为约束源；所有写入入口在 Service 校验。 |
-| 删除与状态流转 | 删除逻辑会处理后代/待办，通用 update 可改状态 | 改为关联子任务或 Todo 时拒绝删除；完成、放弃、恢复使用受控状态入口。 |
-| 工时 | `estimateTime` 为字符串 | `estimated` 与 TrackTime `duration` 均以整数秒为边界契约，展示层换算小时/分钟。 |
+| 详情抽屉 | 已落地 | 任务各视图和 Goal 的关联任务均在当前页面打开 `TaskDetailDrawer`；不注册独立任务详情路由。 |
+| 详情数据 | 已落地 | 左侧仅定位当前根任务及后代；右侧固定概览、关联 Todo、TrackTime；Todo 按 `taskIds` 查询，TrackTime 按 `relatedType/relatedId` 查询。 |
+| 唯一直接归属 | 已落地 | Create/Update Service 强制 `goalId`、`parentId` 二选一，校验归属存在、自环和循环层级；切换归属会显式清除旧关系。 |
+| 时间、重要度、难度继承 | 已落地 | 子任务创建时继承父任务的计划范围、重要度和难度；所有写入入口均校验不得超出上游目标或任务。 |
+| 删除与状态流转 | 已落地 | 有直接子任务或关联 Todo 时拒绝删除；`done/start/pause/abandon/restore` 负责合法状态与时间戳，通用 update 拒绝状态字段。 |
+| 工时 | 已落地 | `estimateTime` 和 TrackTime `duration` 均为整数秒；服务层验证，渲染层按小时/分钟展示。 |
+| 全部任务视图 | 已落地 | 默认展示所有任务，支持关键词、计划时间、重要度、紧急度、状态与关联 Goal 组合筛选。 |
 
 版本内设计、迁移和验收见 [v0.1.0 TDD](../../v0.1.0/TDD.md)。

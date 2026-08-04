@@ -3,6 +3,8 @@ import Login from '../pages/login';
 import PageLayout from '../layout/layout';
 import lazyload from '../utils/lazyload';
 import useRouter, { FlattenRoute, RouterContext } from './useRouter';
+import { TaskDetailDrawerHost } from '../pages/growth/task/detail/TaskDetailDrawer';
+import { FocusTimerProvider } from '../pages/growth/focus-timer';
 
 function Router() {
   const router = useRouter();
@@ -25,12 +27,14 @@ function Router() {
 
   return (
     <RouterContext.Provider value={{ router }}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<PageLayout />}>
-          {renderRouteComponent(
-            router.flattenRoutes.filter((r) => /^\//.test(r.key) && r.fullPath),
-          )}
+      <FocusTimerProvider>
+        <TaskDetailDrawerHost />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<PageLayout />}>
+            {renderRouteComponent(
+              router.flattenRoutes.filter((r) => /^\//.test(r.key) && r.fullPath),
+            )}
           {/* {flattenRoutes.map((route) => {
           return (
             <Route
@@ -56,12 +60,13 @@ function Router() {
           path="/"
           // element={<Navigate to={`/${defaultRoute}`} />}
         /> */}
-          <Route
-            path="*"
-            element={lazyload(() => import('../pages/exception/403'))}
-          />
-        </Route>
-      </Routes>
+            <Route
+              path="*"
+              element={lazyload(() => import('../pages/exception/403'))}
+            />
+          </Route>
+        </Routes>
+      </FocusTimerProvider>
     </RouterContext.Provider>
   );
 }

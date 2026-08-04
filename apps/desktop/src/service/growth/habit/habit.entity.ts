@@ -15,7 +15,7 @@ export class HabitWithoutRelations extends BaseEntity {
   @Column({
     type: 'simple-enum',
     enum: HabitStatus,
-    default: HabitStatus.TODO,
+    default: HabitStatus.ACTIVE,
   })
   status!: HabitStatus;
 
@@ -92,6 +92,29 @@ export class HabitWithoutRelations extends BaseEntity {
   /** 习惯开始日期 */
   @Column('date', { nullable: true })
   repeatStartDate!: string;
+
+  /** 当前待结算的习惯周期待办 */
+  @Column('varchar', { nullable: true })
+  cycleTodoId?: string;
+
+  /** 已创建的周期实例数（首个实例计入） */
+  @Column('int', { default: 0 })
+  cycleCount!: number;
+
+  @Column('int', { default: 0 })
+  currentStreak!: number;
+
+  @Column('int', { default: 0 })
+  longestStreak!: number;
+
+  @Column('int', { default: 0 })
+  completedCount!: number;
+
+  @Column('datetime', { nullable: true })
+  doneAt?: Date;
+
+  @Column('datetime', { nullable: true })
+  abandonedAt?: Date;
 }
 
 @Entity('habit')

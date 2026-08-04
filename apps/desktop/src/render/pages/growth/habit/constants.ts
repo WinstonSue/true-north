@@ -3,17 +3,17 @@ import { HabitStatus, Difficulty } from '@true-north/enum';
 export const HABIT_STATUS_OPTIONS = [
   {
     label: '活跃中',
-    value: HabitStatus.DOING,
+    value: HabitStatus.ACTIVE,
     color: 'green',
   },
   {
     label: '已暂停',
-    value: HabitStatus.ABANDONED,
+    value: HabitStatus.PAUSED,
     color: 'orange',
   },
   {
     label: '已完成',
-    value: HabitStatus.DONE,
+    value: HabitStatus.COMPLETED,
     color: 'blue',
   },
   {

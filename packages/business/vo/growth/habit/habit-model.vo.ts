@@ -18,6 +18,13 @@ export type HabitWithoutRelationsVo = {
   repeatEndDate?: string;
   repeatTimes?: number;
   repeatStartDate: string;
+  cycleTodoId?: string;
+  cycleCount: number;
+  currentStreak: number;
+  longestStreak: number;
+  completedCount: number;
+  doneAt?: string;
+  abandonedAt?: string;
 } & BaseEntityVo;
 
 export type HabitVo = HabitWithoutRelationsVo & {

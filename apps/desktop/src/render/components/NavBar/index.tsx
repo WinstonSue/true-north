@@ -1,4 +1,4 @@
-import { DashboardOutlined, ExperimentOutlined, GlobalOutlined, TagOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, DashboardOutlined, ExperimentOutlined, GlobalOutlined, TagOutlined } from '@ant-design/icons';
 import { useContext, useEffect } from 'react';
 import { Tooltip, Input, Avatar, Dropdown, message, Button, CommentOutlined, LoadingOutlined, MoonOutlined, NotificationOutlined, PoweroffOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@sue/design-web-react';
 
@@ -14,6 +14,7 @@ import styles from './style/index.module.less';
 import defaultLocale from '@/locale';
 import useStorage from '@/utils/useStorage';
 import { generatePermission } from '@/router/routes';
+import { useFocusTimer } from '@/pages/growth/focus-timer';
 
 function Navbar({ show }: { show: boolean }) {
   const t = useLocale();
@@ -24,6 +25,7 @@ function Navbar({ show }: { show: boolean }) {
   const [role, setRole] = useStorage('userRole', 'admin');
 
   const { setLang, lang, theme, setTheme } = useContext(GlobalContext);
+  const { open: openFocusTimer } = useFocusTimer();
 
   function logout() {
     setUserStatus('logout');
@@ -188,6 +190,11 @@ function Navbar({ show }: { show: boolean }) {
           <MessageBox>
             <IconButton icon={<NotificationOutlined />} />
           </MessageBox>
+        </li>
+        <li>
+          <Tooltip title="打开专注计时">
+            <IconButton icon={<ClockCircleOutlined />} onClick={() => openFocusTimer()} />
+          </Tooltip>
         </li>
         <li>
           <Tooltip

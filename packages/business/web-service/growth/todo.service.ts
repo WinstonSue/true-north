@@ -71,6 +71,28 @@ export default class TodoService {
     }
   }
 
+  static async start(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
+    try {
+      const res = await TodoController.start(relatedType, id);
+      if (!options?.silent) Message.success('待办已开始');
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+      throw error;
+    }
+  }
+
+  static async pause(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
+    try {
+      const res = await TodoController.pause(relatedType, id);
+      if (!options?.silent) Message.success('待办已暂停');
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+      throw error;
+    }
+  }
+
   static async abandon(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.abandon(relatedType, id);
@@ -101,6 +123,19 @@ export default class TodoService {
       return res;
     } catch (error: unknown) {
       Message.error(error);
+    }
+  }
+
+  static async doneBatch(body: TodoVO.TodoFilterVo, options?: MethodOptions) {
+    try {
+      const res = await TodoController.doneBatch(body);
+      if (!options?.silent) {
+        Message.success('批量完成成功');
+      }
+      return res;
+    } catch (error: unknown) {
+      Message.error(error);
+      throw error;
     }
   }
 }

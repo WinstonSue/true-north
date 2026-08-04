@@ -123,8 +123,7 @@ function TodoCreatorMain(props: {
             content={
               <div className="p-1">
                 <Select
-                  mode="multiple"
-                  allowCreate={true}
+                  mode="tags"
                   placeholder="添加标签..."
                   className="rounded-md"
                   onChange={(value) => {

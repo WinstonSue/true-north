@@ -1,0 +1,28 @@
+.page {
+  min-width: 0;
+}
+
+.toolbar {
+  min-height: 44px;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--sue-color-border-secondary);
+}
+
+.content {
+  min-width: 0;
+  padding-top: 8px;
+  overflow: auto;
+}
+
+.collapse {
+  width: 100%;
+
+  :global(.sue-collapse-item) { border: 0 !important; }
+  :global(.sue-collapse-header) {
+    padding: 12px 4px !important;
+    color: var(--sue-color-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  :global(.sue-collapse-content-box) { padding: 0 !important; }
+}

@@ -27,6 +27,14 @@ export default class TodoController {
     return request<any>({ method: 'put' })(`/todo/done/${relatedType}/${id}`, body);
   }
 
+  static async start(relatedType: TodoRelatedType, id: string) {
+    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/start/${relatedType}/${id}`);
+  }
+
+  static async pause(relatedType: TodoRelatedType, id: string) {
+    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/pause/${relatedType}/${id}`);
+  }
+
   static async abandon(relatedType: TodoRelatedType, id: string) {
     return request<boolean>({ method: 'put' })(`/todo/abandon/${relatedType}/${id}`);
   }
@@ -37,5 +45,9 @@ export default class TodoController {
 
   static async list(query?: TodoVO.TodoFilterVo) {
     return request<ResponseListVo<TodoVO.TodoWithoutRelationsVo>>({ method: 'get' })(`/todo/list`, query);
+  }
+
+  static async doneBatch(body: TodoVO.TodoFilterVo) {
+    return request<any>({ method: 'put' })(`/todo/done/batch`, body);
   }
 }

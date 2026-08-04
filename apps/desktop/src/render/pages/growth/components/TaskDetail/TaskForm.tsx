@@ -1,14 +1,13 @@
-import { Input, DatePicker, Switch, Spin, Select, Form, type FormRule, Row, Col } from '@sue/design-web-react';
+import { Input, InputNumber, DatePicker, Switch, Spin, Select, Form, type FormRule, Row, Col } from '@sue/design-web-react';
 
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { useTaskDetailContext } from './context';
-import TrackTime from '../TrackTime';
 import { useComponentLoad } from '@/hooks/lifecycle';
 import GoalTreeSelector from '../GoalTreeSelector';
 import { useTaskFormConstraints } from './hooks';
 import { TaskService, GoalService } from '@true-north/web-service';
-import { IMPORTANCE_MAP } from '../../constants';
+import { DIFFICULTY_MAP, IMPORTANCE_MAP } from '../../constants';
 
 const RangePicker = DatePicker.RangePicker;
 const TextArea = Input.TextArea;
@@ -73,7 +72,7 @@ export default function TaskForm() {
     fetchParentGoal();
   }, [taskFormData?.goalId]);
 
-  const { allowedDateRange, allowedImportance, updateByConstraints } =
+  const { allowedDateRange, allowedImportance, allowedDifficulty, updateByConstraints } =
     useTaskFormConstraints(parentTask, parentGoal);
 
   // 当父任务或父目标变化时，检查并调整当前值
@@ -117,24 +116,34 @@ export default function TaskForm() {
         </Item>
         {/* 创建模式下如果有父任务id或目标id则不显示是否子任务开关 */}
         {!shouldHideSubTaskSwitch && (
-          <Item span={24} label="是否子任务" name="isSubTask">
+          <Item span={24} label="是否子任务" name="isSubTask" valuePropName="checked">
             <Switch checked={taskFormData.isSubTask} />
           </Item>
         )}
         {taskFormData.isSubTask ? (
-          <Item span={24} label="父任务" name="parentId">
+          <Item
+            span={24}
+            label="父任务"
+            name="parentId"
+            rules={[{ required: true, message: '请选择父任务' }]}
+          >
             <Select
               options={taskList.map((task) => ({
                 label: task.name,
                 value: task.id,
+                disabled: task.id === currentTask?.id,
               }))}
             />
           </Item>
         ) : (
-          <Item span={24} label="目标" name="goalId">
+          <Item
+            span={24}
+            label="目标"
+            name="goalId"
+            rules={[{ required: true, message: '请选择关联目标' }]}
+          >
             <GoalTreeSelector
               placeholder="请选择父级目标"
-              excludeId={currentTask?.goalId}
             />
           </Item>
         )}
@@ -170,17 +179,7 @@ export default function TaskForm() {
           )}
         </Item>
         <Item span={12} label="预估时间" name="estimateTime">
-          <Input />
-        </Item>
-        <Item span={12} label="跟踪时间" name="trackTimeList">
-          <TrackTime
-            trackTimeList={taskFormData.trackTimeList || []}
-            onChange={(trackTimeList) => {
-              setTaskFormData((prev) => ({ ...prev, trackTimeList }));
-              form.setFieldValue('trackTimeList', trackTimeList);
-            }}
-            taskName={taskFormData.name}
-          />
+          <InputNumber min={0} step={60} placeholder="秒" />
         </Item>
         <Item span={24} label="重要程度" name="importance">
           <Select
@@ -205,6 +204,16 @@ export default function TaskForm() {
               </div>
             )}
         </Item>
+        <Item span={24} label="难度" name="difficulty">
+          <Select
+            placeholder="请选择难度"
+            options={[...DIFFICULTY_MAP.entries()].map(([key, value]) => ({
+              label: value.label,
+              value: key,
+              disabled: !allowedDifficulty.includes(key),
+            }))}
+          />
+        </Item>
         <Item span={24} label="描述" name="description">
           <TextArea autoSize={false} placeholder="描述一下" />
         </Item>
@@ -219,6 +228,7 @@ function Item(props: {
   children: React.ReactNode;
   name: string;
   rules?: FormRule[];
+  valuePropName?: string;
 }) {
   const { size } = useTaskDetailContext();
   const labelCol =
@@ -233,6 +243,8 @@ function Item(props: {
         labelAlign="left"
         labelCol={{ span: labelCol }}
         wrapperCol={{ span: wrapperCol }}
+        rules={props.rules}
+        valuePropName={props.valuePropName}
       >
         {props.children}
       </Form.Item>

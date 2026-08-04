@@ -24,7 +24,6 @@ import { useGoalContext } from '../context';
 import { useGoalDetail } from '../../components/GoalDetail';
 import { GoalService } from '@true-north/web-service';
 import styles from './style.module.less';
-import clsx from 'clsx';
 
 interface TreeNodeData {
   key: string;
@@ -125,9 +124,9 @@ const GoalTreePanel: React.FC = ({}) => {
         >
           <Flex
             container="full"
-            className={clsx(styles['tree-node'], 'gap-2')}
+            className={styles['tree-node']}
           >
-            <Flex container="fixed" className="h-full">
+            <Flex container="fixed" className={styles.treeStatus}>
               {getStatusTag(goal.status)}
             </Flex>
             <Flex container="fill">
@@ -286,7 +285,7 @@ const GoalTreePanel: React.FC = ({}) => {
   const handleDelete = (goal: GoalVo) => {
     Modal.confirm({
       title: '确定删除吗？',
-      content: '删除后将无法恢复，如果目标下有子目标，将一并删除，是否继续？',
+      content: '删除前会检查子目标和关联行动；存在关联内容时不会删除。',
       onOk: async () => {
         try {
           await GoalService.delete(goal.id);
@@ -316,7 +315,7 @@ const GoalTreePanel: React.FC = ({}) => {
   };
 
   return (
-    <Spin spinning={loading} className={clsx('w-full')}>
+    <Spin spinning={loading} className={styles.treeLoading}>
       {treeData.length > 0 ? (
         <Tree
           treeData={treeData}
@@ -326,13 +325,7 @@ const GoalTreePanel: React.FC = ({}) => {
           onExpand={handleExpandWithLoad}
           showLine
           blockNode
-          className={clsx(
-            'w-full',
-            '[&_.sue-tree-treenode]:w-full',
-            '[&_.sue-tree-node-content-wrapper]:w-full',
-            '[&_.sue-tree-title]:w-full',
-            '[&_.sue-tree-title]:block',
-          )}
+          className={styles.goalTree}
         />
       ) : (
         <Empty description="暂无目标数据" />

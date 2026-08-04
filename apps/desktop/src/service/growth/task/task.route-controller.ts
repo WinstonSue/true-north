@@ -66,6 +66,21 @@ export class TaskController {
     return await this.taskService.abandon(id);
   }
 
+  @Put('/done/:id', { description: '完成任务' })
+  async markDone(@Param('id') id: string): Promise<boolean> {
+    return await this.taskService.done(id);
+  }
+
+  @Put('/start/:id', { description: '开始任务' })
+  async start(@Param('id') id: string): Promise<boolean> {
+    return await this.taskService.start(id);
+  }
+
+  @Put('/pause/:id', { description: '暂停任务' })
+  async pause(@Param('id') id: string): Promise<boolean> {
+    return await this.taskService.pause(id);
+  }
+
   @Put('/restore/:id', { description: '恢复任务' })
   async restore(@Param('id') id: string): Promise<boolean> {
     return await this.taskService.restore(id);
@@ -81,7 +96,9 @@ export class TaskController {
     const rootTasks: TaskVO.TaskVo[] = [];
 
     // 转换为 VO 并建立映射
-    const taskVos = list.map((dto) => dto.exportVo());
+    // findByFilter already joins direct children. Build this endpoint from the
+    // flat result only, otherwise every child would be appended twice below.
+    const taskVos = list.map((dto) => ({ ...dto.exportVo(), children: [] }));
     taskVos.forEach((task) => taskMap.set(task.id, task));
 
     // 构建父子关系

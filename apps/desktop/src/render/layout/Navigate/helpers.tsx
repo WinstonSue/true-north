@@ -17,6 +17,8 @@ export function getIconFromKey(key: string): React.ReactNode {
   switch (key) {
     case '/growth':
       return <SiteIcon id="calendar-sidebar" className={styles.icon} />;
+    case '/growth/workbench':
+      return <DashboardOutlined className={styles.icon} />;
     case '/growth/todo':
       return <SiteIcon id="list-sidebar" className={styles.icon} />;
     case '/dashboard':

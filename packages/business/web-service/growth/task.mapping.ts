@@ -1,5 +1,9 @@
 import type { TaskVo, UpdateTaskVo, CreateTaskVo } from '@true-north/vo';
 import type { TaskFormData } from './task.types';
+import dayjs from 'dayjs';
+
+const formatDateTime = (value?: TaskFormData['planTimeRange'][number]) =>
+  value && dayjs(value).isValid() ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : undefined;
 
 export default class TaskMapping {
   static voToFormData(taskVo: TaskVo): TaskFormData {
@@ -8,13 +12,17 @@ export default class TaskMapping {
       description: taskVo.description,
       tags: taskVo.tags,
       importance: taskVo.importance,
+      difficulty: taskVo.difficulty,
       urgency: taskVo.urgency,
       estimateTime: taskVo.estimateTime,
-      planTimeRange: [taskVo.startAt, taskVo.endAt],
+      planTimeRange: [
+        taskVo.startAt ? dayjs(taskVo.startAt) : undefined,
+        taskVo.endAt ? dayjs(taskVo.endAt) : undefined,
+      ],
       // 以下为关联数据
-      goalId: taskVo.goal?.id,
-      parentId: taskVo.parent?.id,
-      isSubTask: !!taskVo.parent,
+      goalId: taskVo.goal?.id ?? taskVo.goalId,
+      parentId: taskVo.parent?.id ?? taskVo.parentId,
+      isSubTask: Boolean(taskVo.parent?.id ?? taskVo.parentId),
       children: taskVo.children || [],
       todoList: taskVo.todoList || [],
       trackTimeList: taskVo.trackTimeList,
@@ -22,26 +30,35 @@ export default class TaskMapping {
   }
 
   static formDataToCreateVo(formData: TaskFormData): CreateTaskVo {
-    const { isSubTask, ...rest } = formData;
     return {
-      ...rest,
-      parentId: isSubTask ? formData.parentId : undefined,
-      goalId: isSubTask ? undefined : formData.goalId,
-      startAt: formData.planTimeRange[0],
-      endAt: formData.planTimeRange[1],
+      name: formData.name,
+      description: formData.description,
       tags: formData.tags || [],
+      importance: formData.importance,
+      difficulty: formData.difficulty,
+      urgency: formData.urgency,
+      parentId: formData.isSubTask ? formData.parentId : undefined,
+      goalId: formData.isSubTask ? undefined : formData.goalId,
+      startAt: formatDateTime(formData.planTimeRange[0]),
+      endAt: formatDateTime(formData.planTimeRange[1]),
+      estimateTime: formData.estimateTime ?? undefined,
     };
   }
 
   static formDataToUpdateVo(formData: TaskFormData): UpdateTaskVo {
-    const { isSubTask, ...rest } = formData;
     return {
-      ...rest,
-      parentId: isSubTask ? formData.parentId : undefined,
-      goalId: isSubTask ? undefined : formData.goalId,
-      startAt: formData.planTimeRange[0],
-      endAt: formData.planTimeRange[1],
+      name: formData.name,
+      description: formData.description,
       tags: formData.tags || [],
+      importance: formData.importance,
+      difficulty: formData.difficulty,
+      urgency: formData.urgency,
+      // null is intentional: it survives IPC and clears the opposite relation.
+      parentId: (formData.isSubTask ? formData.parentId : null) as any,
+      goalId: (formData.isSubTask ? null : formData.goalId) as any,
+      startAt: formatDateTime(formData.planTimeRange[0]),
+      endAt: formatDateTime(formData.planTimeRange[1]),
+      estimateTime: formData.estimateTime ?? undefined,
     };
   }
 }

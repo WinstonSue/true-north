@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Select, DatePicker, InputNumber, Button, Space, message, Divider } from '@sue/design-web-react';
+import { Form, Input, Select, Button, Space, message, Divider } from '@sue/design-web-react';
 
 import { HabitController } from '@true-north/web-service';
-import { CreateHabitVo, GoalVo } from '@true-north/vo';
+import { CreateHabitVo, GoalVo, HabitVo } from '@true-north/vo';
 import { Difficulty } from '@true-north/enum';
 import dayjs from 'dayjs';
 import { DIFFICULTY_MAP, IMPORTANCE_MAP } from '../../constants';
+import RepeatSelector, { createDefaultRepeatSetting, type RepeatSelectorValue } from '@true-north/components-repeat';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -14,22 +15,47 @@ interface CreateHabitProps {
   goals: GoalVo[];
   onSuccess: () => void;
   onCancel: () => void;
+  habit?: HabitVo;
 }
 
 export const CreateHabit: React.FC<CreateHabitProps> = ({
   goals,
   onSuccess,
-  onCancel
+  onCancel,
+  habit,
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const [repeatSetting, setRepeatSetting] = useState<RepeatSelectorValue>(() =>
+    createDefaultRepeatSetting(dayjs().format('YYYY-MM-DD'))
+  );
 
   // 重置表单
   useEffect(() => {
     form.resetFields();
-    setSelectedGoals([]);
-  }, [form]);
+    if (!habit) {
+      setSelectedGoals([]);
+      setRepeatSetting(createDefaultRepeatSetting(dayjs().format('YYYY-MM-DD')));
+      return;
+    }
+    form.setFieldsValue({
+      name: habit.name,
+      description: habit.description,
+      importance: habit.importance,
+      difficulty: habit.difficulty,
+      tags: habit.tags,
+    });
+    setSelectedGoals(habit.goals?.map((goal) => goal.id) || []);
+    setRepeatSetting({
+      repeatMode: habit.repeatMode,
+      repeatConfig: habit.repeatConfig,
+      repeatEndMode: habit.repeatEndMode,
+      repeatStartDate: habit.repeatStartDate,
+      repeatEndDate: habit.repeatEndDate,
+      repeatTimes: habit.repeatTimes,
+    } as RepeatSelectorValue);
+  }, [form, habit]);
 
   // 处理表单提交
   const handleSubmit = async () => {
@@ -49,13 +75,17 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         importance: values.importance || 3,
         difficulty: values.difficulty || Difficulty.Challenger,
         tags: values.tags || [],
-        repeatStartDate: dayjs(values.repeatStartDate).format('YYYY-MM-DD'),
-        repeatEndDate: dayjs(values.repeatEndDate).format('YYYY-MM-DD'),
-        goalIds: selectedGoals
+        goalIds: selectedGoals,
+        ...repeatSetting,
       };
 
-      await HabitController.create(habitData);
-      message.success('习惯创建成功');
+      if (habit) {
+        await HabitController.update(habit.id, habitData);
+        message.success('习惯已更新');
+      } else {
+        await HabitController.create(habitData);
+        message.success('习惯创建成功');
+      }
       onSuccess();
     } catch (error) {
       console.error('创建习惯失败:', error);
@@ -97,7 +127,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
           <TextArea
             placeholder="请描述这个习惯的具体内容和要求"
             rows={3}
-            showWordLimit
+            showCount
             maxLength={200} />
 
         </Form.Item>
@@ -124,7 +154,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
             style={{ width: '100%' }}
             maxTagCount={3}>
 
-              {goals.map((goal) =>
+              {goals.filter((goal) => goal.id).map((goal) =>
             <Option key={goal.id} value={goal.id}>
                   <div>
                     <div className="font-medium">{goal.name}</div>
@@ -178,39 +208,17 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         {/* 标签 */}
         <Form.Item label="标签" name="tags">
           <Select
-            mode="multiple"
+            mode="tags"
             placeholder="添加标签，最多5个"
             maxTagCount={5}
-            allowCreate
             allowClear
             style={{ width: '100%' }} />
 
         </Form.Item>
 
-        {/* 时间设置 */}
-        <div className="grid grid-cols-2 gap-4">
-          <Form.Item
-            label="开始日期"
-            name="repeatStartDate"
-            rules={[{ required: true, message: '请选择开始日期' }]}>
-
-            <DatePicker
-              style={{ width: '100%' }}
-              disabledDate={(date) => date.isBefore(new Date(), 'day')} />
-
-          </Form.Item>
-
-          <Form.Item label="目标日期" name="repeatEndDate">
-            <DatePicker
-              style={{ width: '100%' }}
-              disabledDate={(date) => {
-                const startDate = form.getFieldValue('repeatStartDate');
-                return startDate ?
-                date.isBefore(startDate, 'day') :
-                date.isBefore(new Date(), 'day');
-              }} />
-
-          </Form.Item>
+        <div>
+          <span className="block mb-2 font-medium">重复规则</span>
+          <RepeatSelector lang="zh-CN" value={repeatSetting} onChange={setRepeatSetting} />
         </div>
 
         <Divider />
@@ -219,7 +227,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
       <Space>
         <Button onClick={onCancel}>取消</Button>
         <Button type="primary" loading={loading} onClick={handleSubmit}>
-          创建
+          {habit ? '保存' : '创建'}
         </Button>
       </Space>
     </div>);

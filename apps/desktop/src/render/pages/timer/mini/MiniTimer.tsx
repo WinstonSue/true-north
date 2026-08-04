@@ -11,13 +11,14 @@ const MiniTimer: React.FC = () => {
     countdown,
     setCountdown,
     clockState,
-    setClockState,
     clockRefresh,
     setClockRefresh,
     toggleMiniMode,
     isFullscreen,
     toggleFullscreen,
     handleRefresh,
+    toggleFocus,
+    completeFocus,
   } = useTimerContext();
 
   const [timeArr, setTimeArr] = useState<number[]>(getTimeArr(countdown));
@@ -48,6 +49,7 @@ const MiniTimer: React.FC = () => {
         setCountdown(0);
         setTimeArr(getTimeArr(0));
         timeHandleRef.current = null;
+        completeFocus();
         return;
       }
 
@@ -65,12 +67,13 @@ const MiniTimer: React.FC = () => {
           tick();
         } else {
           timeHandleRef.current = null;
+          completeFocus();
         }
       }, 1000);
     };
 
     tick();
-  }, []);
+  }, [completeFocus, setCountdown]);
 
   const handleLoadClock = useCallback(() => {
     setCountdown(countdown);
@@ -117,7 +120,7 @@ const MiniTimer: React.FC = () => {
         <div className={styles['mini-controls']}>
           <button
             className={styles['mini-btn']}
-            onClick={() => setClockState(!clockState)}
+            onClick={toggleFocus}
           >
             {clockState ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
           </button>

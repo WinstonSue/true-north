@@ -5,12 +5,11 @@ import { useTaskAllContext } from './context';
 import { useEffect, useState } from 'react';
 import { TaskService } from '@true-north/web-service';
 import { TaskVo } from '@true-north/vo';
-import { useTaskDetail } from '../../components';
 import { TaskStatus } from '@true-north/enum';
+import { openTaskDetailDrawer } from '../detail/TaskDetailDrawer';
 
 export default function TaskTable() {
   const { taskList, getTaskPage } = useTaskAllContext();
-  const { openEditDrawer: openEditTaskDrawer } = useTaskDetail();
 
   useEffect(() => {
     async function initData() {
@@ -41,6 +40,8 @@ export default function TaskTable() {
             );
           case TaskStatus.TODO:
             return <div className="text-warning">未完成</div>;
+          case TaskStatus.DOING:
+            return <div className="text-primary">进行中</div>;
           case TaskStatus.ABANDONED:
             return (
               <div className="text-danger">
@@ -55,15 +56,17 @@ export default function TaskTable() {
     {
       title: '计划日期',
       key: 'planDate',
-      render: (_, record) => (
-        <div>
-          {dayjs(record.planDate).format('YYYY-MM-DD')}
-          {record.planStart &&
-            record.planEnd &&
-            `${dayjs(record.planStart).format('YYYY-MM-DD')}
-             - ${dayjs(record.planEnd).format('YYYY-MM-DD')}`}
-        </div>
-      ),
+      render: (_, record) => {
+        const start = record.startAt ? dayjs(record.startAt) : undefined;
+        const end = record.endAt ? dayjs(record.endAt) : undefined;
+        if (!start?.isValid() && !end?.isValid()) return '--';
+        if (start?.isValid() && end?.isValid()) {
+          const startText = start.format('YYYY-MM-DD');
+          const endText = end.format('YYYY-MM-DD');
+          return <div>{startText === endText ? startText : `${startText} - ${endText}`}</div>;
+        }
+        return <div>{(start || end)!.format('YYYY-MM-DD')}</div>;
+      },
     },
     {
       title: '紧急程度',
@@ -79,7 +82,12 @@ export default function TaskTable() {
         <div>{IMPORTANCE_MAP.get(record.importance)?.label || '--'}</div>
       ),
     },
-    { title: '标签', dataIndex: 'tags', key: 'tags' },
+    {
+      title: '标签',
+      dataIndex: 'tags',
+      key: 'tags',
+      render: (tags: string[] | undefined) => tags?.length ? tags.join('、') : '--',
+    },
     {
       title: <span className="text-text-1 font-medium px-4">操作</span>,
       key: 'action',
@@ -88,17 +96,10 @@ export default function TaskTable() {
           <Button
             type="text"
             onClick={() => {
-              openEditTaskDrawer({
-                contentProps: {
-                  task: record,
-                  afterSubmit: async () => {
-                    await getTaskPage();
-                  },
-                },
-              });
+              openTaskDetailDrawer({ taskId: record.id, onRefresh: getTaskPage });
             }}
           >
-            编辑
+            查看
           </Button>
           <Button
             type="text"

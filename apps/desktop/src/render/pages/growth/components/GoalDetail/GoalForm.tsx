@@ -56,6 +56,7 @@ export default function GoalForm() {
     allowedDateRange,
     allowedTypes,
     allowedImportance,
+    allowedDifficulty,
     updateByConstraints,
   } = useGoalFormConstraints(parentGoal);
 
@@ -64,6 +65,9 @@ export default function GoalForm() {
     if (parentGoal) {
       const updates = updateByConstraints(goalFormData);
       form.setFieldsValue(updates);
+      if (Object.keys(updates).length > 0) {
+        setGoalFormData((prev) => ({ ...prev, ...updates }));
+      }
     }
   }, [parentGoal]);
 
@@ -142,25 +146,25 @@ export default function GoalForm() {
           slot={{
             bottom:
               readonly ||
-              (parentGoal && parentGoal.type === GoalType.KEY_RESULT && (
+              (parentGoal && parentGoal.type === GoalType.RESULT && (
                 <div className="text-xs text-orange-600 mt-1 flex items-start gap-1">
-                  <span>父目标是 成果指标，子目标只能是 成果指标</span>
+                  <span>父目标是成果，子目标只能是成果</span>
                 </div>
               )),
           }}
         >
           <Radio.Group disabled={readonly}>
             <Radio
-              value={GoalType.OBJECTIVE}
-              disabled={readonly || !allowedTypes.includes(GoalType.OBJECTIVE)}
+              value={GoalType.VISION}
+              disabled={readonly || !allowedTypes.includes(GoalType.VISION)}
             >
-              战略规划
+              愿景
             </Radio>
             <Radio
-              value={GoalType.KEY_RESULT}
-              disabled={readonly || !allowedTypes.includes(GoalType.KEY_RESULT)}
+              value={GoalType.RESULT}
+              disabled={readonly || !allowedTypes.includes(GoalType.RESULT)}
             >
-              成果指标
+              成果
             </Radio>
           </Radio.Group>
         </Item>
@@ -214,7 +218,11 @@ export default function GoalForm() {
             disabled={readonly}
           >
             {[...DIFFICULTY_MAP.entries()].map(([key, value]) => (
-              <Select.Option key={key} value={key}>
+              <Select.Option
+                key={key}
+                value={key}
+                disabled={!allowedDifficulty.includes(key)}
+              >
                 <Tag color={value.color || 'gray'} className="m-1">
                   {value.label}
                 </Tag>

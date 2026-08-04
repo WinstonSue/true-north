@@ -8,8 +8,8 @@ import IconSelector from '../../components/IconSelector';
 import { TodoService } from '@true-north/web-service';
 import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
-import clsx from 'clsx';
-import { TodoRelatedType } from '@true-north/enum';
+import { TodoRelatedType, TodoStatus } from '@true-north/enum';
+import styles from './style.module.less';
 
 export type TodoItemProps = {
   todo: TodoWithoutRelationsVo;
@@ -21,52 +21,70 @@ export type TodoItemProps = {
 function TodoItem(props: TodoItemProps) {
   const { todo } = props;
   return (
-    <div className={'w-full pl-4 py-2 bg-bg'} key={todo.id}>
-      <Flex container="full" className="items-start" align="flex-start">
-        <Flex container="fixed" className="h-full flex items-start">
+    <div className={styles.todoItem} key={todo.id}>
+      <Flex container="full" className={styles.itemLayout} align="flex-start">
+        <Flex container="fixed" className={styles.checkbox}>
           {props.TriggerCheckbox}
         </Flex>
         <Flex
           container="fill"
           onClick={() => props.onClickTodo(todo)}
-          className={clsx([
-          'cursor-pointer border-b',
-          'after:content-[""] after:block after:h-1 after:w-full']
-          )}>
+          className={styles.content}>
 
-          <div
-            className={clsx(['flex items-center justify-between', 'leading-8'])}>
+          <div className={styles.header}>
 
-            <span className="text-text-1 flex items-center">
+            <span className={styles.title}>
               {todo.name}
               {todo.relatedType === TodoRelatedType.IS_REPEAT &&
               <SiteIcon
                 id={'repeat'}
-                className={'text-danger'}
+                className={styles.repeatIcon}
                 width={20}
                 height={20} />
 
               }
             </span>
-            <div className="h-8 flex items-center">
+            <div className={styles.action}>
               <Popover
                 trigger="click"
                 content={
-                <div className="w-40">
+                <div className={styles.menu}>
+                    {todo.status === TodoStatus.TODO && (
+                      <div
+                        className={styles.menuItem}
+                        onClick={async () => {
+                          await TodoService.start(todo.relatedType, todo.id);
+                          await props.refreshTodoList();
+                        }}
+                      >
+                        开始
+                      </div>
+                    )}
+                    {todo.status === TodoStatus.IN_PROGRESS && (
+                      <div
+                        className={styles.menuItem}
+                        onClick={async () => {
+                          await TodoService.pause(todo.relatedType, todo.id);
+                          await props.refreshTodoList();
+                        }}
+                      >
+                        暂停
+                      </div>
+                    )}
                     <div
-                    className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
-                    onClick={() => {
-                      TodoService.abandon(todo.relatedType, todo.id);
-                      props.refreshTodoList();
+                    className={styles.menuItem}
+                    onClick={async () => {
+                      await TodoService.abandon(todo.relatedType, todo.id);
+                      await props.refreshTodoList();
                     }}>
 
                       放弃
                     </div>
                     <div
-                    className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
-                    onClick={() => {
-                      TodoService.delete(todo.relatedType, todo.id);
-                      props.refreshTodoList();
+                    className={styles.menuItem}
+                    onClick={async () => {
+                      await TodoService.delete(todo.relatedType, todo.id);
+                      await props.refreshTodoList();
                     }}>
 
                       删除
@@ -78,28 +96,22 @@ function TodoItem(props: TodoItemProps) {
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
-                  iconOnly
                   type="text"
                   size="small"
                   icon={<SiteIcon id="more-for-task" />}
-                  className="!flex justify-center items-center !text-text" />
+                  className={styles.moreButton} />
 
               </Popover>
             </div>
           </div>
           {todo.description &&
           <p
-            className="text-body-1 !mb-0.5"
-            style={{
-              textDecoration:
-              todo.status === 'done' ? 'line-through' : 'none',
-              color: 'var(--color-text-3)'
-            }}>
+            className={styles.description}>
 
               {todo.description}
             </p>
           }
-          <div className={clsx(['flex items-center gap-2', 'text-body-2'])}>
+          <div className={styles.meta}>
             {todo.importance &&
             <IconSelector
               map={IMPORTANCE_MAP}
@@ -121,9 +133,7 @@ function TodoItem(props: TodoItemProps) {
             {!isToday(todo.planDate) &&
             <span
               className={
-              todo.planDate < dayjs().format('YYYY-MM-DD') ?
-              'text-danger' :
-              'text-text-3'
+              todo.planDate < dayjs().format('YYYY-MM-DD') ? styles.overdue : styles.date
               }>
 
                 {todo.planDate}
@@ -135,7 +145,7 @@ function TodoItem(props: TodoItemProps) {
               </span>
             }
             {todo.tags?.length > 0 &&
-            <div className="flex flex-wrap gap-1">
+            <div className={styles.tags}>
                 {todo.tags.map((tag, index) =>
               <Tag key={index} color="blue">
                     {tag}

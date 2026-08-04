@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card,
   Button,
+  Drawer,
   Space,
   Tag,
   Progress,
@@ -21,12 +22,14 @@ import {
   LeftOutlined,
 } from '@sue/design-web-react';
 import { CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
-import { HabitService } from '@true-north/web-service';
+import { HabitService, TodoController, GoalController } from '@true-north/web-service';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from './constants';
 import { useHabitContext } from './context';
-import { HabitStatus } from '@true-north/enum';
+import { HabitStatus, TodoRelatedType } from '@true-north/enum';
 import { DIFFICULTY_MAP } from '../constants';
+import { CreateHabit } from './components/CreateHabit';
+import styles from './style.module.less';
 
 export const HabitDetailPage: React.FC = () => {
   const { id } = useParams<{id: string;}>();
@@ -67,8 +70,17 @@ export const HabitDetailPage: React.FC = () => {
 
         switch (action) {
           case 'complete':
-            await HabitService.update(habit.id, { status: HabitStatus.DONE });
-            message.success('习惯已完成');
+            if (!habit.cycleTodoId) throw new Error('当前没有可结算的习惯待办');
+            await TodoController.done(TodoRelatedType.HABIT, habit.cycleTodoId);
+            message.success('本次打卡已完成');
+            break;
+          case 'pause':
+            await HabitService.pause(habit.id);
+            message.success('习惯已暂停');
+            break;
+          case 'resume':
+            await HabitService.activate(habit.id);
+            message.success('习惯已开始');
             break;
           case 'abandon':
             await HabitService.abandon(habit.id);
@@ -101,7 +113,7 @@ export const HabitDetailPage: React.FC = () => {
         try {
           await HabitService.delete(habit.id);
           message.success('习惯已删除');
-          navigate('/growth/habits');
+          navigate('/growth/habit/habit-list');
           refreshHabits();
         } catch (error) {
           console.error('删除习惯失败:', error);
@@ -110,6 +122,32 @@ export const HabitDetailPage: React.FC = () => {
       }
     });
   }, [habit, navigate, refreshHabits]);
+
+  const handleEdit = useCallback(async () => {
+    if (!habit) return;
+    try {
+      const response = await GoalController.findByFilter({});
+      const instance = Drawer.open({
+        title: '编辑习惯',
+        size: 800,
+        content: (
+          <CreateHabit
+            habit={habit}
+            goals={response.list}
+            onSuccess={async () => {
+              await fetchHabitDetail();
+              refreshHabits();
+              instance.destroy();
+            }}
+            onCancel={() => instance.destroy()}
+          />
+        ),
+      });
+    } catch (error) {
+      console.error('获取目标列表失败:', error);
+      message.error('无法打开习惯编辑');
+    }
+  }, [fetchHabitDetail, habit, refreshHabits]);
 
   // 获取状态配置
   const statusConfig = habit ?
@@ -129,7 +167,7 @@ export const HabitDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className={styles.loading}>
         <Spin size={40} />
       </div>);
 
@@ -137,21 +175,21 @@ export const HabitDetailPage: React.FC = () => {
 
   if (!habit) {
     return (
-      <div className="text-center py-8">
+      <div className={styles.emptyState}>
         <span>习惯不存在或已被删除</span>
       </div>);
 
   }
 
   return (
-    <div className="habit-detail-page">
+    <div className={styles.legacyPage}>
       {/* 页面头部 */}
       <Card className="mb-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
             <Button
               icon={<LeftOutlined />}
-              onClick={() => navigate('/growth/habits')}>
+              onClick={() => navigate('/growth/habit/habit-list')}>
 
               返回
             </Button>
@@ -173,7 +211,7 @@ export const HabitDetailPage: React.FC = () => {
 
           <Space>
             {/* 状态操作按钮 */}
-            {habit.status === HabitStatus.DOING &&
+            {habit.status === HabitStatus.ACTIVE &&
             <>
                 <Button
                 type="primary"
@@ -193,7 +231,7 @@ export const HabitDetailPage: React.FC = () => {
               </>
             }
 
-            {habit.status === HabitStatus.ABANDONED &&
+            {(habit.status === HabitStatus.ABANDONED || habit.status === HabitStatus.PAUSED) &&
             <Button
               type="primary"
               icon={<CaretRightOutlined />}
@@ -204,8 +242,8 @@ export const HabitDetailPage: React.FC = () => {
               </Button>
             }
 
-            {(habit.status === HabitStatus.DOING ||
-            habit.status === HabitStatus.ABANDONED) &&
+            {(habit.status === HabitStatus.ACTIVE ||
+            habit.status === HabitStatus.PAUSED) &&
             <Button
               icon={<CloseOutlined />}
               loading={actionLoading}
@@ -215,7 +253,7 @@ export const HabitDetailPage: React.FC = () => {
               </Button>
             }
 
-            <Button icon={<EditOutlined />}>编辑</Button>
+            <Button icon={<EditOutlined />} onClick={handleEdit}>编辑</Button>
             <Button
               type="primary"
               danger

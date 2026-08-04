@@ -15,7 +15,8 @@ export class TodoRepository extends BaseRepositoryImpl<Todo, TodoFilterDto> impl
       const qb = this.repo
         .createQueryBuilder('todo')
         .leftJoinAndSelect('todo.task', 'task')
-        .leftJoinAndSelect('todo.habit', 'habit');
+        .leftJoinAndSelect('todo.habit', 'habit')
+        .andWhere('todo.deletedAt IS NULL');
 
       if (filter.includeIds && filter.includeIds.length > 0) {
         qb.andWhere('todo.id IN (:...includeIds)', { includeIds: filter.includeIds });
@@ -30,6 +31,7 @@ export class TodoRepository extends BaseRepositoryImpl<Todo, TodoFilterDto> impl
         });
       if (filter.urgency !== undefined) qb.andWhere('todo.urgency = :urgency', { urgency: filter.urgency });
       if (filter.taskId) qb.andWhere('todo.taskId = :taskId', { taskId: filter.taskId });
+      if (filter.taskIds?.length) qb.andWhere('todo.taskId IN (:...taskIds)', { taskIds: filter.taskIds });
       if (filter.keyword) qb.andWhere('todo.name LIKE :kw', { kw: `%${filter.keyword}%` });
       if (filter.planDateStart) qb.andWhere('todo.planDate >= :ds', { ds: filter.planDateStart });
       if (filter.planDateEnd) qb.andWhere('todo.planDate <= :de', { de: filter.planDateEnd });

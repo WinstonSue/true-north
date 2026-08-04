@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { BaseEntity } from '@business/common';
-import { TaskStatus } from '@true-north/enum';
+import { Difficulty, TaskStatus } from '@true-north/enum';
 import { Goal } from '../goal/goal.entity';
 import { Todo } from '../todo/todo.entity';
 import { Entity, Column, TreeChildren, TreeParent, Tree, ManyToOne, OneToMany } from 'typeorm';
@@ -16,16 +16,16 @@ export class TaskWithoutRelations extends BaseEntity {
   @Column({
     type: 'varchar',
     enum: TaskStatus,
-    nullable: true,
+    default: TaskStatus.TODO,
   })
   @IsEnum(TaskStatus)
   status!: TaskStatus;
 
-  /** 任务预估时间 */
-  @Column('varchar', { nullable: true })
-  @IsString()
+  /** 任务预估时间（秒） */
+  @Column('integer', { nullable: true })
+  @IsNumber()
   @IsOptional()
-  estimateTime?: string;
+  estimateTime?: number;
 
   /** 任务跟踪时间ID列表 */
   @Column('simple-array', {
@@ -47,6 +47,15 @@ export class TaskWithoutRelations extends BaseEntity {
   @IsNumber()
   @IsOptional()
   importance?: number;
+
+  /** 任务难度 */
+  @Column({
+    type: 'simple-enum',
+    enum: Difficulty,
+    nullable: true,
+  })
+  @IsOptional()
+  difficulty?: Difficulty;
 
   /** 任务紧急程度 */
   @Column('int', { nullable: true })

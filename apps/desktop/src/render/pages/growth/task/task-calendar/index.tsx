@@ -9,7 +9,7 @@ function CalendarPage() {
   const { pageShowDate, calendarMode } = useCalendarContext();
 
   return (
-    <div className="bg-bg-2 rounded-lg w-full max-h-full">
+    <div className={styles.page}>
       <Calendar
         className={`${styles['custom-calendar']}`}
         pageShowDate={pageShowDate}

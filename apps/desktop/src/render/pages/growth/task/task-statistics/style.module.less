@@ -1,0 +1,11 @@
+.statistics {
+  margin: 0;
+  padding: 4px 0 16px;
+}
+
+.statistics :global(.sue-card) { height: 100%; border-color: var(--sue-color-border-secondary); }
+.statistics :global(.sue-statistic-title) { color: var(--sue-color-text-secondary); }
+.statistics :global(.sue-statistic-content) { color: var(--sue-color-text); }
+.statistics > :global(.sue-col):nth-child(2) :global(.sue-statistic-content) { color: var(--sue-color-success); }
+.statistics > :global(.sue-col):nth-child(3) :global(.sue-statistic-content) { color: var(--sue-color-primary); }
+.statistics > :global(.sue-col):nth-child(4) :global(.sue-statistic-content) { color: var(--sue-color-error); }

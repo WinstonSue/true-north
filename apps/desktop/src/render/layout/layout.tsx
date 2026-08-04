@@ -93,13 +93,12 @@ function PageLayout() {
                   container="fixed"
                   className={cs('w-full', styles['layout-breadcrumb'])}
                 >
-                  <Breadcrumb>
-                    {breadcrumb.map((node, index) => (
-                      <Breadcrumb.Item key={index}>
-                        {typeof node === 'string' ? locale[node] || node : node}
-                      </Breadcrumb.Item>
-                    ))}
-                  </Breadcrumb>
+                  <Breadcrumb
+                    items={breadcrumb.map((node, index) => ({
+                      key: index,
+                      title: typeof node === 'string' ? locale[node] || node : node,
+                    }))}
+                  />
                 </Flex>
               )}
               <Flex container="fill" className="overflow-y-auto">

@@ -9,15 +9,14 @@ import {
   Menu,
   Badge,
   CheckOutlined,
-  CloseOutlined,
   DeleteOutlined,
   EditOutlined,
   EllipsisOutlined,
 } from '@sue/design-web-react';
-import { CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
 import { HabitWithoutRelationsVo } from '@true-north/vo';
 import { HabitStatus } from '@true-north/enum';
 import { HABIT_STATUS_OPTIONS, HABIT_DIFFICULTY_OPTIONS } from '../constants';
+import styles from './HabitCard.module.less';
 
 interface HabitCardProps {
   habit: HabitWithoutRelationsVo;
@@ -60,41 +59,38 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   const renderActionMenu = () => {
     const menuItems = [];
 
-    if (habit.status === HabitStatus.DOING) {
+    if (onComplete) {
       menuItems.push(
         <Menu.Item key="complete" onClick={onComplete}>
           <CheckOutlined /> 标记完成
-        </Menu.Item>,
-        <Menu.Item key="pause" onClick={onPause}>
-          <PauseOutlined /> 暂停习惯
         </Menu.Item>
       );
     }
 
-    if (habit.status === HabitStatus.ABANDONED) {
+    if (onResume) {
       menuItems.push(
         <Menu.Item key="resume" onClick={onResume}>
-          <CaretRightOutlined /> 恢复习惯
+          恢复习惯
         </Menu.Item>
       );
     }
 
-    if (
-    habit.status === HabitStatus.DOING ||
-    habit.status === HabitStatus.ABANDONED)
-    {
+    if (onPause) {
       menuItems.push(
-        <Menu.Item key="abandon" onClick={onAbandon}>
-          <CloseOutlined /> 放弃习惯
+        <Menu.Item key="pause" onClick={onPause}>
+          暂停习惯
         </Menu.Item>
       );
     }
 
-    menuItems.push(
+    if (onAbandon) menuItems.push(<Menu.Item key="abandon" onClick={onAbandon}>放弃习惯</Menu.Item>);
+
+    if (onEdit) menuItems.push(
       <Menu.Item key="edit" onClick={onEdit}>
         <EditOutlined /> 编辑习惯
-      </Menu.Item>,
-      <Menu.Item key="delete" onClick={onDelete} className="text-red-500">
+      </Menu.Item>);
+    if (onDelete) menuItems.push(
+      <Menu.Item key="delete" onClick={onDelete} className={styles.dangerAction}>
         <DeleteOutlined /> 删除习惯
       </Menu.Item>
     );
@@ -104,12 +100,12 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
   return (
     <Card
-      className="habit-card h-full"
+      className={styles.card}
       hoverable
       actions={[
       <Dropdown
         key="more"
-        dropdownRender={() => renderActionMenu()}
+        popupRender={() => renderActionMenu()}
         placement="bottomRight">
 
           <Button type="text" icon={<EllipsisOutlined />} />
@@ -117,15 +113,14 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       }>
 
       {/* 卡片头部 */}
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <span className="font-medium text-base line-clamp-2">
+      <div className={styles.header}>
+        <div className={styles.titleBlock}>
+          <span className={styles.title}>
             {habit.name}
           </span>
           {habit.description &&
           <p
-            className="text-sm text-gray-500 mt-1 line-clamp-2"
-            style={{ marginBottom: 0 }}>
+            className={styles.description}>
 
               {habit.description}
             </p>
@@ -134,12 +129,12 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         <Badge
           status={statusConfig?.color as any}
           text={statusConfig?.label}
-          className="ml-2" />
+          className={styles.status} />
 
       </div>
 
       {/* 标签和难度 */}
-      <div className="flex flex-wrap gap-1 mb-3">
+      <div className={styles.tags}>
         {difficultyConfig &&
         <Tag color={difficultyConfig.color} >
             {difficultyConfig.label}
@@ -161,34 +156,34 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       </div>
 
       {/* 进度信息 */}
-      <div className="space-y-2">
+      <div className={styles.body}>
         {/* 完成率 */}
         <div>
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-sm">完成率</span>
-            <span className="text-sm font-medium">{completionRate}%</span>
+          <div className={styles.progressHeader}>
+            <span>完成率</span>
+            <strong>{completionRate}%</strong>
           </div>
           <Progress percent={completionRate}  />
         </div>
 
         {/* 统计信息 */}
-        <div className="grid grid-cols-2 gap-2 text-center">
-          <div className="bg-gray-50 rounded p-2">
-            <div className="text-lg font-bold text-blue-600">
+        <div className={styles.metrics}>
+          <div className={styles.metric}>
+            <div className={styles.metricPrimary}>
               {habit.currentStreak || 0}
             </div>
-            <div className="text-xs text-gray-500">当前连续</div>
+            <div>当前连续</div>
           </div>
-          <div className="bg-gray-50 rounded p-2">
-            <div className="text-lg font-bold text-green-600">
+          <div className={styles.metric}>
+            <div className={styles.metricSuccess}>
               {habit.longestStreak || 0}
             </div>
-            <div className="text-xs text-gray-500">最长连续</div>
+            <div>最长连续</div>
           </div>
         </div>
 
         {/* 时间信息 */}
-        <div className="text-xs text-gray-500 space-y-1">
+        <div className={styles.dates}>
           {habit.repeatStartDate &&
           <div>开始时间: {new Date(habit.repeatStartDate).toLocaleDateString()}</div>
           }
@@ -199,33 +194,29 @@ export const HabitCard: React.FC<HabitCardProps> = ({
       </div>
 
       {/* 快捷操作按钮 */}
-      {habit.status === HabitStatus.DOING &&
-      <div className="mt-3 pt-3 border-t border-gray-100">
-          <Space className="w-full">
+      {onComplete &&
+      <div className={styles.footer}>
+          <Space className={styles.footerActions}>
             <Button
             type="primary"
             size="small"
             icon={<CheckOutlined />}
             onClick={onComplete}
-            className="flex-1">
+            className={styles.completeButton}>
 
               完成
-            </Button>
-            <Button  icon={<PauseOutlined />} onClick={onPause}>
-              暂停
             </Button>
           </Space>
         </div>
       }
 
-      {habit.status === HabitStatus.ABANDONED &&
-      <div className="mt-3 pt-3 border-t border-gray-100">
+      {onResume &&
+      <div className={styles.footer}>
           <Button
           type="primary"
           size="small"
-          icon={<CaretRightOutlined />}
           onClick={onResume}
-          className="w-full">
+          className={styles.fullButton}>
 
             恢复习惯
           </Button>

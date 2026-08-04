@@ -2,6 +2,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useCalendarContext } from './context';
 import { TaskVo } from '@true-north/vo';
 import { useTaskDetail } from '../../components/TaskDetail';
+import { openTaskDetailDrawer } from '../detail/TaskDetailDrawer';
 import { useState, useMemo } from 'react';
 import clsx from 'clsx';
 import SiteIcon from '@/components/SiteIcon';
@@ -10,21 +11,11 @@ import { TaskStatus } from '@true-north/enum';
 function TaskItem({ task }: { task: TaskVo }) {
   const { getTaskList } = useCalendarContext();
 
-  const { openEditDrawer } = useTaskDetail();
-
   return (
     <div
       onClick={(e) => {
         e.stopPropagation();
-        openEditDrawer({
-          contentProps: {
-            task: task,
-            onClose: null,
-            afterSubmit: async () => {
-              await getTaskList();
-            },
-          },
-        });
+        openTaskDetailDrawer({ taskId: task.id, onRefresh: getTaskList });
       }}
       className={clsx([
         `min-w-[200px] text-body-1 px-1.5 leading-[20px] rounded-[2px]`,
@@ -50,7 +41,7 @@ export default function CalendarCell({ cellDate }: { cellDate: Dayjs }) {
 
   const todayTaskList = useMemo(() => {
     return taskList.filter((task) =>
-      dayjs(cellDate).isBetween(task.startAt, task.endAt, 'day'),
+      dayjs(cellDate).isBetween(task.startAt, task.endAt, 'day', '[]'),
     );
   }, [cellDate, taskList]);
 

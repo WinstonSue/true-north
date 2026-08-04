@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, message, Tag, Dropdown, Menu, Button, Breadcrumb, Flex, CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, EllipsisOutlined, RightOutlined } from '@sue/design-web-react';
 
-import { GoalService } from '@true-north/web-service';
+import { GoalController, GoalService } from '@true-north/web-service';
 import { useGoalContext } from '../context';
 import { GoalStatus } from '@true-north/enum';
-import clsx from 'clsx';
+import styles from './style.module.less';
+import GoalAiDecomposition from '../GoalAiDecomposition';
 
 // 状态配置映射
 const STATUS_CONFIG = {
@@ -27,6 +28,7 @@ const STATUS_CONFIG = {
 };
 
 const GoalMainHeader: React.FC = () => {
+  const [aiOpen, setAiOpen] = useState(false);
   const {
     selectedGoal,
     fetchGoalDetail,
@@ -73,26 +75,37 @@ const GoalMainHeader: React.FC = () => {
     await refreshData();
   };
 
-  // 状态变更后的回调
-  const handleStatusChange = async () => {
-    await refreshData();
-  };
-
   // 标记完成
   const handleComplete = async () => {
     if (!selectedGoal) return;
 
+    Modal.confirm({
+      title: '确定标记目标为完成吗？',
+      content: '完成后可通过“恢复”重新激活目标。',
+      onOk: async () => {
+        try {
+          const done = await GoalService.markDone(selectedGoal.id);
+          if (!done) return;
+          message.success('目标已标记为完成');
+          await refreshData();
+        } catch (error) {
+          console.error('标记完成失败:', error);
+          message.error('标记完成失败');
+        }
+      },
+    });
+  };
+
+  const handleRestore = async () => {
+    if (!selectedGoal) return;
     try {
-      await GoalService.update(selectedGoal.id, {
-        status: GoalStatus.DONE,
-        doneAt: new Date().toISOString(),
-        abandonedAt: null,
-      });
-      message.success('目标已标记为完成');
+      const restored = await GoalService.restore(selectedGoal.id);
+      if (!restored) return;
+      message.success('目标已恢复');
       await refreshData();
     } catch (error) {
-      console.error('标记完成失败:', error);
-      message.error('标记完成失败');
+      console.error('恢复目标失败:', error);
+      message.error('恢复目标失败');
     }
   };
 
@@ -105,7 +118,8 @@ const GoalMainHeader: React.FC = () => {
       content: '放弃后可以重新激活，是否继续？',
       onOk: async () => {
         try {
-          await GoalService.abandon(selectedGoal.id);
+          const abandoned = await GoalService.abandon(selectedGoal.id);
+          if (!abandoned) return;
           message.success('目标已放弃');
           await refreshData();
         } catch (error) {
@@ -122,11 +136,12 @@ const GoalMainHeader: React.FC = () => {
 
     Modal.confirm({
       title: '确定删除吗？',
-      content: '删除后将无法恢复，如果目标下有子目标，将一并删除，是否继续？',
+      content: '删除前会检查子目标和关联行动；存在关联内容时不会删除。',
       onOk: async () => {
         try {
-          await GoalService.delete(selectedGoal.id);
+          await GoalController.delete(selectedGoal.id);
           message.success('删除成功');
+          setSelectedGoalId(null);
           await refreshData();
         } catch (error) {
           console.error('删除失败:', error);
@@ -142,10 +157,12 @@ const GoalMainHeader: React.FC = () => {
       <Menu.Item key="edit" onClick={() => setIsEditing(true)}>
         <EditOutlined /> 编辑
       </Menu.Item>
-      <Menu.Item key="abandon" onClick={handleAbandon}>
-        <CloseOutlined /> 放弃
-      </Menu.Item>
-      <Menu.Item key="delete" onClick={handleDelete} className="text-red-500">
+      {selectedGoal && (selectedGoal.status === GoalStatus.TODO || selectedGoal.status === GoalStatus.DOING) && (
+        <Menu.Item key="abandon" onClick={handleAbandon}>
+          <CloseOutlined /> 放弃
+        </Menu.Item>
+      )}
+      <Menu.Item key="delete" onClick={handleDelete} className={styles.dangerAction}>
         <DeleteOutlined /> 删除
       </Menu.Item>
     </Menu>
@@ -154,51 +171,52 @@ const GoalMainHeader: React.FC = () => {
   return (
     <Flex
       container="fixed"
-      className={clsx(
-        'w-full px-4 !h-14',
-        'border-b border-border-2',
-        'justify-between',
-      )}
+      className={styles.header}
+      justify="space-between"
+      align="center"
     >
       {/* 左侧：面包屑导航 */}
-      <Flex container="fill" className={clsx('flex items-center')}>
-        <Breadcrumb separator={<RightOutlined className="text-xs text-gray-400" />}>
-          {breadcrumbPath.map((item, index) => (
-            <Breadcrumb.Item
-              key={item.id}
-              className={clsx(
-                'cursor-pointer transition-colors',
-                index === breadcrumbPath.length - 1
-                  ? 'text-gray-900 font-medium'
-                  : 'text-gray-600 hover:text-blue-600',
-              )}
-              onClick={() => {
-                if (index < breadcrumbPath.length - 1) {
-                  setSelectedGoalId(item.id);
-                }
-              }}
-            >
-              {item.name}
-            </Breadcrumb.Item>
-          ))}
-        </Breadcrumb>
+      <Flex container="fill" className={styles.breadcrumb} align="center">
+        <Breadcrumb
+          separator={<RightOutlined />}
+          items={breadcrumbPath.map((item, index) => ({
+            key: item.id,
+            title: item.name,
+            onClick: () => {
+              if (index < breadcrumbPath.length - 1) {
+                setSelectedGoalId(item.id);
+              }
+            },
+          }))}
+        />
 
-        {selectedGoal && (
-          <Tag color={STATUS_CONFIG[selectedGoal.status]?.color}>
-            {STATUS_CONFIG[selectedGoal.status]?.label}
-          </Tag>
-        )}
       </Flex>
 
       {/* 右侧：状态 Tag + 操作区 */}
       <Flex
         container="fixed"
-        className={clsx('h-full', 'flex items-center gap-2')}
+        className={styles.actions}
       >
-        {/* 主要按钮：已完成 */}
-        {selectedGoal && selectedGoal.status !== GoalStatus.DONE && (
+        {selectedGoal && (
+          <Button onClick={() => setAiOpen(true)}>AI 拆解</Button>
+        )}
+        {selectedGoal && (
+          <Tag color={STATUS_CONFIG[selectedGoal.status]?.color}>
+            {STATUS_CONFIG[selectedGoal.status]?.label}
+          </Tag>
+        )}
+
+        <Dropdown
+          popupRender={() => renderActionMenu()}
+          placement="bottomRight"
+        >
+          <Button icon={<EllipsisOutlined />} />
+        </Dropdown>
+
+        {/* 主要状态操作 */}
+        {selectedGoal && (selectedGoal.status === GoalStatus.TODO || selectedGoal.status === GoalStatus.DOING) && (
           <Button
-            type="default"
+            type="primary"
             size="default"
             status="success"
             icon={<CheckOutlined />}
@@ -208,13 +226,13 @@ const GoalMainHeader: React.FC = () => {
           </Button>
         )}
 
-        <Dropdown
-          dropdownRender={() => renderActionMenu()}
-          placement="bottomRight"
-        >
-          <Button icon={<EllipsisOutlined />} />
-        </Dropdown>
+        {selectedGoal && (selectedGoal.status === GoalStatus.DONE || selectedGoal.status === GoalStatus.ABANDONED) && (
+          <Button type="primary" onClick={handleRestore}>
+            恢复
+          </Button>
+        )}
       </Flex>
+      <GoalAiDecomposition open={aiOpen} goal={selectedGoal} onClose={() => setAiOpen(false)} onSaved={refreshData} />
     </Flex>
   );
 };

@@ -6,7 +6,9 @@ import IconSelector from '../../components/IconSelector';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { TaskService } from '@true-north/web-service';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
-import clsx from 'clsx';
+import { TaskStatus } from '@true-north/enum';
+import { useFocusTimer } from '../../focus-timer';
+import styles from './style.module.less';
 
 export type TaskItemProps = {
   task: TaskWithoutRelationsVo;
@@ -16,41 +18,88 @@ export type TaskItemProps = {
 
 function TaskItem(props: TaskItemProps) {
   const { task } = props;
+  const { open: openFocusTimer } = useFocusTimer();
+  const isActive = task.status === TaskStatus.TODO || task.status === TaskStatus.DOING;
   return (
     <Card
-      bordered
       size="small"
-      className={clsx(
-        'w-full bg-bg-3',
-        '!border-border-1',
-        'cursor-pointer',
-        'hover:!bg-fill-1'
-      )}
+      className={styles.taskItem}
       key={task.id}
       onClick={() => props.onClickTask(task.id)}>
 
-      <div className={clsx(['flex items-center justify-between', 'leading-8'])}>
-        <span className="text-text-1">{task.name}</span>
+      <div className={styles.header}>
+        <span className={styles.title}>{task.name}</span>
 
-        <div className="h-8 flex items-center">
+        <div className={styles.action}>
           <Popover
             trigger="click"
             content={
-            <div className="w-40">
+            <div className={styles.menu}>
+                {task.status === TaskStatus.TODO && (
+                  <div
+                    className={styles.menuItem}
+                    onClick={async (event) => {
+                      event.stopPropagation();
+                      await TaskService.start(task.id);
+                      await props.refreshTaskList();
+                    }}
+                  >
+                    开始
+                  </div>
+                )}
+                {task.status === TaskStatus.DOING && (
+                  <div
+                    className={styles.menuItem}
+                    onClick={async (event) => {
+                      event.stopPropagation();
+                      await TaskService.pause(task.id);
+                      await props.refreshTaskList();
+                    }}
+                  >
+                    暂停
+                  </div>
+                )}
+                {isActive && (
+                  <div
+                    className={styles.menuItem}
+                    onClick={async (event) => {
+                      event.stopPropagation();
+                      await TaskService.markDone(task.id);
+                      await props.refreshTaskList();
+                    }}
+                  >
+                    标记完成
+                  </div>
+                )}
+                {isActive && (
+                  <div
+                    className={styles.menuItem}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openFocusTimer(task.id);
+                    }}
+                  >
+                    开始专注
+                  </div>
+                )}
+                {isActive && (
+                  <div
+                    className={styles.menuItem}
+                    onClick={async (event) => {
+                      event.stopPropagation();
+                      await TaskService.abandon(task.id);
+                      await props.refreshTaskList();
+                    }}
+                  >
+                    放弃
+                  </div>
+                )}
                 <div
-                className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
-                onClick={() => {
-                  TaskService.abandon(task.id);
-                  props.refreshTaskList();
-                }}>
-
-                  放弃
-                </div>
-                <div
-                className="cursor-pointer px-3 h-9 leading-9 hover:bg-fill-2"
-                onClick={() => {
-                  TaskService.delete(task.id);
-                  props.refreshTaskList();
+                className={styles.menuItem}
+                onClick={async (event) => {
+                  event.stopPropagation();
+                  await TaskService.delete(task.id);
+                  await props.refreshTaskList();
                 }}>
 
                   删除
@@ -62,27 +111,22 @@ function TaskItem(props: TaskItemProps) {
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              iconOnly
               type="text"
               size="small"
               icon={<SiteIcon id="more-for-task" />}
-              className="!flex justify-center items-center !text-text" />
+              className={styles.moreButton} />
 
           </Popover>
         </div>
       </div>
       {task.description &&
       <p
-        className="text-body-1 !mb-0.5"
-        style={{
-          textDecoration: task.status === 'done' ? 'line-through' : 'none',
-          color: 'var(--color-text-3)'
-        }}>
+        className={styles.description}>
 
           {task.description}
         </p>
       }
-      <div className={clsx(['flex items-center gap-2', 'text-body-2'])}>
+      <div className={styles.meta}>
         {task.importance &&
         <IconSelector
           map={IMPORTANCE_MAP}
@@ -101,7 +145,7 @@ function TaskItem(props: TaskItemProps) {
 
         }
         {task.tags?.length > 0 &&
-        <div className="flex flex-wrap gap-1">
+        <div className={styles.tags}>
             {task.tags.map((tag, index) =>
           <Tag key={index} color="blue">
                 {tag}

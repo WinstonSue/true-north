@@ -1,13 +1,14 @@
 import { createInjectState } from '@/utils/createInjectState';
-import React, { useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { useState, useEffect, useCallback, ReactNode, Dispatch, SetStateAction } from 'react';
 import { Card, Button, Space, Empty, Spin, message, Modal, Tag, Progress, Table } from '@sue/design-web-react';
-import { HabitController, GoalController } from '@true-north/web-service';
+import { HabitController, GoalController, TodoController } from '@true-north/web-service';
 import {
   HabitWithoutRelationsVo,
   HabitPageFilterVo,
   GoalVo,
 } from '@true-north/vo';
 import { useHabitContext } from '../context';
+import { HabitStatus, TodoRelatedType } from '@true-north/enum';
 
 export const [HabitListProvider, useHabitListContext] = createInjectState<{
   PropsType: {
@@ -23,6 +24,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
       total: number;
     };
     filters: HabitPageFilterVo;
+    setFilters: Dispatch<SetStateAction<HabitPageFilterVo>>;
     handlePageChange: (page: number, pageSize: number) => void;
     handleHabitComplete: (habitId: string) => void;
     handleHabitDelete: (habitId: string) => void;
@@ -45,8 +47,6 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
   const [filters, setFilters] = useState<HabitPageFilterVo>({
     pageNum: 1,
     pageSize: 12,
-    sortBy: 'createdAt',
-    sortOrder: 'DESC',
   });
 
   // 获取习惯列表
@@ -103,8 +103,10 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
   const handleHabitComplete = useCallback(
     async (habitId: string) => {
       try {
-        await HabitController.update(habitId, { status: HabitStatus.DONE });
-        message.success('习惯已完成');
+        const habit = habits.find((item) => item.id === habitId);
+        if (!habit?.cycleTodoId) throw new Error('当前没有可结算的习惯待办');
+        await TodoController.done(TodoRelatedType.HABIT, habit.cycleTodoId);
+        message.success('习惯本次打卡已完成');
         fetchHabits();
         refreshHabits();
       } catch (error) {
@@ -112,7 +114,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
         message.error('完成习惯失败');
       }
     },
-    [fetchHabits, refreshHabits],
+    [fetchHabits, habits, refreshHabits],
   );
 
   // 处理习惯删除
@@ -149,6 +151,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
     loading,
     pagination,
     filters,
+    setFilters,
     handlePageChange,
     handleHabitComplete,
     handleHabitDelete,

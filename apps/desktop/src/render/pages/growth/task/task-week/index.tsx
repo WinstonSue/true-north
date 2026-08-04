@@ -1,14 +1,14 @@
 import TaskList from '../../components/TaskList';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Collapse, Divider, Button } from '@sue/design-web-react';
+import { Collapse, Button, Flex } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TaskService } from '@true-north/web-service';
-import { flushSync } from 'react-dom';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
 import SiteIcon from '@/components/SiteIcon';
-import { useTaskDetail, TaskEditor } from '../../components';
+import { useTaskDetail } from '../../components';
 import { TaskStatus } from '@true-north/enum';
+import { openTaskDetailDrawer } from '../detail/TaskDetailDrawer';
 
 export default function TaskWeek() {
   const [weekTaskList, setWeekTaskList] = useState<TaskWithoutRelationsVo[]>(
@@ -30,59 +30,51 @@ export default function TaskWeek() {
     const weekStart = today.startOf('week').format('YYYY-MM-DD');
     const weekEnd = today.endOf('week').format('YYYY-MM-DD');
 
-    const { list: todos } = await TaskService.findByFilter({
-      status: TaskStatus.TODO,
-      endDateStart: weekStart,
-      endDateEnd: weekEnd,
-    });
-    setWeekTaskList(todos);
+    const activeStatuses = [TaskStatus.TODO, TaskStatus.DOING];
+    const mergeActive = (responses: Array<{ list?: TaskWithoutRelationsVo[] } | undefined>) =>
+      [...new Map(responses.flatMap((response) => response?.list || []).map((task) => [task.id, task])).values()]
+        .sort((a, b) => (a.startAt || '').localeCompare(b.startAt || '') || (a.endAt || '').localeCompare(b.endAt || ''));
+    const [weekTodo, weekDoing, doneResponse, expiredTodo, expiredDoing, abandonedResponse] = await Promise.all([
+      ...activeStatuses.map((status) => TaskService.findByFilter({
+        status,
+        startDateEnd: weekEnd,
+        endDateStart: weekStart,
+      })),
+      TaskService.findByFilter({
+        status: TaskStatus.DONE,
+        doneDateStart: weekStart,
+        doneDateEnd: weekEnd,
+      }),
+      ...activeStatuses.map((status) => TaskService.findByFilter({ status, endDateEnd: yesterday })),
+      TaskService.findByFilter({
+        status: TaskStatus.ABANDONED,
+        abandonedDateStart: weekStart,
+        abandonedDateEnd: weekEnd,
+      }),
+    ]);
+    setWeekTaskList(mergeActive([weekTodo, weekDoing]));
 
-    const { list: doneTasks } = await TaskService.findByFilter({
-      status: TaskStatus.DONE,
-      doneDateStart: weekStart,
-      doneDateEnd: weekEnd,
-    });
-    setWeekDoneTaskList(doneTasks);
+    setWeekDoneTaskList(doneResponse?.list || []);
 
-    const { list: expiredTasks } = await TaskService.findByFilter({
-      status: TaskStatus.TODO,
-      endDateEnd: yesterday,
-    });
-    setExpiredTaskList(expiredTasks);
+    setExpiredTaskList(mergeActive([expiredTodo, expiredDoing]));
 
-    const { list: abandonedTasks } = await TaskService.findByFilter({
-      status: TaskStatus.ABANDONED,
-      abandonedDateStart: weekStart,
-      abandonedDateEnd: weekEnd,
-    });
-    setWeekAbandonedTaskList(abandonedTasks);
+    setWeekAbandonedTaskList(abandonedResponse?.list || []);
 
-    if (currentTask) {
-      showTaskDetail(currentTask.id);
-    }
   }
 
   useEffect(() => {
     refreshData();
   }, []);
 
-  const [currentTask, setCurrentTask] = useState<TaskWithoutRelationsVo | null>(
-    null,
-  );
-
-  async function showTaskDetail(id: string) {
-    flushSync(() => {
-      setCurrentTask(null);
-    });
-    const todo = await TaskService.find(id);
-    setCurrentTask(todo);
+  function showTaskDetail(id: string) {
+    openTaskDetailDrawer({ taskId: id, onRefresh: refreshData });
   }
 
   const { CreatePopover: CreateTaskPopover } = useTaskDetail();
 
   return (
-    <div className="px-5 w-full h-full flex">
-      <div className="w-full py-2">
+    <Flex vertical container="full" className={styles.page}>
+      <Flex container="fixed" className={styles.toolbar} align="center">
         <CreateTaskPopover
           creatorProps={{
             afterSubmit: async () => {
@@ -90,16 +82,18 @@ export default function TaskWeek() {
             },
           }}
         >
-          <Button className="!px-2" type="text" size="small">
-            <div className="flex items-center gap-1">
+          <Button type="text" size="small">
+            <span className={styles.createLabel}>
               <SiteIcon id="add" />
               添加任务
-            </div>
+            </span>
           </Button>
         </CreateTaskPopover>
+      </Flex>
+      <Flex container="fill" className={styles.content}>
         <Collapse
           defaultActiveKey={['expired', 'week']}
-          className={`${styles['custom-collapse']} mt-2`}
+          className={styles.collapse}
 
         >
           {expiredTaskList.length > 0 && (
@@ -155,24 +149,7 @@ export default function TaskWeek() {
             </Collapse.Panel>
           )}
         </Collapse>
-      </div>
-      {currentTask && (
-        <>
-          <Divider vertical className="!h-full" />
-          <div className="w-full py-2">
-            <TaskEditor
-              size="small"
-              task={currentTask}
-              onClose={async () => {
-                showTaskDetail(null);
-              }}
-              afterSubmit={async () => {
-                await refreshData();
-              }}
-            />
-          </div>
-        </>
-      )}
-    </div>
+      </Flex>
+    </Flex>
   );
 }

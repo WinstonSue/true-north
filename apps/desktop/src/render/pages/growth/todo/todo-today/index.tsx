@@ -19,32 +19,24 @@ export default function TodoToday() {
   >([]);
 
   async function refreshData() {
-    const { list: todos } = await TodoService.list({
-      status: TodoStatus.TODO,
-      planDateStart: today,
-      planDateEnd: today,
-    });
-    setTodayTodoList(todos);
+    const mergeActive = (responses: Array<{ list?: TodoVo[] } | undefined>) =>
+      [...new Map(responses.flatMap((response) => response?.list || []).map((todo) => [todo.id, todo])).values()]
+        .sort((a, b) => (a.planStartTime || '').localeCompare(b.planStartTime || ''));
+    const [todayTodo, todayInProgress, doneResponse, expiredTodo, expiredInProgress, abandonedResponse] = await Promise.all([
+      TodoService.list({ status: TodoStatus.TODO, planDateStart: today, planDateEnd: today }),
+      TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateStart: today, planDateEnd: today }),
+      TodoService.list({ status: TodoStatus.DONE, doneDateStart: today, doneDateEnd: today }),
+      TodoService.list({ status: TodoStatus.TODO, planDateEnd: yesterday }),
+      TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateEnd: yesterday }),
+      TodoService.list({ status: TodoStatus.ABANDONED, abandonedDateStart: today, abandonedDateEnd: today }),
+    ]);
+    setTodayTodoList(mergeActive([todayTodo, todayInProgress]));
 
-    const { list: doneTodos } = await TodoService.list({
-      status: TodoStatus.DONE,
-      doneDateStart: today,
-      doneDateEnd: today,
-    });
-    setTodayDoneTodoList(doneTodos);
+    setTodayDoneTodoList(doneResponse?.list || []);
 
-    const { list: expiredTodos } = await TodoService.list({
-      status: TodoStatus.TODO,
-      planDateEnd: yesterday,
-    });
-    setExpiredTodoList(expiredTodos);
+    setExpiredTodoList(mergeActive([expiredTodo, expiredInProgress]));
 
-    const { list: abandonedTodos } = await TodoService.list({
-      status: TodoStatus.ABANDONED,
-      abandonedDateStart: today,
-      abandonedDateEnd: today,
-    });
-    setTodayAbandonedTodoList(abandonedTodos);
+    setTodayAbandonedTodoList(abandonedResponse?.list || []);
 
     if (currentTodo) {
       showTodoDetail(currentTodo);
@@ -65,19 +57,19 @@ export default function TodoToday() {
   }
 
   return (
-    <Flex container="fill" className="flex">
-      <Flex vertical container="fill" className="py-2">
-        <Flex container="fixed" className="w-full">
+    <Flex container="full" className={styles.page}>
+      <Flex vertical container="fill" className={styles.listPane}>
+        <Flex container="fixed" className={styles.toolbar}>
           <TodoCreatorMini
             afterSubmit={async () => {
               refreshData();
             }}
           />
         </Flex>
-        <Flex container="fill" className="overflow-y-auto">
+        <Flex container="fill" className={styles.content}>
           <Collapse
             defaultActiveKey={['expired', 'today']}
-            className={clsx(styles['custom-collapse'])}
+            className={styles.collapse}
 
           >
             {expiredTodoList.length > 0 && (
@@ -137,8 +129,8 @@ export default function TodoToday() {
       </Flex>
       {currentTodo && (
         <>
-          <Divider vertical className="!h-full" />
-          <Flex container="fill" className="w-1/2 py-2">
+          <Divider vertical className={styles.divider} />
+          <Flex container="fill" className={styles.detailPane}>
             <TodoEditor
               todo={currentTodo}
               onClose={async () => {

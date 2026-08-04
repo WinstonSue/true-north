@@ -1,0 +1,15 @@
+.miniTimer { position: fixed; z-index: 1200; right: 24px; bottom: 24px; width: 320px; box-shadow: 0 12px 32px rgb(0 0 0 / 18%); }
+.taskSelector { width: 100%; }
+.miniBody { min-width: 0; }
+.miniTime { color: var(--primary-6); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 28px; line-height: 1; }
+.taskName { color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.finishButton { align-self: flex-end; padding: 0; }
+.fullscreen { position: fixed; z-index: 1200; inset: 0; background: var(--color-bg-1); }
+.fullscreenContent { height: 100%; margin: 0 auto; max-width: 720px; padding: 40px 24px; }
+.fullscreenHeader { width: 100%; }
+.fullscreenHeader h1 { margin: 0; color: var(--text-1); }
+.fullscreenHeader p { margin: 8px 0 0; color: var(--text-3); }
+.fullTimer { color: var(--text-1); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 88px; line-height: 1; }
+.sessionPanel { width: min(100%, 520px); }
+.emptySessions { color: var(--text-3); }
+@media (max-width: 640px) { .miniTimer { right: 12px; bottom: 12px; width: calc(100vw - 24px); } .fullTimer { font-size: 64px; } }

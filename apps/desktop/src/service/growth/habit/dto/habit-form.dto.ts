@@ -31,7 +31,9 @@ export class CreateHabitDto extends PickType(HabitDto, [
     this.tags = vo.tags || [];
     this.difficulty = vo.difficulty as any;
     this.repeatStartDate = dayjs(vo.repeatStartDate).format('YYYY-MM-DD');
-    this.repeatEndDate = dayjs(vo.repeatEndDate).format('YYYY-MM-DD');
+    if (vo.repeatEndDate !== undefined) {
+      this.repeatEndDate = dayjs(vo.repeatEndDate).format('YYYY-MM-DD');
+    }
     this.repeatTimes = vo.repeatTimes;
     this.repeatMode = vo.repeatMode;
     this.repeatConfig = vo.repeatConfig;
@@ -87,6 +89,7 @@ export class UpdateHabitDto extends IntersectionType(
     if (vo.repeatMode !== undefined) this.repeatMode = vo.repeatMode;
     if (vo.repeatConfig !== undefined) this.repeatConfig = vo.repeatConfig;
     if (vo.repeatEndMode !== undefined) this.repeatEndMode = vo.repeatEndMode;
+    if (vo.goalIds !== undefined) this.goalIds = vo.goalIds;
   }
 
   exportUpdateEntity() {

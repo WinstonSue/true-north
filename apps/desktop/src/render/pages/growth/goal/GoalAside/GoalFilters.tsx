@@ -6,6 +6,7 @@ import { GoalStatus, GoalType } from '@true-north/enum';
 import { useGoalContext } from '../context';
 import clsx from 'clsx';
 import { debounce } from 'lodash-es';
+import dayjs from 'dayjs';
 
 const DatePickerRange = DatePicker.RangePicker;
 
@@ -37,8 +38,8 @@ const GoalFilters: React.FC = () => {
   // 获取类型标签文本
   const getTypeLabel = (type: GoalType) => {
     const typeMap = {
-      [GoalType.OBJECTIVE]: '战略规划',
-      [GoalType.KEY_RESULT]: '成果指标',
+      [GoalType.VISION]: '愿景',
+      [GoalType.RESULT]: '成果',
     };
     return typeMap[type] || type;
   };
@@ -114,7 +115,8 @@ const GoalFilters: React.FC = () => {
           placeholder="搜索目标..."
           prefix={<SearchOutlined />}
           value={localSearchValue}
-          onChange={(value) => {
+          onChange={(event) => {
+            const value = event.target.value;
             setLocalSearchValue(value);
             debouncedSetSearchValue(value);
           }}
@@ -176,9 +178,9 @@ const GoalFilters: React.FC = () => {
                 setFilters({ ...filters, type: value });
               }}
             >
-              <Select.Option value={GoalType.OBJECTIVE}>战略规划</Select.Option>
-              <Select.Option value={GoalType.KEY_RESULT}>
-                成果指标
+              <Select.Option value={GoalType.VISION}>愿景</Select.Option>
+              <Select.Option value={GoalType.RESULT}>
+                成果
               </Select.Option>
             </Select>
           </Col>
@@ -225,9 +227,14 @@ const GoalFilters: React.FC = () => {
               placeholder={['开始日期', '结束日期']}
               className="w-full"
               size="small"
-              value={filters.dateRange}
+              value={filters.dateRange?.map((date) => dayjs(date)) as any}
               onChange={(value) => {
-                setFilters({ ...filters, dateRange: value });
+                setFilters({
+                  ...filters,
+                  dateRange: value?.[0] && value?.[1]
+                    ? [value[0].format('YYYY-MM-DD'), value[1].format('YYYY-MM-DD')]
+                    : undefined,
+                });
               }}
             />
           </Col>

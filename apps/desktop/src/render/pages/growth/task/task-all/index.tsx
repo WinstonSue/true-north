@@ -7,18 +7,19 @@ import TaskTable from './TaskTable';
 import { useTaskAllContext } from './context';
 import { CreateButton } from '@/components/Button/CreateButton';
 import { useTaskDetail } from '../../components';
+import styles from './style.module.less';
 
 function TaskAll() {
   const { getTaskPage } = useTaskAllContext();
   const { openCreateDrawer: openCreateTaskDrawer } = useTaskDetail();
 
   return (
-    <Flex vertical container="full">
-      <Flex container="fixed" className="w-full px-5 flex border-b">
+    <Flex vertical container="full" className={styles.page}>
+      <Flex container="fixed" className={styles.filters}>
         <TaskFilters />
       </Flex>
 
-      <Flex container="fixed" className="w-full px-5 flex my-3">
+      <Flex container="fixed" className={styles.actions}>
         <CreateButton
           onClick={() => {
             openCreateTaskDrawer({
@@ -34,7 +35,7 @@ function TaskAll() {
         </CreateButton>
       </Flex>
 
-      <Flex container="fill" className="px-5 w-full h-full flex">
+      <Flex container="fill" className={styles.table}>
         <TaskTable />
       </Flex>
     </Flex>

@@ -50,14 +50,17 @@ export const [TaskAllProvider, useTaskAllContext] = createInjectState<{
     keyword: '',
     importance: undefined,
     urgency: undefined,
-    status: TaskStatus.TODO,
-    startAt: undefined,
-    endAt: undefined,
+    status: undefined,
+    startDateStart: undefined,
+    startDateEnd: undefined,
+    endDateStart: undefined,
+    endDateEnd: undefined,
     doneDateStart: undefined,
     doneDateEnd: undefined,
     abandonedDateStart: undefined,
     abandonedDateEnd: undefined,
-    tags: [],
+    pageNum: 1,
+    pageSize: 10,
   });
 
   async function getTaskPage() {
@@ -71,13 +74,16 @@ export const [TaskAllProvider, useTaskAllContext] = createInjectState<{
       importance: undefined,
       urgency: undefined,
       status: undefined,
-      startAt: undefined,
-      endAt: undefined,
+      startDateStart: undefined,
+      startDateEnd: undefined,
+      endDateStart: undefined,
+      endDateEnd: undefined,
       doneDateStart: undefined,
       doneDateEnd: undefined,
       abandonedDateStart: undefined,
       abandonedDateEnd: undefined,
-      tags: [],
+      pageNum: 1,
+      pageSize: 10,
     });
     await getTaskPage();
   };

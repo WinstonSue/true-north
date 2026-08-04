@@ -27,7 +27,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
     this.tags = vo.tags || [];
     this.importance = vo.importance;
     this.urgency = vo.urgency;
-    this.planDate = dayjs(vo.planDate).toDate();
+    if (vo.planDate !== undefined) this.planDate = dayjs(vo.planDate).toDate();
     this.planStartTime = vo.planStartTime;
     this.planEndTime = vo.planEndTime;
     this.taskId = vo.taskId;
@@ -51,7 +51,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
     todo.taskId = this.taskId;
     todo.repeatId = this.repeatId;
     todo.habitId = this.habitId;
-    todo.relatedType = this.relatedType ?? TodoRelatedType.MANUAL;
+    todo.relatedType = this.relatedType ?? TodoRelatedType.NONE;
 
     return todo;
   }
@@ -72,6 +72,7 @@ export class UpdateTodoDto extends IntersectionType(
     this.taskId = vo.taskId;
     this.planStartTime = vo.planStartTime;
     this.planEndTime = vo.planEndTime;
+    this.status = vo.status;
   }
 
   importUpdateEntity(todo: Todo) {

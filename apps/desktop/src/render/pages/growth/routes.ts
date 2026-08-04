@@ -1,5 +1,11 @@
 import { IRoute } from '@/router/routes';
 
+export const workbenchRoutes: IRoute = {
+  name: 'menu.workbench',
+  key: '/growth/workbench',
+  breadcrumb: true,
+};
+
 export const todoRoutes: IRoute = {
   name: 'menu.todo',
   key: '/growth/todo',
@@ -43,8 +49,14 @@ export const taskRoutes: IRoute = {
   name: 'menu.task',
   key: '/growth/task',
   breadcrumb: false,
-  redirect: '/growth/task/task-week',
+  redirect: '/growth/task/task-today',
   children: [
+    {
+      name: 'menu.task.today',
+      key: 'task-today',
+      breadcrumb: true,
+      ignore: true,
+    },
     {
       name: 'menu.task.week',
       key: 'task-week',
@@ -63,14 +75,13 @@ export const taskRoutes: IRoute = {
       breadcrumb: true,
       ignore: true,
     },
+    {
+      name: 'menu.task.statistics',
+      key: 'task-statistics',
+      breadcrumb: true,
+      ignore: true,
+    },
   ],
-};
-
-export const taskDetailRoutes: IRoute = {
-  name: 'menu.task.detail',
-  key: '/growth/task/detail/:id',
-  breadcrumb: false,
-  ignore: true,
 };
 
 export const goalRoutes: IRoute = {
@@ -100,12 +111,6 @@ export const goalRoutes: IRoute = {
   // ],
 };
 
-export const timerRoutes: IRoute = {
-  name: 'menu.timer',
-  key: '/timer',
-  breadcrumb: true,
-};
-
 export const habitRoutes: IRoute = {
   name: 'menu.habit',
   key: '/growth/habit',
@@ -118,6 +123,18 @@ export const habitRoutes: IRoute = {
       breadcrumb: true,
       ignore: true,
     },
+    {
+      name: 'menu.habit.detail',
+      key: 'habit-detail/:id',
+      breadcrumb: true,
+      ignore: true,
+    },
+    {
+      name: 'menu.habit.statistics',
+      key: 'habit-statistics',
+      breadcrumb: true,
+      ignore: true,
+    },
   ],
 };
 
@@ -126,11 +143,10 @@ export const growthRoutes: IRoute = {
   key: '/growth',
   breadcrumb: false,
   children: [
+    workbenchRoutes,
     todoRoutes,
     goalRoutes,
     taskRoutes,
-    taskDetailRoutes,
     habitRoutes,
-    timerRoutes,
   ],
 };

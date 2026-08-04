@@ -1,35 +1,35 @@
-import React, { useState } from 'react';
-import clsx from 'clsx';
+import React from 'react';
 import { Button, Divider, Flex, PlusOutlined } from '@sue/design-web-react';
 
 import GoalFilters from './GoalFilters';
 import GoalTree from './GoalTree';
 import { useGoalContext } from '../context';
 import { useGoalDetail } from '../../components/GoalDetail';
+import styles from './style.module.less';
 
 export default function GoalAside() {
   const { refreshData } = useGoalContext();
   const { openCreateDrawer } = useGoalDetail();
 
   return (
-    <Flex vertical container="full" className={clsx('py-3', 'gap-3')}>
+    <Flex vertical container="full" className={styles.aside}>
       {/* 头部工具栏 */}
       <Flex
         container="fixed"
-        className={clsx('w-full', 'px-4', 'flex flex-col gap-3')}
+        className={styles.toolbar}
       >
         <GoalFilters />
       </Flex>
 
-      <Divider className={'!m-0'} />
+      <Divider className={styles.divider} />
 
-      <Flex container="fill" className={clsx('px-4', 'overflow-y-auto')}>
+      <Flex container="fill" className={styles.treeArea}>
         <GoalTree />
       </Flex>
 
-      <Flex container="fixed" className={clsx('w-full', 'px-4')}>
+      <Flex container="fixed" className={styles.footer}>
         <Button
-          className={'w-full'}
+          className={styles.createButton}
           type="primary"
           icon={<PlusOutlined />}
           onClick={() =>

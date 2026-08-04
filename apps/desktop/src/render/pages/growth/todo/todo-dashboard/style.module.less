@@ -1,0 +1,24 @@
+.loading { display: flex; min-height: 320px; align-items: center; justify-content: center; }
+
+.dashboard {
+  min-width: 0;
+  padding: 4px 0 16px;
+  color: var(--sue-color-text);
+
+  :global(.bg-bg-2), :global(.bg-bg-1) {
+    border-color: var(--sue-color-border-secondary) !important;
+    border-radius: var(--sue-border-radius) !important;
+    background: var(--sue-color-bg-container) !important;
+    box-shadow: none !important;
+  }
+
+  :global(.bg-fill-1), :global(.bg-gray-50) { background: var(--sue-color-fill-quaternary) !important; }
+  :global(.border-border-1) { border-color: var(--sue-color-border-secondary) !important; }
+  :global(.text-text-1) { color: var(--sue-color-text) !important; }
+  :global(.text-text-2) { color: var(--sue-color-text-secondary) !important; }
+  :global(.text-text-3), :global(.text-gray-500) { color: var(--sue-color-text-tertiary) !important; }
+  :global(.text-primary), :global(.text-blue-600) { color: var(--sue-color-primary) !important; }
+  :global(.text-success), :global(.text-green-600) { color: var(--sue-color-success) !important; }
+  :global(.text-danger), :global(.text-red-600) { color: var(--sue-color-error) !important; }
+  :global(.text-warning), :global(.text-orange-600) { color: var(--sue-color-warning) !important; }
+}
