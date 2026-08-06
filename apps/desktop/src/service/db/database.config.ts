@@ -44,6 +44,7 @@ export const initializeDatabase = async (): Promise<void> => {
       await repairGrowthV010BeforeSynchronize();
       await AppDataSource.initialize();
       await migrateGrowthV010();
+      await migrateGrowthV011();
       console.log('数据库连接已建立', databasePath);
     }
   } catch (error) {
@@ -117,6 +118,13 @@ async function repairGrowthV010BeforeSynchronize(): Promise<void> {
 async function migrateGrowthV010(): Promise<void> {
   await AppDataSource.query(
     "UPDATE task SET estimate_time = NULL WHERE estimate_time IS NOT NULL AND CAST(estimate_time AS TEXT) GLOB '*[^0-9]*'"
+  );
+}
+
+/** Repair titles written by the pre-migration native-event callback bug. */
+async function migrateGrowthV011(): Promise<void> {
+  await AppDataSource.query(
+    "UPDATE todo SET name = '待补充待办' WHERE name = '[object Object]'"
   );
 }
 

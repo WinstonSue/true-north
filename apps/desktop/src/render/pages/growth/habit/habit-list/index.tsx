@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import DefaultPage from '@/components/Layout/DefaultPage';
 import HabitListFilter from './HabitListFilter';
 import { HabitListProvider, useHabitListContext } from './context';
@@ -10,7 +9,6 @@ import { CreateHabit } from '../components/CreateHabit';
 import styles from './style.module.less';
 
 export const HabitListPage: React.FC = () => {
-  const navigate = useNavigate();
   const { goals, handleRefresh } = useHabitListContext();
   const openCreateHabitModal = () => {
     const instance = Drawer.open({
@@ -38,9 +36,6 @@ export const HabitListPage: React.FC = () => {
           <HabitListFilter />
         </Flex>
         <Flex container="fixed" className={styles.actions} gap={8}>
-          <Button onClick={() => navigate('/growth/habit/habit-statistics')}>
-            统计
-          </Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}

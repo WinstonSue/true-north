@@ -11,6 +11,7 @@ export default function TabsPage(props: {
     path: string;
   }[];
   children: React.ReactNode;
+  extra?: React.ReactNode;
 }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,22 +26,25 @@ export default function TabsPage(props: {
         container="fixed"
         className={styles.tabBar}
       >
-        {props.tabs.map((tab) => (
-          <div
-            key={tab.path}
-            className={clsx(
-              styles.tab,
-              {
-                [styles.tabActive]: location.pathname === tab.path,
-              },
-            )}
-            onClick={() => {
-              navigate(tab.path);
-            }}
-          >
-            {tab.name}
-          </div>
-        ))}
+        <div className={styles.tabs}>
+          {props.tabs.map((tab) => (
+            <div
+              key={tab.path}
+              className={clsx(
+                styles.tab,
+                {
+                  [styles.tabActive]: location.pathname === tab.path,
+                },
+              )}
+              onClick={() => {
+                navigate(tab.path);
+              }}
+            >
+              {tab.name}
+            </div>
+          ))}
+        </div>
+        {props.extra && <div className={styles.extra}>{props.extra}</div>}
       </Flex>
 
       <Flex

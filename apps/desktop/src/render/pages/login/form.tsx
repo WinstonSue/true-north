@@ -93,7 +93,7 @@ export default function LoginForm() {
         </Form.Item>
         <Space size={16} direction="vertical">
           <div className={styles['login-form-password-actions']}>
-            <Checkbox checked={rememberPassword} onChange={setRememberPassword}>
+            <Checkbox checked={rememberPassword} onChange={(event) => setRememberPassword(event.target.checked)}>
               {t['login.form.rememberPassword']}
             </Checkbox>
             <a style={{ color: "var(--color-primary-6)" }}>{t['login.form.forgetPassword']}</a>

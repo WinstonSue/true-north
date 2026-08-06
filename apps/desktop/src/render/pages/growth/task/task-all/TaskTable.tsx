@@ -1,28 +1,23 @@
-import { Table, Button, Modal, Card } from '@sue/design-web-react';
+import { Table, Button, Modal, Card, Flex } from '@sue/design-web-react';
 import dayjs from 'dayjs';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { useTaskAllContext } from './context';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TaskService } from '@true-north/web-service';
 import { TaskVo } from '@true-north/vo';
+import { emitTaskChanged } from '../../events';
 import { TaskStatus } from '@true-north/enum';
 import { openTaskDetailDrawer } from '../detail/TaskDetailDrawer';
 
 export default function TaskTable() {
-  const { taskList, getTaskPage } = useTaskAllContext();
-
-  useEffect(() => {
-    async function initData() {
-      await getTaskPage();
-      taskList.forEach((item) => {
-        setSubTaskLoadingStatus((prev) => ({
-          ...prev,
-          [item.id]: 'unLoading',
-        }));
-      });
-    }
-    initData();
-  }, []);
+  const {
+    taskList,
+    total,
+    loading,
+    filters,
+    getTaskPage,
+    setPage,
+  } = useTaskAllContext();
 
   const columns = [
     { title: '任务', dataIndex: 'name', key: 'name' },
@@ -61,11 +56,11 @@ export default function TaskTable() {
         const end = record.endAt ? dayjs(record.endAt) : undefined;
         if (!start?.isValid() && !end?.isValid()) return '--';
         if (start?.isValid() && end?.isValid()) {
-          const startText = start.format('YYYY-MM-DD');
-          const endText = end.format('YYYY-MM-DD');
+          const startText = start.format('YYYY-MM-DD HH:mm');
+          const endText = end.format('YYYY-MM-DD HH:mm');
           return <div>{startText === endText ? startText : `${startText} - ${endText}`}</div>;
         }
-        return <div>{(start || end)!.format('YYYY-MM-DD')}</div>;
+        return <div>{(start || end)!.format('YYYY-MM-DD HH:mm')}</div>;
       },
     },
     {
@@ -109,6 +104,7 @@ export default function TaskTable() {
                 content: '删除后将无法恢复',
                 onOk: async () => {
                   await TaskService.delete(record.id);
+                  emitTaskChanged();
                   await getTaskPage();
                 },
               })
@@ -138,33 +134,67 @@ export default function TaskTable() {
     setSubTaskLoadingStatus((prev) => ({ ...prev, [record.id]: 'loaded' }));
   };
 
+  const canPrevious = filters.pageNum > 1;
+  const canNext = filters.pageNum * filters.pageSize < total;
+
+  const changePage = (pageNum: number) => {
+    setPage(pageNum);
+    void getTaskPage();
+  };
+
   return (
-    <Table
-      className="w-full"
-      columns={columns}
-      data={taskList}
-      pagination={false}
-      rowKey="id"
-      onExpand={onExpandTable}
-      expandedRowRender={(record) => {
-        if (subTaskLoadingStatus[record.id] === 'unLoading') return true;
-        if (subTaskLoadingStatus[record.id] === 'loading') {
-          return (
-            <Card
-              loading={subTaskLoadingStatus[record.id] === 'loading'}
-            ></Card>
-          );
-        }
-        if (subTaskLoadingStatus[record.id] === 'loaded') {
-          return expandedData[record.id]?.children?.length ? (
-            <Card>
-              {expandedData[record.id]?.children
-                .map((item) => item.name)
-                .join(',')}
-            </Card>
-          ) : null;
-        }
-      }}
-    />
+    <Flex vertical container="full" className="gap-3">
+      <Table
+        className="w-full"
+        columns={columns}
+        data={taskList}
+        loading={loading}
+        pagination={false}
+        rowKey="id"
+        onExpand={onExpandTable}
+        expandedRowRender={(record) => {
+          if (subTaskLoadingStatus[record.id] === 'unLoading') return true;
+          if (subTaskLoadingStatus[record.id] === 'loading') {
+            return (
+              <Card
+                loading={subTaskLoadingStatus[record.id] === 'loading'}
+              ></Card>
+            );
+          }
+          if (subTaskLoadingStatus[record.id] === 'loaded') {
+            return expandedData[record.id]?.children?.length ? (
+              <Card>
+                {expandedData[record.id]?.children
+                  .map((item) => item.name)
+                  .join(',')}
+              </Card>
+            ) : null;
+          }
+        }}
+      />
+      {total > 0 && (
+        <Flex container="fixed" justify="space-between" align="center">
+          <span className="text-body-2 text-text-2">
+            第 {filters.pageNum} 页，共 {total} 个任务
+          </span>
+          <Flex gap={8}>
+            <Button
+              size="small"
+              disabled={!canPrevious || loading}
+              onClick={() => changePage(filters.pageNum - 1)}
+            >
+              上一页
+            </Button>
+            <Button
+              size="small"
+              disabled={!canNext || loading}
+              onClick={() => changePage(filters.pageNum + 1)}
+            >
+              下一页
+            </Button>
+          </Flex>
+        </Flex>
+      )}
+    </Flex>
   );
 }

@@ -1,14 +1,13 @@
 import TaskList from '../../components/TaskList';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Collapse, Button, Flex } from '@sue/design-web-react';
+import { Collapse, Flex } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TaskService } from '@true-north/web-service';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
-import SiteIcon from '@/components/SiteIcon';
-import { useTaskDetail } from '../../components';
 import { TaskStatus } from '@true-north/enum';
 import { openTaskDetailDrawer } from '../detail/TaskDetailDrawer';
+import { onTaskChanged } from '../../events';
 
 export default function TaskWeek() {
   const [weekTaskList, setWeekTaskList] = useState<TaskWithoutRelationsVo[]>(
@@ -63,33 +62,16 @@ export default function TaskWeek() {
   }
 
   useEffect(() => {
-    refreshData();
+    void refreshData();
+    return onTaskChanged(() => { void refreshData(); });
   }, []);
 
   function showTaskDetail(id: string) {
     openTaskDetailDrawer({ taskId: id, onRefresh: refreshData });
   }
 
-  const { CreatePopover: CreateTaskPopover } = useTaskDetail();
-
   return (
     <Flex vertical container="full" className={styles.page}>
-      <Flex container="fixed" className={styles.toolbar} align="center">
-        <CreateTaskPopover
-          creatorProps={{
-            afterSubmit: async () => {
-              await refreshData();
-            },
-          }}
-        >
-          <Button type="text" size="small">
-            <span className={styles.createLabel}>
-              <SiteIcon id="add" />
-              添加任务
-            </span>
-          </Button>
-        </CreateTaskPopover>
-      </Flex>
       <Flex container="fill" className={styles.content}>
         <Collapse
           defaultActiveKey={['expired', 'week']}

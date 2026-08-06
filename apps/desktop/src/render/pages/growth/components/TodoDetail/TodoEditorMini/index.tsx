@@ -21,7 +21,7 @@ export default function TodoEditorMini(props: TodoEditorSimpleProps) {
         <Flex container="fixed" className="w-full">
           <TodoEditorHeader />
         </Flex>
-        <Flex container="fill">
+        <Flex vertical container="fill">
           <TodoEditorMain />
         </Flex>
       </Flex>

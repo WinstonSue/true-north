@@ -1,8 +1,9 @@
 import { Drawer, Empty, Flex, Spin } from '@sue/design-web-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { TaskDetailProvider, useTaskDetailContext } from './context';
 import TaskAside from './TaskAside';
 import TaskMain from './TaskMain';
+import { TaskEditor } from '../../components/TaskDetail';
 import styles from './style.module.less';
 
 type OpenTaskDetailDrawerOptions = {
@@ -58,7 +59,12 @@ export function openTaskDetailDrawer({ taskId, onRefresh }: OpenTaskDetailDrawer
 }
 
 function TaskDetailDrawerContent({ onClose }: { onClose: () => void }) {
-  const { currentTask, loading } = useTaskDetailContext();
+  const { currentTask, loading, refreshData } = useTaskDetailContext();
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    setEditing(false);
+  }, [currentTask?.id]);
 
   if (loading && !currentTask) {
     return <Flex container="full" justify="center" align="center"><Spin /></Flex>;
@@ -73,7 +79,22 @@ function TaskDetailDrawerContent({ onClose }: { onClose: () => void }) {
         <TaskAside currentTaskId={currentTask.id} />
       </Flex>
       <Flex container="fill">
-        <TaskMain task={currentTask} onDeleted={onClose} />
+        {editing ? (
+          <TaskEditor
+            task={currentTask}
+            afterSubmit={async () => {
+              await refreshData();
+              setEditing(false);
+            }}
+            onClose={() => setEditing(false)}
+          />
+        ) : (
+          <TaskMain
+            task={currentTask}
+            onDeleted={onClose}
+            onEdit={() => setEditing(true)}
+          />
+        )}
       </Flex>
     </Flex>
   );

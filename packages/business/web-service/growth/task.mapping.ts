@@ -3,7 +3,12 @@ import type { TaskFormData } from './task.types';
 import dayjs from 'dayjs';
 
 const formatDateTime = (value?: TaskFormData['planTimeRange'][number]) =>
-  value && dayjs(value).isValid() ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : undefined;
+  value && dayjs(value).isValid() ? dayjs(value).format('YYYY-MM-DD HH:mm') : undefined;
+
+const toValidDayjs = (value?: TaskVo['startAt']) => {
+  const date = value ? dayjs(value) : undefined;
+  return date?.isValid() ? date : undefined;
+};
 
 export default class TaskMapping {
   static voToFormData(taskVo: TaskVo): TaskFormData {
@@ -16,8 +21,8 @@ export default class TaskMapping {
       urgency: taskVo.urgency,
       estimateTime: taskVo.estimateTime,
       planTimeRange: [
-        taskVo.startAt ? dayjs(taskVo.startAt) : undefined,
-        taskVo.endAt ? dayjs(taskVo.endAt) : undefined,
+        toValidDayjs(taskVo.startAt),
+        toValidDayjs(taskVo.endAt),
       ],
       // 以下为关联数据
       goalId: taskVo.goal?.id ?? taskVo.goalId,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Dispatch, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { TodoFormData, TodoService } from '@true-north/web-service';
 import { createInjectState } from '@/utils/createInjectState';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { TodoMapping } from '@true-north/web-service';
 import { TodoStatus, TodoRelatedType } from '@true-north/enum';
 import { CreateTodoVo } from '@true-north/vo';
+import { emitTodoChanged } from '../../events';
 
 export type TodoDetailProviderProps = {
   children: React.ReactNode;
@@ -33,13 +34,21 @@ export type CurrentTodo = {
   relatedType: TodoRelatedType;
 };
 
+function toTextValue(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+function toOptionalTextValue(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
   PropsType: TodoDetailProviderProps;
   ContextType: {
     currentTodo: CurrentTodo;
     todoFormData: TodoFormData;
     setTodoFormData: (formData: Partial<TodoFormData>) => void;
-    onSubmit: () => Promise<void>;
+    onSubmit: () => Promise<boolean>;
   };
 }>((props) => {
   const [currentTodo, setCurrentTodo] = useState<CurrentTodo>(props.todo);
@@ -78,9 +87,10 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
     init();
   }, [props.mode, initTodoFormData]);
 
-  async function handleCreate() {
+  async function handleCreate(): Promise<boolean> {
     const form = todoFormDataRef.current;
-    if (!form.name) return;
+    const name = toTextValue(form.name).trim();
+    if (!name) return false;
     let repeatConfig: CreateTodoVo['repeatConfig'];
     if (form.repeatConfig) {
       repeatConfig = {
@@ -95,7 +105,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
     }
     try {
       await TodoService.create({
-        name: form.name,
+        name,
         planDate: form.planDate,
         importance: form.importance,
         urgency: form.urgency,
@@ -108,31 +118,53 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
       });
       todoFormDataRef.current = defaultFormData;
       setTodoFormData(todoFormDataRef.current);
+      emitTodoChanged();
+      return true;
     } catch (error) {
       console.error(error);
-      return;
+      return false;
     }
   }
 
-  async function handleUpdate() {
-    const data = TodoMapping.formDataToUpdateVo(todoFormDataRef.current);
-    await TodoService.update(currentTodo.relatedType, currentTodo.id, data);
+  async function handleUpdate(): Promise<boolean> {
+    const name = toTextValue(todoFormDataRef.current.name).trim();
+    if (!name) return false;
+    const data = TodoMapping.formDataToUpdateVo({
+      ...todoFormDataRef.current,
+      name,
+      description: toOptionalTextValue(todoFormDataRef.current.description),
+    });
+    try {
+      await TodoService.update(currentTodo.relatedType, currentTodo.id, data);
+      emitTodoChanged();
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
-  const onSubmit = async () => {
-    if (props.mode === 'creator') {
-      await handleCreate();
-    } else {
-      await handleUpdate();
-    }
+  const onSubmit = async (): Promise<boolean> => {
+    const succeeded = props.mode === 'creator'
+      ? await handleCreate()
+      : await handleUpdate();
+    if (!succeeded) return false;
     await props.afterSubmit?.();
+    return true;
   };
 
   return {
     currentTodo,
     todoFormData,
     setTodoFormData: (formData: Partial<TodoFormData>) => {
-      todoFormDataRef.current = { ...todoFormDataRef.current, ...formData };
+      const normalizedFormData = { ...formData };
+      if ('name' in normalizedFormData) {
+        normalizedFormData.name = toTextValue(normalizedFormData.name);
+      }
+      if ('description' in normalizedFormData) {
+        normalizedFormData.description = toOptionalTextValue(normalizedFormData.description);
+      }
+      todoFormDataRef.current = { ...todoFormDataRef.current, ...normalizedFormData };
       setTodoFormData(todoFormDataRef.current);
     },
     onSubmit,

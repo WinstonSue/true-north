@@ -50,7 +50,11 @@ export class TaskController {
     @Query() taskPageFilterVo?: TaskVO.TaskPageFilterVo
   ): Promise<ResponsePageVo<TaskVO.TaskWithoutRelationsVo>> {
     const filter = new TaskPageFilterDto();
-    if (taskPageFilterVo) filter.importPageVo(taskPageFilterVo);
+    filter.importPageVo({
+      ...taskPageFilterVo,
+      pageNum: normalizePageValue(taskPageFilterVo?.pageNum, 1),
+      pageSize: normalizePageValue(taskPageFilterVo?.pageSize, 10, 100),
+    });
     const { list, total, pageNum, pageSize } = await this.taskService.page(filter);
     return TaskDto.dtoListToPageVo(list, total, pageNum, pageSize);
   }
@@ -116,4 +120,10 @@ export class TaskController {
 
     return { list: rootTasks };
   }
+}
+
+function normalizePageValue(value: unknown, fallback: number, maximum?: number) {
+  const numberValue = Number(value);
+  if (!Number.isInteger(numberValue) || numberValue < 1) return fallback;
+  return maximum ? Math.min(numberValue, maximum) : numberValue;
 }

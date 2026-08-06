@@ -10,6 +10,7 @@ import { TodoWithoutRelationsVo } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoRelatedType, TodoStatus } from '@true-north/enum';
 import styles from './style.module.less';
+import { emitTodoChanged } from '../../events';
 
 export type TodoItemProps = {
   todo: TodoWithoutRelationsVo;
@@ -54,6 +55,7 @@ function TodoItem(props: TodoItemProps) {
                         className={styles.menuItem}
                         onClick={async () => {
                           await TodoService.start(todo.relatedType, todo.id);
+                          emitTodoChanged();
                           await props.refreshTodoList();
                         }}
                       >
@@ -65,6 +67,7 @@ function TodoItem(props: TodoItemProps) {
                         className={styles.menuItem}
                         onClick={async () => {
                           await TodoService.pause(todo.relatedType, todo.id);
+                          emitTodoChanged();
                           await props.refreshTodoList();
                         }}
                       >
@@ -75,6 +78,7 @@ function TodoItem(props: TodoItemProps) {
                     className={styles.menuItem}
                     onClick={async () => {
                       await TodoService.abandon(todo.relatedType, todo.id);
+                      emitTodoChanged();
                       await props.refreshTodoList();
                     }}>
 
@@ -84,6 +88,7 @@ function TodoItem(props: TodoItemProps) {
                     className={styles.menuItem}
                     onClick={async () => {
                       await TodoService.delete(todo.relatedType, todo.id);
+                      emitTodoChanged();
                       await props.refreshTodoList();
                     }}>
 

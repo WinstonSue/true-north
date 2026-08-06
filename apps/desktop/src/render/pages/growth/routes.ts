@@ -19,12 +19,6 @@ export const todoRoutes: IRoute = {
       ignore: true,
     },
     {
-      name: 'menu.todo.week',
-      key: 'todo-week',
-      breadcrumb: true,
-      ignore: true,
-    },
-    {
       name: 'menu.todo.calendar',
       key: 'todo-calendar',
       breadcrumb: true,
@@ -33,12 +27,6 @@ export const todoRoutes: IRoute = {
     {
       name: 'menu.todo.all',
       key: 'todo-all',
-      breadcrumb: true,
-      ignore: true,
-    },
-    {
-      name: 'menu.todo.dashboard',
-      key: 'todo-dashboard',
       breadcrumb: true,
       ignore: true,
     },
@@ -72,12 +60,6 @@ export const taskRoutes: IRoute = {
     {
       name: 'menu.task.all',
       key: 'task-all',
-      breadcrumb: true,
-      ignore: true,
-    },
-    {
-      name: 'menu.task.statistics',
-      key: 'task-statistics',
       breadcrumb: true,
       ignore: true,
     },
@@ -126,12 +108,6 @@ export const habitRoutes: IRoute = {
     {
       name: 'menu.habit.detail',
       key: 'habit-detail/:id',
-      breadcrumb: true,
-      ignore: true,
-    },
-    {
-      name: 'menu.habit.statistics',
-      key: 'habit-statistics',
       breadcrumb: true,
       ignore: true,
     },

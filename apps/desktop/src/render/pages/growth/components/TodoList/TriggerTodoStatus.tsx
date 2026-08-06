@@ -5,6 +5,7 @@ import { TodoVo } from '@true-north/vo';
 import { openModal } from '@/hooks/OpenModal';
 import DoneTimeConform from './DoneTimeConform';
 import { useRef } from 'react';
+import { emitTodoChanged } from '../../events';
 
 export default function TriggerTodoStatus(props: {
   todo: TodoVo;
@@ -14,6 +15,7 @@ export default function TriggerTodoStatus(props: {
 
   async function restore() {
     await TodoService.restore(todo.relatedType, todo.id);
+    emitTodoChanged();
     await props.onChange();
   }
 
@@ -49,12 +51,14 @@ export default function TriggerTodoStatus(props: {
                 await TodoService.done(todo.relatedType, todo.id, {
                   doneAt: doneAt.current,
                 });
+                emitTodoChanged();
                 await props.onChange();
               },
             });
             return;
           }
           await TodoService.done(todo.relatedType, todo.id);
+          emitTodoChanged();
           await props.onChange();
         }}
       />

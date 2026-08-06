@@ -1,12 +1,9 @@
-import { useState, useContext, useRef } from 'react';
+import { useContext, useRef } from 'react';
 import {
   Popover,
   Calendar,
-  Select,
   Switch,
   TimePicker,
-  LeftOutlined,
-  RightOutlined,
 } from '@sue/design-web-react';
 import dayjs, { type Dayjs } from 'dayjs';
 import SiteIcon from '@/components/SiteIcon';
@@ -19,6 +16,12 @@ import type { RepeatSelectorValue } from '@true-north/components-repeat';
 const { RangePicker } = TimePicker;
 
 const today = dayjs().format('YYYY-MM-DD');
+
+function toTimeValue(value?: string) {
+  if (!value) return undefined;
+  const [hour, minute] = value.split(':').map(Number);
+  return dayjs().hour(hour).minute(minute).second(0).millisecond(0);
+}
 
 const getFormattedDate = (date) => {
   const diff = date.diff(today, 'days'); // 计算两个日期的差异
@@ -52,7 +55,6 @@ export default function DateTimeTool(props: {
 }) {
   const { lang } = useContext(GlobalContext);
   const { formData, onChangeData } = props;
-  const [mode, setMode] = useState<'month' | 'year'>('month');
   const disabledRepeatConfigRef = useRef<RepeatVo>();
 
   const updateRepeatConfig = (repeatConfig: RepeatVo | undefined) => {
@@ -66,84 +68,34 @@ export default function DateTimeTool(props: {
         <div className={clsx('py-3 w-72', 'flex flex-col gap-4')}>
           <div className="w-full flex justify-center">
             <Calendar
-              panel
-              panelWidth={'100%'}
+              fullscreen={false}
               value={formData.date}
               defaultValue={dayjs()}
               className="w-full !border-none"
               onChange={(date) => {
-                if (mode === 'year') {
-                  setMode('month');
-                } else {
-                  onChangeData({
-                    ...formData,
-                    date: date,
-                  });
-                }
+                onChangeData({
+                  ...formData,
+                  date,
+                });
               }}
-              mode={mode}
-              headerRender={({
-                value,
-                pageShowDate,
-                onChange,
-                onChangePageDate,
-                onChangeMode,
-              }) => (
-                <div className="text-body-3 px-5 flex items-center justify-between">
-                  <div
-                    onClick={() => {
-                      setMode('year');
-                      onChangeMode('year');
-                    }}
-                    className="cursor-pointer px-2"
-                  >
-                    {pageShowDate?.format(
-                      mode === 'year' ? 'YYYY年' : 'YYYY年MM月',
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <LeftOutlined
-                      className="!text-text-3 cursor-pointer"
-                      onClick={() => {
-                        if (mode === 'year') {
-                          onChangePageDate(pageShowDate?.subtract(1, 'year'));
-                        } else {
-                          onChangePageDate(pageShowDate?.subtract(1, 'month'));
-                        }
-                      }}
-                    />
-                    <a
-                      className="h-5 text-text-3 text-body-2 relative group cursor-pointer"
-                      onClick={() => onChangePageDate(value)}
-                    >
-                      今天
-                    </a>
-                    <RightOutlined
-                      className="!text-text-3 cursor-pointer"
-                      onClick={() => {
-                        if (mode === 'year') {
-                          onChangePageDate(pageShowDate?.add(1, 'year'));
-                        } else {
-                          onChangePageDate(pageShowDate?.add(1, 'month'));
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
             />
           </div>
           <div className="px-3">
             <RangePicker
-              value={formData.timeRange}
+              value={
+                formData.timeRange?.[0] && formData.timeRange?.[1]
+                  ? [toTimeValue(formData.timeRange[0]), toTimeValue(formData.timeRange[1])]
+                  : undefined
+              }
               className="w-full rounded-md"
               format="HH:mm"
-              step={{ minute: 5 }}
               allowClear
-              onChange={(time) => {
+              onChange={(_, timeStrings) => {
                 onChangeData({
                   ...formData,
-                  timeRange: [time[0], time[1]],
+                  timeRange: timeStrings?.[0] && timeStrings?.[1]
+                    ? [timeStrings[0], timeStrings[1]]
+                    : [undefined, undefined],
                 });
               }}
             />
@@ -159,7 +111,9 @@ export default function DateTimeTool(props: {
                     updateRepeatConfig(undefined);
                     return;
                   }
-                  updateRepeatConfig(disabledRepeatConfigRef.current ?? createDefaultRepeatSetting());
+                  updateRepeatConfig(
+                    disabledRepeatConfigRef.current ?? createDefaultRepeatSetting(formData.date.format('YYYY-MM-DD')),
+                  );
                 }}
               />
             </div>

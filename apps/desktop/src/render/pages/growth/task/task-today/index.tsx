@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Collapse, Flex } from '@sue/design-web-react';
+import { Collapse, Flex } from '@sue/design-web-react';
 import { TaskService } from '@true-north/web-service';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
 import TaskList from '../../components/TaskList';
-import SiteIcon from '@/components/SiteIcon';
-import { useTaskDetail } from '../../components';
 import { openTaskDetailDrawer } from '../detail/TaskDetailDrawer';
 import styles from './style.module.less';
+import { onTaskChanged } from '../../events';
 
 type TaskGroups = {
   expired: TaskWithoutRelationsVo[];
@@ -19,7 +18,6 @@ type TaskGroups = {
 
 export default function TaskToday() {
   const [groups, setGroups] = useState<TaskGroups>({ expired: [], today: [], done: [], abandoned: [] });
-  const { CreatePopover: CreateTaskPopover } = useTaskDetail();
 
   const refreshData = async () => {
     const today = dayjs().format('YYYY-MM-DD');
@@ -42,7 +40,10 @@ export default function TaskToday() {
     });
   };
 
-  useEffect(() => { refreshData(); }, []);
+  useEffect(() => {
+    void refreshData();
+    return onTaskChanged(() => { void refreshData(); });
+  }, []);
 
   const renderGroup = (key: keyof TaskGroups, label: string) => groups[key].length ? (
     <Collapse.Panel header={label} key={key}>
@@ -56,11 +57,6 @@ export default function TaskToday() {
 
   return (
     <Flex vertical container="full" className={styles.page}>
-      <Flex container="fixed" className={styles.toolbar} align="center">
-        <CreateTaskPopover creatorProps={{ afterSubmit: refreshData }}>
-          <Button type="text" size="small" icon={<SiteIcon id="add" />}>添加任务</Button>
-        </CreateTaskPopover>
-      </Flex>
       <Flex container="fill" className={styles.content}>
         <Collapse defaultActiveKey={['expired', 'today']} className={styles.collapse}>
           {renderGroup('expired', '已过期')}

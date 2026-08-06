@@ -29,6 +29,7 @@ import { useHabitContext } from './context';
 import { HabitStatus, TodoRelatedType } from '@true-north/enum';
 import { DIFFICULTY_MAP } from '../constants';
 import { CreateHabit } from './components/CreateHabit';
+import { emitHabitChanged } from '../events';
 import styles from './style.module.less';
 
 export const HabitDetailPage: React.FC = () => {
@@ -92,6 +93,7 @@ export const HabitDetailPage: React.FC = () => {
 
         fetchHabitDetail();
         refreshHabits();
+        emitHabitChanged();
       } catch (error) {
         console.error(`${action}习惯失败:`, error);
         message.error(`${action}习惯失败`);
@@ -115,6 +117,7 @@ export const HabitDetailPage: React.FC = () => {
           message.success('习惯已删除');
           navigate('/growth/habit/habit-list');
           refreshHabits();
+          emitHabitChanged();
         } catch (error) {
           console.error('删除习惯失败:', error);
           message.error('删除习惯失败');

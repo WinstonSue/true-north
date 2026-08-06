@@ -26,10 +26,10 @@ const Setting: React.FC<SettingProps> = ({ onConfirm, className }) => {
     onConfirm(form);
   };
 
-  const handleInputChange = (value: string) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
-      countdown: Number(value),
+      countdown: Number(event.target.value),
     });
   };
 

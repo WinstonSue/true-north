@@ -49,8 +49,8 @@ function TodoCreatorMain(props: {
             type="primary"
             size="small"
             className="text-body-3 !bg-transparent !border-none mb-1"
-            onChange={async (value) => {
-              setTodoFormData({ ...todoFormData, name: value });
+            onChange={(event) => {
+              setTodoFormData({ ...todoFormData, name: event.target.value });
             }}
             onPressEnter={() => {
               if (!props.showSubmitButton) {
@@ -75,7 +75,7 @@ function TodoCreatorMain(props: {
                   planTimeRange: data.timeRange,
                   repeatConfig: data.repeatConfig,
                 };
-                setTodoFormData(_formData);
+                setTodoFormData(_formData as Partial<TodoFormData>);
               }}
             />
           )}
@@ -104,8 +104,8 @@ function TodoCreatorMain(props: {
                   value={todoFormData.description}
                   placeholder="描述"
                   className="text-body-3"
-                  onChange={(value) => {
-                    const _formData = { ...todoFormData, description: value };
+                  onChange={(event) => {
+                    const _formData = { ...todoFormData, description: event.target.value };
                     setTodoFormData(_formData);
                   }}
                 />

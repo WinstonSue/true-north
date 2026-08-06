@@ -233,7 +233,6 @@ interface TodoModuleStructure {
       'todo-today/',
       'todo-all/',
       'todo-calendar/',
-      'todo-week/',
       'todo-dashboard/',
     ];
   };
@@ -1390,7 +1389,6 @@ success_criteria:
 - 日期以客户端本地日历日计算，格式为 `YYYY-MM-DD`；本周边界沿用 `dayjs().startOf('week')` 和 `dayjs().endOf('week')`，即周日至周六。
 - 待办以计划日期 `planDate` 判断。“已过期”仅包含 `TODO` 状态且 `planDate <= 昨天` 的待办。
 - 日期为今天、本周后续日期或未来日期的未完成待办不属于“已过期”。`planDate` 为必填字段，因此不会存在无计划日期待办被判定为过期的情况。
-- 本周待办按 `planDate` 位于本周范围内分组；已完成和已放弃待办分别按 `doneAt`、`abandonedAt` 位于本周范围内分组，且不会进入“已过期”。
 
 ---
 

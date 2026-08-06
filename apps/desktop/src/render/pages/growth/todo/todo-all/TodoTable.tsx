@@ -1,43 +1,21 @@
 import type { TableColumnProps } from '@sue/design-web-react';
-import { Table, Button, Modal, message } from '@sue/design-web-react';
+import { Table, Button, Modal } from '@sue/design-web-react';
 import dayjs from 'dayjs';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { useTodoAllContext } from './context';
-import { useEffect, useState } from 'react';
 import { TodoService } from '@true-north/web-service';
 import { openModal } from '@/hooks/OpenModal';
 import { TodoEditor } from '../../components';
 import { TodoRelatedType, TodoStatus } from '@true-north/enum';
 
 import { TodoVo } from '@true-north/vo';
+import { emitTodoChanged } from '../../events';
 
-export default function TodoTable() {
+export default function TodoTable(props: {
+  selectedRowKeys: string[];
+  onSelectionChange: (keys: string[]) => void;
+}) {
   const { todoList, getTodoPage } = useTodoAllContext();
-  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
-  const [batchLoading, setBatchLoading] = useState(false);
-
-  useEffect(() => {
-    getTodoPage();
-  }, []);
-
-  const handleBatchDone = async () => {
-    const selectedTodos = todoList.filter((todo) => selectedRowKeys.includes(todo.id));
-    if (!selectedTodos.length) return;
-    if (selectedTodos.length > 50) {
-      message.error('单次最多完成 50 条待办');
-      return;
-    }
-    try {
-      setBatchLoading(true);
-      await TodoService.doneBatch({
-        todoWithRepeatList: selectedTodos.map((todo) => ({ id: todo.id, relatedType: todo.relatedType })),
-      });
-      setSelectedRowKeys([]);
-      await getTodoPage();
-    } finally {
-      setBatchLoading(false);
-    }
-  };
 
   const columns: TableColumnProps<TodoVo>[] = [
     { title: '待办', dataIndex: 'name', key: 'name' },
@@ -128,7 +106,7 @@ export default function TodoTable() {
               type="text"
               onClick={async () => {
                 await TodoService.start(record.relatedType || TodoRelatedType.NONE, record.id);
-                await getTodoPage();
+                emitTodoChanged();
               }}
             >
               开始
@@ -139,7 +117,7 @@ export default function TodoTable() {
               type="text"
               onClick={async () => {
                 await TodoService.pause(record.relatedType || TodoRelatedType.NONE, record.id);
-                await getTodoPage();
+                emitTodoChanged();
               }}
             >
               暂停
@@ -153,7 +131,7 @@ export default function TodoTable() {
                 content: '删除后将无法恢复',
                 onOk: async () => {
                   await TodoService.delete(record.relatedType || TodoRelatedType.NONE, record.id);
-                  await getTodoPage();
+                  emitTodoChanged();
                 },
               })
             }
@@ -166,31 +144,19 @@ export default function TodoTable() {
   ];
 
   return (
-    <>
-      <div className="mb-3">
-        <Button
-          type="primary"
-          disabled={!selectedRowKeys.length}
-          loading={batchLoading}
-          onClick={handleBatchDone}
-        >
-          批量完成{selectedRowKeys.length ? ` (${selectedRowKeys.length})` : ''}
-        </Button>
-      </div>
-      <Table
+    <Table
         className="w-full"
         columns={columns}
         data={todoList}
         pagination={false}
         rowKey="id"
         rowSelection={{
-          selectedRowKeys,
-          onChange: (keys: React.Key[]) => setSelectedRowKeys(keys.map(String)),
+          selectedRowKeys: props.selectedRowKeys,
+          onChange: (keys: React.Key[]) => props.onSelectionChange(keys.map(String)),
           getCheckboxProps: (record: TodoVo) => ({
             disabled: record.status !== TodoStatus.TODO && record.status !== TodoStatus.IN_PROGRESS,
           }),
         }}
       />
-    </>
   );
 }

@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Card, Col, Flex, Row, Spin, Statistic, message } from '@sue/design-web-react';
 import { CheckCircleOutlined, ClockCircleOutlined, FireOutlined, FlagOutlined, RightOutlined } from '@ant-design/icons';
-import { GoalStatus, TodoRelatedType, TodoStatus } from '@true-north/enum';
+import { GoalStatus, HabitStatus, TaskStatus, TodoRelatedType, TodoStatus } from '@true-north/enum';
 import { GoalService, HabitService, TaskService, TodoService, TrackTimeController } from '@true-north/web-service';
+import { HabitVo, TaskWithoutRelationsVo, TodoVo } from '@true-north/vo';
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { onHabitChanged, onTaskChanged, onTodoChanged } from '../events';
 import styles from './style.module.less';
 
 type DashboardData = {
   goals: any[];
-  todos: any[];
-  habits: any[];
+  tasks: TaskWithoutRelationsVo[];
+  todos: TodoVo[];
+  habits: HabitVo[];
   focusSeconds: number;
 };
 
-const emptyData: DashboardData = { goals: [], todos: [], habits: [], focusSeconds: 0 };
+const emptyData: DashboardData = { goals: [], tasks: [], todos: [], habits: [], focusSeconds: 0 };
 
 export default function Workbench() {
   const navigate = useNavigate();
@@ -30,9 +34,9 @@ export default function Workbench() {
         HabitService.findByFilter({}),
         TrackTimeController.list(),
       ]);
-      void taskResult;
       setData({
         goals: goalResult?.list || [],
+        tasks: taskResult?.list || [],
         todos: todoResult?.list || [],
         habits: habitResult?.list || [],
         focusSeconds: (trackTimeResult?.list || []).reduce((total, record) => total + (record.duration || 0), 0),
@@ -45,14 +49,63 @@ export default function Workbench() {
     }
   }, []);
 
-  useEffect(() => { void loadData(); }, [loadData]);
+  useEffect(() => {
+    void loadData();
+    const unsubscribeTask = onTaskChanged(() => { void loadData(); });
+    const unsubscribeTodo = onTodoChanged(() => { void loadData(); });
+    const unsubscribeHabit = onHabitChanged(() => { void loadData(); });
+    return () => {
+      unsubscribeTask();
+      unsubscribeTodo();
+      unsubscribeHabit();
+    };
+  }, [loadData]);
 
   const dueTodos = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = dayjs().format('YYYY-MM-DD');
     return data.todos
       .filter((todo) => todo.status !== TodoStatus.DONE && todo.status !== TodoStatus.ABANDONED && formatDate(todo.planDate) <= today)
       .sort((left, right) => formatDate(left.planDate).localeCompare(formatDate(right.planDate)));
   }, [data.todos]);
+
+  const taskStats = useMemo(() => {
+    const total = data.tasks.length;
+    const done = data.tasks.filter((task) => task.status === TaskStatus.DONE).length;
+    const doing = data.tasks.filter((task) => task.status === TaskStatus.DOING).length;
+    const overdue = data.tasks.filter((task) =>
+      (task.status === TaskStatus.TODO || task.status === TaskStatus.DOING) &&
+      task.endAt &&
+      dayjs(task.endAt).isBefore(dayjs(), 'day'),
+    ).length;
+    return { total, doing, overdue, completionRate: total ? Math.round(done / total * 100) : 0 };
+  }, [data.tasks]);
+
+  const todoStats = useMemo(() => {
+    const total = data.todos.length;
+    const completed = data.todos.filter((todo) => todo.status === TodoStatus.DONE).length;
+    const pending = data.todos.filter((todo) => todo.status === TodoStatus.TODO).length;
+    const overdue = data.todos.filter((todo) =>
+      todo.status === TodoStatus.TODO && dayjs(todo.planDate).isBefore(dayjs(), 'day'),
+    ).length;
+    return { total, pending, overdue, completionRate: total ? Math.round(completed / total * 100) : 0 };
+  }, [data.todos]);
+
+  const habitStats = useMemo(() => {
+    const total = data.habits.length;
+    const active = data.habits.filter((habit) => habit.status === HabitStatus.ACTIVE).length;
+    const completed = data.habits.filter((habit) => habit.status === HabitStatus.COMPLETED).length;
+    const averageCompletion = total
+      ? Math.round(data.habits.reduce((sum, habit) => {
+        const completedCount = habit.completedCount || 0;
+        const currentStreak = habit.currentStreak || 0;
+        const completionRate = completedCount && currentStreak
+          ? Math.round(completedCount / (currentStreak + completedCount) * 100)
+          : 0;
+        return sum + completionRate;
+      }, 0) / total)
+      : 0;
+    return { total, active, completed, averageCompletion };
+  }, [data.habits]);
 
   const handleCompleteTodo = async (todo: any) => {
     try {
@@ -80,6 +133,29 @@ export default function Workbench() {
           <Col xs={24} sm={12} xl={6}><Metric title="专注投入" value={formatHours(data.focusSeconds)} icon={<ClockCircleOutlined />} /></Col>
           <Col xs={24} sm={12} xl={6}><Metric title="习惯连续" value={longestStreak} suffix="天" icon={<FireOutlined />} /></Col>
         </Row>
+        <Flex vertical gap={12} className={styles.statistics}>
+          <h2>执行概览</h2>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} xl={8}><StatisticsGroup title="任务" items={[
+              { title: '总数', value: taskStats.total, suffix: '项' },
+              { title: '完成率', value: taskStats.completionRate, suffix: '%' },
+              { title: '进行中', value: taskStats.doing, suffix: '项' },
+              { title: '逾期', value: taskStats.overdue, suffix: '项', tone: 'danger' },
+            ]} /></Col>
+            <Col xs={24} xl={8}><StatisticsGroup title="待办" items={[
+              { title: '总数', value: todoStats.total, suffix: '项' },
+              { title: '完成率', value: todoStats.completionRate, suffix: '%' },
+              { title: '待处理', value: todoStats.pending, suffix: '项' },
+              { title: '逾期', value: todoStats.overdue, suffix: '项', tone: 'danger' },
+            ]} /></Col>
+            <Col xs={24} xl={8}><StatisticsGroup title="习惯" items={[
+              { title: '总数', value: habitStats.total, suffix: '个' },
+              { title: '活跃', value: habitStats.active, suffix: '个', tone: 'success' },
+              { title: '已完成', value: habitStats.completed, suffix: '个' },
+              { title: '平均完成率', value: habitStats.averageCompletion, suffix: '%' },
+            ]} /></Col>
+          </Row>
+        </Flex>
         <Row gutter={[16, 16]} className={styles.contentRow}>
           <Col xs={24} xl={14}>
             <Card title="今日待办" extra={<Button type="link" onClick={() => navigate('/growth/todo/todo-today')}>查看全部</Button>}>
@@ -118,9 +194,25 @@ function Metric({ title, value, suffix, icon }: { title: string; value: string |
   return <Card className={styles.metric}><Flex align="center" justify="space-between"><Statistic title={title} value={value} suffix={suffix} /><span className={styles.metricIcon}>{icon}</span></Flex></Card>;
 }
 
+type StatisticItem = { title: string; value: number; suffix: string; tone?: 'danger' | 'success' };
+
+function StatisticsGroup({ title, items }: { title: string; items: StatisticItem[] }) {
+  return (
+    <Card title={title} className={styles.statisticsGroup}>
+      <Row gutter={[12, 16]}>
+        {items.map((item) => (
+          <Col key={item.title} span={12}>
+            <Statistic title={item.title} value={item.value} suffix={item.suffix} className={item.tone ? styles[item.tone] : undefined} />
+          </Col>
+        ))}
+      </Row>
+    </Card>
+  );
+}
+
 function formatDate(value?: string | Date) {
   if (!value) return '';
-  return new Date(value).toISOString().slice(0, 10);
+  return dayjs(value).format('YYYY-MM-DD');
 }
 
 function formatHours(seconds: number) {

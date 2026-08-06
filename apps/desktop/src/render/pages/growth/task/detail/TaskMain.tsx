@@ -1,20 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Tabs, Tag, Dropdown, Menu, Button, Modal, message, Flex, CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, EllipsisOutlined, Empty } from '@sue/design-web-react';
+import { Tabs, Tag, Dropdown, Menu, Button, Modal, message, Flex, CheckOutlined, CloseOutlined, DeleteOutlined, EllipsisOutlined, Empty } from '@sue/design-web-react';
+import dayjs from 'dayjs';
 
 import { TaskVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
 import { TaskService } from '@true-north/web-service';
 import { useTaskDetailContext } from './context';
-import { useTaskDetail } from '../../components/TaskDetail';
 import { useTodoDetail } from '../../components/TodoDetail';
 import styles from './style.module.less';
 import { useFocusTimer } from '../../focus-timer';
+import { emitTaskChanged } from '../../events';
 
 interface TaskMainProps {
   task: TaskVo;
   onDeleted?: () => void;
+  onEdit: () => void;
 }
 
 // 状态配置映射
@@ -37,9 +39,8 @@ const STATUS_CONFIG = {
   },
 };
 
-const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
+const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted, onEdit }) => {
   const { refreshData } = useTaskDetailContext();
-  const { openEditDrawer } = useTaskDetail();
   const { openEditDrawer: openTodoDrawer } = useTodoDetail();
   const { open: openFocusTimer } = useFocusTimer();
   const [activeTab, setActiveTab] = useState('overview');
@@ -56,6 +57,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
     try {
       const done = await TaskService.markDone(task.id);
       if (!done) return;
+      emitTaskChanged();
       message.success('任务已标记为完成');
       await refreshData();
     } catch (error) {
@@ -69,6 +71,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
     try {
       const restored = await TaskService.restore(task.id);
       if (!restored) return;
+      emitTaskChanged();
       message.success('任务已恢复');
       await refreshData();
     } catch (error) {
@@ -86,6 +89,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
         try {
           const abandoned = await TaskService.abandon(task.id);
           if (!abandoned) return;
+          emitTaskChanged();
           message.success('任务已放弃');
           await refreshData();
         } catch (error) {
@@ -99,6 +103,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
   const handleStart = async () => {
     try {
       await TaskService.start(task.id);
+      emitTaskChanged();
       await refreshData();
     } catch (error) {
       console.error('开始任务失败:', error);
@@ -108,6 +113,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
   const handlePause = async () => {
     try {
       await TaskService.pause(task.id);
+      emitTaskChanged();
       await refreshData();
     } catch (error) {
       console.error('暂停任务失败:', error);
@@ -123,6 +129,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
         try {
           const deleted = await TaskService.delete(task.id);
           if (!deleted) return;
+          emitTaskChanged();
           message.success('删除成功');
           onDeleted?.();
         } catch (error) {
@@ -136,9 +143,6 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
   // 渲染操作菜单
   const renderActionMenu = () => (
     <Menu>
-      <Menu.Item key="edit" onClick={() => openEditDrawer({ contentProps: { task, afterSubmit: refreshData } })}>
-        <EditOutlined /> 编辑
-      </Menu.Item>
       {task.status === TaskStatus.TODO && (
         <Menu.Item key="start" onClick={handleStart}>开始</Menu.Item>
       )}
@@ -203,6 +207,10 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
           <Tag color={STATUS_CONFIG[task.status]?.color}>
             {STATUS_CONFIG[task.status]?.label}
           </Tag>
+
+          <Button type="text" onClick={onEdit}>
+            编辑
+          </Button>
 
           {/* ... 下拉菜单 */}
           <Dropdown
@@ -270,7 +278,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
                           <div>
                             <span className={styles.label}>开始时间：</span>
                             <span>
-                              {new Date(task.startAt).toLocaleDateString()}
+                              {dayjs(task.startAt).format('YYYY-MM-DD HH:mm')}
                             </span>
                           </div>
                         )}
@@ -278,7 +286,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
                           <div>
                             <span className={styles.label}>结束时间：</span>
                             <span>
-                              {new Date(task.endAt).toLocaleDateString()}
+                              {dayjs(task.endAt).format('YYYY-MM-DD HH:mm')}
                             </span>
                           </div>
                         )}
@@ -314,7 +322,7 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted }) => {
                   </Flex>
                   {task.trackTimeList?.length ? task.trackTimeList.map((record) => (
                     <Flex key={record.id} justify="space-between" align="center" className={styles.trackRow}>
-                      <span>{record.startAt ? new Date(record.startAt).toLocaleString() : '手动记录'}</span>
+                      <span>{record.startAt ? dayjs(record.startAt).format('YYYY-MM-DD HH:mm') : '手动记录'}</span>
                       <Flex gap={12} align="center">
                         {record.notes && <span>{record.notes}</span>}
                         <strong>{formatDuration(record.duration)}</strong>

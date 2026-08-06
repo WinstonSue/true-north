@@ -1,6 +1,6 @@
 import { ClockCircleOutlined, DashboardOutlined, ExperimentOutlined, GlobalOutlined, TagOutlined } from '@ant-design/icons';
 import { useContext, useEffect } from 'react';
-import { Tooltip, Input, Avatar, Dropdown, message, Button, CommentOutlined, LoadingOutlined, MoonOutlined, NotificationOutlined, PoweroffOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@sue/design-web-react';
+import { Tooltip, Avatar, Dropdown, message, CommentOutlined, LoadingOutlined, MoonOutlined, NotificationOutlined, PoweroffOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@sue/design-web-react';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { GlobalState } from '@/store';
@@ -9,14 +9,13 @@ import useLocale from '@/utils/useLocale';
 import Logo from '@/assets/logo.svg';
 import MessageBox from '@/components/MessageBox';
 import IconButton from './IconButton';
-import Settings from '../Settings';
 import styles from './style/index.module.less';
 import defaultLocale from '@/locale';
 import useStorage from '@/utils/useStorage';
 import { generatePermission } from '@/router/routes';
 import { useFocusTimer } from '@/pages/growth/focus-timer';
 
-function Navbar({ show }: { show: boolean }) {
+function Navbar() {
   const t = useLocale();
   const { userInfo, userLoading } = useSelector((state: GlobalState) => state);
   const dispatch = useDispatch();
@@ -53,18 +52,6 @@ function Navbar({ show }: { show: boolean }) {
       },
     });
   }, [role]);
-
-  if (!show) {
-    return (
-      <div className={styles['fixed-settings']}>
-        <Settings
-          trigger={
-            <Button icon={<SettingOutlined />} type="primary" size="large" />
-          }
-        />
-      </div>
-    );
-  }
 
   const handleChangeRole = () => {
     const newRole = role === 'admin' ? 'user' : 'admin';
@@ -159,12 +146,6 @@ function Navbar({ show }: { show: boolean }) {
       </div>
       <ul className={styles.right}>
         <li>
-          <Input.Search
-            className={styles.round}
-            placeholder={t['navbar.search.placeholder']}
-          />
-        </li>
-        <li>
           <Dropdown
             trigger={['hover']}
             placement="bottomRight"
@@ -200,8 +181,8 @@ function Navbar({ show }: { show: boolean }) {
           <Tooltip
             title={
               theme === 'light'
-                ? t['settings.navbar.theme.toDark']
-                : t['settings.navbar.theme.toLight']
+                ? t['navbar.theme.toDark']
+                : t['navbar.theme.toLight']
             }
           >
             <IconButton
@@ -209,9 +190,6 @@ function Navbar({ show }: { show: boolean }) {
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             />
           </Tooltip>
-        </li>
-        <li>
-          <Settings />
         </li>
         {userInfo && (
           <li>

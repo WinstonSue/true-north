@@ -9,6 +9,7 @@ import {
 } from '@true-north/vo';
 import { useHabitContext } from '../context';
 import { HabitStatus, TodoRelatedType } from '@true-north/enum';
+import { emitHabitChanged } from '../../events';
 
 export const [HabitListProvider, useHabitListContext] = createInjectState<{
   PropsType: {
@@ -109,6 +110,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
         message.success('习惯本次打卡已完成');
         fetchHabits();
         refreshHabits();
+        emitHabitChanged();
       } catch (error) {
         console.error('完成习惯失败:', error);
         message.error('完成习惯失败');
@@ -129,6 +131,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
             message.success('习惯已删除');
             fetchHabits();
             refreshHabits();
+            emitHabitChanged();
           } catch (error) {
             console.error('删除习惯失败:', error);
             message.error('删除习惯失败');

@@ -97,5 +97,6 @@ export function useTaskDetail() {
     openEditDrawer,
     openCreateDrawer,
     CreatePopover,
+    createPopoverVisible,
   };
 }

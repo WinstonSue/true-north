@@ -18,13 +18,18 @@ export class TaskRepository extends BaseRepositoryImpl<Task, TaskFilterDto> impl
     function buildQuery(
       filter: TaskFilterDto & {
         excludeIds?: string[];
-      }
+      },
+      includeChildren = true,
     ) {
       let qb = this.repo
         .createQueryBuilder('task')
-        .leftJoinAndSelect('task.parent', 'parent')
-        .leftJoinAndSelect('task.children', 'children')
         .andWhere('task.deletedAt IS NULL');
+
+      if (includeChildren) {
+        qb = qb
+          .leftJoinAndSelect('task.parent', 'parent')
+          .leftJoinAndSelect('task.children', 'children');
+      }
 
       const { excludeIds } = filter;
       if (excludeIds && excludeIds.length) qb = qb.andWhere('task.id NOT IN (:...excludeIds)', { excludeIds });
@@ -96,10 +101,29 @@ export class TaskRepository extends BaseRepositoryImpl<Task, TaskFilterDto> impl
       const { goalIds } = filter;
       if (goalIds && goalIds.length) qb = qb.andWhere('task.goalId IN (:...goalIds)', { goalIds });
 
+      if (filter.id) qb = qb.andWhere('task.id = :id', { id: filter.id });
+
       return qb.orderBy('task.updatedAt', 'DESC');
     }
 
     super(AppDataSource.getRepository(Task), buildQuery);
+  }
+
+  async page(
+    filter: TaskFilterDto & { pageNum?: number; pageSize?: number },
+  ): Promise<{ list: Task[]; total: number; pageNum: number; pageSize: number }> {
+    const pageNum = normalizePageValue(filter.pageNum, 1);
+    const pageSize = normalizePageValue(filter.pageSize, 10, 100);
+    const query = (this.buildQuery as (
+      pageFilter: TaskFilterDto & { pageNum?: number; pageSize?: number },
+      includeChildren?: boolean,
+    ) => ReturnType<typeof this.repo.createQueryBuilder>)(filter, false);
+    const [list, total] = await query
+      .skip((pageNum - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+
+    return { list, total, pageNum, pageSize };
   }
 
   async updateWithParent(taskUpdate: Task): Promise<Task> {
@@ -120,4 +144,10 @@ export class TaskRepository extends BaseRepositoryImpl<Task, TaskFilterDto> impl
     if (!entity) throw new Error(`任务不存在，ID: ${id}`);
     return entity;
   }
+}
+
+function normalizePageValue(value: unknown, fallback: number, maximum?: number) {
+  const numberValue = Number(value);
+  if (!Number.isInteger(numberValue) || numberValue < 1) return fallback;
+  return maximum ? Math.min(numberValue, maximum) : numberValue;
 }

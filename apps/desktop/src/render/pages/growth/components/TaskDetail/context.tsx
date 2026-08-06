@@ -15,6 +15,28 @@ import {
 import { createInjectState } from '@/utils/createInjectState';
 import dayjs from 'dayjs';
 import { message } from '@sue/design-web-react';
+import { emitTaskChanged } from '../../events';
+
+function toValidDayjs(value?: string | dayjs.Dayjs) {
+  const date = value ? dayjs(value) : undefined;
+  return date?.isValid() ? date : undefined;
+}
+
+export function normalizeTaskPlanTimeRange(
+  planTimeRange?: TaskFormData['planTimeRange'],
+) {
+  return [
+    toValidDayjs(planTimeRange?.[0]),
+    toValidDayjs(planTimeRange?.[1]),
+  ] as TaskFormData['planTimeRange'];
+}
+
+function normalizeTaskFormData(formData: TaskFormData): TaskFormData {
+  return {
+    ...formData,
+    planTimeRange: normalizeTaskPlanTimeRange(formData.planTimeRange),
+  };
+}
 
 export type TaskDetailContextProps = {
   children: React.ReactNode;
@@ -42,18 +64,14 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
   const [loading, setLoading] = useState(false);
   const [currentTask, setCurrentTask] = useState<TaskVo>();
 
-  const initialPlanTimeRange = props.initialFormData?.planTimeRange;
-  const defaultFormData: TaskFormData = {
+  const defaultFormData = normalizeTaskFormData({
     name: '',
     children: [],
     trackTimeList: [],
     ...props.initialFormData,
     isSubTask: props.initialFormData?.isSubTask ?? Boolean(props.initialFormData?.parentId),
-    planTimeRange: [
-      initialPlanTimeRange?.[0] ? dayjs(initialPlanTimeRange[0]) : undefined,
-      initialPlanTimeRange?.[1] ? dayjs(initialPlanTimeRange[1]) : undefined,
-    ],
-  };
+    planTimeRange: props.initialFormData?.planTimeRange ?? [undefined, undefined],
+  } as TaskFormData);
 
   const [taskFormData, setTaskFormData] =
     useState<TaskFormData>(defaultFormData);
@@ -71,7 +89,7 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
   const refreshTaskDetail = async (id: string) => {
     const task = await TaskService.find(id);
     setCurrentTask(task);
-    setTaskFormData(TaskMapping.voToFormData(task));
+    setTaskFormData(normalizeTaskFormData(TaskMapping.voToFormData(task)));
   };
 
   const initTaskFormData = useCallback(async () => {
@@ -105,6 +123,7 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
     const task = await TaskService.create(createTaskVo);
     if (!task) return false;
     setTaskFormData(defaultFormData);
+    emitTaskChanged();
     return true;
   }
 
@@ -118,6 +137,7 @@ export const [TaskDetailProvider, useTaskDetailContext] = createInjectState<{
       return false;
     }
     const task = await TaskService.update(currentTask.id, data);
+    if (task) emitTaskChanged();
     return Boolean(task);
   }
 

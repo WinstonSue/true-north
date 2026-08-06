@@ -7,6 +7,7 @@ import { Difficulty } from '@true-north/enum';
 import dayjs from 'dayjs';
 import { DIFFICULTY_MAP, IMPORTANCE_MAP } from '../../constants';
 import RepeatSelector, { createDefaultRepeatSetting, type RepeatSelectorValue } from '@true-north/components-repeat';
+import { emitHabitChanged } from '../../events';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -86,6 +87,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         await HabitController.create(habitData);
         message.success('习惯创建成功');
       }
+      emitHabitChanged();
       onSuccess();
     } catch (error) {
       console.error('创建习惯失败:', error);

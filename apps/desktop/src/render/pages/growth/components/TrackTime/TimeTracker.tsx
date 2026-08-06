@@ -195,7 +195,7 @@ export default function TimeTracker({
           <RangePicker
             showTime
             value={timeRange}
-            onChange={(dateString, date) =>
+            onChange={(date) =>
             setTimeRange(date as [dayjs.Dayjs, dayjs.Dayjs])
             }
             style={{ width: '100%' }}
@@ -204,7 +204,7 @@ export default function TimeTracker({
           <Input.TextArea
             placeholder="备注..."
             value={note}
-            onChange={setNote}
+            onChange={(event) => setNote(event.target.value)}
             autoSize={{ minRows: 2, maxRows: 3 }} />
 
           <div className="flex space-x-2">

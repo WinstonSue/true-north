@@ -9,6 +9,7 @@ import { TaskWithoutRelationsVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
 import { useFocusTimer } from '../../focus-timer';
 import styles from './style.module.less';
+import { emitTaskChanged } from '../../events';
 
 export type TaskItemProps = {
   task: TaskWithoutRelationsVo;
@@ -41,6 +42,7 @@ function TaskItem(props: TaskItemProps) {
                     onClick={async (event) => {
                       event.stopPropagation();
                       await TaskService.start(task.id);
+                      emitTaskChanged();
                       await props.refreshTaskList();
                     }}
                   >
@@ -53,6 +55,7 @@ function TaskItem(props: TaskItemProps) {
                     onClick={async (event) => {
                       event.stopPropagation();
                       await TaskService.pause(task.id);
+                      emitTaskChanged();
                       await props.refreshTaskList();
                     }}
                   >
@@ -65,6 +68,7 @@ function TaskItem(props: TaskItemProps) {
                     onClick={async (event) => {
                       event.stopPropagation();
                       await TaskService.markDone(task.id);
+                      emitTaskChanged();
                       await props.refreshTaskList();
                     }}
                   >
@@ -88,6 +92,7 @@ function TaskItem(props: TaskItemProps) {
                     onClick={async (event) => {
                       event.stopPropagation();
                       await TaskService.abandon(task.id);
+                      emitTaskChanged();
                       await props.refreshTaskList();
                     }}
                   >
@@ -99,6 +104,7 @@ function TaskItem(props: TaskItemProps) {
                 onClick={async (event) => {
                   event.stopPropagation();
                   await TaskService.delete(task.id);
+                  emitTaskChanged();
                   await props.refreshTaskList();
                 }}>
 

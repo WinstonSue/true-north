@@ -64,7 +64,7 @@ export const HabitFilter: React.FC<HabitFilterProps> = ({
               placeholder="搜索习惯名称或描述"
               prefix={<SearchOutlined />}
               value={filters.keyword}
-              onChange={(value) => handleFilterChange('keyword', value)}
+              onChange={(event) => handleFilterChange('keyword', event.target.value)}
               allowClear
             />
           </Form.Item>
