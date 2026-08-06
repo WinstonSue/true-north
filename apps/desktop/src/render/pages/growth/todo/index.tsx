@@ -10,23 +10,22 @@ export default function TodoPage() {
 
   return (
     <TabsPage
+      tabs={[
+        { name: '今日待办', path: '/growth/todo/todo-today' },
+        { name: '待办日历', path: '/growth/todo/todo-calendar' },
+        { name: '全部待办', path: '/growth/todo/todo-all' },
+      ]}
       extra={
         <CreateButton
           onClick={() => {
             openCreateDrawer({
-              contentProps: {
-              },
+              contentProps: {},
             });
           }}
         >
           新建待办
         </CreateButton>
       }
-      tabs={[
-        { name: '今日待办', path: '/growth/todo/todo-today' },
-        { name: '待办日历', path: '/growth/todo/todo-calendar' },
-        { name: '全部待办', path: '/growth/todo/todo-all' },
-      ]}
     >
       <Outlet />
     </TabsPage>

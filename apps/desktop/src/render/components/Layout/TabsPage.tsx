@@ -17,25 +17,15 @@ export default function TabsPage(props: {
   const location = useLocation();
 
   return (
-    <Flex
-      vertical
-      container="full"
-      className={styles.page}
-    >
-      <Flex
-        container="fixed"
-        className={styles.tabBar}
-      >
-        <div className={styles.tabs}>
+    <Flex vertical container="full" className={styles.page}>
+      <Flex container="fixed" className={styles.tabBar}>
+        <Flex container="fill" className={styles.tabs}>
           {props.tabs.map((tab) => (
             <div
               key={tab.path}
-              className={clsx(
-                styles.tab,
-                {
-                  [styles.tabActive]: location.pathname === tab.path,
-                },
-              )}
+              className={clsx(styles.tab, {
+                [styles.tabActive]: location.pathname === tab.path,
+              })}
               onClick={() => {
                 navigate(tab.path);
               }}
@@ -43,14 +33,15 @@ export default function TabsPage(props: {
               {tab.name}
             </div>
           ))}
-        </div>
-        {props.extra && <div className={styles.extra}>{props.extra}</div>}
+        </Flex>
+        {props.extra && (
+          <Flex container="fixed" justify="end" align="center">
+            {props.extra}
+          </Flex>
+        )}
       </Flex>
 
-      <Flex
-        container="fill"
-        className={styles.content}
-      >
+      <Flex container="fill" className={styles.content}>
         {props.children}
       </Flex>
     </Flex>

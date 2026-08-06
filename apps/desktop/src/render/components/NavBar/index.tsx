@@ -1,6 +1,6 @@
 import { ClockCircleOutlined, DashboardOutlined, ExperimentOutlined, GlobalOutlined, TagOutlined } from '@ant-design/icons';
 import { useContext, useEffect } from 'react';
-import { Tooltip, Avatar, Dropdown, message, CommentOutlined, LoadingOutlined, MoonOutlined, NotificationOutlined, PoweroffOutlined, SettingOutlined, SunOutlined, UserOutlined } from '@sue/design-web-react';
+import { Tooltip, Avatar, Dropdown, message, CommentOutlined, LoadingOutlined, MoonOutlined, NotificationOutlined, PoweroffOutlined, SettingOutlined, SunOutlined, UserOutlined, Flex } from '@sue/design-web-react';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { GlobalState } from '@/store';
@@ -137,7 +137,7 @@ function Navbar() {
   };
 
   return (
-    <div className={styles.navbar}>
+    <Flex vertical={false} className={styles.navbar} justify="space-between">
       <div className={styles.left}>
         <div className={styles.logo}>
           <Logo />
@@ -209,7 +209,7 @@ function Navbar() {
           </li>
         )}
       </ul>
-    </div>
+    </Flex>
   );
 }
 
