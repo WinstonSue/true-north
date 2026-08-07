@@ -21,9 +21,13 @@
 
 ## 原型对齐边界
 
+Growth 其余页面视觉以 Prototype 为准；**专注计时是样式例外**：
+
 | 产品/原型语义 | 当前实现 | 对齐约束 |
 | --- | --- | --- |
-| 全局计时器 | 原型在顶栏与任务详情中复用 `FocusTimer` | 计时器打开时可携带任务关联；开始、最小化、结束记录的 UI 状态不由 RouteController 保存。 |
-| 任务可选关联 | 当前模型支持通用可选关联 | Task 场景使用 `relatedType=task` 与任务 id；未关联记录仍应可创建和查询。 |
-| 时长单位 | VO 使用 `duration: number`，旧文档未规定单位 | ProductWiki 与技术边界统一为整数秒；聚合和显示由 render 换算为小时/分钟。 |
-| 任务实际耗时 | Task 详情可查询关联记录 | 任务的实际耗时由 TrackTime 记录聚合，不另存可变的 Task 实际时长字段。 |
+| 迷你浮层 | `FocusTimerProvider` mini Card | **保持 Desktop 现状**（`focus-timer/index.tsx` mini 分支），不跟原型像素对齐。 |
+| 全屏模式 | FocusTimer full | **复用** [`pages/timer/normal`](../../../apps/desktop/src/render/pages/timer/normal/) 的 `Flip` / `Countdown`（或 `Flip` + `getTimeArr`）+ 底部 `.actions`；业务仍 `TrackTimeController.create`；不以「仅深色大字」代替。 |
+| 全局计时器 | 顶栏与任务入口唤起 | 可携带任务关联；UI 状态不由 RouteController 保存。 |
+| 任务可选关联 | 通用可选关联 | Task 场景 `relatedType=task`；未关联记录可创建查询。 |
+| 时长单位 | `duration: number` | 整数秒；render 换算小时/分钟。 |
+| 任务实际耗时 | Task 详情聚合 | 由 TrackTime 聚合，不另存 Task 实际时长字段。 |

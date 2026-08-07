@@ -9,7 +9,9 @@ function createChangeEvent() {
     },
     subscribe(listener: ChangeListener) {
       listeners.add(listener);
-      return () => listeners.delete(listener);
+      return () => {
+        listeners.delete(listener);
+      };
     },
   };
 }

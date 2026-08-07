@@ -321,7 +321,6 @@ function App() {
                   <TasksPage
                     tasks={tasks}
                     goals={goals}
-                    todos={todos}
                     setDrawer={setDrawer}
                     updateTask={updateTask}
                     onFocusTask={(task) => openFocusTimer(task.id)}

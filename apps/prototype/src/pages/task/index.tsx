@@ -2,17 +2,16 @@ import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Alert, Button, Calendar, Card, DatePicker, Flex, Select, Space, Table, Tabs, Tooltip } from '@sue/design-web-react';
 import { Check, Filter, Play, Plus, RotateCcw } from 'lucide-react';
-import { ExecutionGroupList, PriorityTag, StateTag } from '../../shared/components';
+import { DayAgendaCalendar, ExecutionGroupList, formatDayAgendaTitle, PriorityTag, StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
 import { TODAY } from '../../shared/mock-data';
-import type { DrawerState, Goal, Task, TaskStatus, Todo } from '../../shared/types';
+import type { DrawerState, Goal, Task, TaskStatus } from '../../shared/types';
 import { addDays, goalName, groupExecutionItems, statusLabel } from '../../shared/utils';
 import styles from './index.module.css';
 
 type Props = {
   tasks: Task[];
   goals: Goal[];
-  todos: Todo[];
   setDrawer: (drawer: DrawerState) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
   onFocusTask: (task: Task) => void;
@@ -21,9 +20,11 @@ type Props = {
 
 const taskStatuses: TaskStatus[] = ['todo', 'doing', 'done', 'abandoned'];
 
-export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusTask, onOpenTaskDetail }: Props) {
+export function TasksPage({ tasks, goals, setDrawer, updateTask, onFocusTask, onOpenTaskDetail }: Props) {
   const [activeTab, setActiveTab] = useState('today');
   const [selectedDate, setSelectedDate] = useState(() => dayjs(TODAY));
+  const [visibleMonth, setVisibleMonth] = useState(() => dayjs(TODAY).startOf('month'));
+  const [hoveredCalendarDate, setHoveredCalendarDate] = useState<string>();
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [statuses, setStatuses] = useState<TaskStatus[]>([]);
   const [relations, setRelations] = useState<string[]>([]);
@@ -61,6 +62,20 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
       }, {}),
     [tasks],
   );
+  const calendarCounts = useMemo(() => {
+    const visibleStart = visibleMonth.startOf('month').startOf('week');
+    const visibleEnd = visibleMonth.endOf('month').endOf('week');
+    const counts: Record<string, number> = {};
+    tasks.forEach((task) => {
+      if (task.status === 'done' || task.status === 'abandoned') return;
+      plannedDates(task).forEach((date) => {
+        if (date >= visibleStart.format('YYYY-MM-DD') && date <= visibleEnd.format('YYYY-MM-DD')) {
+          counts[date] = (counts[date] || 0) + 1;
+        }
+      });
+    });
+    return counts;
+  }, [tasks, visibleMonth]);
   const hasFilters = Boolean(statuses.length || relations.length || filterStart || filterEnd);
   const clearFilters = () => {
     setStatuses([]);
@@ -114,130 +129,160 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
   ];
 
   return (
-    <>
-      <Card className={styles.taskSurface} data-product-ref={productRef('growth.task.interaction')}>
-        <Flex className={styles.taskToolbar} align="center" justify="space-between">
-          {activeTab === 'today' ? (
-            <DatePicker value={selectedDate} allowClear={false} onChange={(date) => date && setSelectedDate(date)} />
-          ) : <span />}
-          <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'task' })}>新建任务</Button>
-        </Flex>
+    <Card className={styles.taskSurface} data-product-ref={productRef('growth.task.interaction')}>
+      <Flex className={styles.taskToolbar} align="center" justify="space-between">
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
+          className={styles.taskTabs}
           items={[
-            {
-              key: 'today',
-              label: '当前',
-              children: <TaskExecutionList date={selectedDate.format('YYYY-MM-DD')} tasks={tasks} relationName={relationName} onOpenTaskDetail={onOpenTaskDetail} updateTask={updateTask} onFocusTask={onFocusTask} />,
-            },
-            {
-              key: 'calendar',
-              label: '日历',
-              children: (
-                <Calendar
-                  className={styles.taskCalendar}
-                  defaultValue={dayjs(TODAY)}
-                  cellRender={(date, info) => {
-                    if (info.type !== 'date') return info.originNode;
-                    const dayTasks = tasksByDate[date.format('YYYY-MM-DD')] || [];
-                    return (
-                      <Flex vertical className={styles.calendarCell} gap={3}>
-                        {dayTasks.map((task) => (
-                          <Button
-                            className={`${styles.calendarTask} ${styles[task.status]}`}
-                            key={task.id}
-                            size="small"
-                            type="text"
-                            title={task.title}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onOpenTaskDetail(task.id);
-                            }}
-                          >
-                            <span className={styles.calendarTaskTitle}>{task.title}</span>
-                            <StateTag status={task.status} />
-                          </Button>
-                        ))}
-                      </Flex>
-                    );
-                  }}
-                />
-              ),
-            },
-            {
-              key: 'all',
-              label: '全部',
-              children: (
-                <Flex vertical gap={12} data-product-ref={productRef('growth.task.view.all')}>
-                  <Flex className={styles.filterToolbar} align="center" justify="space-between" wrap="wrap" gap={8}>
-                    <span className={styles.resultCount}>共 {filteredTasks.length} 项任务</span>
-                    <Space size={4}>
-                      {hasFilters && (
-                        <Tooltip title="清空筛选">
-                          <Button type="text" size="small" icon={<RotateCcw size={15} />} aria-label="清空筛选" onClick={clearFilters} />
-                        </Tooltip>
-                      )}
-                      <Tooltip title={filtersExpanded ? '收起筛选' : '展开筛选'}>
-                        <Button
-                          type={hasFilters ? 'primary' : 'text'}
-                          size="small"
-                          icon={<Filter size={15} />}
-                          aria-label={filtersExpanded ? '收起筛选' : '展开筛选'}
-                          aria-expanded={filtersExpanded}
-                          onClick={() => setFiltersExpanded((value) => !value)}
-                        />
-                      </Tooltip>
-                    </Space>
-                  </Flex>
-                  {filtersExpanded && (
-                    <Flex className={styles.filterFields} wrap="wrap" gap={8}>
-                      <Select
-                        mode="multiple"
-                        value={statuses}
-                        placeholder="全部状态"
-                        className={styles.filterControl}
-                        options={taskStatuses.map((value) => ({ value, label: statusLabel(value) }))}
-                        onChange={(value) => setStatuses(value as TaskStatus[])}
-                      />
-                      <Select
-                        mode="multiple"
-                        value={relations}
-                        placeholder="全部归属"
-                        className={styles.relationFilter}
-                        options={relationOptions}
-                        onChange={(value) => setRelations(value as string[])}
-                      />
-                      <DatePicker
-                        allowClear
-                        placeholder="计划开始日期"
-                        value={filterStart ? dayjs(filterStart) : undefined}
-                        onChange={(date) => setFilterStart(date?.format('YYYY-MM-DD'))}
-                      />
-                      <DatePicker
-                        allowClear
-                        placeholder="计划结束日期"
-                        value={filterEnd ? dayjs(filterEnd) : undefined}
-                        onChange={(date) => setFilterEnd(date?.format('YYYY-MM-DD'))}
-                      />
-                    </Flex>
-                  )}
-                  {filteredTasks.length ? (
-                    <Table rowKey="id" dataSource={filteredTasks} columns={columns} pagination={false} />
-                  ) : (
-                    <Alert type="info" showIcon title="没有匹配的任务" description="调整或清空筛选条件后可查看全部任务。" />
-                  )}
-                </Flex>
-              ),
-            },
+            { key: 'today', label: '当前' },
+            { key: 'calendar', label: '日历' },
+            { key: 'all', label: '全部' },
           ]}
         />
-        <Flex className={styles.linkageSummary} align="center" justify="space-between" wrap="wrap" gap={8} data-product-ref={productRef('growth.task.rule.single-parent')}>
-          <span><b>任务联动</b> 已关联 {todos.filter((todo) => todo.taskId).length}/{todos.length} 项待办</span>
-          <span>任务完成后可在详情确认子任务与待办状态</span>
+        <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'task' })}>
+          新建任务
+        </Button>
+      </Flex>
+
+      {activeTab === 'today' ? (
+        <div className={styles.dayAgenda} data-product-ref={productRef('growth.task.view.today')}>
+          <aside className={styles.dayAgendaSidebar}>
+            <DayAgendaCalendar
+              value={selectedDate}
+              onChange={setSelectedDate}
+              visibleMonth={visibleMonth}
+              onVisibleMonthChange={setVisibleMonth}
+              itemCounts={calendarCounts}
+            />
+          </aside>
+          <main className={styles.dayAgendaMain}>
+            <header className={styles.dayAgendaToolbar}>
+              <h2 className={styles.dayAgendaTitle}>{formatDayAgendaTitle(selectedDate)}</h2>
+            </header>
+            <TaskExecutionList
+              date={selectedDate.format('YYYY-MM-DD')}
+              tasks={tasks}
+              relationName={relationName}
+              onOpenTaskDetail={onOpenTaskDetail}
+              updateTask={updateTask}
+              onFocusTask={onFocusTask}
+            />
+          </main>
+        </div>
+      ) : activeTab === 'calendar' ? (
+        <Calendar
+          className={styles.taskCalendar}
+          defaultValue={dayjs(TODAY)}
+          cellRender={(date, info) => {
+            if (info.type !== 'date') return info.originNode;
+            const dateKey = date.format('YYYY-MM-DD');
+            const dayTasks = tasksByDate[dateKey] || [];
+            return (
+              <Flex
+                vertical
+                className={styles.calendarCell}
+                gap={3}
+                onMouseEnter={() => setHoveredCalendarDate(dateKey)}
+                onMouseLeave={() => setHoveredCalendarDate(undefined)}
+              >
+                {dayTasks.map((task) => (
+                  <Button
+                    className={`${styles.calendarTask} ${styles[task.status]}`}
+                    key={task.id}
+                    size="small"
+                    type="text"
+                    title={task.title}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onOpenTaskDetail(task.id);
+                    }}
+                  >
+                    <span className={styles.calendarTaskTitle}>{task.title}</span>
+                    <StateTag status={task.status} />
+                  </Button>
+                ))}
+                {hoveredCalendarDate === dateKey && (
+                  <Button
+                    className={styles.calendarAdd}
+                    size="small"
+                    type="text"
+                    icon={<Plus size={12} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setDrawer({ kind: 'task', plannedStart: dateKey, plannedEnd: dateKey });
+                    }}
+                  >
+                    添加任务
+                  </Button>
+                )}
+              </Flex>
+            );
+          }}
+        />
+      ) : (
+        <Flex vertical gap={12} data-product-ref={productRef('growth.task.view.all')}>
+          <Flex className={styles.filterToolbar} align="center" justify="space-between" wrap="wrap" gap={8}>
+            <span className={styles.resultCount}>共 {filteredTasks.length} 项任务</span>
+            <Space size={4}>
+              {hasFilters && (
+                <Tooltip title="清空筛选">
+                  <Button type="text" size="small" icon={<RotateCcw size={15} />} aria-label="清空筛选" onClick={clearFilters} />
+                </Tooltip>
+              )}
+              <Tooltip title={filtersExpanded ? '收起筛选' : '展开筛选'}>
+                <Button
+                  type={hasFilters ? 'primary' : 'text'}
+                  size="small"
+                  icon={<Filter size={15} />}
+                  aria-label={filtersExpanded ? '收起筛选' : '展开筛选'}
+                  aria-expanded={filtersExpanded}
+                  onClick={() => setFiltersExpanded((value) => !value)}
+                />
+              </Tooltip>
+            </Space>
+          </Flex>
+          {filtersExpanded && (
+            <Flex className={styles.filterFields} wrap="wrap" gap={8}>
+              <Select
+                mode="multiple"
+                value={statuses}
+                placeholder="全部状态"
+                className={styles.filterControl}
+                options={taskStatuses.map((value) => ({ value, label: statusLabel(value) }))}
+                onChange={(value) => setStatuses(value as TaskStatus[])}
+              />
+              <Select
+                mode="multiple"
+                value={relations}
+                placeholder="全部归属"
+                className={styles.relationFilter}
+                options={relationOptions}
+                onChange={(value) => setRelations(value as string[])}
+              />
+              <DatePicker
+                allowClear
+                placeholder="计划开始日期"
+                value={filterStart ? dayjs(filterStart) : undefined}
+                onChange={(date) => setFilterStart(date?.format('YYYY-MM-DD'))}
+              />
+              <DatePicker
+                allowClear
+                placeholder="计划结束日期"
+                value={filterEnd ? dayjs(filterEnd) : undefined}
+                onChange={(date) => setFilterEnd(date?.format('YYYY-MM-DD'))}
+              />
+            </Flex>
+          )}
+          {filteredTasks.length ? (
+            <Table rowKey="id" dataSource={filteredTasks} columns={columns} pagination={false} />
+          ) : (
+            <Alert type="info" showIcon title="没有匹配的任务" description="调整或清空筛选条件后可查看全部任务。" />
+          )}
         </Flex>
-      </Card>
-    </>
+      )}
+    </Card>
   );
 }
 
@@ -256,9 +301,11 @@ function TaskExecutionList({
   updateTask: (id: string, patch: Partial<Task>) => void;
   onFocusTask: (task: Task) => void;
 }) {
-  const groups = groupExecutionItems(tasks, 'today', date, (task) => ({ start: task.plannedStart, end: task.plannedEnd }));
+  const groups = groupExecutionItems(tasks, 'today', date, (task) => ({ start: task.plannedStart, end: task.plannedEnd }), {
+    includeOverdue: date === TODAY,
+  });
   return (
-    <div className={styles.executionGroups} data-product-ref={productRef('growth.task.view.today')}>
+    <div className={styles.executionGroups}>
       <ExecutionGroupList
         groups={groups}
         renderItem={(task) => (
@@ -267,7 +314,9 @@ function TaskExecutionList({
             <Button block className={styles.executionContent} type="text" onClick={() => onOpenTaskDetail(task.id)}>
               <Flex align="flex-start" vertical gap={2}>
                 <span className={styles.executionTitle}>{task.title}</span>
-                <span className={styles.executionMeta}>{relationName(task)} · {task.plannedStart} - {task.plannedEnd} · 预计耗时 {task.estimated}h / 实际耗时 {task.actual}h</span>
+                <span className={styles.executionMeta}>
+                  {relationName(task)} · {task.plannedStart} - {task.plannedEnd} · 预计耗时 {task.estimated}h / 实际耗时 {task.actual}h
+                </span>
               </Flex>
             </Button>
             <Flex className={styles.executionActions} container="fixed" gap={8}>

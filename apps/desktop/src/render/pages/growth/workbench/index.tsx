@@ -7,6 +7,7 @@ import { HabitVo, TaskWithoutRelationsVo, TodoVo } from '@true-north/vo';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { onHabitChanged, onTaskChanged, onTodoChanged } from '../events';
+import { formatHabitRepeatLabel } from '../habit/formatHabitRepeatLabel';
 import styles from './style.module.less';
 
 type DashboardData = {
@@ -107,13 +108,43 @@ export default function Workbench() {
     return { total, active, completed, averageCompletion };
   }, [data.habits]);
 
-  const handleCompleteTodo = async (todo: any) => {
+  const handleCompleteTodo = async (todo: TodoVo) => {
     try {
       await TodoService.done(todo.relatedType || TodoRelatedType.NONE, todo.id);
       await loadData();
     } catch (error) {
       console.error('完成待办失败:', error);
       message.error('完成待办失败');
+    }
+  };
+
+  const handleHabitComplete = async (habit: HabitVo) => {
+    if (!habit.cycleTodoId) {
+      message.warning('当前没有可结算的习惯待办');
+      return;
+    }
+    try {
+      await TodoService.done(TodoRelatedType.HABIT, habit.cycleTodoId);
+      message.success('习惯本次打卡已完成');
+      await loadData();
+    } catch (error) {
+      console.error('完成习惯失败:', error);
+      message.error('完成习惯失败');
+    }
+  };
+
+  const handleHabitIncomplete = async (habit: HabitVo) => {
+    if (!habit.cycleTodoId) {
+      message.warning('当前没有可结算的习惯待办');
+      return;
+    }
+    try {
+      await TodoService.abandon(TodoRelatedType.HABIT, habit.cycleTodoId);
+      message.success('已记录未完成');
+      await loadData();
+    } catch (error) {
+      console.error('标记习惯未完成失败:', error);
+      message.error('标记习惯未完成失败');
     }
   };
 
@@ -177,8 +208,22 @@ export default function Workbench() {
               <Flex vertical className={styles.list} gap={4}>
                 {data.habits.length ? data.habits.slice(0, 6).map((habit) => (
                   <Flex key={habit.id} align="center" justify="space-between" gap={12} className={styles.listRow}>
-                    <Flex align="center" gap={10} className={styles.todoTitle}><FireOutlined className={styles.habitIcon} /><div><b>{habit.name}</b><span>连续 {habit.currentStreak || 0} 天</span></div></Flex>
-                    <Button type="text" icon={<RightOutlined />} aria-label={`查看 ${habit.name}`} onClick={() => navigate(`/growth/habit/habit-detail/${habit.id}`)} />
+                    <Flex align="center" gap={10} className={styles.todoTitle}>
+                      <FireOutlined className={styles.habitIcon} />
+                      <div>
+                        <b>{habit.name}</b>
+                        <span>
+                          {formatHabitRepeatLabel(habit)} · 连续 {habit.currentStreak || 0} 天 ·{' '}
+                          {habit.goals?.[0]?.name || '—'}
+                        </span>
+                      </div>
+                    </Flex>
+                    <HabitCheckInActions
+                      habit={habit}
+                      onComplete={() => void handleHabitComplete(habit)}
+                      onIncomplete={() => void handleHabitIncomplete(habit)}
+                      onOpenDetail={() => navigate(`/growth/habit/habit-detail/${habit.id}`)}
+                    />
                   </Flex>
                 )) : <div className={styles.empty}>还没有进行中的习惯。</div>}
               </Flex>
@@ -186,6 +231,36 @@ export default function Workbench() {
           </Col>
         </Row>
       </Spin>
+    </Flex>
+  );
+}
+
+function HabitCheckInActions({
+  habit,
+  onComplete,
+  onIncomplete,
+  onOpenDetail,
+}: {
+  habit: HabitVo;
+  onComplete: () => void;
+  onIncomplete: () => void;
+  onOpenDetail: () => void;
+}) {
+  if (habit.status === HabitStatus.COMPLETED) return <span className={styles.habitStatus}>执行规则已结束</span>;
+  if (habit.status === HabitStatus.PAUSED) return <span className={styles.habitStatus}>已暂停打卡</span>;
+  if (habit.status === HabitStatus.ABANDONED) return <span className={styles.habitStatus}>已放弃习惯</span>;
+  if (!habit.cycleTodoId) {
+    return (
+      <Flex gap={6} align="center">
+        <span className={styles.habitStatus}>下一次待办已安排</span>
+        <Button type="text" icon={<RightOutlined />} aria-label={`查看 ${habit.name}`} onClick={onOpenDetail} />
+      </Flex>
+    );
+  }
+  return (
+    <Flex gap={6} align="center">
+      <Button size="small" type="primary" onClick={onComplete}>完成</Button>
+      <Button size="small" onClick={onIncomplete}>未完成</Button>
     </Flex>
   );
 }

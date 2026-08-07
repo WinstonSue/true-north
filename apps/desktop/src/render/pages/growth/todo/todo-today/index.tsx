@@ -117,7 +117,7 @@ export default function TodoToday() {
             <TodoAgendaSections
               groups={[
                 ...(isSelectedToday ? [{ key: 'expired', label: '已过期', todoList: expiredTodos }] : []),
-                { key: 'scheduled', label: '当日待办', todoList: scheduledTodos },
+                { key: 'scheduled', label: '未完成', todoList: scheduledTodos },
                 { key: 'done', label: '已完成', todoList: doneTodos },
                 { key: 'abandoned', label: '已放弃', todoList: abandonedTodos },
               ]}

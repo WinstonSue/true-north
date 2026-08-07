@@ -35,8 +35,10 @@ export function groupExecutionItems<T extends ExecutionItem>(
   scope: ExecutionScope,
   today: string,
   getTimeRange: (item: T) => { start: string; end: string },
+  options?: { includeOverdue?: boolean },
 ): ExecutionGroup<T>[] {
   const { start, end, label } = getExecutionRange(scope, today);
+  const includeOverdue = options?.includeOverdue !== false;
   const pending = (item: T) => item.status !== 'done' && item.status !== 'abandoned';
   const inRange = (item: T) => {
     const range = getTimeRange(item);
@@ -45,7 +47,11 @@ export function groupExecutionItems<T extends ExecutionItem>(
   const isOverdue = (item: T) => getTimeRange(item).end < start;
 
   return [
-    { key: 'overdue', title: '已过期', items: items.filter((item) => pending(item) && isOverdue(item)) },
+    {
+      key: 'overdue',
+      title: '已过期',
+      items: includeOverdue ? items.filter((item) => pending(item) && isOverdue(item)) : [],
+    },
     { key: 'current', title: label, items: items.filter((item) => pending(item) && inRange(item)) },
     { key: 'done', title: '已完成', items: items.filter((item) => item.status === 'done' && inRange(item)) },
     { key: 'abandoned', title: '已放弃', items: items.filter((item) => item.status === 'abandoned' && inRange(item)) },

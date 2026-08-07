@@ -154,7 +154,7 @@ export default function TaskToday() {
 
   const renderGroup = (key: keyof TaskGroups, label: string) =>
     groups[key].length ? (
-      <Collapse.Panel header={label} key={key}>
+      <Collapse.Panel header={`${label} (${groups[key].length})`} key={key}>
         <TaskList
           taskList={groups[key]}
           onClickTask={async (id) => {
@@ -192,7 +192,7 @@ export default function TaskToday() {
                 className={styles.collapse}
               >
                 {isSelectedToday && renderGroup('expired', '已过期')}
-                {renderGroup('scheduled', '当日任务')}
+                {renderGroup('scheduled', '未完成')}
                 {renderGroup('done', '已完成')}
                 {renderGroup('abandoned', '已放弃')}
               </Collapse>

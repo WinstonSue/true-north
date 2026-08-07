@@ -3,18 +3,12 @@
 .header { display: flex; min-width: 0; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .titleBlock { min-width: 0; flex: 1; }
 .title { display: -webkit-box; overflow: hidden; color: var(--sue-color-text); font-size: 16px; font-weight: 600; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-.description { display: -webkit-box; margin: 5px 0 0; overflow: hidden; color: var(--sue-color-text-tertiary); font-size: 12px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .status { flex: 0 0 auto; }
-.tags { display: flex; min-height: 24px; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
-.body { display: flex; flex-direction: column; gap: 14px; }
+.body { display: flex; flex-direction: column; gap: 10px; }
+.goalLabel { margin: 0; color: var(--sue-color-text-secondary); font-size: 13px; line-height: 22px; }
+.repeatLabel { margin: 0; color: var(--sue-color-text-secondary); font-size: 13px; line-height: 22px; }
 .progressHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; color: var(--sue-color-text-secondary); font-size: 12px; }
 .progressHeader strong { color: var(--sue-color-text); font-weight: 600; }
-.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; text-align: center; }
-.metric { padding: 10px; border-radius: var(--sue-border-radius); background: var(--sue-color-fill-quaternary); color: var(--sue-color-text-tertiary); font-size: 12px; }
-.metricPrimary, .metricSuccess { margin-bottom: 3px; font-size: 20px; font-weight: 700; }
-.metricPrimary { color: var(--sue-color-primary); }
-.metricSuccess { color: var(--sue-color-success); }
-.dates { display: grid; gap: 3px; color: var(--sue-color-text-tertiary); font-size: 12px; }
 .footer { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--sue-color-border-secondary); }
 .footerActions { display: flex; width: 100%; }
 .completeButton { flex: 1; }

@@ -14,7 +14,7 @@ export type Task = { id: string; title: string; description: string; goalId?: st
 export type Todo = { id: string; title: string; description: string; taskId?: string; goalId?: string; habitId?: string; status: TodoStatus; importance: number; urgency: number; planned: string; plannedStartTime: string; plannedEndTime: string; repeat?: TodoRepeat; history: string[] };
 export type Habit = { id: string; title: string; goalIds: string[]; status: HabitStatus; importance: number; difficulty: number; repeat: RepeatPayload; streak: number; longest: number; logs: Array<{ date: string; completed: boolean }> };
 export type FocusSession = { id: string; taskId?: string; title: string; minutes: number; at: string };
-export type DrawerState = { kind: DrawerKind; id?: string } | null;
+export type DrawerState = { kind: DrawerKind; id?: string; plannedStart?: string; plannedEnd?: string; planned?: string } | null;
 export type AiSuggestion = { id: string; kind: DrawerKind; title: string; goalId: string; parentId?: string; planned: string; importance: number; difficulty: number; impact: string; reason: string; conflict?: string };
 export type NavigationItem = { id: string; path: string; label: string; icon: LucideIcon };
 export type SaveEntity = (kind: DrawerKind, draft: Goal | Task | Todo | Habit) => void;

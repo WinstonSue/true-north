@@ -59,7 +59,7 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, onClose, onS
         : drawer.kind === 'todo'
           ? todos.find((item) => item.id === drawer.id)
           : habits.find((item) => item.id === drawer.id);
-  const [draft, setDraft] = useState<Goal | Task | Todo | Habit>(() => existing || createDraft(drawer.kind, goals));
+  const [draft, setDraft] = useState<Goal | Task | Todo | Habit>(() => existing || createDraft(drawer.kind, goals, drawer));
   const [error, setError] = useState('');
   const [repeatError, setRepeatError] = useState('');
   const patch = (value: Partial<typeof draft>) => setDraft((current) => ({ ...current, ...value }) as typeof draft);
@@ -133,7 +133,7 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, onClose, onS
   );
 }
 
-function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habit {
+function createDraft(kind: DrawerKind, goals: Goal[], drawer?: NonNullable<DrawerState>): Goal | Task | Todo | Habit {
   const id = `${kind[0]}${Date.now()}`;
   if (kind === 'goal')
     return {
@@ -157,10 +157,10 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
       status: 'todo',
       importance: 3,
       difficulty: 2,
-      start: TODAY,
-      end: NEXT_DAY,
-      plannedStart: TODAY,
-      plannedEnd: TODAY,
+      start: drawer?.plannedStart || TODAY,
+      end: drawer?.plannedEnd || NEXT_DAY,
+      plannedStart: drawer?.plannedStart || TODAY,
+      plannedEnd: drawer?.plannedEnd || drawer?.plannedStart || TODAY,
       estimated: 1,
       actual: 0,
     };
@@ -172,7 +172,7 @@ function createDraft(kind: DrawerKind, goals: Goal[]): Goal | Task | Todo | Habi
       status: 'todo',
       importance: 3,
       urgency: 3,
-      planned: TODAY,
+      planned: drawer?.planned || drawer?.plannedStart || TODAY,
       plannedStartTime: '09:00',
       plannedEndTime: '09:00',
       history: ['刚刚创建'],

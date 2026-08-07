@@ -27,8 +27,9 @@ export default function TodoAgendaSections(props: TodoAgendaSectionsProps) {
       {visibleGroups.map((group) => (
         <section className={styles.section} key={group.key}>
           <header className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>{group.label}</h2>
-            <span className={styles.sectionCount}>{group.todoList.length}</span>
+            <h2 className={styles.sectionTitle}>
+              {group.label} ({group.todoList.length})
+            </h2>
           </header>
           <TodoList
             todoList={group.todoList}

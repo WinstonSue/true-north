@@ -28,6 +28,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
     setFilters: Dispatch<SetStateAction<HabitPageFilterVo>>;
     handlePageChange: (page: number, pageSize: number) => void;
     handleHabitComplete: (habitId: string) => void;
+    handleHabitIncomplete: (habitId: string) => void;
     handleHabitDelete: (habitId: string) => void;
     handleRefresh: () => Promise<void>;
   };
@@ -119,6 +120,24 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
     [fetchHabits, habits, refreshHabits],
   );
 
+  const handleHabitIncomplete = useCallback(
+    async (habitId: string) => {
+      try {
+        const habit = habits.find((item) => item.id === habitId);
+        if (!habit?.cycleTodoId) throw new Error('当前没有可结算的习惯待办');
+        await TodoController.abandon(TodoRelatedType.HABIT, habit.cycleTodoId);
+        message.success('已记录未完成');
+        fetchHabits();
+        refreshHabits();
+        emitHabitChanged();
+      } catch (error) {
+        console.error('标记习惯未完成失败:', error);
+        message.error('标记习惯未完成失败');
+      }
+    },
+    [fetchHabits, habits, refreshHabits],
+  );
+
   // 处理习惯删除
   const handleHabitDelete = useCallback(
     async (habitId: string) => {
@@ -157,6 +176,7 @@ export const [HabitListProvider, useHabitListContext] = createInjectState<{
     setFilters,
     handlePageChange,
     handleHabitComplete,
+    handleHabitIncomplete,
     handleHabitDelete,
     handleRefresh,
   };

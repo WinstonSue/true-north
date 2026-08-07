@@ -23,7 +23,7 @@
 
 ## 原型对齐边界
 
-桌面端增长待办入口为 `/growth/todo/todo-today`、`/growth/todo/todo-calendar` 和 `/growth/todo/todo-all`；`todo-today` 是当前日期工作清单，左侧日程日历可切换选定日期，列表按过期、当日、已完成和已放弃分组。独立周视图和统计页已移除，工作台承担聚合统计。
+桌面端增长待办入口为 `/growth/todo/todo-today`、`/growth/todo/todo-calendar` 和 `/growth/todo/todo-all`；`todo-today` 是当前日期工作清单，左侧日程日历可切换选定日期，列表按「已过期 / **未完成** / 已完成 / 已放弃」分组（仅选定今天时显示已过期）。**能力集以 Desktop 为准，页面视觉对齐 Prototype。** 批量完成仅在 `todo-all`（单次 ≤50）；当前页不提供多选批量。独立周视图和统计页已移除，工作台承担聚合统计。
 
 | 产品/原型语义 | 当前实现 | 需要明确的边界 |
 | --- | --- | --- |
@@ -31,6 +31,8 @@
 | 创建来源 | 枚举为 `none / goal / habit / task / repeat / is-repeat` | 手动创建禁止写入任务或习惯来源；系统生成待办保留唯一来源，重复模板实例使用 `is-repeat`，历史完成记录使用 `repeat`。 |
 | 计划时间 | Entity/VO 已有 `planDate`、`planStartTime`、`planEndTime` | 计划日与日内时间是当前持久化边界；跨日排程不应由界面私自派生。 |
 | 周期待办 | 一个 Repeat 模板由 `TodoRepeatService` 推进并产生日志待办 | 下一次日期与结束条件必须复用共享重复规则，见 [重复规则](./repeat.md)。 |
-| 批量完成 | 已有 `/todo/done/batch` | Service 已校验单次最多 50 条，并逐条结算以保证习惯周期可以推进。 |
+| 批量完成 | 已有 `/todo/done/batch` | 仅全部待办页暴露；Service 已校验单次最多 50 条，并逐条结算以保证习惯周期可以推进。 |
+| 当前页列表 | TodoAgendaSections + TodoItem | overdue 仅今天；execution row：checkbox+完成，习惯/周期行内未完成；放弃/删除可留菜单。 |
+| 月历 chip | CalendarCell | 左边框风格对齐原型；悬停新建逻辑保持。 |
 
-原型与桌面端目前共享当前/日历/全部三类入口；ProductWiki 中保留的周视图和统计视图属于后续规划，不应作为当前路由或接口验收项。
+原型与桌面端目前共享当前/日历/全部三类入口；ProductWiki 中保留的周视图和统计视图属于后续规划，不应作为当前路由或接口验收项。不做数据迁移。

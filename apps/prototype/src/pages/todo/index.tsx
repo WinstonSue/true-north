@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Alert, Button, Calendar, Card, Checkbox, DatePicker, Flex, Modal, Select, Space, Table, Tabs, Tooltip } from '@sue/design-web-react';
 import { Check, Filter, Plus, RotateCcw, X } from 'lucide-react';
-import { ExecutionGroupList, PriorityTag, StateTag } from '../../shared/components';
+import { DayAgendaCalendar, ExecutionGroupList, formatDayAgendaTitle, PriorityTag, StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
 import { TODAY } from '../../shared/mock-data';
 import type { DrawerState, Goal, Habit, Task, Todo, TodoStatus } from '../../shared/types';
@@ -24,7 +24,7 @@ const todoStatuses: TodoStatus[] = ['todo', 'in_progress', 'done', 'abandoned'];
 export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo, markTodoIncomplete }: Props) {
   const [tab, setTab] = useState('today');
   const [selectedDate, setSelectedDate] = useState(() => dayjs(TODAY));
-  const [filter, setFilter] = useState<TodoStatus | 'all'>('all');
+  const [visibleMonth, setVisibleMonth] = useState(() => dayjs(TODAY).startOf('month'));
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [statuses, setStatuses] = useState<TodoStatus[]>([]);
   const [relations, setRelations] = useState<string[]>([]);
@@ -32,22 +32,39 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
   const [filterEnd, setFilterEnd] = useState<string>();
   const [selected, setSelected] = useState<string[]>([]);
   const [batchOpen, setBatchOpen] = useState(false);
-  const isTimeScope = tab === 'today';
   const orderedTodos = useMemo(() => [...todos].sort(compareTodoPlan), [todos]);
-  const filteredTodos = orderedTodos.filter((todo) => filter === 'all' || todo.status === filter);
   const groups = useMemo(
-    () => (isTimeScope ? groupExecutionItems(filteredTodos, 'today', selectedDate.format('YYYY-MM-DD'), (todo) => ({ start: todo.planned, end: todo.planned })) : []),
-    [filteredTodos, isTimeScope, selectedDate],
+    () =>
+      groupExecutionItems(
+        orderedTodos,
+        'today',
+        selectedDate.format('YYYY-MM-DD'),
+        (todo) => ({ start: todo.planned, end: todo.planned }),
+        { includeOverdue: selectedDate.format('YYYY-MM-DD') === TODAY },
+      ),
+    [orderedTodos, selectedDate],
   );
   const todosByDate = useMemo(
     () =>
-      filteredTodos.reduce<Record<string, Todo[]>>((items, todo) => {
+      orderedTodos.reduce<Record<string, Todo[]>>((items, todo) => {
         (items[todo.planned] ||= []).push(todo);
         return items;
       }, {}),
-    [filteredTodos],
+    [orderedTodos],
   );
-  const relationKey = (todo: Todo) => (todo.taskId ? `task:${todo.taskId}` : todo.goalId ? `goal:${todo.goalId}` : todo.habitId ? `habit:${todo.habitId}` : 'independent');
+  const calendarCounts = useMemo(() => {
+    const visibleStart = visibleMonth.startOf('month').startOf('week').format('YYYY-MM-DD');
+    const visibleEnd = visibleMonth.endOf('month').endOf('week').format('YYYY-MM-DD');
+    return orderedTodos.reduce<Record<string, number>>((counts, todo) => {
+      if (todo.status === 'done' || todo.status === 'abandoned') return counts;
+      if (todo.planned >= visibleStart && todo.planned <= visibleEnd) {
+        counts[todo.planned] = (counts[todo.planned] || 0) + 1;
+      }
+      return counts;
+    }, {});
+  }, [orderedTodos, visibleMonth]);
+  const relationKey = (todo: Todo) =>
+    todo.taskId ? `task:${todo.taskId}` : todo.goalId ? `goal:${todo.goalId}` : todo.habitId ? `habit:${todo.habitId}` : 'independent';
   const relationOptions = useMemo(
     () => [
       ...goals.map((goal) => ({ value: `goal:${goal.id}`, label: `目标 · ${goal.title}` })),
@@ -109,7 +126,9 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
       title: '待办',
       render: (_: unknown, todo: Todo) => (
         <span>
-          <Button type="link" onClick={() => setDrawer({ kind: 'todo', id: todo.id })}>{todo.title}</Button>
+          <Button type="link" onClick={() => setDrawer({ kind: 'todo', id: todo.id })}>
+            {todo.title}
+          </Button>
         </span>
       ),
     },
@@ -123,7 +142,11 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
     },
     {
       title: '优先级',
-      render: (_: unknown, todo: Todo) => <span data-product-ref={productRef('growth.todo.priority')}><PriorityTag importance={todo.importance} urgency={todo.urgency} /></span>,
+      render: (_: unknown, todo: Todo) => (
+        <span data-product-ref={productRef('growth.todo.priority')}>
+          <PriorityTag importance={todo.importance} urgency={todo.urgency} />
+        </span>
+      ),
     },
     {
       title: '状态',
@@ -149,52 +172,62 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
       <div data-product-ref={productRef('growth.todo.interaction')}>
         <Card className={styles.todoSurface}>
           <Flex className={styles.todoToolbar} align="center" justify="space-between" gap={12}>
-            <Tabs activeKey={tab} onChange={setTab} items={[
-              { key: 'today', label: '当前' },
-              { key: 'calendar', label: '日历' },
-              { key: 'all', label: '全部' },
-            ]} />
+            <Tabs
+              activeKey={tab}
+              onChange={setTab}
+              items={[
+                { key: 'today', label: '当前' },
+                { key: 'calendar', label: '日历' },
+                { key: 'all', label: '全部' },
+              ]}
+            />
             <Space>
-              {tab === 'today' && (
-                <DatePicker value={selectedDate} allowClear={false} onChange={(date) => date && setSelectedDate(date)} />
-              )}
-              {tab !== 'all' && (
-                <Select
-                  value={filter}
-                  style={{ width: 120 }}
-                  options={[{ value: 'all', label: '全部状态' }, ...todoStatuses.map((value) => ({ value, label: statusLabel(value) }))]}
-                  onChange={(value) => setFilter(value as TodoStatus | 'all')}
-                />
-              )}
-              {(isTimeScope || tab === 'all') && selected.length > 0 && <Button onClick={() => setBatchOpen(true)}>批量完成 {selected.length}</Button>}
-              <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'todo' })}>新建待办</Button>
+              {tab === 'all' && selected.length > 0 && <Button onClick={() => setBatchOpen(true)}>批量完成 {selected.length}</Button>}
+              <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'todo' })}>
+                新建待办
+              </Button>
             </Space>
           </Flex>
 
-          {isTimeScope ? (
-            <div className={styles.executionGroups}>
-              <ExecutionGroupList
-                groups={groups}
-                renderItem={(todo) => (
-                  <Flex align="center" className={`${styles.executionItem} ${styles[todo.status]}`} gap={12} key={todo.id}>
-                    <span className={styles.selectionControl}>
-                      <Checkbox checked={selected.includes(todo.id)} onChange={(event) => toggleSelected(todo.id, event.target.checked)} />
-                    </span>
-                    <span className={styles.statusIndicator} aria-hidden="true" />
-                    <Button block className={styles.executionContent} type="text" onClick={() => setDrawer({ kind: 'todo', id: todo.id })}>
-                      <Flex align="flex-start" vertical gap={2}>
-                        <span className={styles.executionTitle}>{todo.title}</span>
-                        <span className={styles.executionMeta}>{relationName(todo)} · 计划 {formatTodoPlan(todo)}</span>
+          {tab === 'today' ? (
+            <div className={styles.dayAgenda} data-product-ref={productRef('growth.todo.view.today')}>
+              <aside className={styles.dayAgendaSidebar}>
+                <DayAgendaCalendar
+                  value={selectedDate}
+                  onChange={setSelectedDate}
+                  visibleMonth={visibleMonth}
+                  onVisibleMonthChange={setVisibleMonth}
+                  itemCounts={calendarCounts}
+                />
+              </aside>
+              <main className={styles.dayAgendaMain}>
+                <header className={styles.dayAgendaToolbar}>
+                  <h2 className={styles.dayAgendaTitle}>{formatDayAgendaTitle(selectedDate)}</h2>
+                </header>
+                <div className={styles.executionGroups}>
+                  <ExecutionGroupList
+                    groups={groups}
+                    renderItem={(todo) => (
+                      <Flex align="center" className={`${styles.executionItem} ${styles[todo.status]}`} gap={12} key={todo.id}>
+                        <span className={styles.statusIndicator} aria-hidden="true" />
+                        <Button block className={styles.executionContent} type="text" onClick={() => setDrawer({ kind: 'todo', id: todo.id })}>
+                          <Flex align="flex-start" vertical gap={2}>
+                            <span className={styles.executionTitle}>{todo.title}</span>
+                            <span className={styles.executionMeta}>
+                              {relationName(todo)} · 计划 {formatTodoPlan(todo)}
+                            </span>
+                          </Flex>
+                        </Button>
+                        <Flex className={styles.executionActions} container="fixed" gap={8}>
+                          <PriorityTag importance={todo.importance} urgency={todo.urgency} />
+                          <StateTag status={todo.status} />
+                          <TodoActions todo={todo} />
+                        </Flex>
                       </Flex>
-                    </Button>
-                    <Flex className={styles.executionActions} container="fixed" gap={8}>
-                      <PriorityTag importance={todo.importance} urgency={todo.urgency} />
-                      <StateTag status={todo.status} />
-                      <TodoActions todo={todo} />
-                    </Flex>
-                  </Flex>
-                )}
-              />
+                    )}
+                  />
+                </div>
+              </main>
             </div>
           ) : tab === 'calendar' ? (
             <Calendar
@@ -206,8 +239,20 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
                 return (
                   <Flex vertical className={styles.calendarCell} gap={3}>
                     {dayTodos.map((todo) => (
-                      <Button className={styles.calendarTodo} key={todo.id} size="small" type="text" title={todo.title} onClick={(event) => { event.stopPropagation(); setDrawer({ kind: 'todo', id: todo.id }); }}>
-                        <span className={styles.calendarTodoTitle}>{formatTodoPlan(todo)} {todo.title}</span>
+                      <Button
+                        className={styles.calendarTodo}
+                        key={todo.id}
+                        size="small"
+                        type="text"
+                        title={todo.title}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setDrawer({ kind: 'todo', id: todo.id });
+                        }}
+                      >
+                        <span className={styles.calendarTodoTitle}>
+                          {formatTodoPlan(todo)} {todo.title}
+                        </span>
                         <StateTag status={todo.status} />
                       </Button>
                     ))}
@@ -279,7 +324,9 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
         </Card>
       </div>
       <Modal title="批量完成待办" open={batchOpen} onOk={batchDone} onCancel={() => setBatchOpen(false)} okText="确认完成" cancelText="取消">
-        <div data-product-ref={productRef('growth.todo.interaction')}><p>将完成已选择的 {Math.min(selected.length, 50)} 条待办。</p></div>
+        <div data-product-ref={productRef('growth.todo.interaction')}>
+          <p>将完成已选择的 {Math.min(selected.length, 50)} 条待办。</p>
+        </div>
       </Modal>
     </>
   );

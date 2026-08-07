@@ -20,13 +20,15 @@
 
 ## 原型对齐边界
 
-桌面端习惯入口为 `/growth/habit/habit-list` 和 `/growth/habit/habit-detail/:id`。列表负责筛选、创建和进入详情；详情负责编辑、暂停/恢复、放弃、删除和当前周期待办打卡。独立习惯统计页已从导航移除，工作台展示连续天数摘要。
+功能与样式真源均为 **Prototype**：主路径是列表/卡片就地打卡（完成 / 未完成），不必先进入详情。Desktop 路由 `/growth/habit/habit-list` 与 `/growth/habit/habit-detail/:id` 可保留，详情降为次要入口（编辑规则、暂停/恢复、放弃等）。工作台习惯区复用同一套 Todo 结算接口完成就地打卡。
 
-| 产品/原型语义 | 当前实现 | 需要明确的边界 |
+| 产品/原型语义 | 当前实现 | 对齐方案 |
 | --- | --- | --- |
-| 状态 | 当前枚举为 `active / paused / completed / abandoned` | render 使用 `HabitStatus` 与服务端保持一致；暂停、激活和放弃均通过受控服务方法完成。 |
-| 目标关联 | 习惯 Entity/VO 支持目标关系和筛选 | 创建与更新会校验目标关系；列表筛选和详情展示复用同一 VO。 |
-| 重复规则 | 保存和读取都会调用共享规则断言 | 习惯不能使用 `none`，且配置变化必须校验完整规则。 |
-| 周期待办 | Habit 返回 `cycleTodoId`，TodoService 负责结算并推进下一周期 | 完成或放弃习惯待办会同步更新习惯统计和下一次日期；暂停、完成或放弃习惯后不再生成新的周期待办。 |
+| HabitCard 字段 | 卡片含打卡 | 标题、目标、`执行规则：{label}`、连续 Progress、完成/未完成/编辑；弱化难度/重要度堆砌。`formatHabitRepeatLabel` 映射 repeatMode/end。 |
+| 工作台习惯行 | 就地打卡 | meta=`规则 · 连续 N 天 · 目标`；完成/未完成调用 Todo done/abandon。 |
+| 列表就地打卡 | HabitCard footer | `cycleTodoId` 存在时完成/未完成；刷新习惯列表。 |
+| 详情 | `/habit-detail/:id` | 次要入口：编辑规则、暂停/恢复、放弃、删除。 |
+| 状态 | `active / paused / completed / abandoned` | 不变；受控服务方法。 |
+| 周期待办 | `cycleTodoId` + TodoService | 不变；见 [重复规则](./repeat.md)。 |
 
-重复规则实现细节见 [重复规则](./repeat.md)。
+不做数据迁移；本地测试数据可保留。

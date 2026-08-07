@@ -51,6 +51,8 @@
 
 计时状态必须清晰可见；运行中的计时器最小化后仍保持浮层可见。重置不会保留记录，结束并记录会保留本次专注。关联任务只是组织方式，不能阻止用户记录独立专注。
 
+Desktop 样式例外：迷你浮层保持 Desktop 现状；全屏模式采用 Desktop 原页面级 track-time / timer 样式，不以原型像素级为约束。Growth 其余页面视觉以原型为准。
+
 <!-- product-ref: growth.track-time.rule.task-optional -->
 ### 任务可选关联
 

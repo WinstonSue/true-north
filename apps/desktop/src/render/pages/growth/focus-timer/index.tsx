@@ -1,8 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Button, Card, Flex, Select, Space, Tooltip, message } from '@sue/design-web-react';
-import { ClockCircleOutlined, CompressOutlined, ExpandOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
+import { CompressOutlined, ExpandOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import { TaskStatus, TrackTimeRelatedType } from '@true-north/enum';
 import { TaskService, TrackTimeController } from '@true-north/web-service';
+import Flip from '@/pages/timer/normal/Flip';
+import { getTimeArr } from '@/pages/timer/utils';
 import styles from './style.module.less';
 
 const DEFAULT_DURATION = 25 * 60;
@@ -12,7 +14,6 @@ type FocusTimerContextValue = {
 };
 
 type TaskOption = { value: string; label: string };
-type Session = { id: string; title: string; duration: number; startedAt?: string };
 
 const FocusTimerContext = createContext<FocusTimerContextValue | null>(null);
 
@@ -30,32 +31,14 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
   const [elapsed, setElapsed] = useState(0);
   const [startedAt, setStartedAt] = useState<number>();
   const [taskOptions, setTaskOptions] = useState<TaskOption[]>([]);
-  const [sessions, setSessions] = useState<Session[]>([]);
 
   const loadTimerData = useCallback(async () => {
     try {
-      const [taskResult, recordResult] = await Promise.all([
-        TaskService.findByFilter({}),
-        TrackTimeController.list(),
-      ]);
+      const taskResult = await TaskService.findByFilter({});
       setTaskOptions(
         (taskResult?.list || [])
           .filter((task) => task.status !== TaskStatus.DONE && task.status !== TaskStatus.ABANDONED)
           .map((task) => ({ value: task.id, label: task.name })),
-      );
-      const today = new Date().toDateString();
-      setSessions(
-        (recordResult?.list || [])
-          .filter((record) => record.startAt && new Date(record.startAt).toDateString() === today)
-          .sort((left, right) => new Date(right.startAt || 0).getTime() - new Date(left.startAt || 0).getTime())
-          .map((record) => ({
-            id: record.id,
-            title: record.relatedId
-              ? taskResult?.list?.find((task) => task.id === record.relatedId)?.name || '关联任务'
-              : '独立专注',
-            duration: record.duration,
-            startedAt: record.startAt,
-          })),
       );
     } catch (error) {
       console.error('加载专注计时器数据失败:', error);
@@ -150,7 +133,6 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
           elapsed={elapsed}
           fullScreen={fullScreen}
           running={running}
-          sessions={sessions}
           taskId={taskId}
           taskName={taskName}
           taskOptions={taskOptions}
@@ -170,7 +152,6 @@ function FocusTimerOverlay({
   elapsed,
   fullScreen,
   running,
-  sessions,
   taskId,
   taskName,
   taskOptions,
@@ -184,7 +165,6 @@ function FocusTimerOverlay({
   elapsed: number;
   fullScreen: boolean;
   running: boolean;
-  sessions: Session[];
   taskId?: string;
   taskName: string;
   taskOptions: TaskOption[];
@@ -196,6 +176,7 @@ function FocusTimerOverlay({
   onToggleRunning: () => void;
 }) {
   const remaining = Math.max(DEFAULT_DURATION - elapsed, 0);
+  const timeArr = getTimeArr(remaining);
   const controls = (
     <Space size={8}>
       <Tooltip title="重置计时">
@@ -227,20 +208,54 @@ function FocusTimerOverlay({
   if (fullScreen) {
     return (
       <div className={styles.fullscreen}>
-        <Flex vertical className={styles.fullscreenContent} align="center" justify="center" gap={28}>
+        <div className={styles.fullscreenContent}>
           <Flex className={styles.fullscreenHeader} align="center" justify="space-between">
-            <div><h1>专注计时</h1><p>记录此刻真正投入的时间</p></div>
-            <Tooltip title="最小化"><Button type="text" icon={<CompressOutlined />} aria-label="最小化计时器" onClick={onToggleFullScreen} /></Tooltip>
+            <div>
+              <h1>专注计时</h1>
+              <p>{taskName}</p>
+            </div>
+            <Select
+              allowClear
+              className={styles.fullscreenTaskSelector}
+              value={taskId}
+              placeholder="选择任务（可选）"
+              options={taskOptions}
+              onChange={(value) => onSetTaskId(value as string | undefined)}
+            />
           </Flex>
-          <Flex vertical align="center" gap={20}>
-            {selector}
-            <div className={styles.fullTimer}>{formatSeconds(remaining)}</div>
-            <span className={styles.taskName}>{taskName}</span>
-            {controls}
-            <Button type="link" icon={<ClockCircleOutlined />} onClick={onFinish}>结束并记录</Button>
-          </Flex>
-          <SessionList sessions={sessions} />
-        </Flex>
+          <div className={styles.clock}>
+            <div className={styles.clockContainer}>
+              <Flip total={9} current={timeArr[0]} />
+              <Flip total={9} current={timeArr[1]} />
+              <div className={styles.colon} />
+              <Flip total={5} current={timeArr[2]} />
+              <Flip total={9} current={timeArr[3]} />
+              <div className={styles.colon} />
+              <Flip total={5} current={timeArr[4]} />
+              <Flip total={9} current={timeArr[5]} />
+            </div>
+          </div>
+          <div className={styles.fullscreenActions}>
+            <Tooltip title="重置计时">
+              <Button shape="circle" icon={<ReloadOutlined />} aria-label="重置计时" onClick={onReset} />
+            </Tooltip>
+            <Tooltip title={running ? '暂停计时' : '开始计时'}>
+              <Button
+                type="primary"
+                shape="circle"
+                icon={running ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                aria-label={running ? '暂停计时' : '开始计时'}
+                onClick={onToggleRunning}
+              />
+            </Tooltip>
+            <button type="button" className={styles.recordButton} onClick={onFinish}>
+              结束并记录
+            </button>
+            <Tooltip title="最小化">
+              <Button shape="circle" icon={<CompressOutlined />} aria-label="最小化计时器" onClick={onToggleFullScreen} />
+            </Tooltip>
+          </div>
+        </div>
       </div>
     );
   }
@@ -266,23 +281,8 @@ function FocusTimerOverlay({
   );
 }
 
-function SessionList({ sessions }: { sessions: Session[] }) {
-  return (
-    <Card className={styles.sessionPanel} title="今日时间记录">
-      {sessions.length ? (
-        <Flex vertical gap={10}>{sessions.map((session) => <Flex key={session.id} align="center" justify="space-between"><span>{session.title}</span><b>{formatDuration(session.duration)}</b></Flex>)}</Flex>
-      ) : <span className={styles.emptySessions}>尚无时间记录</span>}
-    </Card>
-  );
-}
-
 function formatSeconds(total: number) {
   const minutes = Math.floor(total / 60).toString().padStart(2, '0');
   const seconds = (total % 60).toString().padStart(2, '0');
   return `${minutes}:${seconds}`;
-}
-
-function formatDuration(total: number) {
-  const minutes = Math.floor(total / 60);
-  return minutes >= 60 ? `${Math.floor(minutes / 60)} 小时 ${minutes % 60} 分钟` : `${minutes} 分钟`;
 }

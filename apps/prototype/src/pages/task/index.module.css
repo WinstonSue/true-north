@@ -1,9 +1,14 @@
 .taskSurface { overflow: hidden; }
 .taskSurface :global(.sue-card-body) { padding: 0 20px 16px; }
-.taskToolbar { min-height: 48px; }
-.taskSurface :global(.sue-tabs-nav) { margin-bottom: 8px; }
-.taskSurface :global(.sue-tabs-tab) { padding: 16px 2px 12px; }
-.taskSurface :global(.sue-tabs-content-holder) { min-height: 276px; }
+.taskToolbar { min-height: 48px; border-bottom: 1px solid var(--sue-color-border-secondary); margin-bottom: 12px; }
+.taskTabs { min-width: 0; flex: 1 1 auto; }
+.taskToolbar :global(.sue-tabs-nav) { margin-bottom: 0; }
+.taskToolbar :global(.sue-tabs-tab) { padding: 16px 2px 12px; }
+.dayAgenda { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; min-height: 420px; }
+.dayAgendaSidebar { border: 1px solid var(--sue-color-border-secondary); border-radius: var(--sue-border-radius); background: var(--sue-color-bg-container); }
+.dayAgendaMain { min-width: 0; }
+.dayAgendaToolbar { min-height: 40px; margin-bottom: 4px; }
+.dayAgendaTitle { margin: 0; font-size: 20px; font-weight: 600; line-height: 28px; }
 .executionGroups :global(.sue-collapse-header) { padding: 10px 0 !important; color: var(--sue-color-text-secondary); font-size: 13px; font-weight: 600; }
 .executionGroups :global(.sue-collapse-content-box) { padding: 0 !important; }
 .executionItem { min-width: 0; min-height: 64px; padding: 10px 4px; border-bottom: 1px solid var(--sue-color-border-secondary); }
@@ -34,5 +39,5 @@
 .calendarTask.done { border-left-color: var(--sue-color-success); }
 .calendarTask.abandoned { border-left-color: var(--sue-color-text-quaternary); }
 .calendarTaskTitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; }
-.linkageSummary { margin-top: 8px; padding: 12px 0 0; border-top: 1px solid var(--sue-color-border-secondary); color: var(--sue-color-text-secondary); font-size: 12px; }
-.linkageSummary b { margin-right: 8px; color: var(--sue-color-text); font-size: 13px; }
+.calendarAdd { width: 100%; height: 23px; padding: 0 4px; justify-content: flex-start; color: var(--sue-color-text-secondary); border: 1px dashed var(--sue-color-border); }
+.calendarAdd:hover { color: var(--sue-color-primary); border-color: var(--sue-color-primary-border); }

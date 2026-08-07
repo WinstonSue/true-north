@@ -1,9 +1,14 @@
 .todoSurface { overflow: hidden; }
 .todoSurface :global(.sue-card-body) { padding: 0 20px 16px; }
-.todoToolbar { min-height: 57px; border-bottom: 1px solid var(--sue-color-border-secondary); }
+.todoToolbar { min-height: 57px; border-bottom: 1px solid var(--sue-color-border-secondary); margin-bottom: 12px; }
 .todoToolbar > * { min-width: 0; }
 .todoToolbar :global(.sue-tabs-nav) { margin-bottom: 0; }
 .todoToolbar :global(.sue-tabs-tab) { padding: 16px 2px 12px; }
+.dayAgenda { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 16px; min-height: 420px; }
+.dayAgendaSidebar { border: 1px solid var(--sue-color-border-secondary); border-radius: var(--sue-border-radius); background: var(--sue-color-bg-container); }
+.dayAgendaMain { min-width: 0; }
+.dayAgendaToolbar { min-height: 40px; margin-bottom: 4px; }
+.dayAgendaTitle { margin: 0; font-size: 20px; font-weight: 600; line-height: 28px; }
 .filterToolbar { min-height: 32px; }
 .resultCount { color: var(--sue-color-text-tertiary); font-size: 13px; }
 .filterFields { padding: 10px; border: 1px solid var(--sue-color-border-secondary); border-radius: var(--sue-border-radius); background: var(--sue-color-fill-quaternary); }
@@ -13,7 +18,6 @@
 .executionGroups :global(.sue-collapse-content-box) { padding: 0 !important; }
 .executionItem { min-width: 0; min-height: 64px; padding: 10px 4px; border-bottom: 1px solid var(--sue-color-border-secondary); }
 .executionItem:last-child { border-bottom: 0; }
-.selectionControl { flex: 0 0 auto; }
 .statusIndicator { width: 3px; height: 34px; flex: 0 0 3px; border-radius: var(--sue-border-radius-sm); background: var(--sue-color-primary); }
 .executionContent { min-width: 0; flex: 1 1 auto; padding: 0 !important; justify-content: flex-start !important; text-align: left; }
 .executionTitle, .executionMeta { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
