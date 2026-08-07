@@ -1,70 +1,207 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Collapse, Flex } from '@sue/design-web-react';
+import { Collapse, Empty, Flex } from '@sue/design-web-react';
 import { TaskService } from '@true-north/web-service';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
 import TaskList from '../../components/TaskList';
+import DayAgendaCalendar, {
+  formatDayAgendaTitle,
+} from '../../components/DayAgenda';
+import { useDayAgendaDate } from '../../components/DayAgenda/context';
 import { openTaskDetailDrawer } from '../detail/TaskDetailDrawer';
 import styles from './style.module.less';
 import { onTaskChanged } from '../../events';
 
 type TaskGroups = {
   expired: TaskWithoutRelationsVo[];
-  today: TaskWithoutRelationsVo[];
+  scheduled: TaskWithoutRelationsVo[];
   done: TaskWithoutRelationsVo[];
   abandoned: TaskWithoutRelationsVo[];
 };
 
-export default function TaskToday() {
-  const [groups, setGroups] = useState<TaskGroups>({ expired: [], today: [], done: [], abandoned: [] });
+const emptyGroups: TaskGroups = {
+  expired: [],
+  scheduled: [],
+  done: [],
+  abandoned: [],
+};
 
-  const refreshData = async () => {
-    const today = dayjs().format('YYYY-MM-DD');
-    const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+export default function TaskToday() {
+  const { selectedDate, setSelectedDate, visibleMonth, setVisibleMonth } =
+    useDayAgendaDate();
+  const [groups, setGroups] = useState<TaskGroups>(emptyGroups);
+  const [calendarCounts, setCalendarCounts] = useState<Record<string, number>>(
+    {},
+  );
+  const selectedDateText = selectedDate.format('YYYY-MM-DD');
+  const isSelectedToday = selectedDate.isSame(dayjs(), 'day');
+
+  const refreshData = useCallback(async () => {
     const activeStatuses = [TaskStatus.TODO, TaskStatus.DOING];
-    const mergeActive = (responses: Array<{ list?: TaskWithoutRelationsVo[] } | undefined>) =>
-      [...new Map(responses.flatMap((response) => response?.list || []).map((task) => [task.id, task])).values()]
-        .sort((a, b) => (a.startAt || '').localeCompare(b.startAt || '') || (a.endAt || '').localeCompare(b.endAt || ''));
-    const [expiredTodo, expiredDoing, todayTodo, todayDoing, done, abandoned] = await Promise.all([
-      ...activeStatuses.map((status) => TaskService.findByFilter({ status, endDateEnd: yesterday })),
-      ...activeStatuses.map((status) => TaskService.findByFilter({ status, startDateEnd: today, endDateStart: today })),
-      TaskService.findByFilter({ status: TaskStatus.DONE, doneDateStart: today, doneDateEnd: today }),
-      TaskService.findByFilter({ status: TaskStatus.ABANDONED, abandonedDateStart: today, abandonedDateEnd: today }),
+    const mergeActive = (
+      responses: Array<{ list?: TaskWithoutRelationsVo[] } | undefined>,
+    ) =>
+      [
+        ...new Map(
+          responses
+            .flatMap((response) => response?.list || [])
+            .map((task) => [task.id, task]),
+        ).values(),
+      ].sort(
+        (a, b) =>
+          (a.startAt || '').localeCompare(b.startAt || '') ||
+          (a.endAt || '').localeCompare(b.endAt || ''),
+      );
+    const [scheduledTodo, scheduledDoing, done, abandoned] = await Promise.all([
+      ...activeStatuses.map((status) =>
+        TaskService.findByFilter({
+          status,
+          startDateEnd: selectedDateText,
+          endDateStart: selectedDateText,
+        }),
+      ),
+      TaskService.findByFilter({
+        status: TaskStatus.DONE,
+        doneDateStart: selectedDateText,
+        doneDateEnd: selectedDateText,
+      }),
+      TaskService.findByFilter({
+        status: TaskStatus.ABANDONED,
+        abandonedDateStart: selectedDateText,
+        abandonedDateEnd: selectedDateText,
+      }),
     ]);
+
+    let expired: TaskWithoutRelationsVo[] = [];
+    if (isSelectedToday) {
+      const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+      const [expiredTodo, expiredDoing] = await Promise.all(
+        activeStatuses.map((status) =>
+          TaskService.findByFilter({ status, endDateEnd: yesterday }),
+        ),
+      );
+      expired = mergeActive([expiredTodo, expiredDoing]);
+    }
+
     setGroups({
-      expired: mergeActive([expiredTodo, expiredDoing]),
-      today: mergeActive([todayTodo, todayDoing]),
+      expired,
+      scheduled: mergeActive([scheduledTodo, scheduledDoing]),
       done: done?.list || [],
       abandoned: abandoned?.list || [],
     });
-  };
+  }, [isSelectedToday, selectedDateText]);
+
+  const refreshCalendarCounts = useCallback(async () => {
+    const visibleStart = visibleMonth.startOf('month').startOf('week');
+    const visibleEnd = visibleMonth.endOf('month').endOf('week');
+    const activeStatuses = [TaskStatus.TODO, TaskStatus.DOING];
+    const responses = await Promise.all(
+      activeStatuses.map((status) =>
+        TaskService.findByFilter({
+          status,
+          startDateEnd: visibleEnd.format('YYYY-MM-DD'),
+          endDateStart: visibleStart.format('YYYY-MM-DD'),
+        }),
+      ),
+    );
+    const taskList = [
+      ...new Map(
+        responses
+          .flatMap((response) => response?.list || [])
+          .map((task) => [task.id, task]),
+      ).values(),
+    ];
+    const counts: Record<string, number> = {};
+
+    taskList.forEach((task) => {
+      const taskStart = dayjs(task.startAt);
+      const taskEnd = dayjs(task.endAt);
+      if (!taskStart.isValid() || !taskEnd.isValid()) return;
+
+      let cursor = taskStart.isBefore(visibleStart, 'day')
+        ? visibleStart
+        : taskStart.startOf('day');
+      const lastDate = taskEnd.isAfter(visibleEnd, 'day')
+        ? visibleEnd
+        : taskEnd.startOf('day');
+      while (!cursor.isAfter(lastDate, 'day')) {
+        const dateKey = cursor.format('YYYY-MM-DD');
+        counts[dateKey] = (counts[dateKey] || 0) + 1;
+        cursor = cursor.add(1, 'day');
+      }
+    });
+
+    setCalendarCounts(counts);
+  }, [visibleMonth]);
 
   useEffect(() => {
     void refreshData();
-    return onTaskChanged(() => { void refreshData(); });
-  }, []);
+  }, [refreshData]);
 
-  const renderGroup = (key: keyof TaskGroups, label: string) => groups[key].length ? (
-    <Collapse.Panel header={label} key={key}>
-      <TaskList
-        taskList={groups[key]}
-        onClickTask={async (id) => { openTaskDetailDrawer({ taskId: id, onRefresh: refreshData }); }}
-        refreshTaskList={refreshData}
-      />
-    </Collapse.Panel>
-  ) : null;
+  useEffect(() => {
+    void refreshCalendarCounts();
+  }, [refreshCalendarCounts]);
+
+  useEffect(
+    () =>
+      onTaskChanged(() => {
+        void refreshData();
+        void refreshCalendarCounts();
+      }),
+    [refreshCalendarCounts, refreshData],
+  );
+
+  const renderGroup = (key: keyof TaskGroups, label: string) =>
+    groups[key].length ? (
+      <Collapse.Panel header={label} key={key}>
+        <TaskList
+          taskList={groups[key]}
+          onClickTask={async (id) => {
+            openTaskDetailDrawer({ taskId: id, onRefresh: refreshData });
+          }}
+          refreshTaskList={refreshData}
+        />
+      </Collapse.Panel>
+    ) : null;
+
+  const hasItems = Object.values(groups).some((group) => group.length > 0);
 
   return (
     <Flex vertical container="full" className={styles.page}>
-      <Flex container="fill" className={styles.content}>
-        <Collapse defaultActiveKey={['expired', 'today']} className={styles.collapse}>
-          {renderGroup('expired', '已过期')}
-          {renderGroup('today', '今日')}
-          {renderGroup('done', '已完成')}
-          {renderGroup('abandoned', '已放弃')}
-        </Collapse>
-      </Flex>
+      <div className={styles.layout}>
+        <aside className={styles.sidebar}>
+          <DayAgendaCalendar
+            value={selectedDate}
+            onChange={setSelectedDate}
+            visibleMonth={visibleMonth}
+            onVisibleMonthChange={setVisibleMonth}
+            itemCounts={calendarCounts}
+          />
+        </aside>
+        <main className={styles.main}>
+          <header className={styles.toolbar}>
+            <h1 className={styles.title}>
+              {formatDayAgendaTitle(selectedDate)}
+            </h1>
+          </header>
+          <div className={styles.content}>
+            {hasItems ? (
+              <Collapse
+                defaultActiveKey={['expired', 'scheduled', 'done', 'abandoned']}
+                className={styles.collapse}
+              >
+                {isSelectedToday && renderGroup('expired', '已过期')}
+                {renderGroup('scheduled', '当日任务')}
+                {renderGroup('done', '已完成')}
+                {renderGroup('abandoned', '已放弃')}
+              </Collapse>
+            ) : (
+              <Empty description="当天没有任务" className={styles.empty} />
+            )}
+          </div>
+        </main>
+      </div>
     </Flex>
   );
 }

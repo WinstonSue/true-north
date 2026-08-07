@@ -1,5 +1,7 @@
 # 习惯管理
 
+桌面端当前入口为习惯列表和习惯详情；详情负责编辑、暂停/恢复、放弃、删除与周期待办打卡，工作台只展示连续天数摘要。独立习惯统计和打卡日历已废弃，不属于当前桌面路由。
+
 <!-- product-wiki:managed:start -->
 ## 产品规格（受管）
 
@@ -32,8 +34,8 @@
 | --- | --- | --- | --- | --- | --- |
 | 习惯列表 | `habit` | 日常打卡与进度查看 | 路线图 | 部分覆盖 | `growth.habit.view.list` |
 | 习惯详情 | `habit` | 查看关联目标和日志 | 路线图 | 部分覆盖 | `growth.habit.view.detail` |
-| 习惯统计 | `habit` | 复盘完成率与连续执行情况 | 路线图 | 部分覆盖 | `growth.habit.view.statistics` |
-| 打卡日历 | `habit` | 观察习惯完成密度 | 路线图 | 未覆盖 | `growth.habit.view.calendar` |
+| 习惯统计 | `habit` | 复盘完成率与连续执行情况 | 已废弃 | 未覆盖 | `growth.habit.view.statistics` |
+| 打卡日历 | `habit` | 观察习惯完成密度 | 已废弃 | 未覆盖 | `growth.habit.view.calendar` |
 
 ### 规则索引
 

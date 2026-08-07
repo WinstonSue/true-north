@@ -20,11 +20,13 @@
 
 ## 原型对齐边界
 
+桌面端习惯入口为 `/growth/habit/habit-list` 和 `/growth/habit/habit-detail/:id`。列表负责筛选、创建和进入详情；详情负责编辑、暂停/恢复、放弃、删除和当前周期待办打卡。独立习惯统计页已从导航移除，工作台展示连续天数摘要。
+
 | 产品/原型语义 | 当前实现 | 需要明确的边界 |
 | --- | --- | --- |
-| 状态 | 当前枚举沿用 `todo / doing / done / abandoned` | ProductWiki 使用 `active / paused / completed / abandoned`；未完成枚举迁移前，render 不应把产品状态直接作为 IPC 枚举。 |
-| 目标关联 | 习惯 Entity/VO 支持目标关系和筛选 | “至少一个活跃目标”的校验尚需在 Service 层作为业务规则保证。 |
+| 状态 | 当前枚举为 `active / paused / completed / abandoned` | render 使用 `HabitStatus` 与服务端保持一致；暂停、激活和放弃均通过受控服务方法完成。 |
+| 目标关联 | 习惯 Entity/VO 支持目标关系和筛选 | 创建与更新会校验目标关系；列表筛选和详情展示复用同一 VO。 |
 | 重复规则 | 保存和读取都会调用共享规则断言 | 习惯不能使用 `none`，且配置变化必须校验完整规则。 |
-| 周期待办 | 当前模块没有单独暴露 `cycleTodo` 领域契约 | “一个活跃习惯对应一个未结算周期待办”的创建、结算和逾期编排需由 Habit 与 Todo 服务协同实现。 |
+| 周期待办 | Habit 返回 `cycleTodoId`，TodoService 负责结算并推进下一周期 | 完成或放弃习惯待办会同步更新习惯统计和下一次日期；暂停、完成或放弃习惯后不再生成新的周期待办。 |
 
 重复规则实现细节见 [重复规则](./repeat.md)。

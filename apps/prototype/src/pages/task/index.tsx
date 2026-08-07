@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { Alert, Button, Calendar, Card, Col, DatePicker, Flex, Row, Select, Space, Statistic, Table, Tabs, Tooltip } from '@sue/design-web-react';
+import { Alert, Button, Calendar, Card, DatePicker, Flex, Select, Space, Table, Tabs, Tooltip } from '@sue/design-web-react';
 import { Check, Filter, Play, Plus, RotateCcw } from 'lucide-react';
 import { ExecutionGroupList, PriorityTag, StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
@@ -23,6 +23,7 @@ const taskStatuses: TaskStatus[] = ['todo', 'doing', 'done', 'abandoned'];
 
 export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusTask, onOpenTaskDetail }: Props) {
   const [activeTab, setActiveTab] = useState('today');
+  const [selectedDate, setSelectedDate] = useState(() => dayjs(TODAY));
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [statuses, setStatuses] = useState<TaskStatus[]>([]);
   const [relations, setRelations] = useState<string[]>([]);
@@ -115,7 +116,10 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
   return (
     <>
       <Card className={styles.taskSurface} data-product-ref={productRef('growth.task.interaction')}>
-        <Flex className={styles.taskToolbar} align="center" justify="end">
+        <Flex className={styles.taskToolbar} align="center" justify="space-between">
+          {activeTab === 'today' ? (
+            <DatePicker value={selectedDate} allowClear={false} onChange={(date) => date && setSelectedDate(date)} />
+          ) : <span />}
           <Button type="primary" icon={<Plus size={15} />} onClick={() => setDrawer({ kind: 'task' })}>新建任务</Button>
         </Flex>
         <Tabs
@@ -124,13 +128,8 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
           items={[
             {
               key: 'today',
-              label: '今日',
-              children: <TaskExecutionList scope="today" tasks={tasks} relationName={relationName} onOpenTaskDetail={onOpenTaskDetail} updateTask={updateTask} onFocusTask={onFocusTask} />,
-            },
-            {
-              key: 'week',
-              label: '本周',
-              children: <TaskExecutionList scope="week" tasks={tasks} relationName={relationName} onOpenTaskDetail={onOpenTaskDetail} updateTask={updateTask} onFocusTask={onFocusTask} />,
+              label: '当前',
+              children: <TaskExecutionList date={selectedDate.format('YYYY-MM-DD')} tasks={tasks} relationName={relationName} onOpenTaskDetail={onOpenTaskDetail} updateTask={updateTask} onFocusTask={onFocusTask} />,
             },
             {
               key: 'calendar',
@@ -231,11 +230,6 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
                 </Flex>
               ),
             },
-            {
-              key: 'statistics',
-              label: '统计',
-              children: <TaskStatistics tasks={tasks} />,
-            },
           ]}
         />
         <Flex className={styles.linkageSummary} align="center" justify="space-between" wrap="wrap" gap={8} data-product-ref={productRef('growth.task.rule.single-parent')}>
@@ -248,23 +242,23 @@ export function TasksPage({ tasks, goals, todos, setDrawer, updateTask, onFocusT
 }
 
 function TaskExecutionList({
-  scope,
+  date,
   tasks,
   relationName,
   onOpenTaskDetail,
   updateTask,
   onFocusTask,
 }: {
-  scope: 'today' | 'week';
+  date: string;
   tasks: Task[];
   relationName: (task: Task) => string;
   onOpenTaskDetail: (id: string) => void;
   updateTask: (id: string, patch: Partial<Task>) => void;
   onFocusTask: (task: Task) => void;
 }) {
-  const groups = groupExecutionItems(tasks, scope, TODAY, (task) => ({ start: task.plannedStart, end: task.plannedEnd }));
+  const groups = groupExecutionItems(tasks, 'today', date, (task) => ({ start: task.plannedStart, end: task.plannedEnd }));
   return (
-    <div className={styles.executionGroups} data-product-ref={productRef(scope === 'today' ? 'growth.task.view.today' : 'growth.task.view.week')}>
+    <div className={styles.executionGroups} data-product-ref={productRef('growth.task.view.today')}>
       <ExecutionGroupList
         groups={groups}
         renderItem={(task) => (
@@ -299,17 +293,4 @@ function plannedDates(task: Task) {
   const dates = [];
   for (let date = task.plannedStart; date <= task.plannedEnd; date = addDays(date, 1)) dates.push(date);
   return dates;
-}
-
-function TaskStatistics({ tasks }: { tasks: Task[] }) {
-  const completed = tasks.filter((task) => task.status === 'done').length;
-  const completionRate = Math.round((completed / Math.max(1, tasks.length)) * 100);
-  return (
-    <Row gutter={[12, 12]} className={styles.statistics} data-product-ref={productRef('growth.task.view.statistics')}>
-      <Col xs={12} md={6}><div className={styles.statItem}><Statistic title="任务总数" value={tasks.length} suffix="项" /></div></Col>
-      <Col xs={12} md={6}><div className={`${styles.statItem} ${styles.primaryStat}`}><Statistic title="完成率" value={completionRate} suffix="%" /></div></Col>
-      <Col xs={12} md={6}><div className={styles.statItem}><Statistic title="进行中" value={tasks.filter((task) => task.status === 'doing').length} suffix="项" /></div></Col>
-      <Col xs={12} md={6}><div className={styles.statItem}><Statistic title="待开始" value={tasks.filter((task) => task.status === 'todo').length} suffix="项" /></div></Col>
-    </Row>
-  );
 }

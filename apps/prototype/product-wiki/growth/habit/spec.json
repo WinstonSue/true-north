@@ -88,15 +88,15 @@
       "prototypePage": "habit",
       "scenario": "复盘完成率与连续执行情况",
       "reference": "growth.habit.view.statistics",
-      "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none"
     },
     {
       "id": "calendar",
       "name": "打卡日历",
       "prototypePage": "habit",
       "scenario": "观察习惯完成密度",
-      "productStatus": "roadmap",
+      "productStatus": "deprecated",
       "prototypeCoverage": "none",
       "reference": "growth.habit.view.calendar"
     }

@@ -19,6 +19,9 @@ type Props = {
 
 export function Workbench({ goals, tasks, todos, habits, onNavigate, completeTodo, markTodoIncomplete }: Props) {
   const due = todos.filter((todo) => todo.status !== 'done' && todo.planned <= TODAY).sort(compareTodoPlan);
+  const taskCompleted = tasks.filter((task) => task.status === 'done').length;
+  const todoCompleted = todos.filter((todo) => todo.status === 'done').length;
+  const activeHabits = habits.filter((habit) => habit.status === 'active').length;
   return (
     <>
       <Row gutter={[16, 16]}>
@@ -50,11 +53,40 @@ export function Workbench({ goals, tasks, todos, habits, onNavigate, completeTod
         <Col xs={24} sm={12} lg={6}>
           <div data-product-ref={productRef('growth.habit.metrics')}>
             <Card>
-              <Statistic title="习惯连续" value={Math.max(...habits.map((habit) => habit.streak))} suffix="天" />
+              <Statistic title="习惯连续" value={Math.max(0, ...habits.map((habit) => habit.streak))} suffix="天" />
             </Card>
           </div>
         </Col>
       </Row>
+      <section className={styles.statistics} aria-label="执行概览">
+        <h2>执行概览</h2>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}>
+            <Card title="任务">
+              <div className={styles.statGrid}>
+                <Statistic title="完成率" value={Math.round(taskCompleted / Math.max(1, tasks.length) * 100)} suffix="%" />
+                <Statistic title="进行中" value={tasks.filter((task) => task.status === 'doing').length} suffix="项" />
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} md={8}>
+            <Card title="待办">
+              <div className={styles.statGrid}>
+                <Statistic title="完成率" value={Math.round(todoCompleted / Math.max(1, todos.length) * 100)} suffix="%" />
+                <Statistic title="待处理" value={todos.filter((todo) => todo.status === 'todo' || todo.status === 'in_progress').length} suffix="项" />
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} md={8}>
+            <Card title="习惯">
+              <div className={styles.statGrid}>
+                <Statistic title="活跃" value={activeHabits} suffix="个" />
+                <Statistic title="已完成" value={habits.filter((habit) => habit.status === 'completed').length} suffix="个" />
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      </section>
       <Row gutter={[16, 16]} className={styles.sectionRow}>
         <Col xs={24} lg={14}>
           <div data-product-ref={productRef('growth.todo.overview')}>
@@ -99,7 +131,7 @@ export function Workbench({ goals, tasks, todos, habits, onNavigate, completeTod
               title="习惯打卡"
               extra={
                 <Button type="link" onClick={() => onNavigate('/habits')}>
-                  查看统计
+                  查看习惯
                 </Button>
               }
             >

@@ -1,6 +1,69 @@
 {
   "changes": [
     {
+      "version": "v0.1.1",
+      "date": "2026-08-07",
+      "event": "deprecated",
+      "summary": "桌面端不再提供独立目标健康面板，结构与执行摘要由目标详情和工作台承载。",
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none",
+      "feature": { "key": "growth.goal:view:dashboard", "scope": "view", "moduleId": "growth.goal", "moduleTitle": "目标管理", "name": "目标健康面板", "reference": "growth.goal.view.dashboard" }
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-08-07",
+      "event": "deprecated",
+      "summary": "桌面端不再提供独立习惯统计页，连续天数摘要收敛到习惯详情和工作台。",
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none",
+      "feature": { "key": "growth.habit:view:statistics", "scope": "view", "moduleId": "growth.habit", "moduleTitle": "习惯管理", "name": "习惯统计", "reference": "growth.habit.view.statistics" }
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-08-07",
+      "event": "deprecated",
+      "summary": "桌面端不再提供独立习惯打卡日历，周期执行记录由习惯详情和待办日程展示。",
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none",
+      "feature": { "key": "growth.habit:view:calendar", "scope": "view", "moduleId": "growth.habit", "moduleTitle": "习惯管理", "name": "打卡日历", "reference": "growth.habit.view.calendar" }
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-08-07",
+      "event": "deprecated",
+      "summary": "桌面端移除独立周视图，统一由可切换日期的当前任务视图与任务日历承载。",
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none",
+      "feature": { "key": "growth.task:view:week", "scope": "view", "moduleId": "growth.task", "moduleTitle": "任务管理", "name": "本周任务", "reference": "growth.task.view.week" }
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-08-07",
+      "event": "deprecated",
+      "summary": "桌面端移除独立任务统计页，统计摘要统一收敛到工作台。",
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none",
+      "feature": { "key": "growth.task:view:statistics", "scope": "view", "moduleId": "growth.task", "moduleTitle": "任务管理", "name": "任务统计", "reference": "growth.task.view.statistics" }
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-08-07",
+      "event": "deprecated",
+      "summary": "桌面端移除独立周视图，统一由可切换日期的当前待办视图与待办日历承载。",
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none",
+      "feature": { "key": "growth.todo:view:week", "scope": "view", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "本周待办", "reference": "growth.todo.view.week" }
+    },
+    {
+      "version": "v0.1.1",
+      "date": "2026-08-07",
+      "event": "deprecated",
+      "summary": "桌面端移除独立待办统计页，统计摘要统一收敛到工作台。",
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none",
+      "feature": { "key": "growth.todo:view:statistics", "scope": "view", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "待办统计", "reference": "growth.todo.view.statistics" }
+    },
+    {
       "version": "v0.1.0",
       "date": "2026-07-30",
       "event": "changed",

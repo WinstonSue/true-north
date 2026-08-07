@@ -46,12 +46,6 @@ export const taskRoutes: IRoute = {
       ignore: true,
     },
     {
-      name: 'menu.task.week',
-      key: 'task-week',
-      breadcrumb: true,
-      ignore: true,
-    },
-    {
       name: 'menu.task.calendar',
       key: 'task-calendar',
       breadcrumb: true,

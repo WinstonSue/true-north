@@ -11,10 +11,10 @@ const goalTypeLabels: Record<GoalType, string> = { vision: '规划', result: '�
 export const goalTypes: Array<{ value: GoalType; label: string }> = productEnumValues('growth.goal', 'goal', 'type').map((value) => ({ value: value as GoalType, label: goalTypeLabels[value as GoalType] || value }));
 export const nav: NavigationItem[] = [
   { id: 'workbench', path: '/workbench', label: '工作台', icon: Grid2X2 },
-  { id: 'goal', path: '/goals', label: '目标管理', icon: Target },
-  { id: 'task', path: '/tasks', label: '任务管理', icon: FolderKanban },
+  { id: 'goal', path: '/goals', label: '目标', icon: Target },
+  { id: 'task', path: '/tasks', label: '任务', icon: FolderKanban },
   { id: 'todo', path: '/todos', label: '待办事项', icon: ListTodo },
-  { id: 'habit', path: '/habits', label: '习惯追踪', icon: TrendingUp },
+  { id: 'habit', path: '/habits', label: '习惯', icon: TrendingUp },
 ];
 
 export const initialGoals = growthFixtures.goals as unknown as Goal[];

@@ -64,9 +64,9 @@
   "views": [
     {
       "id": "today",
-      "name": "今日任务",
+      "name": "当前任务",
       "prototypePage": "task",
-      "scenario": "聚焦当日执行与逾期事项",
+      "scenario": "聚焦选定日期的执行与逾期事项",
       "reference": "growth.task.view.today",
       "productStatus": "roadmap",
       "prototypeCoverage": "partial"
@@ -77,8 +77,8 @@
       "prototypePage": "task",
       "scenario": "分组管理当前周执行",
       "reference": "growth.task.view.week",
-      "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none"
     },
     {
       "id": "all",
@@ -95,8 +95,8 @@
       "prototypePage": "task",
       "scenario": "复盘任务执行状态",
       "reference": "growth.task.view.statistics",
-      "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none"
     },
     {
       "id": "calendar",
@@ -162,7 +162,7 @@
     },
     {
       "id": "growth.task.view.today",
-      "heading": "### 今日任务"
+      "heading": "### 当前任务"
     },
     {
       "id": "growth.task.view.week",

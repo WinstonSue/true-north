@@ -1,50 +1,90 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { Flex } from '@sue/design-web-react';
 import styles from './style.module.less';
 import { TodoService } from '@true-north/web-service';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
-import { useTodoHooks } from '../hooks';
 import { TodoStatus } from '@true-north/enum';
 import { useTodoDetail } from '../../components';
+import DayAgendaCalendar, { formatDayAgendaTitle } from '../../components/DayAgenda';
+import { useDayAgendaDate } from '../../components/DayAgenda/context';
 import TodoAgendaSections from '../components/TodoAgendaSections';
 import { onTodoChanged } from '../../events';
 
 export default function TodoToday() {
-  const { today, yesterday } = useTodoHooks();
-  const [todayTodoList, setTodayTodoList] = useState<TodoVo[]>([]);
-  const [todayDoneTodoList, setTodayDoneTodoList] = useState<TodoVo[]>([]);
-  const [expiredTodoList, setExpiredTodoList] = useState<TodoVo[]>([]);
-  const [todayAbandonedTodoList, setTodayAbandonedTodoList] = useState<
-    TodoVo[]
-  >([]);
+  const { selectedDate, setSelectedDate, visibleMonth, setVisibleMonth } = useDayAgendaDate();
+  const [scheduledTodos, setScheduledTodos] = useState<TodoVo[]>([]);
+  const [doneTodos, setDoneTodos] = useState<TodoVo[]>([]);
+  const [expiredTodos, setExpiredTodos] = useState<TodoVo[]>([]);
+  const [abandonedTodos, setAbandonedTodos] = useState<TodoVo[]>([]);
+  const [calendarCounts, setCalendarCounts] = useState<Record<string, number>>({});
+  const selectedDateText = selectedDate.format('YYYY-MM-DD');
+  const isSelectedToday = selectedDate.isSame(dayjs(), 'day');
 
-  async function refreshData() {
+  const refreshData = useCallback(async () => {
     const mergeActive = (responses: Array<{ list?: TodoVo[] } | undefined>) =>
       [...new Map(responses.flatMap((response) => response?.list || []).map((todo) => [todo.id, todo])).values()]
         .sort((a, b) => (a.planStartTime || '').localeCompare(b.planStartTime || ''));
-    const [todayTodo, todayInProgress, doneResponse, expiredTodo, expiredInProgress, abandonedResponse] = await Promise.all([
-      TodoService.list({ status: TodoStatus.TODO, planDateStart: today, planDateEnd: today }),
-      TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateStart: today, planDateEnd: today }),
-      TodoService.list({ status: TodoStatus.DONE, doneDateStart: today, doneDateEnd: today }),
-      TodoService.list({ status: TodoStatus.TODO, planDateEnd: yesterday }),
-      TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateEnd: yesterday }),
-      TodoService.list({ status: TodoStatus.ABANDONED, abandonedDateStart: today, abandonedDateEnd: today }),
+    const [scheduledTodo, scheduledInProgress, doneResponse, abandonedResponse] = await Promise.all([
+      TodoService.list({ status: TodoStatus.TODO, planDateStart: selectedDateText, planDateEnd: selectedDateText }),
+      TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateStart: selectedDateText, planDateEnd: selectedDateText }),
+      TodoService.list({ status: TodoStatus.DONE, doneDateStart: selectedDateText, doneDateEnd: selectedDateText }),
+      TodoService.list({ status: TodoStatus.ABANDONED, abandonedDateStart: selectedDateText, abandonedDateEnd: selectedDateText }),
     ]);
-    setTodayTodoList(mergeActive([todayTodo, todayInProgress]));
 
-    setTodayDoneTodoList(doneResponse?.list || []);
+    let expired: TodoVo[] = [];
+    if (isSelectedToday) {
+      const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+      const [expiredTodo, expiredInProgress] = await Promise.all([
+        TodoService.list({ status: TodoStatus.TODO, planDateEnd: yesterday }),
+        TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateEnd: yesterday }),
+      ]);
+      expired = mergeActive([expiredTodo, expiredInProgress]);
+    }
 
-    setExpiredTodoList(mergeActive([expiredTodo, expiredInProgress]));
+    setScheduledTodos(mergeActive([scheduledTodo, scheduledInProgress]));
+    setDoneTodos(doneResponse?.list || []);
+    setExpiredTodos(expired);
+    setAbandonedTodos(abandonedResponse?.list || []);
+  }, [isSelectedToday, selectedDateText]);
 
-    setTodayAbandonedTodoList(abandonedResponse?.list || []);
+  const refreshCalendarCounts = useCallback(async () => {
+    const visibleStart = visibleMonth.startOf('month').startOf('week');
+    const visibleEnd = visibleMonth.endOf('month').endOf('week');
+    const responses = await Promise.all([
+      TodoService.list({
+        status: TodoStatus.TODO,
+        planDateStart: visibleStart.format('YYYY-MM-DD'),
+        planDateEnd: visibleEnd.format('YYYY-MM-DD'),
+      }),
+      TodoService.list({
+        status: TodoStatus.IN_PROGRESS,
+        planDateStart: visibleStart.format('YYYY-MM-DD'),
+        planDateEnd: visibleEnd.format('YYYY-MM-DD'),
+      }),
+    ]);
+    const todoList = [...new Map(responses.flatMap((response) => response?.list || []).map((todo) => [todo.id, todo])).values()];
+    const counts = todoList.reduce<Record<string, number>>((result, todo) => {
+      const dateKey = dayjs(todo.planDate).format('YYYY-MM-DD');
+      result[dateKey] = (result[dateKey] || 0) + 1;
+      return result;
+    }, {});
 
-  }
+    setCalendarCounts(counts);
+  }, [visibleMonth]);
 
   useEffect(() => {
     void refreshData();
-    return onTodoChanged(() => { void refreshData(); });
-  }, []);
+  }, [refreshData]);
+
+  useEffect(() => {
+    void refreshCalendarCounts();
+  }, [refreshCalendarCounts]);
+
+  useEffect(() => onTodoChanged(() => {
+    void refreshData();
+    void refreshCalendarCounts();
+  }), [refreshCalendarCounts, refreshData]);
 
   const { openEditDrawer } = useTodoDetail();
 
@@ -59,25 +99,35 @@ export default function TodoToday() {
 
   return (
     <Flex vertical container="full" className={styles.page}>
-      <Flex container="fixed" className={styles.toolbar} align="center">
-        <div className={styles.heading}>
-          <h1 className={styles.title}>今日待办</h1>
-          <span className={styles.subtitle}>{dayjs(today).format('YYYY年M月D日 dddd')}</span>
-        </div>
-      </Flex>
-      <Flex vertical container="fill" className={styles.content}>
-        <TodoAgendaSections
-          groups={[
-            { key: 'expired', label: '已过期', todoList: expiredTodoList },
-            { key: 'today', label: '今天', todoList: todayTodoList },
-            { key: 'done', label: '已完成', todoList: todayDoneTodoList },
-            { key: 'abandoned', label: '已放弃', todoList: todayAbandonedTodoList },
-          ]}
-          emptyLabel="今天没有待办"
-          onClickTodo={showTodoDetail}
-          refreshTodoList={refreshData}
-        />
-      </Flex>
+      <div className={styles.layout}>
+        <aside className={styles.sidebar}>
+          <DayAgendaCalendar
+            value={selectedDate}
+            onChange={setSelectedDate}
+            visibleMonth={visibleMonth}
+            onVisibleMonthChange={setVisibleMonth}
+            itemCounts={calendarCounts}
+          />
+        </aside>
+        <main className={styles.main}>
+          <header className={styles.toolbar}>
+            <h1 className={styles.title}>{formatDayAgendaTitle(selectedDate)}</h1>
+          </header>
+          <div className={styles.content}>
+            <TodoAgendaSections
+              groups={[
+                ...(isSelectedToday ? [{ key: 'expired', label: '已过期', todoList: expiredTodos }] : []),
+                { key: 'scheduled', label: '当日待办', todoList: scheduledTodos },
+                { key: 'done', label: '已完成', todoList: doneTodos },
+                { key: 'abandoned', label: '已放弃', todoList: abandonedTodos },
+              ]}
+              emptyLabel="当天没有待办"
+              onClickTodo={showTodoDetail}
+              refreshTodoList={refreshData}
+            />
+          </div>
+        </main>
+      </div>
     </Flex>
   );
 }

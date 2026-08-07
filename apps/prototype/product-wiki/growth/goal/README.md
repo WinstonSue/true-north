@@ -1,5 +1,7 @@
 # 目标管理
 
+桌面端当前入口为目标树和目标脑图；目标详情以内嵌概览、子目标、关联任务三 Tab 展示，并支持 AI 拆解、受控状态操作和删除影响检查。独立目标健康面板已废弃，结构摘要由目标详情和工作台承载。
+
 <!-- product-wiki:managed:start -->
 ## 产品规格（受管）
 
@@ -33,7 +35,7 @@
 | 目标树 | `goal` | 构建和浏览目标层级 | 路线图 | 部分覆盖 | `growth.goal.view.tree` |
 | 目标详情 | `goal` | 查看和编辑单个目标 | 路线图 | 完整覆盖 | `growth.goal.view.detail` |
 | 目标脑图 | `goal` | 理解目标与任务关系 | 路线图 | 部分覆盖 | `growth.goal.view.mindmap` |
-| 目标健康面板 | `goal` | 查看结构健康与指标趋势 | 路线图 | 未覆盖 | `growth.goal.view.dashboard` |
+| 目标健康面板 | `goal` | 查看结构健康与指标趋势 | 已废弃 | 未覆盖 | `growth.goal.view.dashboard` |
 
 ### 规则索引
 

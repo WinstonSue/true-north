@@ -100,9 +100,9 @@
   "views": [
     {
       "id": "today",
-      "name": "今日待办",
+      "name": "当前待办",
       "prototypePage": "todo",
-      "scenario": "聚焦当日行动",
+      "scenario": "聚焦选定日期的行动",
       "reference": "growth.todo.view.today",
       "productStatus": "roadmap",
       "prototypeCoverage": "partial"
@@ -113,8 +113,8 @@
       "prototypePage": "todo",
       "scenario": "安排周度执行",
       "reference": "growth.todo.view.week",
-      "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none"
     },
     {
       "id": "calendar",
@@ -140,8 +140,8 @@
       "prototypePage": "todo",
       "scenario": "复盘效率和优先级分布",
       "reference": "growth.todo.view.statistics",
-      "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "productStatus": "deprecated",
+      "prototypeCoverage": "none"
     }
   ],
   "rules": [
@@ -202,7 +202,7 @@
     },
     {
       "id": "growth.todo.view.today",
-      "heading": "### 今日待办"
+      "heading": "### 当前待办"
     },
     {
       "id": "growth.todo.view.week",

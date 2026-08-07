@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { Alert, Button, Calendar, Card, Checkbox, Col, DatePicker, Flex, Modal, Row, Select, Space, Statistic, Table, Tabs, Tooltip } from '@sue/design-web-react';
+import { Alert, Button, Calendar, Card, Checkbox, DatePicker, Flex, Modal, Select, Space, Table, Tabs, Tooltip } from '@sue/design-web-react';
 import { Check, Filter, Plus, RotateCcw, X } from 'lucide-react';
 import { ExecutionGroupList, PriorityTag, StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
@@ -23,6 +23,7 @@ const todoStatuses: TodoStatus[] = ['todo', 'in_progress', 'done', 'abandoned'];
 
 export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo, markTodoIncomplete }: Props) {
   const [tab, setTab] = useState('today');
+  const [selectedDate, setSelectedDate] = useState(() => dayjs(TODAY));
   const [filter, setFilter] = useState<TodoStatus | 'all'>('all');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [statuses, setStatuses] = useState<TodoStatus[]>([]);
@@ -31,12 +32,12 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
   const [filterEnd, setFilterEnd] = useState<string>();
   const [selected, setSelected] = useState<string[]>([]);
   const [batchOpen, setBatchOpen] = useState(false);
-  const isTimeScope = tab === 'today' || tab === 'week';
+  const isTimeScope = tab === 'today';
   const orderedTodos = useMemo(() => [...todos].sort(compareTodoPlan), [todos]);
   const filteredTodos = orderedTodos.filter((todo) => filter === 'all' || todo.status === filter);
   const groups = useMemo(
-    () => (isTimeScope ? groupExecutionItems(filteredTodos, tab, TODAY, (todo) => ({ start: todo.planned, end: todo.planned })) : []),
-    [filteredTodos, isTimeScope, tab],
+    () => (isTimeScope ? groupExecutionItems(filteredTodos, 'today', selectedDate.format('YYYY-MM-DD'), (todo) => ({ start: todo.planned, end: todo.planned })) : []),
+    [filteredTodos, isTimeScope, selectedDate],
   );
   const todosByDate = useMemo(
     () =>
@@ -149,13 +150,14 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
         <Card className={styles.todoSurface}>
           <Flex className={styles.todoToolbar} align="center" justify="space-between" gap={12}>
             <Tabs activeKey={tab} onChange={setTab} items={[
-              { key: 'today', label: '今日' },
-              { key: 'week', label: '本周' },
+              { key: 'today', label: '当前' },
               { key: 'calendar', label: '日历' },
               { key: 'all', label: '全部' },
-              { key: 'statistics', label: '统计' },
             ]} />
             <Space>
+              {tab === 'today' && (
+                <DatePicker value={selectedDate} allowClear={false} onChange={(date) => date && setSelectedDate(date)} />
+              )}
               {tab !== 'all' && (
                 <Select
                   value={filter}
@@ -213,8 +215,6 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
                 );
               }}
             />
-          ) : tab === 'statistics' ? (
-            <div data-product-ref={productRef('growth.todo.metrics')}><TodoStatistics todos={todos} /></div>
           ) : (
             <Flex vertical gap={12} data-product-ref={productRef('growth.todo.view.all')}>
               <Flex className={styles.filterToolbar} align="center" justify="space-between" wrap="wrap" gap={8}>
@@ -282,16 +282,5 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
         <div data-product-ref={productRef('growth.todo.interaction')}><p>将完成已选择的 {Math.min(selected.length, 50)} 条待办。</p></div>
       </Modal>
     </>
-  );
-}
-
-function TodoStatistics({ todos }: { todos: Todo[] }) {
-  const completed = todos.filter((todo) => todo.status === 'done').length;
-  return (
-    <Row gutter={[12, 12]} className={styles.statistics}>
-      <Col md={8}><div className={`${styles.statItem} ${styles.primaryStat}`}><Statistic title="完成率" value={Math.round((completed / Math.max(1, todos.length)) * 100)} suffix="%" /></div></Col>
-      <Col md={8}><div className={styles.statItem}><Statistic title="逾期待办" value={todos.filter((todo) => todo.planned < TODAY && todo.status !== 'done').length} suffix="项" /></div></Col>
-      <Col md={8}><div className={styles.statItem}><Statistic title="第一象限" value={todos.filter((todo) => todo.importance >= 4 && todo.urgency >= 4).length} suffix="项" /></div></Col>
-    </Row>
   );
 }
