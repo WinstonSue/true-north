@@ -1,86 +1,91 @@
 'use client';
 
 import dayjs, { type Dayjs } from 'dayjs';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  Alert,
   Button,
   Col,
   DatePicker,
+  Empty,
+  Flex,
   Form,
   Input,
+  Radio,
   Row,
   Select,
   Switch,
   TimePicker,
+  Tooltip,
 } from '@sue/design-web-react';
 import RepeatSelector, {
   createDefaultRepeatSetting,
   type RepeatSelectorValue,
 } from '@true-north/components-repeat';
 import type { TodoFormData } from '@true-north/web-service';
+import { TrackTimeController } from '@true-north/web-service';
+import {
+  TodoRelatedType,
+  TodoStatus,
+  TrackTimeRelatedType,
+} from '@true-north/enum';
+import { TrackTime as TrackTimeVO } from '@true-north/vo';
 import { IMPORTANCE_MAP, URGENCY_MAP } from '../../constants';
 import { useTodoDetailContext } from './context';
+import {
+  DEFAULT_PLAN_TIME,
+  defaultTimeRange,
+  isTodoPlanRange,
+  normalizePlanTimeRange,
+  toDayjsTime,
+} from './planTime';
+import { openFocusTimer } from '../../focus-timer';
 import styles from './TodoForm.module.less';
 
 const { TextArea } = Input;
-const { RangePicker } = TimePicker;
 
 type TodoFormValues = {
   name: string;
   description?: string;
   planDate: Dayjs;
-  planTimeRange?: [Dayjs, Dayjs];
   importance?: number;
   urgency?: number;
-  tags?: string[];
 };
 
 type TodoFormProps = {
   onClose?: () => void | Promise<void>;
 };
 
-function toDayjsTime(value?: string) {
-  if (!value) return undefined;
-  const [hour, minute] = value.split(':').map(Number);
-  return dayjs().hour(hour).minute(minute).second(0).millisecond(0);
-}
-
 function toFormValues(data: TodoFormData): TodoFormValues {
-  const start = toDayjsTime(data.planTimeRange?.[0]);
-  const end = toDayjsTime(data.planTimeRange?.[1]);
   return {
     name: data.name,
     description: data.description,
     planDate: dayjs(data.planDate),
-    planTimeRange: start && end ? [start, end] : undefined,
     importance: data.importance,
     urgency: data.urgency,
-    tags: data.tags ?? [],
   };
 }
 
-function toFormPatch(changedValues: Partial<TodoFormValues>): Partial<TodoFormData> {
+function toFormPatch(
+  changedValues: Partial<TodoFormValues>,
+): Partial<TodoFormData> {
   const patch: Partial<TodoFormData> = {};
   if ('name' in changedValues) {
-    patch.name = typeof changedValues.name === 'string' ? changedValues.name : '';
+    patch.name =
+      typeof changedValues.name === 'string' ? changedValues.name : '';
   }
   if ('description' in changedValues) {
-    patch.description = typeof changedValues.description === 'string'
-      ? changedValues.description
-      : undefined;
+    patch.description =
+      typeof changedValues.description === 'string'
+        ? changedValues.description
+        : undefined;
   }
   if ('planDate' in changedValues && changedValues.planDate) {
     patch.planDate = changedValues.planDate.format('YYYY-MM-DD');
   }
-  if ('planTimeRange' in changedValues) {
-    const range = changedValues.planTimeRange;
-    patch.planTimeRange = range
-      ? [range[0].format('HH:mm'), range[1].format('HH:mm')]
-      : undefined;
-  }
-  if ('importance' in changedValues) patch.importance = changedValues.importance;
+  if ('importance' in changedValues)
+    patch.importance = changedValues.importance;
   if ('urgency' in changedValues) patch.urgency = changedValues.urgency;
-  if ('tags' in changedValues) patch.tags = changedValues.tags ?? [];
   return patch;
 }
 
@@ -89,19 +94,65 @@ function toTodoRepeat(
   planDate: string,
 ): TodoFormData['repeatConfig'] {
   return value
-    ? ({ ...value, currentDate: planDate } as unknown as TodoFormData['repeatConfig'])
+    ? ({
+        ...value,
+        currentDate: planDate,
+        repeatStartDate: value.repeatStartDate || planDate,
+      } as unknown as TodoFormData['repeatConfig'])
     : undefined;
 }
 
+function formatDuration(totalSeconds?: number) {
+  const seconds = Math.max(0, totalSeconds || 0);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) return `${hours} 小时 ${minutes} 分钟`;
+  return `${minutes} 分钟`;
+}
+
 export default function TodoForm(props: TodoFormProps) {
-  const { todoFormData, setTodoFormData, onSubmit } = useTodoDetailContext();
+  const { todoFormData, setTodoFormData, onSubmit, currentTodo } =
+    useTodoDetailContext();
   const [form] = Form.useForm<TodoFormValues>();
+  const [trackRecords, setTrackRecords] = useState<TrackTimeVO.TrackTimeVo[]>(
+    [],
+  );
 
   useEffect(() => {
     form.setFieldsValue(toFormValues(todoFormData));
   }, [form, todoFormData]);
 
-  const repeatValue = todoFormData.repeatConfig as RepeatSelectorValue | undefined;
+  useEffect(() => {
+    if (!currentTodo?.id) {
+      setTrackRecords([]);
+      return;
+    }
+    void TrackTimeController.findByRelatedId(
+      TrackTimeRelatedType.TODO,
+      currentTodo.id,
+    )
+      .then((response) => setTrackRecords(response?.list || []))
+      .catch(() => setTrackRecords([]));
+  }, [currentTodo?.id]);
+
+  const repeatValue = todoFormData.repeatConfig as
+    RepeatSelectorValue | undefined;
+  const [planStart, planEnd] = normalizePlanTimeRange(
+    todoFormData.planTimeRange ?? [DEFAULT_PLAN_TIME, DEFAULT_PLAN_TIME],
+  );
+  const settledTimes = todoFormData.settledTimes ?? 0;
+  const relatedType = currentTodo?.relatedType ?? todoFormData.relatedType;
+  const isSystemSourced =
+    relatedType === TodoRelatedType.HABIT ||
+    relatedType === TodoRelatedType.TASK ||
+    relatedType === TodoRelatedType.GOAL ||
+    Boolean(todoFormData.taskId || todoFormData.habitId);
+  const canFocus =
+    Boolean(currentTodo) &&
+    currentTodo?.status === TodoStatus.TODO &&
+    isTodoPlanRange(planStart, planEnd);
+  const isPointPlan =
+    Boolean(currentTodo) && !isTodoPlanRange(planStart, planEnd);
 
   async function handleSubmit() {
     try {
@@ -125,7 +176,9 @@ export default function TodoForm(props: TodoFormProps) {
             patch.repeatConfig = toTodoRepeat(
               {
                 ...todoFormData.repeatConfig,
-                repeatStartDate: patch.planDate,
+                repeatStartDate: settledTimes
+                  ? todoFormData.repeatConfig.repeatStartDate
+                  : patch.planDate,
               } as RepeatSelectorValue,
               patch.planDate,
             );
@@ -144,27 +197,131 @@ export default function TodoForm(props: TodoFormProps) {
         <Form.Item label="描述" name="description">
           <TextArea placeholder="描述一下" rows={4} maxLength={500} showCount />
         </Form.Item>
+        <Form.Item
+          label={
+            <Flex justify="space-between" align="center" gap={8}>
+              计划日期
+              <Tooltip title="启用重复">
+                <Switch
+                  size="small"
+                  checked={Boolean(repeatValue)}
+                  disabled={Boolean(currentTodo)}
+                  onChange={(enabled) => {
+                    if (currentTodo) return;
+                    setTodoFormData({
+                      repeatConfig: enabled
+                        ? toTodoRepeat(
+                            repeatValue ??
+                              createDefaultRepeatSetting(todoFormData.planDate),
+                            todoFormData.planDate,
+                          )
+                        : undefined,
+                    });
+                  }}
+                />
+              </Tooltip>
+            </Flex>
+          }
+          name="planDate"
+          rules={[{ required: true, message: '请选择计划日期' }]}
+        >
+          {!repeatValue && (
+            <DatePicker
+              className="w-full"
+              format="YYYY-MM-DD"
+              allowClear={false}
+            />
+          )}
+          {repeatValue && !isSystemSourced && (
+            <RepeatSelector
+              lang="zh-CN"
+              value={repeatValue}
+              onChange={(value) => {
+                const nextPlanDate = settledTimes
+                  ? todoFormData.planDate
+                  : value.repeatStartDate || todoFormData.planDate;
+                setTodoFormData({
+                  planDate: nextPlanDate,
+                  repeatConfig: toTodoRepeat(value, nextPlanDate),
+                });
+                form.setFieldValue('planDate', dayjs(nextPlanDate));
+              }}
+            />
+          )}
+        </Form.Item>
 
+        <Form.Item
+          label={
+            <Flex justify="space-between" align="center" gap={8}>
+              计划时间
+              <Radio.Group
+                size="small"
+                optionType="button"
+                value={isTodoPlanRange(planStart, planEnd) ? 'range' : 'point'}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value === 'point') {
+                    setTodoFormData({ planTimeRange: [planStart, planStart] });
+                    return;
+                  }
+                  const range = defaultTimeRange(planStart);
+                  setTodoFormData({
+                    planTimeRange: [range.start, range.end],
+                  });
+                }}
+              >
+                <Radio value="point">时间点</Radio>
+                <Radio value="range">时间范围</Radio>
+              </Radio.Group>
+            </Flex>
+          }
+          required
+        >
+          <Flex vertical gap={8}>
+            {isTodoPlanRange(planStart, planEnd) ? (
+              <TimePicker.RangePicker
+                allowClear={false}
+                format="HH:mm"
+                minuteStep={5}
+                value={[toDayjsTime(planStart)!, toDayjsTime(planEnd)!]}
+                className="w-full"
+                onChange={(range) => {
+                  if (!range?.[0] || !range[1]) return;
+                  const nextStart = range[0].format('HH:mm');
+                  const nextEnd = range[1].format('HH:mm');
+                  if (nextStart < nextEnd) {
+                    setTodoFormData({ planTimeRange: [nextStart, nextEnd] });
+                  }
+                }}
+              />
+            ) : (
+              <TimePicker
+                allowClear={false}
+                format="HH:mm"
+                minuteStep={5}
+                value={toDayjsTime(planStart)}
+                className="w-full"
+                onChange={(time) => {
+                  if (!time) return;
+                  const point = time.format('HH:mm');
+                  setTodoFormData({ planTimeRange: [point, point] });
+                }}
+              />
+            )}
+          </Flex>
+        </Form.Item>
         <Row gutter={[16, 0]}>
-          <Col span={12}>
-            <Form.Item label="计划日期" name="planDate" rules={[{ required: true, message: '请选择计划日期' }]}>
-              <DatePicker className="w-full" format="YYYY-MM-DD" allowClear={false} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="时间范围" name="planTimeRange">
-              <RangePicker className="w-full" format="HH:mm" allowClear />
-            </Form.Item>
-          </Col>
           <Col span={12}>
             <Form.Item label="重要程度" name="importance">
               <Select
                 allowClear
                 placeholder="请选择重要程度"
-                options={[...IMPORTANCE_MAP.entries()].map(([value, option]) => ({
-                  value,
-                  label: option.label,
-                }))}
+                options={[...IMPORTANCE_MAP.entries()].map(
+                  ([value, option]) => ({
+                    value,
+                    label: option.label,
+                  }),
+                )}
               />
             </Form.Item>
           </Col>
@@ -181,46 +338,52 @@ export default function TodoForm(props: TodoFormProps) {
           </Col>
         </Row>
 
-        <Form.Item label="标签" name="tags">
-          <Select mode="tags" placeholder="添加标签" options={[]} />
-        </Form.Item>
-
-        <Form.Item label="重复">
-          <div className={styles.repeatField}>
-            <div className={styles.repeatHeader}>
-              <span>{repeatValue ? '已启用重复' : '不重复'}</span>
-              <Switch
-                checked={Boolean(repeatValue)}
-                onChange={(enabled) => {
-                  setTodoFormData({
-                    repeatConfig: enabled
-                      ? toTodoRepeat(
-                          repeatValue ?? createDefaultRepeatSetting(todoFormData.planDate),
-                          todoFormData.planDate,
-                        )
-                      : undefined,
-                  });
-                }}
-              />
-            </div>
-            {repeatValue && (
-              <RepeatSelector
-                lang="zh-CN"
-                value={repeatValue}
-                onChange={(value) => {
-                  setTodoFormData({
-                    repeatConfig: toTodoRepeat(value, todoFormData.planDate),
-                  });
-                }}
-              />
-            )}
-          </div>
-        </Form.Item>
+        {currentTodo && (
+          <Form.Item label="专注记录">
+            <Flex vertical gap={8}>
+              {canFocus ? (
+                <Button
+                  type="primary"
+                  onClick={() =>
+                    openFocusTimer({
+                      todoId: currentTodo.id,
+                      label: currentTodo.name,
+                    })
+                  }
+                >
+                  开始专注计时
+                </Button>
+              ) : isPointPlan && currentTodo.status === TodoStatus.TODO ? (
+                <Alert
+                  type="info"
+                  showIcon
+                  title="时间点待办不可从本入口管理计时；已有记录仍可查看。"
+                />
+              ) : null}
+              {trackRecords.length ? (
+                trackRecords.map((record) => (
+                  <Flex key={record.id} justify="space-between" align="center">
+                    <span>
+                      {record.startAt
+                        ? dayjs(record.startAt).format('YYYY-MM-DD HH:mm')
+                        : '专注记录'}
+                    </span>
+                    <strong>{formatDuration(record.duration)}</strong>
+                  </Flex>
+                ))
+              ) : (
+                <Empty description="暂无关联专注记录" />
+              )}
+            </Flex>
+          </Form.Item>
+        )}
       </Form>
 
       <div className={styles.footer}>
         <Button onClick={() => props.onClose?.()}>取消</Button>
-        <Button type="primary" onClick={handleSubmit}>确认</Button>
+        <Button type="primary" onClick={handleSubmit}>
+          确认
+        </Button>
       </div>
     </div>
   );

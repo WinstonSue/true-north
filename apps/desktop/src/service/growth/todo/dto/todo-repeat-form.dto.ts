@@ -1,5 +1,5 @@
 import { TodoRepeatDto } from './todo-repeat-model.dto';
-import { PickType, IntersectionType, PartialType, OmitType } from 'francis-mapped-types';
+import { PickType, IntersectionType, PartialType } from 'francis-mapped-types';
 import { TodoRepeat } from '../todo-repeat.entity';
 import type { Todo as TodoVO } from '@true-north/vo';
 
@@ -8,7 +8,6 @@ export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
   'description',
   'importance',
   'urgency',
-  'tags',
   'status',
   'currentDate',
   'repeatStartDate',
@@ -28,7 +27,6 @@ export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
     this.description = vo.description;
     this.importance = vo.importance;
     this.urgency = vo.urgency;
-    this.tags = vo.tags || [];
     this.repeatStartDate = vo.repeatConfig.repeatStartDate;
     this.currentDate = vo.repeatConfig.currentDate;
     this.repeatMode = vo.repeatConfig.repeatMode;
@@ -48,7 +46,6 @@ export class CreateTodoRepeatDto extends PickType(TodoRepeatDto, [
     if (this.description !== undefined) todoRepeat.description = this.description;
     if (this.importance !== undefined) todoRepeat.importance = this.importance;
     if (this.urgency !== undefined) todoRepeat.urgency = this.urgency;
-    if (this.tags !== undefined) todoRepeat.tags = this.tags;
     if (this.status !== undefined) todoRepeat.status = this.status;
 
     if (this.repeatStartDate !== undefined) todoRepeat.repeatStartDate = this.repeatStartDate;
@@ -75,7 +72,6 @@ export class UpdateTodoRepeatDto extends IntersectionType(
     this.description = vo.description;
     this.importance = vo.importance;
     this.urgency = vo.urgency;
-    this.tags = vo.tags;
     this.repeatStartDate = vo.repeatConfig?.repeatStartDate;
     this.repeatMode = vo.repeatConfig?.repeatMode;
     this.repeatConfig = vo.repeatConfig?.repeatConfig;
@@ -84,6 +80,11 @@ export class UpdateTodoRepeatDto extends IntersectionType(
     this.repeatTimes = vo.repeatConfig?.repeatTimes;
     this.planStartTime = vo.planStartTime;
     this.planEndTime = vo.planEndTime;
+    // 计划日期对应当前实例 currentDate
+    const nextCurrentDate = vo.planDate || vo.repeatConfig?.currentDate;
+    if (nextCurrentDate) {
+      this.currentDate = nextCurrentDate;
+    }
   }
 
   importUpdateEntity(todoRepeat: TodoRepeat) {
@@ -97,7 +98,6 @@ export class UpdateTodoRepeatDto extends IntersectionType(
     if (this.description === undefined) this.description = todoRepeat.description;
     if (this.importance === undefined) this.importance = todoRepeat.importance;
     if (this.urgency === undefined) this.urgency = todoRepeat.urgency;
-    if (this.tags === undefined) this.tags = todoRepeat.tags;
     if (this.repeatStartDate === undefined) this.repeatStartDate = todoRepeat.repeatStartDate;
     if (this.currentDate === undefined) this.currentDate = todoRepeat.currentDate;
     if (this.repeatMode === undefined) this.repeatMode = todoRepeat.repeatMode;
@@ -124,7 +124,6 @@ export class UpdateTodoRepeatDto extends IntersectionType(
     if (this.description !== undefined) todoRepeat.description = this.description;
     if (this.importance !== undefined) todoRepeat.importance = this.importance;
     if (this.urgency !== undefined) todoRepeat.urgency = this.urgency;
-    if (this.tags !== undefined) todoRepeat.tags = this.tags;
     if (this.repeatStartDate !== undefined) todoRepeat.repeatStartDate = this.repeatStartDate;
     if (this.currentDate !== undefined) todoRepeat.currentDate = this.currentDate;
     if (this.status !== undefined) todoRepeat.status = this.status;

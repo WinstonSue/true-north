@@ -1,7 +1,8 @@
 'use client';
 
-import { Tag, Popover, Button, Flex } from '@sue/design-web-react';
+import { Button, Flex, Tooltip } from '@sue/design-web-react';
 import SiteIcon from '@/components/SiteIcon';
+import { PlayCircleOutlined, StopOutlined } from '@ant-design/icons';
 import { isToday } from 'date-fns';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import IconSelector from '../../components/IconSelector';
@@ -12,6 +13,8 @@ import clsx from 'clsx';
 import { TodoRelatedType, TodoStatus } from '@true-north/enum';
 import styles from './style.module.less';
 import { emitTodoChanged } from '../../events';
+import { formatTodoPlanTime, isTodoPlanRange } from '../TodoDetail/planTime';
+import { useFocusTimer } from '../../focus-timer';
 
 export type TodoItemProps = {
   todo: TodoWithoutRelationsVo;
@@ -22,12 +25,10 @@ export type TodoItemProps = {
 
 function TodoItem(props: TodoItemProps) {
   const { todo } = props;
-  const isActive = todo.status === TodoStatus.TODO || todo.status === TodoStatus.IN_PROGRESS;
-  const canMarkIncomplete =
-    isActive &&
-    (todo.relatedType === TodoRelatedType.HABIT ||
-      todo.relatedType === TodoRelatedType.IS_REPEAT ||
-      todo.relatedType === TodoRelatedType.REPEAT);
+  const { open: openFocusTimer } = useFocusTimer();
+  const isActive = todo.status === TodoStatus.TODO;
+  const canFocus = isActive && isTodoPlanRange(todo.planStartTime, todo.planEndTime);
+  const planTimeLabel = formatTodoPlanTime(todo.planStartTime, todo.planEndTime);
 
   return (
     <div
@@ -67,93 +68,40 @@ function TodoItem(props: TodoItemProps) {
             )}
             <span className={todo.planDate < dayjs().format('YYYY-MM-DD') ? styles.overdue : styles.date}>
               {isToday(todo.planDate) ? '' : `${todo.planDate} `}
-              {todo.planStartTime && todo.planEndTime ? `${todo.planStartTime}-${todo.planEndTime}` : null}
+              {planTimeLabel}
             </span>
-            {todo.tags?.length > 0 && (
-              <div className={styles.tags}>
-                {todo.tags.map((tag, index) => (
-                  <Tag key={index} color="blue">
-                    {tag}
-                  </Tag>
-                ))}
-              </div>
-            )}
           </div>
         </Flex>
-        <Flex container="fixed" className={styles.executionActions} align="center" gap={8}>
-          {canMarkIncomplete && (
-            <Button
-              size="small"
-              onClick={async (event) => {
-                event.stopPropagation();
-                await TodoService.abandon(todo.relatedType, todo.id);
-                emitTodoChanged();
-                await props.refreshTodoList();
-              }}
-            >
-              未完成
-            </Button>
-          )}
-          <Popover
-            trigger="click"
-            content={
-              <div className={styles.menu}>
-                {todo.status === TodoStatus.TODO && (
-                  <div
-                    className={styles.menuItem}
-                    onClick={async () => {
-                      await TodoService.start(todo.relatedType, todo.id);
-                      emitTodoChanged();
-                      await props.refreshTodoList();
-                    }}
-                  >
-                    开始
-                  </div>
-                )}
-                {todo.status === TodoStatus.IN_PROGRESS && (
-                  <div
-                    className={styles.menuItem}
-                    onClick={async () => {
-                      await TodoService.pause(todo.relatedType, todo.id);
-                      emitTodoChanged();
-                      await props.refreshTodoList();
-                    }}
-                  >
-                    暂停
-                  </div>
-                )}
-                <div
-                  className={styles.menuItem}
-                  onClick={async () => {
-                    await TodoService.abandon(todo.relatedType, todo.id);
-                    emitTodoChanged();
-                    await props.refreshTodoList();
+        {isActive && (
+          <Flex container="fixed" className={styles.executionActions} align="center" gap={8}>
+            {canFocus && (
+              <Tooltip title="开始专注">
+                <Button
+                  size="small"
+                  icon={<PlayCircleOutlined />}
+                  aria-label={`为${todo.name}开始专注`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    openFocusTimer({ todoId: todo.id, label: todo.name });
                   }}
-                >
-                  放弃
-                </div>
-                <div
-                  className={styles.menuItem}
-                  onClick={async () => {
-                    await TodoService.delete(todo.relatedType, todo.id);
-                    emitTodoChanged();
-                    await props.refreshTodoList();
-                  }}
-                >
-                  删除
-                </div>
-              </div>
-            }
-          >
-            <Button
-              onClick={(e) => e.stopPropagation()}
-              type="text"
-              size="small"
-              icon={<SiteIcon id="more-for-task" />}
-              className={styles.moreButton}
-            />
-          </Popover>
-        </Flex>
+                />
+              </Tooltip>
+            )}
+            <Tooltip title="放弃">
+              <Button
+                size="small"
+                icon={<StopOutlined />}
+                aria-label={`放弃 ${todo.name}`}
+                onClick={async (event) => {
+                  event.stopPropagation();
+                  await TodoService.abandon(todo.relatedType, todo.id);
+                  emitTodoChanged();
+                  await props.refreshTodoList();
+                }}
+              />
+            </Tooltip>
+          </Flex>
+        )}
       </Flex>
     </div>
   );

@@ -27,14 +27,6 @@ export default class TodoController {
     return request<any>({ method: 'put' })(`/todo/done/${relatedType}/${id}`, body);
   }
 
-  static async start(relatedType: TodoRelatedType, id: string) {
-    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/start/${relatedType}/${id}`);
-  }
-
-  static async pause(relatedType: TodoRelatedType, id: string) {
-    return request<TodoVO.TodoVo>({ method: 'put' })(`/todo/pause/${relatedType}/${id}`);
-  }
-
   static async abandon(relatedType: TodoRelatedType, id: string) {
     return request<boolean>({ method: 'put' })(`/todo/abandon/${relatedType}/${id}`);
   }

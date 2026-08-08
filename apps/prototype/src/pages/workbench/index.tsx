@@ -73,7 +73,7 @@ export function Workbench({ goals, tasks, todos, habits, onNavigate, completeTod
             <Card title="待办">
               <div className={styles.statGrid}>
                 <Statistic title="完成率" value={Math.round(todoCompleted / Math.max(1, todos.length) * 100)} suffix="%" />
-                <Statistic title="待处理" value={todos.filter((todo) => todo.status === 'todo' || todo.status === 'in_progress').length} suffix="项" />
+                <Statistic title="待处理" value={todos.filter((todo) => todo.status === 'todo').length} suffix="项" />
               </div>
             </Card>
           </Col>

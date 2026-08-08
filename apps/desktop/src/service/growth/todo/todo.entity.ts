@@ -4,7 +4,7 @@ import { TodoStatus, TodoRelatedType } from '@true-north/enum';
 import { Task } from '../task/task.entity';
 import { TodoRepeat } from './todo-repeat.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { IsString, IsOptional, IsEnum, IsArray, IsNumber, IsISO8601 } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, IsISO8601 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class TodoWithoutRelations extends BaseEntity {
@@ -41,12 +41,6 @@ export class TodoWithoutRelations extends BaseEntity {
   @IsOptional()
   @Type(() => Number)
   urgency?: number;
-
-  /** 待办标签 */
-  @Column('simple-array')
-  @IsArray()
-  @IsString({ each: true })
-  tags!: string[];
 
   /** 待办完成时间 */
   @Column('datetime', {

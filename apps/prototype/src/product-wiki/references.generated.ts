@@ -53,9 +53,13 @@ export const productReferenceIds = [
   'growth.todo.rule.related-inheritance',
   'growth.todo.rule.batch-limit',
   'growth.todo.rule.repeat-template',
+  'growth.todo.rule.focus-range-only',
+  'growth.todo.rule.edit-no-repeat-toggle',
   'growth.todo.metrics',
   'growth.track-time.overview',
   'growth.track-time.rule.task-optional',
+  'growth.track-time.rule.todo-optional',
+  'growth.track-time.rule.todo-range-focus',
 ] as const;
 
 export type ProductReferenceId = (typeof productReferenceIds)[number];

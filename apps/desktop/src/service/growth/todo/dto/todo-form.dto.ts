@@ -14,7 +14,6 @@ export class CreateTodoDto extends PickType(TodoDto, [
   'planEndTime',
   'importance',
   'urgency',
-  'tags',
   'relatedType',
   'repeatConfig',
   'taskId',
@@ -24,7 +23,6 @@ export class CreateTodoDto extends PickType(TodoDto, [
   importCreateVo(vo: TodoVO.CreateTodoVo) {
     this.name = vo.name;
     this.description = vo.description;
-    this.tags = vo.tags || [];
     this.importance = vo.importance;
     this.urgency = vo.urgency;
     if (vo.planDate !== undefined) this.planDate = dayjs(vo.planDate).toDate();
@@ -44,7 +42,6 @@ export class CreateTodoDto extends PickType(TodoDto, [
     todo.status = this.status ?? TodoStatus.TODO;
     todo.importance = this.importance;
     todo.urgency = this.urgency;
-    todo.tags = this.tags;
     todo.planDate = this.planDate;
     todo.planStartTime = this.planStartTime;
     todo.planEndTime = this.planEndTime;
@@ -65,7 +62,6 @@ export class UpdateTodoDto extends IntersectionType(
   importUpdateVo(vo: TodoVO.UpdateTodoVo) {
     this.name = vo.name;
     this.description = vo.description;
-    this.tags = vo.tags;
     this.importance = vo.importance;
     this.urgency = vo.urgency;
     this.planDate = dayjs(vo.planDate).toDate();
@@ -89,7 +85,6 @@ export class UpdateTodoDto extends IntersectionType(
     if (this.planEndTime === undefined) this.planEndTime = todo.planEndTime;
     if (this.importance === undefined) this.importance = todo.importance;
     if (this.urgency === undefined) this.urgency = todo.urgency;
-    if (this.tags === undefined) this.tags = todo.tags;
     if (this.doneAt === undefined) this.doneAt = todo.doneAt;
     if (this.abandonedAt === undefined) this.abandonedAt = todo.abandonedAt;
     if (this.taskId === undefined) this.taskId = todo.taskId;
@@ -106,7 +101,6 @@ export class UpdateTodoDto extends IntersectionType(
     if (this.planEndTime !== undefined) todo.planEndTime = this.planEndTime;
     if (this.importance !== undefined) todo.importance = this.importance;
     if (this.urgency !== undefined) todo.urgency = this.urgency;
-    if (this.tags !== undefined) todo.tags = this.tags;
     if (this.doneAt !== undefined) todo.doneAt = this.doneAt;
     if (this.abandonedAt !== undefined) todo.abandonedAt = this.abandonedAt;
     if (this.taskId !== undefined) todo.taskId = this.taskId;

@@ -98,24 +98,9 @@ export class TodoController {
     return await this.todoService.done(relatedType, id, body);
   }
 
-  @Put('/start/:relatedType/:id', { description: '开始待办' })
-  async start(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
-    if (relatedType === TodoRelatedType.IS_REPEAT) throw new Error('周期待办实例不支持开始操作');
-    return (await this.todoService.start(id)).exportVo();
-  }
-
-  @Put('/pause/:relatedType/:id', { description: '暂停待办' })
-  async pause(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<TodoVO.TodoVo> {
-    if (relatedType === TodoRelatedType.IS_REPEAT) throw new Error('周期待办实例不支持暂停操作');
-    return (await this.todoService.pause(id)).exportVo();
-  }
-
   @Put('/abandon/:relatedType/:id', { description: '废弃待办' })
-  async abandon(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<boolean> {
-    if (relatedType === TodoRelatedType.IS_REPEAT) {
-      return await this.todoRepeatService.abandon(id);
-    }
-    return await this.todoService.abandon(id);
+  async abandon(@Param('relatedType') relatedType: TodoRelatedType, @Param('id') id: string): Promise<any> {
+    return await this.todoService.abandon(relatedType, id);
   }
 
   @Put('/restore/:relatedType/:id', { description: '恢复待办' })

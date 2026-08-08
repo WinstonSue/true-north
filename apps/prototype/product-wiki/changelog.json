@@ -1,6 +1,78 @@
 {
   "changes": [
     {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "changed",
+      "summary": "待办列表直接露出完成与放弃（习惯/周期以标记未完成结算）。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "partial",
+      "feature": { "key": "growth.todo:view:today", "scope": "view", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "当前待办", "reference": "growth.todo.view.today" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "introduced",
+      "summary": "新建可配置是否重复；编辑不可切换是否重复，已有规则仍可调整细节。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.todo:rule:edit-no-repeat-toggle", "scope": "rule", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "编辑不可切换是否重复", "reference": "growth.todo.rule.edit-no-repeat-toggle" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "changed",
+      "summary": "待办状态精简为待开始、已完成、已放弃，去掉进行中与开始操作。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.todo:field:todo.status", "scope": "field", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "状态", "parentName": "待办" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "introduced",
+      "summary": "区间计划的未完成待办可从待办入口关联全局专注计时；时间点待办隐藏入口，历史记录仍可读。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.todo:rule:focus-range-only", "scope": "rule", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "区间计划可关联专注", "reference": "growth.todo.rule.focus-range-only" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "introduced",
+      "summary": "专注记录可关联待办，与任务关联互斥；结束专注不改变待办状态。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.track-time:rule:todo-optional", "scope": "rule", "moduleId": "growth.track-time", "moduleTitle": "专注与时间追踪", "name": "待办可选关联", "reference": "growth.track-time.rule.todo-optional" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "introduced",
+      "summary": "仅区间计划待办可从待办入口管理计时；时间点待办入口隐藏，已有记录只读。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.track-time:rule:todo-range-focus", "scope": "rule", "moduleId": "growth.track-time", "moduleTitle": "专注与时间追踪", "name": "待办入口仅区间可管理计时", "reference": "growth.track-time.rule.todo-range-focus" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "changed",
+      "summary": "专注模块依赖待办，并从顶栏、任务或待办唤起全局计时。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.track-time:view:focus", "scope": "view", "moduleId": "growth.track-time", "moduleTitle": "专注与时间追踪", "name": "专注计时", "reference": "growth.track-time.overview" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "introduced",
+      "summary": "专注记录新增可选关联待办字段。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.track-time:field:track-time.todoId", "scope": "field", "moduleId": "growth.track-time", "moduleTitle": "专注与时间追踪", "name": "关联待办", "parentName": "专注记录" }
+    },
+    {
       "version": "v0.1.1",
       "date": "2026-08-07",
       "event": "deprecated",

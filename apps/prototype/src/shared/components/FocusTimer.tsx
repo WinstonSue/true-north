@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Button, Card, Flex, Select, Space, Tooltip, message } from '@sue/design-web-react';
 import { Check, Maximize2, Minimize2, Pause, Play, TimerReset, X } from 'lucide-react';
 import { productRef } from '../../product-wiki';
-import type { FocusSession, Task } from '../types';
+import type { FocusSession, Task, Todo } from '../types';
 import styles from './FocusTimer.module.css';
 
 const FOCUS_SECONDS = 25 * 60;
@@ -11,10 +11,12 @@ const FOCUS_SECONDS = 25 * 60;
 type Props = {
   open: boolean;
   initialTaskId?: string;
+  initialTodoId?: string;
   tasks: Task[];
+  todos: Todo[];
   sessions: FocusSession[];
   onClose: () => void;
-  onTaskSelected: () => void;
+  onRelatedSelected: () => void;
   setSessions: Dispatch<SetStateAction<FocusSession[]>>;
   updateTask: (id: string, patch: Partial<Task>) => void;
 };
@@ -22,18 +24,23 @@ type Props = {
 export function FocusTimer({
   open,
   initialTaskId,
+  initialTodoId,
   tasks,
+  todos,
   sessions,
   onClose,
-  onTaskSelected,
+  onRelatedSelected,
   setSessions,
   updateTask,
 }: Props) {
   const [mode, setMode] = useState<'mini' | 'full'>('mini');
   const [taskId, setTaskId] = useState<string>();
+  const [todoId, setTodoId] = useState<string>();
   const [remaining, setRemaining] = useState(FOCUS_SECONDS);
   const [running, setRunning] = useState(false);
   const task = tasks.find((item) => item.id === taskId);
+  const todo = todos.find((item) => item.id === todoId);
+  const lockedToTodo = Boolean(todoId);
   const taskOptions = useMemo(
     () =>
       tasks
@@ -41,13 +48,20 @@ export function FocusTimer({
         .map((item) => ({ value: item.id, label: item.title })),
     [tasks],
   );
+  const relatedTitle = todo?.title || task?.title || '独立专注';
 
   useEffect(() => {
-    if (!initialTaskId) return;
-    setTaskId(initialTaskId);
+    if (!initialTodoId && !initialTaskId) return;
+    if (initialTodoId) {
+      setTodoId(initialTodoId);
+      setTaskId(undefined);
+    } else if (initialTaskId) {
+      setTaskId(initialTaskId);
+      setTodoId(undefined);
+    }
     setMode('mini');
-    onTaskSelected();
-  }, [initialTaskId, onTaskSelected]);
+    onRelatedSelected();
+  }, [initialTaskId, initialTodoId, onRelatedSelected]);
 
   useEffect(() => {
     if (!running) return;
@@ -61,18 +75,21 @@ export function FocusTimer({
     setSessions((items) => [
       {
         id: `f${Date.now()}`,
-        taskId,
-        title: task?.title || '独立专注',
+        taskId: todoId ? undefined : taskId,
+        todoId,
+        title: relatedTitle,
         minutes: 25,
         at: '刚刚',
       },
       ...items,
     ]);
-    if (task) {
+    if (task && !todoId) {
       const actual = Math.round((task.actual + 25 / 60) * 100) / 100;
       updateTask(task.id, { actual, status: task.status === 'todo' ? 'doing' : task.status });
+      message.success('已记录 25 分钟专注，并回写实际耗时');
+      return;
     }
-    message.success(task ? '已记录 25 分钟专注，并回写实际耗时' : '已记录 25 分钟独立专注');
+    message.success(todoId ? '已记录 25 分钟专注（待办状态不变）' : '已记录 25 分钟独立专注');
   };
 
   useEffect(() => {
@@ -89,14 +106,19 @@ export function FocusTimer({
     if (running) return setMode('mini');
     onClose();
   };
-  const selector = (
+  const selector = lockedToTodo ? (
+    <span className={styles.taskName}>待办 · {todo?.title || '已删除待办'}</span>
+  ) : (
     <Select
       allowClear
       className={styles.taskSelect}
       value={taskId}
       placeholder="选择任务（可选）"
       options={taskOptions}
-      onChange={(value) => setTaskId(value as string | undefined)}
+      onChange={(value) => {
+        setTaskId(value as string | undefined);
+        setTodoId(undefined);
+      }}
     />
   );
   const controls = (
@@ -131,7 +153,7 @@ export function FocusTimer({
           <Flex vertical align="center" gap={20}>
             {selector}
             <div className={styles.fullTimer}>{formatSeconds(remaining)}</div>
-            <span className={styles.taskName}>{task?.title || '独立专注'}</span>
+            <span className={styles.taskName}>{relatedTitle}</span>
             {controls}
             <Button type="link" icon={<Check size={15} />} onClick={recordSession}>
               结束并记录 25 分钟
@@ -174,7 +196,7 @@ export function FocusTimer({
         <Flex className={styles.miniBody} align="center" justify="space-between" gap={12}>
           <Flex vertical gap={2}>
             <b className={styles.miniTime}>{formatSeconds(remaining)}</b>
-            <span className={styles.taskName}>{task?.title || '独立专注'}</span>
+            <span className={styles.taskName}>{relatedTitle}</span>
           </Flex>
           {controls}
         </Flex>

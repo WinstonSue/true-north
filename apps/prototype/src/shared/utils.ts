@@ -67,12 +67,18 @@ export function statusLabel(status: string) {
         paused: '已暂停',
         archived: '已归档',
         abandoned: '已放弃',
-        in_progress: '进行中',
         active: '开始',
         completed: '已完成',
       } as Record<string, string>
     )[status] || status
   );
+}
+/** 计划起止不相等时为时间区间，可从待办入口管理专注计时 */
+export function isTodoPlanRange(todo: Pick<Todo, 'plannedStartTime' | 'plannedEndTime'>) {
+  return Boolean(todo.plannedStartTime && todo.plannedEndTime && todo.plannedStartTime !== todo.plannedEndTime);
+}
+export function canFocusTodo(todo: Pick<Todo, 'status' | 'plannedStartTime' | 'plannedEndTime'>) {
+  return todo.status === 'todo' && isTodoPlanRange(todo);
 }
 export function formatTodoPlan(todo: Pick<Todo, 'planned' | 'plannedStartTime' | 'plannedEndTime'>) {
   const time = todo.plannedStartTime === todo.plannedEndTime

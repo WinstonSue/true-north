@@ -11,7 +11,6 @@ export type CreateTodoVo = Pick<
   | 'planEndTime'
   | 'importance'
   | 'urgency'
-  | 'tags'
   | 'repeatConfig'
   | 'taskId'
   | 'repeatId'

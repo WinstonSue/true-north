@@ -71,28 +71,6 @@ export default class TodoService {
     }
   }
 
-  static async start(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
-    try {
-      const res = await TodoController.start(relatedType, id);
-      if (!options?.silent) Message.success('待办已开始');
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-      throw error;
-    }
-  }
-
-  static async pause(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
-    try {
-      const res = await TodoController.pause(relatedType, id);
-      if (!options?.silent) Message.success('待办已暂停');
-      return res;
-    } catch (error: unknown) {
-      Message.error(error);
-      throw error;
-    }
-  }
-
   static async abandon(relatedType: TodoRelatedType, id: string, options?: MethodOptions) {
     try {
       const res = await TodoController.abandon(relatedType, id);

@@ -15,7 +15,6 @@ export type TodoRepeatWithoutRelationsVo = {
   description?: string;
   importance?: number;
   urgency?: number;
-  tags?: string[];
   status: TodoStatus;
   abandonedAt?: string;
 } & BaseEntityVo;

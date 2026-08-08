@@ -34,7 +34,7 @@ export default function GoalAiDecomposition({ open, goal, onClose, onSaved }: { 
     } else if (suggestion.kind === 'task') {
       await TaskService.create({ name: title, description: '由目标 AI 拆解创建。', tags: [], importance: goal.importance || Importance.Core, difficulty: goal.difficulty || Difficulty.Challenger, urgency: 3, goalId: goal.id, startAt: goal.startAt, endAt: goal.endAt, estimateTime: 3600 });
     } else if (suggestion.kind === 'todo') {
-      await TodoService.create({ name: title, description: '由目标 AI 拆解创建。', status: TodoStatus.TODO, planDate: dayjs().add(1, 'day').format('YYYY-MM-DD'), importance: goal.importance || Importance.Core, urgency: 3, tags: [] });
+      await TodoService.create({ name: title, description: '由目标 AI 拆解创建。', status: TodoStatus.TODO, planDate: dayjs().add(1, 'day').format('YYYY-MM-DD'), importance: goal.importance || Importance.Core, urgency: 3 });
     } else {
       const repeatStartDate = dayjs().add(1, 'day').format('YYYY-MM-DD');
       const repeatSetting = createDefaultRepeatSetting(repeatStartDate);

@@ -75,11 +75,10 @@
           "required": true,
           "values": [
             "todo",
-            "in_progress",
             "done",
             "abandoned"
           ],
-          "description": "待办执行状态。",
+          "description": "待办执行状态；不含进行中，执行投入通过专注计时关联记录。",
           "productStatus": "roadmap",
           "prototypeCoverage": "complete"
         },
@@ -189,6 +188,36 @@
       "reference": "growth.todo.rule.repeat-template",
       "productStatus": "roadmap",
       "prototypeCoverage": "complete"
+    },
+    {
+      "id": "focus-range-only",
+      "name": "区间计划可关联专注",
+      "entities": [
+        "todo"
+      ],
+      "description": "未完成且计划起止时间为区间的待办，可从待办入口唤起全局专注计时并关联该待办；计划为时间点时不可从待办入口管理计时，已有关联记录仍可只读查看。专注结束不改变待办状态。",
+      "views": [
+        "today",
+        "all"
+      ],
+      "reference": "growth.todo.rule.focus-range-only",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete"
+    },
+    {
+      "id": "edit-no-repeat-toggle",
+      "name": "编辑不可切换是否重复",
+      "entities": [
+        "todo"
+      ],
+      "description": "仅新建独立待办时可开启或关闭重复；编辑时不可切换是否重复，已启用重复时仍可调整规则细节。",
+      "views": [
+        "today",
+        "all"
+      ],
+      "reference": "growth.todo.rule.edit-no-repeat-toggle",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete"
     }
   ],
   "references": [
@@ -239,6 +268,14 @@
     {
       "id": "growth.todo.rule.repeat-template",
       "heading": "### 周期待办模板推进"
+    },
+    {
+      "id": "growth.todo.rule.focus-range-only",
+      "heading": "### 区间计划可关联专注"
+    },
+    {
+      "id": "growth.todo.rule.edit-no-repeat-toggle",
+      "heading": "### 编辑不可切换是否重复"
     },
     {
       "id": "growth.todo.metrics",

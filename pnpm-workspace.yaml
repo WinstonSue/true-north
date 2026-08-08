@@ -10,6 +10,7 @@ nodeOptions: "--no-warnings --no-deprecation"
 storeDir: .pnpm-store
 
 minimumReleaseAgeExclude:
+  - '@sue/design-web-react@0.0.3-beta'
   - baseline-browser-mapping@2.11.12
   - electron-to-chromium@1.5.400
   - node-releases@2.0.52

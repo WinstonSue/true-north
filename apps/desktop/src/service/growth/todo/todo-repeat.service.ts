@@ -131,12 +131,15 @@ export class TodoRepeatService {
     await this.todoRepeatRepository.update(todoRepeatUpdateEntity);
   }
 
-  async abandon(id: string): Promise<any> {
-    const todoRepeatUpdateEntity = new TodoRepeat();
-    todoRepeatUpdateEntity.id = id;
-    todoRepeatUpdateEntity.status = TodoStatus.ABANDONED;
-    todoRepeatUpdateEntity.abandonedAt = new Date();
-    await this.todoRepeatRepository.update(todoRepeatUpdateEntity);
+  /** 将模板标记为最终结束状态（无下一实例时） */
+  async finish(id: string, status: TodoStatus.DONE | TodoStatus.ABANDONED): Promise<void> {
+    const updateTodoRepeatDto = new UpdateTodoRepeatDto();
+    updateTodoRepeatDto.id = id;
+    updateTodoRepeatDto.status = status;
+    if (status === TodoStatus.ABANDONED) {
+      updateTodoRepeatDto.abandonedAt = new Date();
+    }
+    await this.update(updateTodoRepeatDto);
   }
 
   async restore(id: string): Promise<any> {
@@ -147,8 +150,15 @@ export class TodoRepeatService {
     await this.todoRepeatRepository.update(todoRepeatUpdateEntity);
   }
 
-  async updateToNext(id: string): Promise<TodoRepeatDto> {
+  /**
+   * 结算当前实例：返回结算前的模板快照；若有下一有效日期则推进 currentDate 并重置为 todo，否则不推进。
+   * nextDate 为 null 表示重复计划已结束。
+   */
+  async settleCurrent(id: string): Promise<{ settled: TodoRepeatDto; nextDate: string | null }> {
     let todoRepeatDto = await this.findWithRelations(id);
+    if (todoRepeatDto.status !== TodoStatus.TODO) {
+      throw new Error('当前状态不允许结算周期待办');
+    }
     const repeatConfig = {
       repeatMode: todoRepeatDto.repeatMode,
       repeatConfig: todoRepeatDto.repeatConfig,
@@ -157,28 +167,35 @@ export class TodoRepeatService {
       repeatTimes: todoRepeatDto.repeatTimes,
       repeatStartDate: todoRepeatDto.repeatStartDate,
     };
-    // 验证当前日期是否符合重复规则
     todoRepeatDto = this.fixCurrentDate(todoRepeatDto);
+    const settledSnapshot = todoRepeatDto;
 
-    const currentDate = dayjs(todoRepeatDto.currentDate);
-
-    // 当前日期符合规则，计算下一个日期
-    const calculatedNextDateResult = calculateNextDate(currentDate, repeatConfig);
+    const calculatedNextDateResult = calculateNextDate(dayjs(todoRepeatDto.currentDate), repeatConfig);
     if (calculatedNextDateResult.ok === false) {
       throw new RepeatValidationError(calculatedNextDateResult.issues);
     }
-    const calculatedNextDate = calculatedNextDateResult.value;
+    const nextDate = calculatedNextDateResult.value
+      ? calculatedNextDateResult.value.format('YYYY-MM-DD')
+      : null;
 
-    if (!calculatedNextDate) {
-      throw new Error('No next date found');
+    if (nextDate) {
+      const updateTodoRepeatDto = new UpdateTodoRepeatDto();
+      updateTodoRepeatDto.id = todoRepeatDto.id;
+      updateTodoRepeatDto.currentDate = nextDate;
+      updateTodoRepeatDto.status = TodoStatus.TODO;
+      await this.update(updateTodoRepeatDto);
     }
-    const nextDate = calculatedNextDate;
 
-    const updateTodoRepeatDto = new UpdateTodoRepeatDto();
-    updateTodoRepeatDto.id = todoRepeatDto.id;
-    updateTodoRepeatDto.currentDate = nextDate.format('YYYY-MM-DD');
-    await this.update(updateTodoRepeatDto);
-    return todoRepeatDto;
+    return { settled: settledSnapshot, nextDate };
+  }
+
+  /** @deprecated 使用 settleCurrent */
+  async updateToNext(id: string): Promise<TodoRepeatDto> {
+    const { settled, nextDate } = await this.settleCurrent(id);
+    if (!nextDate) {
+      await this.finish(id, TodoStatus.DONE);
+    }
+    return settled;
   }
 
   /**
@@ -186,7 +203,7 @@ export class TodoRepeatService {
    * 不会落库，仅在内存中生成；若当日已有具体待办，则使用已存在的待办（并补充 repeat 信息）
    */
   async generateTodoByRepeat(todoFilter: TodoFilterDto): Promise<TodoDto[]> {
-    if (todoFilter.status !== TodoStatus.TODO) {
+    if (todoFilter.status && todoFilter.status !== TodoStatus.TODO) {
       return [];
     }
     const rangeStart = todoFilter.planDateStart ? dayjs(todoFilter.planDateStart) : undefined;
@@ -202,6 +219,14 @@ export class TodoRepeatService {
     for (const todoRepeat of todoRepeatList) {
       let todoRepeatDto = new TodoRepeatDto();
       todoRepeatDto.importEntity(todoRepeat);
+
+      const templateStatus = todoRepeatDto.status ?? TodoStatus.TODO;
+      if (templateStatus !== TodoStatus.TODO) {
+        continue;
+      }
+      if (todoFilter.status && templateStatus !== todoFilter.status) {
+        continue;
+      }
 
       // 结束条件预处理
       const endMode = todoRepeatDto.repeatEndMode as RepeatEndMode | undefined;
@@ -254,7 +279,6 @@ export class TodoRepeatService {
       id: todoRepeat.id,
       name: todoRepeat.name,
       description: todoRepeat.description,
-      tags: todoRepeat.tags || [],
       importance: todoRepeat.importance,
       urgency: todoRepeat.urgency,
       planDate: planDate || dayjs(todoRepeat.currentDate).toDate(),
@@ -264,7 +288,7 @@ export class TodoRepeatService {
       updatedAt: new Date(),
       repeat: todoRepeat,
       relatedType: TodoRelatedType.IS_REPEAT,
-      status: TodoStatus.TODO,
+      status: todoRepeat.status ?? TodoStatus.TODO,
     });
     return todoDto;
   }

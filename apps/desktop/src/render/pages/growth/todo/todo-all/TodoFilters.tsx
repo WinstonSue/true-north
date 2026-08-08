@@ -105,23 +105,10 @@ export function TodoFilters() {
             placeholder="待办状态"
           >
             <Select.Option value={TodoStatus.TODO}>未完成</Select.Option>
-            <Select.Option value={TodoStatus.IN_PROGRESS}>进行中</Select.Option>
             <Select.Option value={TodoStatus.DONE}>已完成</Select.Option>
             <Select.Option value={TodoStatus.ABANDONED}>已放弃</Select.Option>
           </Select>
         </Col>
-        {/* <Col span={6}>
-          <TagSelector
-            multiple={true}
-            value={filters.tags}
-            onChange={(value) => {
-              setFilters((prev: TodoPageFilterVo) => ({
-                ...prev,
-                tags: value,
-              }));
-            }}
-          />
-        </Col> */}
       </Row>
     </TableFilter>
   );

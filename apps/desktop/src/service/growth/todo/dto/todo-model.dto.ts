@@ -31,7 +31,6 @@ export class TodoDto extends TodoWithoutRelationsDto {
     this.name = entity.name;
     this.description = entity.description;
     this.status = entity.status;
-    this.tags = entity.tags;
     this.importance = entity.importance;
     this.urgency = entity.urgency;
     this.planDate = entity.planDate;
@@ -42,8 +41,12 @@ export class TodoDto extends TodoWithoutRelationsDto {
     this.relatedType = entity.relatedType;
     this.doneAt = entity.doneAt;
     this.abandonedAt = entity.abandonedAt;
-    this.planStartTime = entity.planStartTime;
-    this.planEndTime = entity.planEndTime;
+    this.planStartTime = entity.planStartTime
+      ? entity.planStartTime.slice(0, 5)
+      : entity.planStartTime;
+    this.planEndTime = entity.planEndTime
+      ? entity.planEndTime.slice(0, 5)
+      : entity.planEndTime;
     if (entity.task) {
       const taskDto = new TaskDto();
       taskDto.importEntity(entity.task);
@@ -62,7 +65,6 @@ export class TodoDto extends TodoWithoutRelationsDto {
       name: this.name || '',
       description: this.description,
       status: this.status ?? TodoStatus.TODO,
-      tags: this.tags,
       importance: this.importance,
       urgency: this.urgency,
       planDate: dayjs(this.planDate).format('YYYY-MM-DD'),

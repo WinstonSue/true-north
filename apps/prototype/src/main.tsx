@@ -73,6 +73,7 @@ function App() {
   const [sessions, setSessions] = useState<FocusSession[]>([]);
   const [focusTimerOpen, setFocusTimerOpen] = useState(false);
   const [focusTimerTaskId, setFocusTimerTaskId] = useState<string>();
+  const [focusTimerTodoId, setFocusTimerTodoId] = useState<string>();
   const [selectedGoal, setSelectedGoal] = useState('g3');
   const [drawer, setDrawer] = useState<DrawerState>(null);
   const [aiDecompositionOpen, setAiDecompositionOpen] = useState(false);
@@ -101,9 +102,14 @@ function App() {
     setSelectedGoal(deleted?.parentId && remaining.some((goal) => goal.id === deleted.parentId) ? deleted.parentId : remaining[0]?.id || '');
     notify('目标已删除');
   };
-  const openFocusTimer = useCallback((taskId?: string) => {
-    setFocusTimerTaskId(taskId);
+  const openFocusTimer = useCallback((related?: { taskId?: string; todoId?: string }) => {
+    setFocusTimerTaskId(related?.taskId);
+    setFocusTimerTodoId(related?.todoId);
     setFocusTimerOpen(true);
+  }, []);
+  const clearFocusRelated = useCallback(() => {
+    setFocusTimerTaskId(undefined);
+    setFocusTimerTodoId(undefined);
   }, []);
   const resolveHabitTodo = (todo: Todo, completed: boolean) => {
     const habit = habits.find((item) => item.id === todo.habitId);
@@ -141,6 +147,12 @@ function App() {
     if (todo.repeat) return resolveRepeatingTodo(todo, false);
     updateTodo(todo.id, { status: 'abandoned' }, '标记未完成');
     notify('待办已标记为未完成');
+  };
+  const abandonTodo = (todo: Todo) => {
+    if (todo.habitId) return resolveHabitTodo(todo, false);
+    if (todo.repeat) return resolveRepeatingTodo(todo, false);
+    updateTodo(todo.id, { status: 'abandoned' }, '放弃待办');
+    notify('待办已放弃');
   };
   const saveEntity: SaveEntity = (kind: DrawerKind, draft: Goal | Task | Todo | Habit) => {
     if (kind === 'goal')
@@ -323,7 +335,7 @@ function App() {
                     goals={goals}
                     setDrawer={setDrawer}
                     updateTask={updateTask}
-                    onFocusTask={(task) => openFocusTimer(task.id)}
+                    onFocusTask={(task) => openFocusTimer({ taskId: task.id })}
                     onOpenTaskDetail={setTaskDetailId}
                   />
                 }
@@ -339,6 +351,8 @@ function App() {
                     setDrawer={setDrawer}
                     completeTodo={completeTodo}
                     markTodoIncomplete={markTodoIncomplete}
+                    abandonTodo={abandonTodo}
+                    onFocusTodo={(todo) => openFocusTimer({ todoId: todo.id })}
                   />
                 }
               />
@@ -351,7 +365,7 @@ function App() {
           </main>
         </Flex>
       </Flex>
-      {taskDetailId && <TaskDetailDrawer taskId={taskDetailId} goals={goals} tasks={tasks} todos={todos} updateTask={updateTask} createTask={createTask} deleteTask={deleteTask} setDrawer={setDrawer} onFocusTask={(task) => openFocusTimer(task.id)} onClose={() => setTaskDetailId(undefined)} notify={notify} />}
+      {taskDetailId && <TaskDetailDrawer taskId={taskDetailId} goals={goals} tasks={tasks} todos={todos} updateTask={updateTask} createTask={createTask} deleteTask={deleteTask} setDrawer={setDrawer} onFocusTask={(task) => openFocusTimer({ taskId: task.id })} onClose={() => setTaskDetailId(undefined)} notify={notify} />}
       {drawer && (
         <EntityDrawer
           drawer={drawer}
@@ -359,9 +373,11 @@ function App() {
           tasks={tasks}
           todos={todos}
           habits={habits}
+          sessions={sessions}
           onClose={() => setDrawer(null)}
           onSave={saveEntity}
-          onFocusTask={(task) => openFocusTimer(task.id)}
+          onFocusTask={(task) => openFocusTimer({ taskId: task.id })}
+          onFocusTodo={(todo) => openFocusTimer({ todoId: todo.id })}
         />
       )}
       <AiDecompositionDrawer
@@ -378,10 +394,12 @@ function App() {
       <FocusTimer
         open={focusTimerOpen}
         initialTaskId={focusTimerTaskId}
+        initialTodoId={focusTimerTodoId}
         tasks={tasks}
+        todos={todos}
         sessions={sessions}
         onClose={() => setFocusTimerOpen(false)}
-        onTaskSelected={() => setFocusTimerTaskId(undefined)}
+        onRelatedSelected={clearFocusRelated}
         setSessions={setSessions}
         updateTask={updateTask}
       />

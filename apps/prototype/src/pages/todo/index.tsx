@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Alert, Button, Calendar, Card, Checkbox, DatePicker, Flex, Modal, Select, Space, Table, Tabs, Tooltip } from '@sue/design-web-react';
-import { Check, Filter, Plus, RotateCcw, X } from 'lucide-react';
+import { Ban, Check, Filter, Play, Plus, RotateCcw, X } from 'lucide-react';
 import { DayAgendaCalendar, ExecutionGroupList, formatDayAgendaTitle, PriorityTag, StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
 import { TODAY } from '../../shared/mock-data';
 import type { DrawerState, Goal, Habit, Task, Todo, TodoStatus } from '../../shared/types';
-import { compareTodoPlan, formatTodoPlan, goalName, groupExecutionItems, statusLabel } from '../../shared/utils';
+import { canFocusTodo, compareTodoPlan, formatTodoPlan, goalName, groupExecutionItems, statusLabel } from '../../shared/utils';
 import styles from './index.module.css';
 
 type Props = {
@@ -17,11 +17,23 @@ type Props = {
   setDrawer: (drawer: DrawerState) => void;
   completeTodo: (todo: Todo) => void;
   markTodoIncomplete: (todo: Todo) => void;
+  abandonTodo: (todo: Todo) => void;
+  onFocusTodo: (todo: Todo) => void;
 };
 
-const todoStatuses: TodoStatus[] = ['todo', 'in_progress', 'done', 'abandoned'];
+const todoStatuses: TodoStatus[] = ['todo', 'done', 'abandoned'];
 
-export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo, markTodoIncomplete }: Props) {
+export function TodosPage({
+  todos,
+  goals,
+  tasks,
+  habits,
+  setDrawer,
+  completeTodo,
+  markTodoIncomplete,
+  abandonTodo,
+  onFocusTodo,
+}: Props) {
   const [tab, setTab] = useState('today');
   const [selectedDate, setSelectedDate] = useState(() => dayjs(TODAY));
   const [visibleMonth, setVisibleMonth] = useState(() => dayjs(TODAY).startOf('month'));
@@ -107,9 +119,21 @@ export function TodosPage({ todos, goals, tasks, habits, setDrawer, completeTodo
   const TodoActions = ({ todo }: { todo: Todo }) =>
     todo.status !== 'done' && todo.status !== 'abandoned' ? (
       <>
+        {canFocusTodo(todo) && (
+          <Tooltip title="开始专注">
+            <Button
+              icon={<Play size={15} />}
+              size="small"
+              aria-label={`为 ${todo.title} 开始专注`}
+              onClick={() => onFocusTodo(todo)}
+            />
+          </Tooltip>
+        )}
         <Button icon={<Check size={15} />} size="small" title="完成" aria-label={`完成 ${todo.title}`} onClick={() => completeTodo(todo)} />
-        {(todo.habitId || todo.repeat) && (
+        {(todo.habitId || todo.repeat) ? (
           <Button icon={<X size={15} />} size="small" title="标记未完成" aria-label={`标记 ${todo.title} 未完成`} onClick={() => markTodoIncomplete(todo)} />
+        ) : (
+          <Button icon={<Ban size={15} />} size="small" title="放弃" aria-label={`放弃 ${todo.title}`} onClick={() => abandonTodo(todo)} />
         )}
       </>
     ) : null;

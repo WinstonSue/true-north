@@ -22,12 +22,8 @@ export default function TodoToday() {
   const isSelectedToday = selectedDate.isSame(dayjs(), 'day');
 
   const refreshData = useCallback(async () => {
-    const mergeActive = (responses: Array<{ list?: TodoVo[] } | undefined>) =>
-      [...new Map(responses.flatMap((response) => response?.list || []).map((todo) => [todo.id, todo])).values()]
-        .sort((a, b) => (a.planStartTime || '').localeCompare(b.planStartTime || ''));
-    const [scheduledTodo, scheduledInProgress, doneResponse, abandonedResponse] = await Promise.all([
+    const [scheduledTodo, doneResponse, abandonedResponse] = await Promise.all([
       TodoService.list({ status: TodoStatus.TODO, planDateStart: selectedDateText, planDateEnd: selectedDateText }),
-      TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateStart: selectedDateText, planDateEnd: selectedDateText }),
       TodoService.list({ status: TodoStatus.DONE, doneDateStart: selectedDateText, doneDateEnd: selectedDateText }),
       TodoService.list({ status: TodoStatus.ABANDONED, abandonedDateStart: selectedDateText, abandonedDateEnd: selectedDateText }),
     ]);
@@ -35,14 +31,17 @@ export default function TodoToday() {
     let expired: TodoVo[] = [];
     if (isSelectedToday) {
       const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
-      const [expiredTodo, expiredInProgress] = await Promise.all([
-        TodoService.list({ status: TodoStatus.TODO, planDateEnd: yesterday }),
-        TodoService.list({ status: TodoStatus.IN_PROGRESS, planDateEnd: yesterday }),
-      ]);
-      expired = mergeActive([expiredTodo, expiredInProgress]);
+      const expiredTodo = await TodoService.list({ status: TodoStatus.TODO, planDateEnd: yesterday });
+      expired = [...(expiredTodo?.list || [])].sort((a, b) =>
+        (a.planStartTime || '').localeCompare(b.planStartTime || ''),
+      );
     }
 
-    setScheduledTodos(mergeActive([scheduledTodo, scheduledInProgress]));
+    setScheduledTodos(
+      [...(scheduledTodo?.list || [])].sort((a, b) =>
+        (a.planStartTime || '').localeCompare(b.planStartTime || ''),
+      ),
+    );
     setDoneTodos(doneResponse?.list || []);
     setExpiredTodos(expired);
     setAbandonedTodos(abandonedResponse?.list || []);
@@ -51,19 +50,12 @@ export default function TodoToday() {
   const refreshCalendarCounts = useCallback(async () => {
     const visibleStart = visibleMonth.startOf('month').startOf('week');
     const visibleEnd = visibleMonth.endOf('month').endOf('week');
-    const responses = await Promise.all([
-      TodoService.list({
-        status: TodoStatus.TODO,
-        planDateStart: visibleStart.format('YYYY-MM-DD'),
-        planDateEnd: visibleEnd.format('YYYY-MM-DD'),
-      }),
-      TodoService.list({
-        status: TodoStatus.IN_PROGRESS,
-        planDateStart: visibleStart.format('YYYY-MM-DD'),
-        planDateEnd: visibleEnd.format('YYYY-MM-DD'),
-      }),
-    ]);
-    const todoList = [...new Map(responses.flatMap((response) => response?.list || []).map((todo) => [todo.id, todo])).values()];
+    const response = await TodoService.list({
+      status: TodoStatus.TODO,
+      planDateStart: visibleStart.format('YYYY-MM-DD'),
+      planDateEnd: visibleEnd.format('YYYY-MM-DD'),
+    });
+    const todoList = response?.list || [];
     const counts = todoList.reduce<Record<string, number>>((result, todo) => {
       const dateKey = dayjs(todo.planDate).format('YYYY-MM-DD');
       result[dateKey] = (result[dateKey] || 0) + 1;

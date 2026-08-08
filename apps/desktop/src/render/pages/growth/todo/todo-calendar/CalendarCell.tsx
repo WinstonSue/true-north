@@ -2,7 +2,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useCalendarContext } from './context';
 import { TodoVo } from '@true-north/vo';
 import { TodoStatus } from '@true-north/enum';
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import clsx from 'clsx';
 import { useTodoDetail } from '../../components';
 import SiteIcon from '@/components/SiteIcon';
@@ -54,10 +54,7 @@ export default function CalendarCell({ cellDate }: { cellDate: Dayjs }) {
     );
   }, [cellDate, todoList]);
 
-  const {
-    CreatePopover: CreateTodoPopover,
-    createPopoverVisible: createTodoPopoverVisible,
-  } = useTodoDetail();
+  const { openCreateDrawer } = useTodoDetail();
 
   return (
     <div className={styles.cell}>
@@ -79,32 +76,32 @@ export default function CalendarCell({ cellDate }: { cellDate: Dayjs }) {
                 <TodoItem key={todo.id} todo={todo} />
               ))}
             </div>
-            {(showAddTaskDate?.isSame(cellDate) ||
-              createTodoPopoverVisible) && (
+            {showAddTaskDate?.isSame(cellDate) && (
               <div className={styles.cellCreate}>
-                <CreateTodoPopover
-                  creatorProps={{
-                    showSubmitButton: true,
-                    initialFormData: {
-                      planDate: cellDate.format('YYYY-MM-DD'),
-                    },
-                    afterSubmit: async () => {
-                      await getTodoList();
-                    },
+                <div
+                  className={clsx([
+                    'w-full text-body-1 px-1.5 leading-[20px] rounded-[2px]',
+                    'flex items-center gap-1',
+                    'text-text-2 truncate cursor-pointer',
+                    'opacity-0.75 bg-secondary hover:bg-secondary-hover active:bg-secondary-active',
+                  ])}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openCreateDrawer({
+                      contentProps: {
+                        initialFormData: {
+                          planDate: cellDate.format('YYYY-MM-DD'),
+                        },
+                        afterSubmit: async () => {
+                          await getTodoList();
+                        },
+                      },
+                    });
                   }}
                 >
-                  <div
-                    className={clsx([
-                      'w-full text-body-1 px-1.5 leading-[20px] rounded-[2px]',
-                      'flex items-center gap-1',
-                      'text-text-2 truncate cursor-pointer',
-                      'opacity-0.75 bg-secondary hover:bg-secondary-hover active:bg-secondary-active',
-                    ])}
-                  >
-                    <SiteIcon id="add" className="w-3 h-3" />
-                    添加待办
-                  </div>
-                </CreateTodoPopover>
+                  <SiteIcon id="add" className="w-3 h-3" />
+                  添加待办
+                </div>
               </div>
             )}
         </>

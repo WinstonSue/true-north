@@ -119,6 +119,8 @@ async function migrateGrowthV010(): Promise<void> {
   await AppDataSource.query(
     "UPDATE task SET estimate_time = NULL WHERE estimate_time IS NOT NULL AND CAST(estimate_time AS TEXT) GLOB '*[^0-9]*'"
   );
+  await AppDataSource.query("UPDATE todo SET status = 'todo' WHERE status = 'in_progress'");
+  await AppDataSource.query("UPDATE todo_repeat SET status = 'todo' WHERE status = 'in_progress'");
 }
 
 /** Repair titles written by the pre-migration native-event callback bug. */

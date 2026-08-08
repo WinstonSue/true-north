@@ -122,7 +122,7 @@ export class HabitService {
     habit.abandonedAt = new Date();
     if (habit.cycleTodoId) {
       const cycleTodo = await this.todoRepository.find(habit.cycleTodoId);
-      if (cycleTodo.status === TodoStatus.TODO || cycleTodo.status === TodoStatus.IN_PROGRESS) {
+      if (cycleTodo.status === TodoStatus.TODO) {
         cycleTodo.status = TodoStatus.ABANDONED;
         cycleTodo.abandonedAt = habit.abandonedAt;
         await this.todoRepository.update(cycleTodo);
@@ -153,7 +153,6 @@ export class HabitService {
     todo.name = habit.name;
     todo.description = habit.description;
     todo.importance = habit.importance;
-    todo.tags = habit.tags || [];
     todo.planDate = new Date(habit.repeatStartDate);
     todo.status = TodoStatus.TODO;
     todo.relatedType = TodoRelatedType.HABIT;

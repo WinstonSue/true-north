@@ -24,7 +24,7 @@ function TodoAll() {
     setSelectedRowKeys((keys) => keys.filter((key) =>
       todoList.some((todo) =>
         todo.id === key &&
-        (todo.status === TodoStatus.TODO || todo.status === TodoStatus.IN_PROGRESS),
+        todo.status === TodoStatus.TODO,
       ),
     ));
   }, [todoList]);

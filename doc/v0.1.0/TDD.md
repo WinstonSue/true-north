@@ -8,18 +8,17 @@ document_meta:
   version: 'v0.1.0'
   status: 'draft'
   created_date: '2025-12-23'
-  last_updated: '2026-07-30'
+  last_updated: '2026-08-08'
   owner: 'Growth Squad'
   target_audience: ['frontend_developer', 'desktop_service_developer', 'tester']
 
 scope:
   product_change_source: 'apps/prototype/product-wiki/changelog.json'
-  product_change_count: 6
-  included_modules: ['growth.goal', 'growth.task']
-  supplemental_contract: '任务预计时长与专注时长均以整数秒传输和存储'
+  included_modules: ['growth.goal', 'growth.task', 'growth.todo', 'growth.track-time']
+  supplemental_contract: '任务预计时长与专注时长均以整数秒传输和存储；待办无 in_progress，计时不改待办状态'
 ```
 
-桌面端进程、IPC、DTO/VO 与持久化分层参见 [TechnicalWiki · 架构总览](../TechnicalWiki/architecture/overview.md) 和 [TechnicalWiki · 数据流](../TechnicalWiki/architecture/data-flow.md)。产品规则参见 ProductWiki 的 [目标管理](../../apps/prototype/product-wiki/growth/goal/README.md) 与 [任务管理](../../apps/prototype/product-wiki/growth/task/README.md)。
+桌面端进程、IPC、DTO/VO 与持久化分层参见 [TechnicalWiki · 架构总览](../TechnicalWiki/architecture/overview.md) 和 [TechnicalWiki · 数据流](../TechnicalWiki/architecture/data-flow.md)。产品规则参见 ProductWiki 的 [目标管理](../../apps/prototype/product-wiki/growth/goal/README.md)、[任务管理](../../apps/prototype/product-wiki/growth/task/README.md)、[待办管理](../../apps/prototype/product-wiki/growth/todo/README.md) 与 [专注与时间追踪](../../apps/prototype/product-wiki/growth/track-time/README.md)。长期实现边界见 [TechnicalWiki · Todo](../TechnicalWiki/growth/todo.md)、[Track-Time](../TechnicalWiki/growth/track-time.md)。
 
 ## 范围追溯与现状
 
@@ -29,8 +28,10 @@ scope:
 | Goal 时间范围、优先级继承 | `shared/lifecycle.ts` | Entity 有时间、重要度、难度；Service 未校验父子关系 | 创建、编辑父/子目标时在 Service 层校验 |
 | Task 详情抽屉 | `pages/task-detail/` | 有任务树、关联查询基础接口；无抽屉实现契约 | 抽屉数据加载与交互实现 |
 | Task 时间继承 | `shared/lifecycle.ts` | Task 允许 `goalId`、`parentId` 同时为空或同时存在，缺少难度字段 | 唯一归属与上游约束校验 |
+| Todo 状态精简 | `pages/todo/`、`EntityDrawer` | 仍有 `in_progress` 与 `/todo/start|/pause` | 三态 + 删除 start/pause + 数据迁移 |
+| Todo 区间专注 / TrackTime 待办关联 | `FocusTimer`、待办列表/抽屉 | TrackTime 仅 `TASK`；待办无专注入口 | `TrackTimeRelatedType.TODO`、入口与只读历史 |
 
-非范围：Todo、Habit、TrackTime 与重复规则的产品功能扩展不在本版本新增交付中；它们的现状和对齐边界仅维护在 Growth TechnicalWiki。
+非范围：Habit 产品扩展；全局 FocusTimer 内「选择待办」联合选择器（本期以待办入口预填为主）；服务端因时间点拒绝 create。
 
 ## 目标与任务实现设计
 
@@ -49,6 +50,22 @@ scope:
 - Task 的创建与更新必须恰好指定一个直接归属（`goalId` 或 `parentId`）；校验归属对象存在、无自环/循环父子关系，并校验任务计划范围、重要度与难度不超出归属目标或父任务。删除有直接子任务或关联 Todo 的任务时返回冲突，不级联删除。
 - 新增 `PUT /task/done/:id`；`abandon`、`restore` 与 `done` 负责状态时间戳和转换校验，通用 `PUT /task/update/:id` 不接受状态流转。
 
+### Todo：状态精简与受控流转
+
+- `TodoStatus` 仅保留 `todo | done | abandoned`；从 `@true-north/enum` 移除 `IN_PROGRESS`。
+- 删除 `TodoService` / `TodoRepeatService` 的 `start`、`pause` 及 RouteController `PUT /todo/start/:relatedType/:id`、`PUT /todo/pause/:relatedType/:id`；按仓库生成流程同步客户端。
+- `done` / `abandon` 仅允许当前状态为 `todo`；`restore` 回到 `todo`。通用 `update` 不接受状态字段。
+- SQLite 启动迁移：将 `todo` / `todo_repeat`（及实际表名）中 `status = 'in_progress'` 更新为 `'todo'`。
+- Render：列表/表格/筛选去掉「开始」与「进行中」；未完成判定为 `status === todo`。
+
+### TrackTime：待办关联与 FocusTimer
+
+- `TrackTimeRelatedType` 增加 `TODO = 'todo'`；create/related 查询支持待办 id。
+- `FocusTimerProvider.open` 支持 `{ relatedType, relatedId }` 或等价的任务/待办预关联；结束时 `TrackTimeController.create` 写入对应关联；**不**调用待办状态接口。
+- 待办列表/详情：当 `status === todo` 且 `planStartTime !== planEndTime` 时展示「开始专注」；时间点隐藏入口。
+- 待办详情只读加载 `GET /trackTime/related/todo/:id`；时间点待办同样可读。
+- 顶栏唤起可继续只选任务；不强制全局选择器支持待办。服务端不因时间点拒绝 `relatedType=todo` 的 create。
+
 ### 数据、VO 与迁移
 
 | 对象 | v0.1.0 契约 | 兼容处理 |
@@ -58,14 +75,16 @@ scope:
 | Task 预计时长 | `estimated: number`，单位为秒 | `estimateTime: string` 迁移为可无歧义解析的秒数；不可解析值置空并列入数据修复清单。 |
 | TrackTime 时长 | `duration: number`，单位为秒 | 所有聚合与展示从秒换算为小时/分钟；不再以分钟作为 IPC 或存储单位。 |
 | Task 难度 | `difficulty: number`，与 Goal 一致参与上游校验 | 保留历史 `urgency` 列直到兼容窗口结束，但不作为 v0.1.0 任务层级约束字段。 |
+| TodoStatus | `todo \| done \| abandoned` | `in_progress` → `todo`；删除 start/pause 生成接口。 |
+| TrackTimeRelatedType | `none \| task \| todo` | 存量记录无待办关联；新增待办关联写入 `relatedType=todo`。 |
 
 接口定义、VO 与 web-service controller 必须通过仓库生成流程更新；不得直接改写生成接口。
 
 ## 实施顺序与验收
 
-1. 更新 ProductWiki 时长单位和 PRD，完成 Goal/Task 类型、字段与迁移设计。
-2. 落地 Service 级层级、删除与状态转换约束，再通过 RouteController 暴露新增 `done` IPC。
-3. 完成 Task 抽屉的树、详情、Todo 与计时器数据编排；所有错误在操作位置反馈。
+1. 更新 ProductWiki 与 PRD，完成 Goal/Task/Todo/TrackTime 差异设计。
+2. 落地 Service 级层级、删除与状态转换约束，再通过 RouteController 暴露新增 `done` IPC；删除待办 start/pause。
+3. 完成 Task 抽屉与 Todo 专注入口、TrackTime 待办关联；所有错误在操作位置反馈。
 4. 更新 TechnicalWiki 的现状与差距矩阵，保证版本 TDD 不复制长期工程规范。
 
 | 场景 | 验收结果 |
@@ -75,6 +94,9 @@ scope:
 | 打开任意任务详情 | 在当前页面打开抽屉；左侧仅有同根子树；右侧无独立子任务 Tab。 |
 | 新建或调整子任务 | 必须只有一个上游，且计划范围、重要度、难度均不超过上游。 |
 | 记录与展示工时 | Task 预计与 TrackTime 实际均以秒保存；界面显示可读的小时/分钟。 |
+| 待办状态 | 无开始操作与进行中；旧 `in_progress` 视为未完成。 |
+| 区间待办专注 | 可预关联创建 TrackTime；待办状态不变。 |
+| 时间点待办 | 无专注入口；已有关联记录仍可读。 |
 
 验证命令：
 

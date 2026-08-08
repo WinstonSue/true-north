@@ -3,7 +3,7 @@ import { Entity, OneToMany, Column } from 'typeorm';
 import { Todo } from '../todo/todo.entity';
 import { RepeatMode, RepeatEndMode, type RepeatConfigPayload } from '@true-north/components-repeat/types';
 import { TodoStatus } from '@true-north/enum';
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BaseEntity } from '@business/common';
 
@@ -95,13 +95,6 @@ export class TodoRepeatWithoutRelations extends BaseEntity {
   @IsOptional()
   @Type(() => Number)
   urgency?: number;
-
-  /** 模板标签 */
-  @Column('simple-array', { nullable: true })
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  tags?: string[];
 
   /** 状态（模板整体状态） */
   @Column({ type: 'varchar', length: 20, nullable: true })

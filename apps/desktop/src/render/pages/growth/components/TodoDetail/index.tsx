@@ -1,10 +1,8 @@
-import { Drawer, Popover } from '@sue/design-web-react';
-import { useState } from 'react';
+import { Drawer } from '@sue/design-web-react';
 import TodoEditor, { TodoEditorProps } from './TodoEditor';
-import TodoCreatorMini, { TodoCreatorMiniProps } from './TodoCreatorMini';
 import TodoCreator, { TodoCreatorProps } from './TodoCreator';
 
-export { TodoEditor, TodoCreator, TodoCreatorMini };
+export { TodoEditor, TodoCreator };
 
 type DrawerOptions = Omit<Parameters<typeof Drawer.open>[0], 'content'>;
 
@@ -51,52 +49,8 @@ export function useTodoDetail() {
     });
   };
 
-  const [createPopoverVisible, setCreatePopoverVisible] = useState(false);
-
-  const CreatePopover = ({
-    children,
-    creatorProps,
-  }: {
-    children: React.ReactNode;
-    creatorProps: TodoCreatorMiniProps;
-  }) => {
-    return (
-      <Popover
-        trigger="click"
-        open={createPopoverVisible}
-        onOpenChange={(visible) => {
-          setCreatePopoverVisible(visible);
-        }}
-        placement="bottomLeft"
-        style={{
-          maxWidth: 'unset',
-        }}
-        content={
-          <div className="w-[400px] p-2">
-            <TodoCreatorMini
-              {...creatorProps}
-              onClose={async () => {
-                await creatorProps.onClose?.();
-                setCreatePopoverVisible(false);
-              }}
-            />
-          </div>
-        }
-      >
-        <span
-          className="cursor-pointer"
-          onClick={() => setCreatePopoverVisible(true)}
-        >
-          {children}
-        </span>
-      </Popover>
-    );
-  };
-
   return {
     openEditDrawer,
     openCreateDrawer,
-    CreatePopover,
-    createPopoverVisible,
   };
 }

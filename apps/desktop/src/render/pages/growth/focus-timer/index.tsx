@@ -9,24 +9,52 @@ import styles from './style.module.less';
 
 const DEFAULT_DURATION = 25 * 60;
 
+export type FocusTimerOpenOptions = {
+  taskId?: string;
+  todoId?: string;
+  label?: string;
+};
+
+type FocusTimerOpenFn = (related?: string | FocusTimerOpenOptions) => void;
+
 type FocusTimerContextValue = {
-  open: (taskId?: string) => void;
+  open: FocusTimerOpenFn;
 };
 
 type TaskOption = { value: string; label: string };
 
 const FocusTimerContext = createContext<FocusTimerContextValue | null>(null);
 
+/** Static Drawer/Modal portals leave the React tree; Provider registers here. */
+let registeredOpen: FocusTimerOpenFn | null = null;
+
+export function openFocusTimer(related?: string | FocusTimerOpenOptions) {
+  if (!registeredOpen) {
+    message.warning('专注计时器未就绪');
+    return;
+  }
+  registeredOpen(related);
+}
+
 export function useFocusTimer() {
   const context = useContext(FocusTimerContext);
-  if (!context) throw new Error('FocusTimerProvider is required');
-  return context;
+  if (context) return context;
+  // Fallback for content rendered by Drawer.open / Modal.confirm outside the provider tree.
+  return { open: openFocusTimer };
+}
+
+function normalizeOpenOptions(related?: string | FocusTimerOpenOptions): FocusTimerOpenOptions {
+  if (!related) return {};
+  if (typeof related === 'string') return { taskId: related };
+  return related;
 }
 
 export function FocusTimerProvider({ children }: { children: React.ReactNode }) {
   const [visible, setVisible] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
   const [taskId, setTaskId] = useState<string>();
+  const [todoId, setTodoId] = useState<string>();
+  const [lockedLabel, setLockedLabel] = useState<string>();
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [startedAt, setStartedAt] = useState<number>();
@@ -46,12 +74,22 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
-  const open = useCallback((nextTaskId?: string) => {
-    setTaskId(nextTaskId);
+  const open = useCallback((related?: string | FocusTimerOpenOptions) => {
+    const options = normalizeOpenOptions(related);
+    setTodoId(options.todoId);
+    setTaskId(options.todoId ? undefined : options.taskId);
+    setLockedLabel(options.todoId ? options.label || '待办专注' : undefined);
     setVisible(true);
     setFullScreen(false);
     void loadTimerData();
   }, [loadTimerData]);
+
+  useEffect(() => {
+    registeredOpen = open;
+    return () => {
+      if (registeredOpen === open) registeredOpen = null;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!running || !startedAt) return;
@@ -88,10 +126,16 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
       return;
     }
     const endedAt = new Date();
+    const relatedType = todoId
+      ? TrackTimeRelatedType.TODO
+      : taskId
+        ? TrackTimeRelatedType.TASK
+        : TrackTimeRelatedType.NONE;
+    const relatedId = todoId || taskId;
     try {
       await TrackTimeController.create({
-        relatedType: taskId ? TrackTimeRelatedType.TASK : TrackTimeRelatedType.NONE,
-        relatedId: taskId,
+        relatedType,
+        relatedId,
         duration: elapsed,
         startAt: new Date(endedAt.getTime() - elapsed * 1000).toISOString(),
         endAt: endedAt.toISOString(),
@@ -123,7 +167,9 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
   };
 
   const contextValue = useMemo(() => ({ open }), [open]);
-  const taskName = taskOptions.find((task) => task.value === taskId)?.label || '独立专注';
+  const taskName = todoId
+    ? lockedLabel || '待办专注'
+    : taskOptions.find((task) => task.value === taskId)?.label || '独立专注';
 
   return (
     <FocusTimerContext.Provider value={contextValue}>
@@ -132,6 +178,7 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
         <FocusTimerOverlay
           elapsed={elapsed}
           fullScreen={fullScreen}
+          lockedToTodo={Boolean(todoId)}
           running={running}
           taskId={taskId}
           taskName={taskName}
@@ -139,7 +186,11 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
           onClose={close}
           onFinish={finish}
           onReset={reset}
-          onSetTaskId={setTaskId}
+          onSetTaskId={(value) => {
+            setTaskId(value);
+            setTodoId(undefined);
+            setLockedLabel(undefined);
+          }}
           onToggleFullScreen={() => setFullScreen((value) => !value)}
           onToggleRunning={toggleRunning}
         />
@@ -151,6 +202,7 @@ export function FocusTimerProvider({ children }: { children: React.ReactNode }) 
 function FocusTimerOverlay({
   elapsed,
   fullScreen,
+  lockedToTodo,
   running,
   taskId,
   taskName,
@@ -164,6 +216,7 @@ function FocusTimerOverlay({
 }: {
   elapsed: number;
   fullScreen: boolean;
+  lockedToTodo: boolean;
   running: boolean;
   taskId?: string;
   taskName: string;
@@ -194,7 +247,9 @@ function FocusTimerOverlay({
       </Tooltip>
     </Space>
   );
-  const selector = (
+  const selector = lockedToTodo ? (
+    <span className={styles.taskName}>待办 · {taskName}</span>
+  ) : (
     <Select
       allowClear
       className={styles.taskSelector}
@@ -214,14 +269,18 @@ function FocusTimerOverlay({
               <h1>专注计时</h1>
               <p>{taskName}</p>
             </div>
-            <Select
-              allowClear
-              className={styles.fullscreenTaskSelector}
-              value={taskId}
-              placeholder="选择任务（可选）"
-              options={taskOptions}
-              onChange={(value) => onSetTaskId(value as string | undefined)}
-            />
+            {lockedToTodo ? (
+              <span className={styles.taskName}>待办 · {taskName}</span>
+            ) : (
+              <Select
+                allowClear
+                className={styles.fullscreenTaskSelector}
+                value={taskId}
+                placeholder="选择任务（可选）"
+                options={taskOptions}
+                onChange={(value) => onSetTaskId(value as string | undefined)}
+              />
+            )}
           </Flex>
           <div className={styles.clock}>
             <div className={styles.clockContainer}>

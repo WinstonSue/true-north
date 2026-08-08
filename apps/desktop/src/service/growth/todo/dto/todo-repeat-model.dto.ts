@@ -6,6 +6,13 @@ import { Todo } from '../../todo/todo.entity';
 import type { Todo as TodoVO } from '@true-north/vo';
 import { TodoRelatedType } from '@true-north/enum';
 
+function toHm(value?: string): string | undefined {
+  if (!value) return undefined;
+  const [hour, minute] = value.split(':');
+  if (hour === undefined || minute === undefined) return undefined;
+  return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+}
+
 export class TodoRepeatWithoutRelationsDto extends TodoRepeatWithoutRelations {}
 
 export class TodoRepeatDto extends IntersectionType(BaseModelDto, TodoRepeatWithoutRelationsDto) {
@@ -24,8 +31,9 @@ export class TodoRepeatDto extends IntersectionType(BaseModelDto, TodoRepeatWith
     this.description = entity.description;
     this.importance = entity.importance;
     this.urgency = entity.urgency;
-    this.tags = entity.tags;
     this.currentDate = entity.currentDate;
+    this.planStartTime = toHm(entity.planStartTime);
+    this.planEndTime = toHm(entity.planEndTime);
     this.status = entity.status;
     this.abandonedAt = entity.abandonedAt;
     // 关联属性（浅拷贝，避免递归）
@@ -40,13 +48,15 @@ export class TodoRepeatDto extends IntersectionType(BaseModelDto, TodoRepeatWith
       description: this.description || '',
       importance: this.importance,
       urgency: this.urgency,
-      tags: this.tags || [],
       status: this.status,
       abandonedAt: this.abandonedAt ? dayjs(this.abandonedAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
       createdAt: dayjs(this.createdAt).format('YYYY-MM-DD HH:mm:ss'),
       updatedAt: dayjs(this.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
       planDate: dayjs(this.currentDate).format('YYYY-MM-DD'),
+      planStartTime: toHm(this.planStartTime),
+      planEndTime: toHm(this.planEndTime),
       relatedType: TodoRelatedType.IS_REPEAT,
+      settledTimes: this.todos?.length ?? 0,
 
       repeatConfig: {
         currentDate: dayjs(this.currentDate).format('YYYY-MM-DD'),

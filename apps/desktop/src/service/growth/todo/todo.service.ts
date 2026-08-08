@@ -129,30 +129,11 @@ export class TodoService {
 
   async done(relatedType: TodoRelatedType, id: string, { doneAt }: { doneAt?: string } = {}) {
     if (relatedType === TodoRelatedType.IS_REPEAT) {
-      const updateTodoRepeatDto = await this.todoRepeatService.updateToNext(id);
-      // 创建一个新的已完成 todo
-      const createTodoDto = new CreateTodoDto();
-      createTodoDto.name = updateTodoRepeatDto.name;
-      createTodoDto.description = updateTodoRepeatDto.description;
-      createTodoDto.importance = updateTodoRepeatDto.importance;
-      createTodoDto.urgency = updateTodoRepeatDto.urgency;
-      createTodoDto.tags = updateTodoRepeatDto.tags || [];
-      createTodoDto.planDate = dayjs(updateTodoRepeatDto.currentDate).toDate();
-      createTodoDto.status = TodoStatus.DONE;
-      createTodoDto.repeatId = id;
-      createTodoDto.relatedType = TodoRelatedType.REPEAT;
-
-      const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
-
-      const updateTodoDto = new UpdateTodoDto();
-      updateTodoDto.id = newTodo.id;
-      updateTodoDto.status = TodoStatus.DONE;
-      updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
-      return await this.update(updateTodoDto, true);
+      return await this.settleIsRepeat(id, true, doneAt);
     }
     const current = await this.todoRepository.find(id);
     await this.assertHabitCycleIsActive(current);
-    if (current.status !== TodoStatus.TODO && current.status !== TodoStatus.IN_PROGRESS) {
+    if (current.status !== TodoStatus.TODO) {
       throw new Error('当前状态不允许标记为完成');
     }
     const updateTodoDto = new UpdateTodoDto();
@@ -162,26 +143,6 @@ export class TodoService {
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, true);
     return result;
-  }
-
-  async start(id: string): Promise<TodoDto> {
-    const current = await this.todoRepository.find(id);
-    await this.assertHabitCycleIsActive(current);
-    if (current.status !== TodoStatus.TODO) throw new Error('当前状态不允许开始待办');
-    const updateTodoDto = new UpdateTodoDto();
-    updateTodoDto.id = id;
-    updateTodoDto.status = TodoStatus.IN_PROGRESS;
-    return await this.update(updateTodoDto, true);
-  }
-
-  async pause(id: string): Promise<TodoDto> {
-    const current = await this.todoRepository.find(id);
-    await this.assertHabitCycleIsActive(current);
-    if (current.status !== TodoStatus.IN_PROGRESS) throw new Error('当前状态不允许暂停待办');
-    const updateTodoDto = new UpdateTodoDto();
-    updateTodoDto.id = id;
-    updateTodoDto.status = TodoStatus.TODO;
-    return await this.update(updateTodoDto, true);
   }
 
   async doneBatch(filter: TodoFilterDto): Promise<any> {
@@ -206,46 +167,23 @@ export class TodoService {
       for (const id of todoIds) result.push(await this.done(TodoRelatedType.NONE, id));
     }
 
-    // 处理重复 todo：更新 currentDate 到下一个时间，并创建已完成的 todo
     if (todoRepeatIds.length > 0) {
       for (const id of todoRepeatIds) {
-        const updateTodoRepeatDto = await this.todoRepeatService.updateToNext(id);
-        // 创建一个新的已完成 todo
-        const createTodoDto = new CreateTodoDto();
-        createTodoDto.name = updateTodoRepeatDto.name;
-        createTodoDto.description = updateTodoRepeatDto.description;
-        createTodoDto.importance = updateTodoRepeatDto.importance;
-        createTodoDto.urgency = updateTodoRepeatDto.urgency;
-        createTodoDto.tags = updateTodoRepeatDto.tags || [];
-        createTodoDto.planDate = dayjs(updateTodoRepeatDto.currentDate).toDate();
-        createTodoDto.status = TodoStatus.DONE;
-        createTodoDto.repeatId = id;
-        createTodoDto.relatedType = TodoRelatedType.REPEAT;
-
-        const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
-
-        // 手动设置完成相关字段和重复关联
-        const updateNewTodo = new Todo();
-        updateNewTodo.id = newTodo.id;
-        updateNewTodo.status = TodoStatus.DONE;
-        updateNewTodo.doneAt = new Date();
-
-        const completedTodo = await this.todoRepository.update(updateNewTodo);
-
-        const todoDto = new TodoDto();
-        todoDto.importEntity(completedTodo);
-        result.push(todoDto);
+        result.push(await this.settleIsRepeat(id, true));
       }
     }
 
     return result;
   }
 
-  async abandon(id: string): Promise<any> {
+  async abandon(relatedType: TodoRelatedType, id: string): Promise<any> {
+    if (relatedType === TodoRelatedType.IS_REPEAT) {
+      return await this.settleIsRepeat(id, false);
+    }
     const current = await this.todoRepository.find(id);
     await this.assertHabitCycleIsActive(current);
-    if (current.status !== TodoStatus.TODO && current.status !== TodoStatus.IN_PROGRESS) {
-      throw new Error('当前状态不允许标记为未完成');
+    if (current.status !== TodoStatus.TODO) {
+      throw new Error('当前状态不允许放弃');
     }
     const updateTodoDto = new UpdateTodoDto();
     updateTodoDto.id = id;
@@ -253,6 +191,48 @@ export class TodoService {
     updateTodoDto.abandonedAt = new Date();
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, false);
+    return result;
+  }
+
+  /** 结算周期待办当前实例：物化 DONE/ABANDONED，推进或结束模板 */
+  private async settleIsRepeat(
+    id: string,
+    completed: boolean,
+    doneAt?: string,
+  ): Promise<TodoDto> {
+    const { settled, nextDate } = await this.todoRepeatService.settleCurrent(id);
+
+    const createTodoDto = new CreateTodoDto();
+    createTodoDto.name = settled.name;
+    createTodoDto.description = settled.description;
+    createTodoDto.importance = settled.importance;
+    createTodoDto.urgency = settled.urgency;
+    createTodoDto.planDate = dayjs(settled.currentDate).toDate();
+    createTodoDto.planStartTime = settled.planStartTime;
+    createTodoDto.planEndTime = settled.planEndTime;
+    createTodoDto.status = completed ? TodoStatus.DONE : TodoStatus.ABANDONED;
+    createTodoDto.repeatId = id;
+    createTodoDto.relatedType = TodoRelatedType.REPEAT;
+
+    const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
+
+    const updateTodoDto = new UpdateTodoDto();
+    updateTodoDto.id = newTodo.id;
+    updateTodoDto.status = completed ? TodoStatus.DONE : TodoStatus.ABANDONED;
+    if (completed) {
+      updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
+    } else {
+      updateTodoDto.abandonedAt = new Date();
+    }
+    const result = await this.update(updateTodoDto, true);
+
+    if (!nextDate) {
+      await this.todoRepeatService.finish(
+        id,
+        completed ? TodoStatus.DONE : TodoStatus.ABANDONED,
+      );
+    }
+
     return result;
   }
 
@@ -306,7 +286,6 @@ export class TodoService {
     nextTodo.name = habit.name;
     nextTodo.description = habit.description;
     nextTodo.importance = habit.importance;
-    nextTodo.tags = habit.tags || [];
     nextTodo.planDate = nextDateResult.value.toDate();
     nextTodo.status = TodoStatus.TODO;
     nextTodo.relatedType = TodoRelatedType.HABIT;

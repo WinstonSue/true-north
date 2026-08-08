@@ -25,6 +25,7 @@ import { productRef } from '../../product-wiki';
 import type {
   DrawerKind,
   DrawerState,
+  FocusSession,
   Goal,
   GoalStatus,
   Habit,
@@ -36,7 +37,7 @@ import type {
 } from '../types';
 import { asTodoRepeat } from '../repeat';
 import { validateGoalHierarchy, validateTaskHierarchy } from '../lifecycle';
-import { statusLabel } from '../utils';
+import { canFocusTodo, isTodoPlanRange, statusLabel } from '../utils';
 import styles from './EntityDrawer.module.css';
 
 type Props = {
@@ -45,12 +46,25 @@ type Props = {
   tasks: Task[];
   todos: Todo[];
   habits: Habit[];
+  sessions: FocusSession[];
   onClose: () => void;
   onSave: SaveEntity;
   onFocusTask: (task: Task) => void;
+  onFocusTodo: (todo: Todo) => void;
 };
 
-export function EntityDrawer({ drawer, goals, tasks, todos, habits, onClose, onSave, onFocusTask }: Props) {
+export function EntityDrawer({
+  drawer,
+  goals,
+  tasks,
+  todos,
+  habits,
+  sessions,
+  onClose,
+  onSave,
+  onFocusTask,
+  onFocusTodo,
+}: Props) {
   const existing =
     drawer.kind === 'goal'
       ? goals.find((item) => item.id === drawer.id)
@@ -120,7 +134,9 @@ export function EntityDrawer({ drawer, goals, tasks, todos, habits, onClose, onS
               tasks={tasks}
               habits={habits}
               isNew={!existing}
+              sessions={sessions}
               onRepeatInvalid={setRepeatError}
+              onFocusTodo={onFocusTodo}
             />
           )}
           {drawer.kind === 'habit' && (
@@ -532,7 +548,9 @@ function TodoFields({
   tasks,
   habits,
   isNew,
+  sessions,
   onRepeatInvalid,
+  onFocusTodo,
 }: {
   draft: Todo;
   patch: (value: Partial<Todo>) => void;
@@ -540,10 +558,13 @@ function TodoFields({
   tasks: Task[];
   habits: Habit[];
   isNew: boolean;
+  sessions: FocusSession[];
   onRepeatInvalid: (message: string) => void;
+  onFocusTodo: (todo: Todo) => void;
 }) {
   const disabledRepeatRef = useRef<Todo['repeat']>(undefined);
   const repeatSetting = draft.repeat;
+  const todoSessions = sessions.filter((session) => session.todoId === draft.id);
   const sourceName = draft.taskId
     ? `任务 · ${tasks.find((task) => task.id === draft.taskId)?.title || '已删除任务'}`
     : draft.goalId
@@ -572,7 +593,9 @@ function TodoFields({
                 <span>重复</span>
                 <Switch
                   checked={Boolean(draft.repeat)}
+                  disabled={!isNew}
                   onChange={(enabled) => {
+                    if (!isNew) return;
                     onRepeatInvalid('');
                     if (!enabled) {
                       disabledRepeatRef.current = draft.repeat;
@@ -621,12 +644,33 @@ function TodoFields({
         <Form.Item label="状态">
           <Select
             value={draft.status}
-            options={['todo', 'in_progress', 'done', 'abandoned'].map((value) => ({
+            options={['todo', 'done', 'abandoned'].map((value) => ({
               value,
               label: statusLabel(value),
             }))}
             onChange={(value) => patch({ status: value as TodoStatus })}
           />
+        </Form.Item>
+      )}
+      {!isNew && (
+        <Form.Item label="专注记录" data-product-ref={productRef('growth.track-time.rule.todo-range-focus')}>
+          <Flex vertical gap={8}>
+            {canFocusTodo(draft) ? (
+              <Button onClick={() => onFocusTodo(draft)}>开始专注计时</Button>
+            ) : draft.status === 'todo' && !isTodoPlanRange(draft) ? (
+              <Alert type="info" showIcon title="时间点待办不可从本入口管理计时；已有记录仍可查看。" />
+            ) : null}
+            {todoSessions.length ? (
+              todoSessions.map((session) => (
+                <Flex key={session.id} align="center" justify="space-between">
+                  <span>{session.title}</span>
+                  <b>{session.minutes} 分钟 · {session.at}</b>
+                </Flex>
+              ))
+            ) : (
+              <span>尚无关联专注记录</span>
+            )}
+          </Flex>
         </Form.Item>
       )}
       <Form.Item label="描述">
