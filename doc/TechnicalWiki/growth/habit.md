@@ -1,34 +1,41 @@
 # Habit 技术实现
 
-产品说明见 [习惯管理 ProductWiki](../../../apps/prototype/product-wiki/growth/habit/README.md)。
+产品说明见 [习惯管理 ProductWiki](../../../apps/prototype/product-wiki/growth/habit/README.md)。重复调度见 [重复规则](./repeat.md)。
 
-## 当前代码边界
+## 代码边界
 
 - 控制器：[habit.route-controller.ts](../../../apps/desktop/src/service/growth/habit/habit.route-controller.ts)，前缀 `/habit`。
-- 服务、DTO 和相关持久化实现位于 `apps/desktop/src/service/growth/habit/`；`HabitService` 在创建、更新、读取时通过 `@true-north/components-repeat` 校验重复配置。
+- 服务位于 `apps/desktop/src/service/growth/habit/`；创建/更新时通过 `@true-north/components-repeat` 校验规则，规则与游标落在共享 **`repeat`**（`habit.repeatId`），Habit 自身不再重复存储规则列。
+- Habit **不是** `repeat_todo`：额外拥有目标关联、streak、pause/activate 等产品语义。
+- 打卡走 Todo 结算接口（`relatedType=habit`）；游标推进复用 `RepeatService.settleCurrent`。
 - DTO 位于 `dto/`，VO 来自 `@true-north/vo` 的 `Habit` 命名空间。
 
-## 当前 IPC 路由
+## 与重复域的关系
+
+| 概念 | Habit |
+| --- | --- |
+| 调度 | `habit.repeatId` → `repeat`（含 `currentDate`） |
+| 当前实例 | `cycleTodoId` 指向已物化的当前 `todo`（eager）；`todo.relatedType=habit`，`relatedId=habit.id` |
+| 结算 | 原地更新当前 todo 状态 → 推进 `repeat.currentDate` → 创建下一 cycle todo（或结束习惯） |
+| 与独立重复差异 | 独立重复用 `repeat_todo` 投影、完成时才物化；Habit 创建即物化当前 cycle todo |
+
+## IPC 路由
 
 | 方法 | 路径 | 行为 |
 | --- | --- | --- |
-| POST | `/habit/create` | 创建习惯 |
+| POST | `/habit/create` | 创建习惯 + `repeat` + 首个 cycle todo |
 | DELETE | `/habit/delete/:id` | 删除习惯 |
-| PUT | `/habit/update/:id` | 更新习惯 |
-| GET | `/habit/find/:id`、`/list`、`/page` | 查询单项、列表和分页 |
-| PUT | `/habit/abandon/:id`、`/restore/:id` | 废弃与恢复习惯 |
+| PUT | `/habit/update/:id` | 更新习惯内容/规则（规则写 `repeat`） |
+| GET | `/habit/find/:id`、`/list`、`/page` | 查询 |
+| PUT | `/habit/abandon/:id`、`/restore/:id`、暂停/激活 | 受控状态；放弃时结算未完成的 cycle todo |
 
 ## 原型对齐边界
 
-功能与样式真源均为 **Prototype**：主路径是列表/卡片就地打卡（完成 / 未完成），不必先进入详情。Desktop 路由 `/growth/habit/habit-list` 与 `/growth/habit/habit-detail/:id` 可保留，详情降为次要入口（编辑规则、暂停/恢复、放弃等）。工作台习惯区复用同一套 Todo 结算接口完成就地打卡。
+功能与样式真源均为 **Prototype**：主路径是列表/卡片就地打卡，详情为次要入口。工作台习惯区复用 Todo `done`/`abandon`。
 
-| 产品/原型语义 | 当前实现 | 对齐方案 |
-| --- | --- | --- |
-| HabitCard 字段 | 卡片含打卡 | 标题、目标、`执行规则：{label}`、连续 Progress、完成/未完成/编辑；弱化难度/重要度堆砌。`formatHabitRepeatLabel` 映射 repeatMode/end。 |
-| 工作台习惯行 | 就地打卡 | meta=`规则 · 连续 N 天 · 目标`；完成/未完成调用 Todo done/abandon。 |
-| 列表就地打卡 | HabitCard footer | `cycleTodoId` 存在时完成/未完成；刷新习惯列表。 |
-| 详情 | `/habit-detail/:id` | 次要入口：编辑规则、暂停/恢复、放弃、删除。 |
-| 状态 | `active / paused / completed / abandoned` | 不变；受控服务方法。 |
-| 周期待办 | `cycleTodoId` + TodoService | 不变；见 [重复规则](./repeat.md)。 |
-
-不做数据迁移；本地测试数据可保留。
+| 产品/原型语义 | 实现边界 |
+| --- | --- |
+| HabitCard / 工作台 | 就地完成/未完成；`formatHabitRepeatLabel` 展示规则 |
+| 状态 | `active / paused / completed / abandoned` |
+| 周期待办 | `cycleTodoId` + Todo 结算 + `RepeatService` 推进 |
+| 已结算习惯 todo | 不可 `restore`；等待下一周期 |

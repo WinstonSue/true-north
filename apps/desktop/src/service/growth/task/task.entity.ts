@@ -2,9 +2,9 @@ import 'reflect-metadata';
 import { BaseEntity } from '@business/common';
 import { Difficulty, TaskStatus } from '@true-north/enum';
 import { Goal } from '../goal/goal.entity';
-import { Todo } from '../todo/todo.entity';
-import { Entity, Column, TreeChildren, TreeParent, Tree, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, TreeChildren, TreeParent, Tree, ManyToOne } from 'typeorm';
 import { IsEnum, IsOptional, IsString, IsNumber, IsArray } from 'class-validator';
+import type { Todo } from '../todo/todo.entity';
 
 export class TaskWithoutRelations extends BaseEntity {
   /** 任务名称 */
@@ -118,12 +118,11 @@ export class Task extends TaskWithoutRelations {
   })
   children!: Task[];
 
-  /** 任务事项列表 */
-  @OneToMany(() => Todo, (todo) => todo.task)
-  todoList?: Todo[];
-
   /** 目标 */
   @ManyToOne(() => Goal, (goal) => goal.taskList)
   @IsOptional()
   goal?: Goal;
+
+  /** 任务下的待办（按 relatedType/relatedId 手动加载，非 TypeORM 关系列） */
+  todoList?: Todo[];
 }

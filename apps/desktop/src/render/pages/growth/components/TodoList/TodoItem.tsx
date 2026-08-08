@@ -13,7 +13,7 @@ import clsx from 'clsx';
 import { TodoRelatedType, TodoStatus } from '@true-north/enum';
 import styles from './style.module.less';
 import { emitTodoChanged } from '../../events';
-import { formatTodoPlanTime, isTodoPlanRange } from '../TodoDetail/planTime';
+import { formatTodoPlanTime, isTodoPlanRange } from '../TodoDetail';
 import { useFocusTimer } from '../../focus-timer';
 
 export type TodoItemProps = {

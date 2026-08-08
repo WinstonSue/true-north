@@ -133,8 +133,36 @@ function App() {
   const resolveRepeatingTodo = (todo: Todo, completed: boolean) => {
     if (!todo.repeat || !isPendingTodo(todo)) return;
     const next = settleRepeatingTodo(todo, completed);
-    setTodos((items) => items.map((item) => (item.id === todo.id ? next : item)));
-    notify(next.planned === todo.planned ? '周期待办已结算，重复计划已结束' : '周期待办已结算，已安排下一次');
+    const snapshot: Todo = {
+      ...todo,
+      id: `${todo.id}-log-${todo.planned}-${todo.repeat.settledTimes}`,
+      status: completed ? 'done' : 'abandoned',
+      repeat: undefined,
+      history: [...todo.history, completed ? `${todo.planned} 完成周期实例` : `${todo.planned} 标记周期实例未完成`],
+    };
+    setTodos((items) => {
+      const rest = items.filter((item) => item.id !== todo.id);
+      if (next.status === 'todo' && next.planned !== todo.planned) {
+        return [...rest, snapshot, next];
+      }
+      // 系列结束：以无 repeat 的历史实例保留最终状态
+      return [...rest, { ...snapshot, id: todo.id }];
+    });
+    notify(next.status === 'todo' && next.planned !== todo.planned ? '周期待办已结算，已安排下一次' : '周期待办已结算，重复计划已结束');
+  };
+  const deleteTodo = (todo: Todo) => {
+    if (todo.habitId && isPendingTodo(todo)) {
+      notify('习惯周期待办不能单独删除');
+      return;
+    }
+    if (todo.repeat && isPendingTodo(todo)) {
+      // 仅删除系列定义与当前视图；已物化历史（无 repeat 的结算行）保留
+      setTodos((items) => items.filter((item) => item.id !== todo.id));
+      notify('已删除重复待办，已完成/已放弃记录保留');
+      return;
+    }
+    setTodos((items) => items.filter((item) => item.id !== todo.id));
+    notify('待办已删除');
   };
   const completeTodo = (todo: Todo) => {
     if (todo.habitId) return resolveHabitTodo(todo, true);
@@ -352,6 +380,7 @@ function App() {
                     completeTodo={completeTodo}
                     markTodoIncomplete={markTodoIncomplete}
                     abandonTodo={abandonTodo}
+                    deleteTodo={deleteTodo}
                     onFocusTodo={(todo) => openFocusTimer({ todoId: todo.id })}
                   />
                 }

@@ -16,8 +16,13 @@ export type TodoWithoutRelationsVo = {
   planEndTime?: string;
   planDate: string;
   relatedType: TodoRelatedType;
+  /** 主人 id；relatedType=repeat 时为 repeat_todo.id */
+  relatedId?: string;
+  /** 派生兼容字段：relatedType=task 时等于 relatedId */
   taskId?: string;
+  /** 派生兼容字段：relatedType=repeat 时等于 relatedId（repeat_todo.id） */
   repeatId?: string;
+  /** 派生兼容字段：relatedType=habit 时等于 relatedId */
   habitId?: string;
 } & BaseEntityVo;
 

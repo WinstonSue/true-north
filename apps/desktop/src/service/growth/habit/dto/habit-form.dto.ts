@@ -4,6 +4,7 @@ import { HabitDto } from './habit-model.dto';
 import { Habit } from '../habit.entity';
 import type { Habit as HabitVO } from '@true-north/vo';
 import dayjs from 'dayjs';
+import type { RepeatRuleInput } from '../../repeat/repeat.service';
 
 export class CreateHabitDto extends PickType(HabitDto, [
   'name',
@@ -41,7 +42,19 @@ export class CreateHabitDto extends PickType(HabitDto, [
     this.goalIds = vo.goalIds;
   }
 
-  exportCreateEntity() {
+  toRepeatRuleInput(): RepeatRuleInput {
+    return {
+      repeatMode: this.repeatMode,
+      repeatConfig: this.repeatConfig,
+      repeatEndMode: this.repeatEndMode,
+      repeatEndDate: this.repeatEndDate,
+      repeatTimes: this.repeatTimes,
+      repeatStartDate: this.repeatStartDate,
+      currentDate: this.repeatStartDate,
+    };
+  }
+
+  exportCreateEntity(repeatId: string) {
     const entity = new Habit();
 
     if (this.name !== undefined) entity.name = this.name;
@@ -49,12 +62,7 @@ export class CreateHabitDto extends PickType(HabitDto, [
     if (this.importance !== undefined) entity.importance = this.importance;
     if (this.tags !== undefined) entity.tags = this.tags;
     if (this.difficulty !== undefined) entity.difficulty = this.difficulty;
-    if (this.repeatStartDate !== undefined) entity.repeatStartDate = this.repeatStartDate;
-    if (this.repeatEndDate !== undefined) entity.repeatEndDate = this.repeatEndDate;
-    if (this.repeatTimes !== undefined) entity.repeatTimes = this.repeatTimes;
-    if (this.repeatMode !== undefined) entity.repeatMode = this.repeatMode;
-    if (this.repeatConfig !== undefined) entity.repeatConfig = this.repeatConfig;
-    if (this.repeatEndMode !== undefined) entity.repeatEndMode = this.repeatEndMode;
+    entity.repeatId = repeatId;
 
     return entity;
   }
@@ -92,6 +100,31 @@ export class UpdateHabitDto extends IntersectionType(
     if (vo.goalIds !== undefined) this.goalIds = vo.goalIds;
   }
 
+  hasRepeatRuleUpdate(): boolean {
+    return [
+      this.repeatMode,
+      this.repeatConfig,
+      this.repeatEndMode,
+      this.repeatEndDate,
+      this.repeatTimes,
+      this.repeatStartDate,
+    ].some((value) => value !== undefined);
+  }
+
+  toRepeatRulePartial(): Partial<RepeatRuleInput> {
+    const partial: Partial<RepeatRuleInput> = {};
+    if (this.repeatMode !== undefined) partial.repeatMode = this.repeatMode;
+    if (this.repeatConfig !== undefined) partial.repeatConfig = this.repeatConfig;
+    if (this.repeatEndMode !== undefined) partial.repeatEndMode = this.repeatEndMode;
+    if (this.repeatEndDate !== undefined) partial.repeatEndDate = this.repeatEndDate;
+    if (this.repeatTimes !== undefined) partial.repeatTimes = this.repeatTimes;
+    if (this.repeatStartDate !== undefined) {
+      partial.repeatStartDate = this.repeatStartDate;
+      partial.currentDate = this.repeatStartDate;
+    }
+    return partial;
+  }
+
   exportUpdateEntity() {
     const entity = new Habit();
 
@@ -102,12 +135,6 @@ export class UpdateHabitDto extends IntersectionType(
     if (this.importance !== undefined) entity.importance = this.importance;
     if (this.tags !== undefined) entity.tags = this.tags;
     if (this.difficulty !== undefined) entity.difficulty = this.difficulty;
-    if (this.repeatStartDate !== undefined) entity.repeatStartDate = this.repeatStartDate;
-    if (this.repeatEndDate !== undefined) entity.repeatEndDate = this.repeatEndDate;
-    if (this.repeatTimes !== undefined) entity.repeatTimes = this.repeatTimes;
-    if (this.repeatMode !== undefined) entity.repeatMode = this.repeatMode;
-    if (this.repeatConfig !== undefined) entity.repeatConfig = this.repeatConfig;
-    if (this.repeatEndMode !== undefined) entity.repeatEndMode = this.repeatEndMode;
     if (this.status !== undefined) entity.status = this.status;
 
     return entity;

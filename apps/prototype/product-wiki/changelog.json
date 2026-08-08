@@ -3,6 +3,24 @@
     {
       "version": "v0.1.0",
       "date": "2026-08-08",
+      "event": "introduced",
+      "summary": "删除仅全部待办提供；重复系列只能在全部删除，且保留已结算历史。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.todo:rule:delete-boundary", "scope": "rule", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "删除入口与重复删除", "reference": "growth.todo.rule.delete-boundary" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
+      "event": "changed",
+      "summary": "全部待办纳入进行中重复当前实例，并作为删除与批量治理入口。",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete",
+      "feature": { "key": "growth.todo:view:all", "scope": "view", "moduleId": "growth.todo", "moduleTitle": "待办管理", "name": "全部待办", "reference": "growth.todo.view.all" }
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-08-08",
       "event": "changed",
       "summary": "待办列表直接露出完成与放弃（习惯/周期以标记未完成结算）。",
       "productStatus": "roadmap",

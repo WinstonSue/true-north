@@ -1,36 +1,47 @@
 import { TodoRepository } from './todo.repository';
 import { TodoRepeatRepository } from './todo-repeat.repository';
-import { CreateTodoDto, UpdateTodoDto, TodoPageFilterDto, TodoFilterDto, TodoDto, UpdateTodoRepeatDto } from './dto';
+import { CreateTodoDto, UpdateTodoDto, TodoPageFilterDto, TodoFilterDto, TodoDto } from './dto';
 import { Todo } from './todo.entity';
-import { TodoStatus, TodoRelatedType } from '@true-north/enum';
+import { TodoStatus, TodoRelatedType, TodoRepeatStatus } from '@true-north/enum';
 import { TodoRepeatService } from './todo-repeat.service';
 import dayjs from 'dayjs';
 import { HabitRepository } from '../habit/habit.repository';
 import { Habit } from '../habit/habit.entity';
 import { HabitStatus } from '@true-north/enum';
-import { calculateNextDate } from '@true-north/components-repeat/helpers';
 import { RepeatEndMode } from '@true-north/components-repeat/types';
+import { RepeatService, repeatService as defaultRepeatService } from '../repeat/repeat.service';
+import { narrowTodoRelated } from './todo-related';
 
 export class TodoService {
   protected todoRepository: TodoRepository;
   protected todoRepeatRepository: TodoRepeatRepository;
   protected todoRepeatService: TodoRepeatService;
   protected habitRepository: HabitRepository;
+  protected repeatService: RepeatService;
 
   constructor(
     todoRepository: TodoRepository,
     todoRepeatRepository: TodoRepeatRepository,
-    habitRepository = new HabitRepository()
+    habitRepository = new HabitRepository(),
+    repeatService = defaultRepeatService
   ) {
     this.todoRepository = todoRepository;
     this.todoRepeatRepository = todoRepeatRepository;
-    this.todoRepeatService = new TodoRepeatService(todoRepeatRepository);
+    this.todoRepeatService = new TodoRepeatService(todoRepeatRepository, repeatService, todoRepository);
     this.habitRepository = habitRepository;
+    this.repeatService = repeatService;
   }
 
   // ====== 基础 CRUD ======
   async create(createTodoDto: CreateTodoDto): Promise<TodoDto> {
-    if (createTodoDto.taskId || createTodoDto.habitId) {
+    const related = narrowTodoRelated({
+      relatedType: createTodoDto.relatedType,
+      relatedId: createTodoDto.relatedId ?? createTodoDto.taskId ?? createTodoDto.habitId,
+    });
+    if (
+      related.relatedType === TodoRelatedType.HABIT ||
+      related.relatedType === TodoRelatedType.TASK
+    ) {
       throw new Error('手动创建的待办不能指定系统来源');
     }
     const entity = await this.todoRepository.create(createTodoDto.exportCreateEntity());
@@ -42,7 +53,10 @@ export class TodoService {
   async delete(id: string): Promise<boolean> {
     try {
       const current = await this.todoRepository.find(id);
-      if (current.habitId) throw new Error('习惯周期待办不能单独删除，请通过习惯操作结束周期');
+      const related = narrowTodoRelated(current);
+      if (related.relatedType === TodoRelatedType.HABIT) {
+        throw new Error('习惯周期待办不能单独删除，请通过习惯操作结束周期');
+      }
       await this.todoRepository.delete(id);
       return true;
     } catch (error) {
@@ -60,7 +74,12 @@ export class TodoService {
       throw new Error('待办状态只能通过开始、暂停、完成、放弃或恢复操作更新');
     }
     if (current.relatedType && current.relatedType !== TodoRelatedType.NONE) {
-      if (updateTodoDto.taskId !== undefined || updateTodoDto.habitId !== undefined) {
+      if (
+        updateTodoDto.taskId !== undefined ||
+        updateTodoDto.habitId !== undefined ||
+        updateTodoDto.relatedType !== undefined ||
+        updateTodoDto.relatedId !== undefined
+      ) {
         throw new Error('系统生成待办的来源不可修改');
       }
     }
@@ -100,13 +119,29 @@ export class TodoService {
     pageSize: number;
   }> {
     const result = await this.todoRepository.page(filter);
+    const list = result.list.map((entity) => {
+      const todoDto = new TodoDto();
+      todoDto.importEntity(entity);
+      return todoDto;
+    });
+
+    // 与 list 同构：未完成筛选下合并 repeat_todo 当前日期视图
+    const includeViews = !filter.status || filter.status === TodoStatus.TODO;
+    if (!includeViews) {
+      return { ...result, list };
+    }
+
+    const views = await this.todoRepeatService.generateTodoByRepeat(filter);
+    const keyword = filter.keyword?.trim().toLowerCase();
+    const filteredViews = keyword
+      ? views.filter((view) => (view.name || '').toLowerCase().includes(keyword))
+      : views;
+    const existingIds = new Set(list.map((item) => item.id));
+    const extraViews = filteredViews.filter((view) => !existingIds.has(view.id));
     return {
       ...result,
-      list: result.list.map((entity) => {
-        const todoDto = new TodoDto();
-        todoDto.importEntity(entity);
-        return todoDto;
-      }),
+      list: [...extraViews, ...list],
+      total: result.total + extraViews.length,
     };
   }
 
@@ -114,9 +149,7 @@ export class TodoService {
 
   async list(filter: TodoFilterDto): Promise<TodoDto[]> {
     const todoDtoList = await this.findByFilter(filter);
-
     const todoRepeatDtoList = await this.todoRepeatService.generateTodoByRepeat(filter);
-
     return [...todoDtoList, ...todoRepeatDtoList];
   }
 
@@ -162,7 +195,6 @@ export class TodoService {
 
     let result: any = [];
 
-    // 逐条结算以保证习惯周期待办可以推进到下一实例。
     if (todoIds.length > 0) {
       for (const id of todoIds) result.push(await this.done(TodoRelatedType.NONE, id));
     }
@@ -194,7 +226,7 @@ export class TodoService {
     return result;
   }
 
-  /** 结算周期待办当前实例：物化 DONE/ABANDONED，推进或结束模板 */
+  /** 结算 is-repeat 视图：物化 DONE/ABANDONED todo，推进或结束 repeat_todo */
   private async settleIsRepeat(
     id: string,
     completed: boolean,
@@ -211,8 +243,8 @@ export class TodoService {
     createTodoDto.planStartTime = settled.planStartTime;
     createTodoDto.planEndTime = settled.planEndTime;
     createTodoDto.status = completed ? TodoStatus.DONE : TodoStatus.ABANDONED;
-    createTodoDto.repeatId = id;
     createTodoDto.relatedType = TodoRelatedType.REPEAT;
+    createTodoDto.relatedId = id;
 
     const newTodo = await this.todoRepository.create(createTodoDto.exportCreateEntity());
 
@@ -229,7 +261,7 @@ export class TodoService {
     if (!nextDate) {
       await this.todoRepeatService.finish(
         id,
-        completed ? TodoStatus.DONE : TodoStatus.ABANDONED,
+        completed ? TodoRepeatStatus.ENDED : TodoRepeatStatus.ABANDONED,
       );
     }
 
@@ -238,7 +270,10 @@ export class TodoService {
 
   async restore(id: string): Promise<any> {
     const current = await this.todoRepository.find(id);
-    if (current.habitId) throw new Error('已结算的习惯待办不能恢复，请等待下一周期');
+    const related = narrowTodoRelated(current);
+    if (related.relatedType === TodoRelatedType.HABIT) {
+      throw new Error('已结算的习惯待办不能恢复，请等待下一周期');
+    }
     const updateTodoDto = new UpdateTodoDto();
     updateTodoDto.id = id;
     updateTodoDto.status = TodoStatus.TODO;
@@ -248,9 +283,12 @@ export class TodoService {
   }
 
   private async advanceHabitCycle(todo: Todo, wasCompleted: boolean): Promise<void> {
-    if (!todo.habitId) return;
-    const habit = await this.habitRepository.find(todo.habitId);
+    const related = narrowTodoRelated(todo);
+    if (related.relatedType !== TodoRelatedType.HABIT) return;
+
+    const habit = await this.habitRepository.findWithRelations(related.relatedId, ['repeat']);
     if (habit.status !== HabitStatus.ACTIVE || (habit.cycleTodoId && habit.cycleTodoId !== todo.id)) return;
+    if (!habit.repeatId || !habit.repeat) return;
 
     const completedCount = Math.max(habit.cycleCount || 1, 1);
     if (wasCompleted) {
@@ -260,24 +298,25 @@ export class TodoService {
     } else {
       habit.currentStreak = 0;
     }
-    if (habit.repeatEndMode === RepeatEndMode.FOR_TIMES && completedCount >= (habit.repeatTimes || 0)) {
+
+    if (
+      habit.repeat.repeatEndMode === RepeatEndMode.FOR_TIMES &&
+      completedCount >= (habit.repeat.repeatTimes || 0)
+    ) {
       await this.completeHabit(habit);
       return;
     }
 
-    const nextDateResult = calculateNextDate(dayjs(todo.planDate), {
-      repeatStartDate: habit.repeatStartDate,
-      repeatMode: habit.repeatMode,
-      repeatConfig: habit.repeatConfig,
-      repeatEndMode: habit.repeatEndMode,
-      repeatEndDate: habit.repeatEndDate,
-      repeatTimes: habit.repeatTimes,
-    });
-    if (!nextDateResult.ok || !nextDateResult.value) {
+    const { nextDate } = await this.repeatService.settleCurrent(habit.repeatId);
+    if (!nextDate) {
       await this.completeHabit(habit);
       return;
     }
-    if (habit.repeatEndMode === RepeatEndMode.TO_DATE && habit.repeatEndDate && nextDateResult.value.isAfter(habit.repeatEndDate, 'day')) {
+    if (
+      habit.repeat.repeatEndMode === RepeatEndMode.TO_DATE &&
+      habit.repeat.repeatEndDate &&
+      dayjs(nextDate).isAfter(habit.repeat.repeatEndDate, 'day')
+    ) {
       await this.completeHabit(habit);
       return;
     }
@@ -286,11 +325,10 @@ export class TodoService {
     nextTodo.name = habit.name;
     nextTodo.description = habit.description;
     nextTodo.importance = habit.importance;
-    nextTodo.planDate = nextDateResult.value.toDate();
+    nextTodo.planDate = dayjs(nextDate).toDate();
     nextTodo.status = TodoStatus.TODO;
     nextTodo.relatedType = TodoRelatedType.HABIT;
     nextTodo.relatedId = habit.id;
-    nextTodo.habitId = habit.id;
     const saved = await this.todoRepository.create(nextTodo);
     habit.cycleTodoId = saved.id;
     habit.cycleCount = completedCount + 1;
@@ -298,8 +336,9 @@ export class TodoService {
   }
 
   private async assertHabitCycleIsActive(todo: Todo): Promise<void> {
-    if (!todo.habitId) return;
-    const habit = await this.habitRepository.find(todo.habitId);
+    const related = narrowTodoRelated(todo);
+    if (related.relatedType !== TodoRelatedType.HABIT) return;
+    const habit = await this.habitRepository.find(related.relatedId);
     if (habit.status !== HabitStatus.ACTIVE || habit.cycleTodoId !== todo.id) {
       throw new Error('该习惯当前未处于可打卡状态');
     }

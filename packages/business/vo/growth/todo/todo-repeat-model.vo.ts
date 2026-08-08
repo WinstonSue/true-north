@@ -1,9 +1,10 @@
 import { BaseEntityVo } from '../../common';
 import { TodoVo } from '../todo/todo-model.vo';
 import { RepeatMode, RepeatEndMode, type RepeatConfigPayload } from '@true-north/components-repeat/types';
-import { TodoStatus } from '@true-north/enum';
+import { TodoRepeatStatus } from '@true-north/enum';
 
 export type TodoRepeatWithoutRelationsVo = {
+  /** 以下规则字段由关联 Repeat 展平 */
   repeatMode: RepeatMode;
   repeatConfig?: RepeatConfigPayload;
   repeatEndMode: RepeatEndMode;
@@ -11,11 +12,12 @@ export type TodoRepeatWithoutRelationsVo = {
   repeatTimes?: number;
   repeatStartDate: string;
   currentDate: string;
+  repeatId?: string;
   name: string;
   description?: string;
   importance?: number;
   urgency?: number;
-  status: TodoStatus;
+  status: TodoRepeatStatus;
   abandonedAt?: string;
 } & BaseEntityVo;
 

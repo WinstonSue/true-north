@@ -18,6 +18,8 @@ export type HabitWithoutRelationsVo = {
   repeatEndDate?: string;
   repeatTimes?: number;
   repeatStartDate: string;
+  /** 关联的共享调度实体 */
+  repeatId?: string;
   cycleTodoId?: string;
   cycleCount: number;
   currentStreak: number;

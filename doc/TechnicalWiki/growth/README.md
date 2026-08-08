@@ -33,7 +33,7 @@
 | 工作台 | render 聚合页 | 已组合目标、任务、待办、习惯和专注投入指标 | 习惯区需就地完成/未完成（调用 Todo done/abandon），视觉对齐原型。 |
 | 目标管理 | `service/growth/goal` | 树、CRUD、关联查询、AI 拆解和受控状态流转已存在 | 能力维持 Desktop；观感对齐原型。见 [Goal](./goal.md)。 |
 | 任务管理 | `service/growth/task` | 当前任务、月历、全部任务和详情抽屉已接入 | 能力维持 Desktop；列表/分组视觉对齐原型；分组中间项文案为「未完成」。见 [Task](./task.md)。 |
-| 待办管理 | `service/growth/todo` | 当前待办、月历、全部待办、批量完成和重复/习惯联动已接入 | 批量仅全部页；当前页视觉对齐原型。见 [Todo](./todo.md)。 |
-| 习惯管理 | `service/growth/habit` | 列表、详情、创建/编辑、暂停/恢复、放弃和周期待办打卡已存在 | 主路径改为列表就地打卡（卡片），详情为次要入口。见 [Habit](./habit.md)。 |
+| 待办管理 | `service/growth/todo` | 当前待办、月历、全部待办、批量完成；`repeat_todo` 投影与物化 | 关联收拢为 `relatedType`+`relatedId`；见 [Todo](./todo.md)。 |
+| 习惯管理 | `service/growth/habit` | 列表、详情、创建/编辑、暂停/恢复、放弃和周期待办打卡 | 规则挂共享 `repeat`；打卡走 Todo 结算。见 [Habit](./habit.md)。 |
 | 专注计时 | `service/growth/track-time` | 全局覆盖层、任务入口和秒级关联时间记录已接入 | mini 不变；full 用旧页面级样式。见 [TrackTime](./track-time.md)。 |
-| 重复规则 | `@true-north/components-repeat` | 规则解析、校验、下一次日期计算已存在 | 不单独暴露 IPC，由 Todo 与 Habit 调用，见 [重复规则](./repeat.md)。 |
+| 重复规则 | `@true-north/components-repeat` + `service/growth/repeat` | 算法包 + 调度表 `repeat`（规则与 `currentDate`） | 不单独暴露 IPC；`repeat_todo` / Habit 关联。见 [重复规则](./repeat.md)。 |

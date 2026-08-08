@@ -1,10 +1,9 @@
 import 'reflect-metadata';
-import { Entity, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm';
 import { Difficulty, HabitStatus, Importance } from '@true-north/enum';
 import { BaseEntity } from '@business/common';
-import { RepeatMode, RepeatEndMode, type RepeatConfigPayload } from '@true-north/components-repeat/types';
 import { Goal } from '../goal/goal.entity';
-import { Todo } from '../todo/todo.entity';
+import { Repeat } from '../repeat/repeat.entity';
 
 export class HabitWithoutRelations extends BaseEntity {
   /** 习惯名称 */
@@ -43,55 +42,9 @@ export class HabitWithoutRelations extends BaseEntity {
   })
   difficulty!: Difficulty;
 
-  /** 习惯模式 */
-  @Column({
-    type: 'varchar',
-    length: 20,
-  })
-  repeatMode!: RepeatMode;
-
-  /** 习惯配置 */
-  @Column({
-    type: 'text',
-    nullable: true,
-    transformer: {
-      to: (value) => JSON.stringify(value),
-      from: (value) => {
-        if (value === null || value === undefined) return undefined;
-        try {
-          return JSON.parse(value);
-        } catch {
-          return value;
-        }
-      },
-    },
-  })
-  repeatConfig?: RepeatConfigPayload;
-
-  /** 习惯结束模式 */
-  @Column({
-    type: 'varchar',
-    length: 20,
-  })
-  repeatEndMode!: RepeatEndMode;
-
-  /** 习惯结束日期 */
-  @Column({
-    type: 'date',
-    nullable: true,
-  })
-  repeatEndDate?: string;
-
-  /** 习惯次数 */
-  @Column({
-    type: 'int',
-    nullable: true,
-  })
-  repeatTimes?: number;
-
-  /** 习惯开始日期 */
-  @Column('date', { nullable: true })
-  repeatStartDate!: string;
+  /** 关联的调度规则 */
+  @Column('varchar', { nullable: true })
+  repeatId?: string;
 
   /** 当前待结算的习惯周期待办 */
   @Column('varchar', { nullable: true })
@@ -128,7 +81,7 @@ export class Habit extends HabitWithoutRelations {
   })
   goals!: Goal[];
 
-  /** 关联的待办事项（习惯产生的具体待办任务） */
-  @OneToMany(() => Todo, (todo) => todo.habit, { cascade: true })
-  todos!: Todo[];
+  @ManyToOne(() => Repeat, { nullable: true })
+  @JoinColumn({ name: 'repeat_id' })
+  repeat?: Repeat;
 }

@@ -147,7 +147,7 @@ export default function TaskTable() {
       <Table
         className="w-full"
         columns={columns}
-        data={taskList}
+        dataSource={taskList}
         loading={loading}
         pagination={false}
         rowKey="id"

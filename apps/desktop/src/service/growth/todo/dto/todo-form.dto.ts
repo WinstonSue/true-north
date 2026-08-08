@@ -4,6 +4,7 @@ import { Todo as TodoVO } from '@true-north/vo';
 import dayjs from 'dayjs';
 import { TodoDto } from './todo-model.dto';
 import { Todo } from '../todo.entity';
+import { mapCompatIdsToRelated } from '../todo-related';
 
 export class CreateTodoDto extends PickType(TodoDto, [
   'name',
@@ -15,6 +16,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
   'importance',
   'urgency',
   'relatedType',
+  'relatedId',
   'repeatConfig',
   'taskId',
   'repeatId',
@@ -31,11 +33,20 @@ export class CreateTodoDto extends PickType(TodoDto, [
     this.taskId = vo.taskId;
     this.habitId = vo.habitId;
     this.repeatId = vo.repeatId;
+    this.relatedId = vo.relatedId;
+    this.relatedType = vo.relatedType;
     this.status = vo.status;
   }
 
   exportCreateEntity(): Todo {
     const todo = new Todo();
+    const related = mapCompatIdsToRelated({
+      relatedType: this.relatedType,
+      relatedId: this.relatedId,
+      taskId: this.taskId,
+      habitId: this.habitId,
+      repeatId: this.repeatId,
+    });
 
     todo.name = this.name;
     todo.description = this.description;
@@ -45,10 +56,8 @@ export class CreateTodoDto extends PickType(TodoDto, [
     todo.planDate = this.planDate;
     todo.planStartTime = this.planStartTime;
     todo.planEndTime = this.planEndTime;
-    todo.taskId = this.taskId;
-    todo.repeatId = this.repeatId;
-    todo.habitId = this.habitId;
-    todo.relatedType = this.relatedType ?? TodoRelatedType.NONE;
+    todo.relatedType = related.relatedType ?? TodoRelatedType.NONE;
+    todo.relatedId = related.relatedId;
 
     return todo;
   }
@@ -66,6 +75,10 @@ export class UpdateTodoDto extends IntersectionType(
     this.urgency = vo.urgency;
     this.planDate = dayjs(vo.planDate).toDate();
     this.taskId = vo.taskId;
+    this.habitId = vo.habitId;
+    this.repeatId = vo.repeatId;
+    this.relatedId = vo.relatedId;
+    this.relatedType = vo.relatedType;
     this.planStartTime = vo.planStartTime;
     this.planEndTime = vo.planEndTime;
     this.status = vo.status;
@@ -87,7 +100,8 @@ export class UpdateTodoDto extends IntersectionType(
     if (this.urgency === undefined) this.urgency = todo.urgency;
     if (this.doneAt === undefined) this.doneAt = todo.doneAt;
     if (this.abandonedAt === undefined) this.abandonedAt = todo.abandonedAt;
-    if (this.taskId === undefined) this.taskId = todo.taskId;
+    if (this.relatedType === undefined) this.relatedType = todo.relatedType;
+    if (this.relatedId === undefined) this.relatedId = todo.relatedId;
   }
 
   exportUpdateEntity() {
@@ -103,7 +117,21 @@ export class UpdateTodoDto extends IntersectionType(
     if (this.urgency !== undefined) todo.urgency = this.urgency;
     if (this.doneAt !== undefined) todo.doneAt = this.doneAt;
     if (this.abandonedAt !== undefined) todo.abandonedAt = this.abandonedAt;
-    if (this.taskId !== undefined) todo.taskId = this.taskId;
+    if (this.relatedType !== undefined || this.relatedId !== undefined || this.taskId !== undefined) {
+      const related = mapCompatIdsToRelated({
+        relatedType: this.relatedType,
+        relatedId: this.relatedId,
+        taskId: this.taskId,
+        habitId: this.habitId,
+        repeatId: this.repeatId,
+      });
+      if (this.relatedType !== undefined || this.taskId !== undefined || this.habitId !== undefined || this.repeatId !== undefined) {
+        todo.relatedType = related.relatedType;
+      }
+      if (this.relatedId !== undefined || this.taskId !== undefined || this.habitId !== undefined || this.repeatId !== undefined) {
+        todo.relatedId = related.relatedId;
+      }
+    }
     return todo;
   }
 }

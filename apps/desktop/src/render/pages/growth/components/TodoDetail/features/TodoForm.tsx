@@ -30,17 +30,17 @@ import {
   TrackTimeRelatedType,
 } from '@true-north/enum';
 import { TrackTime as TrackTimeVO } from '@true-north/vo';
-import { IMPORTANCE_MAP, URGENCY_MAP } from '../../constants';
-import { useTodoDetailContext } from './context';
+import { IMPORTANCE_MAP, URGENCY_MAP } from '../../../constants';
+import { useTodoDetailContext } from '../context';
 import {
   DEFAULT_PLAN_TIME,
   defaultTimeRange,
   isTodoPlanRange,
   normalizePlanTimeRange,
   toDayjsTime,
-} from './planTime';
-import { openFocusTimer } from '../../focus-timer';
-import styles from './TodoForm.module.less';
+} from '../planTime';
+import { openFocusTimer } from '../../../focus-timer';
+import styles from '../style.module.less';
 
 const { TextArea } = Input;
 
@@ -111,7 +111,7 @@ function formatDuration(totalSeconds?: number) {
 }
 
 export default function TodoForm(props: TodoFormProps) {
-  const { todoFormData, setTodoFormData, onSubmit, currentTodo } =
+  const { mode, todoFormData, setTodoFormData, onSubmit, currentTodo } =
     useTodoDetailContext();
   const [form] = Form.useForm<TodoFormValues>();
   const [trackRecords, setTrackRecords] = useState<TrackTimeVO.TrackTimeVo[]>(
@@ -123,7 +123,7 @@ export default function TodoForm(props: TodoFormProps) {
   }, [form, todoFormData]);
 
   useEffect(() => {
-    if (!currentTodo?.id) {
+    if (mode !== 'editor' || !currentTodo?.id) {
       setTrackRecords([]);
       return;
     }
@@ -133,8 +133,9 @@ export default function TodoForm(props: TodoFormProps) {
     )
       .then((response) => setTrackRecords(response?.list || []))
       .catch(() => setTrackRecords([]));
-  }, [currentTodo?.id]);
+  }, [mode, currentTodo?.id]);
 
+  const isEditor = mode === 'editor';
   const repeatValue = todoFormData.repeatConfig as
     RepeatSelectorValue | undefined;
   const [planStart, planEnd] = normalizePlanTimeRange(
@@ -148,11 +149,10 @@ export default function TodoForm(props: TodoFormProps) {
     relatedType === TodoRelatedType.GOAL ||
     Boolean(todoFormData.taskId || todoFormData.habitId);
   const canFocus =
-    Boolean(currentTodo) &&
+    isEditor &&
     currentTodo?.status === TodoStatus.TODO &&
     isTodoPlanRange(planStart, planEnd);
-  const isPointPlan =
-    Boolean(currentTodo) && !isTodoPlanRange(planStart, planEnd);
+  const isPointPlan = !isTodoPlanRange(planStart, planEnd);
 
   async function handleSubmit() {
     try {
@@ -201,25 +201,27 @@ export default function TodoForm(props: TodoFormProps) {
           label={
             <Flex justify="space-between" align="center" gap={8}>
               计划日期
-              <Tooltip title="启用重复">
-                <Switch
-                  size="small"
-                  checked={Boolean(repeatValue)}
-                  disabled={Boolean(currentTodo)}
-                  onChange={(enabled) => {
-                    if (currentTodo) return;
-                    setTodoFormData({
-                      repeatConfig: enabled
-                        ? toTodoRepeat(
-                            repeatValue ??
-                              createDefaultRepeatSetting(todoFormData.planDate),
-                            todoFormData.planDate,
-                          )
-                        : undefined,
-                    });
-                  }}
-                />
-              </Tooltip>
+              {!isEditor && (
+                <Tooltip title="启用重复">
+                  <Switch
+                    size="small"
+                    checked={Boolean(repeatValue)}
+                    onChange={(enabled) => {
+                      setTodoFormData({
+                        repeatConfig: enabled
+                          ? toTodoRepeat(
+                              repeatValue ??
+                                createDefaultRepeatSetting(
+                                  todoFormData.planDate,
+                                ),
+                              todoFormData.planDate,
+                            )
+                          : undefined,
+                      });
+                    }}
+                  />
+                </Tooltip>
+              )}
             </Flex>
           }
           name="planDate"
@@ -338,7 +340,7 @@ export default function TodoForm(props: TodoFormProps) {
           </Col>
         </Row>
 
-        {currentTodo && (
+        {isEditor && currentTodo && (
           <Form.Item label="专注记录">
             <Flex vertical gap={8}>
               {canFocus ? (

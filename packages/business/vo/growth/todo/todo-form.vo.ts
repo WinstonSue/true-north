@@ -15,6 +15,9 @@ export type CreateTodoVo = Pick<
   | 'taskId'
   | 'repeatId'
   | 'habitId'
->;
+> & {
+  relatedType?: TodoVo['relatedType'];
+  relatedId?: string;
+};
 
 export type UpdateTodoVo = Partial<CreateTodoVo>;

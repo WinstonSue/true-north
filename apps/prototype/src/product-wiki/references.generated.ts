@@ -55,6 +55,7 @@ export const productReferenceIds = [
   'growth.todo.rule.repeat-template',
   'growth.todo.rule.focus-range-only',
   'growth.todo.rule.edit-no-repeat-toggle',
+  'growth.todo.rule.delete-boundary',
   'growth.todo.metrics',
   'growth.track-time.overview',
   'growth.track-time.rule.task-optional',

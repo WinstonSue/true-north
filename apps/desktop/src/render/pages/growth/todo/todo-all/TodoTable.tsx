@@ -1,17 +1,41 @@
 import type { TableColumnProps } from '@sue/design-web-react';
-import { Table, Button } from '@sue/design-web-react';
+import { Table, Button, Modal, message, Tag, Flex } from '@sue/design-web-react';
 import dayjs from 'dayjs';
 import { URGENCY_MAP, IMPORTANCE_MAP } from '../../constants';
 import { useTodoAllContext } from './context';
 import { TodoService } from '@true-north/web-service';
-import { openModal } from '@/hooks/OpenModal';
-import { TodoEditor } from '../../components';
+import {
+  useTodoDetail,
+  formatTodoPlanTime,
+  isTodoPlanRange,
+} from '../../components';
 import { TodoRelatedType, TodoStatus } from '@true-north/enum';
 
 import { TodoVo } from '@true-north/vo';
 import { emitTodoChanged } from '../../events';
-import { formatTodoPlanTime, isTodoPlanRange } from '../../components/TodoDetail/planTime';
 import { useFocusTimer } from '../../focus-timer';
+
+function relatedTypeLabel(relatedType?: TodoRelatedType): string {
+  switch (relatedType) {
+    case TodoRelatedType.TASK:
+      return '任务';
+    case TodoRelatedType.GOAL:
+      return '目标';
+    case TodoRelatedType.HABIT:
+      return '习惯';
+    case TodoRelatedType.IS_REPEAT:
+      return '独立重复';
+    case TodoRelatedType.REPEAT:
+      return '独立重复';
+    case TodoRelatedType.NONE:
+    default:
+      return '独立';
+  }
+}
+
+function isRepeatSeries(relatedType?: TodoRelatedType): boolean {
+  return relatedType === TodoRelatedType.IS_REPEAT;
+}
 
 export default function TodoTable(props: {
   selectedRowKeys: string[];
@@ -19,10 +43,39 @@ export default function TodoTable(props: {
 }) {
   const { todoList, getTodoPage } = useTodoAllContext();
   const { open: openFocusTimer } = useFocusTimer();
+  const { openEditDrawer } = useTodoDetail();
+
+  const openEdit = (record: TodoVo) => {
+    openEditDrawer({
+      contentProps: {
+        todo: record,
+        afterSubmit: async () => {
+          emitTodoChanged();
+          await getTodoPage();
+        },
+      },
+    });
+  };
 
   const columns: TableColumnProps<TodoVo>[] = [
-    { title: '待办', dataIndex: 'name', key: 'name' },
-    { title: '描述', dataIndex: 'description', key: 'description' },
+    {
+      title: '待办',
+      key: 'name',
+      render: (_, record) => (
+        <Flex align="center" gap={8}>
+          <Button type="text" onClick={() => openEdit(record)}>
+            {record.name}
+          </Button>
+          {isRepeatSeries(record.relatedType) && <Tag color="blue">重复</Tag>}
+        </Flex>
+      ),
+    },
+    {
+      title: '来源',
+      key: 'relatedType',
+      width: 110,
+      render: (_, record) => relatedTypeLabel(record.relatedType),
+    },
     {
       title: '状态',
       key: 'status',
@@ -82,28 +135,7 @@ export default function TodoTable(props: {
         const isActive = record.status === TodoStatus.TODO;
         return (
           <div>
-            <Button
-              type="text"
-              onClick={() => {
-                openModal({
-                  title: <div className="text-body-3">编辑</div>,
-                  content: (
-                    <div className="ml-[-6px]">
-                      <TodoEditor
-                        todo={record}
-                        onClose={null}
-                        afterSubmit={async () => {
-                          await getTodoPage();
-                        }}
-                      />
-                    </div>
-                  ),
-                  onCancel: () => {
-                    getTodoPage();
-                  },
-                });
-              }}
-            >
+            <Button type="text" onClick={() => openEdit(record)}>
               编辑
             </Button>
             {isActive && isTodoPlanRange(record.planStartTime, record.planEndTime) && (
@@ -138,6 +170,38 @@ export default function TodoTable(props: {
                 </Button>
               </>
             )}
+            {!(relatedType === TodoRelatedType.HABIT && isActive) && (
+              <Button
+                type="text"
+                status="danger"
+                onClick={() => {
+                  const isRepeatSeries = relatedType === TodoRelatedType.IS_REPEAT;
+                  Modal.confirm({
+                    title: isRepeatSeries ? '删除重复待办' : '删除待办',
+                    content: isRepeatSeries
+                      ? '将停止后续重复生成，已完成/已放弃的历史记录会保留。确定删除吗？'
+                      : '删除后无法恢复，确定删除该待办吗？',
+                    okText: '删除',
+                    cancelText: '取消',
+                    onOk: async () => {
+                      try {
+                        await TodoService.delete(relatedType, record.id);
+                        message.success(
+                          isRepeatSeries ? '已删除重复待办，历史记录已保留' : '待办已删除',
+                        );
+                        emitTodoChanged();
+                        await getTodoPage();
+                      } catch (error) {
+                        console.error(error);
+                        message.error('删除失败');
+                      }
+                    },
+                  });
+                }}
+              >
+                删除
+              </Button>
+            )}
           </div>
         );
       },
@@ -146,19 +210,18 @@ export default function TodoTable(props: {
 
   return (
     <Table
-        className="w-full"
-        // @ts-expect-error design-web Table generics currently mismatch ColumnProps<TodoVo>
-        columns={columns}
-        data={todoList as any}
-        pagination={false}
-        rowKey="id"
-        rowSelection={{
-          selectedRowKeys: props.selectedRowKeys,
-          onChange: (keys: React.Key[]) => props.onSelectionChange(keys.map(String)),
-          getCheckboxProps: (record: TodoVo) => ({
-            disabled: record.status !== TodoStatus.TODO,
-          }),
-        }}
-      />
+      className="w-full"
+      columns={columns as any}
+      dataSource={todoList}
+      pagination={false}
+      rowKey="id"
+      rowSelection={{
+        selectedRowKeys: props.selectedRowKeys,
+        onChange: (keys) => props.onSelectionChange(keys.map(String)),
+        getCheckboxProps: (record: TodoVo) => ({
+          disabled: record.status !== TodoStatus.TODO,
+        }),
+      }}
+    />
   );
 }

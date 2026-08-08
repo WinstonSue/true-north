@@ -7,7 +7,7 @@ import { TodoRepository } from '../todo/todo.repository';
 import { TodoRepeatRepository } from '../todo/todo-repeat.repository';
 import { TrackTimeRepository } from '../track-time/track-time.repository';
 import { TrackTimeDto } from '../track-time/dto/track-time-model.dto';
-import { TaskStatus, TrackTimeRelatedType } from '@true-north/enum';
+import { TaskStatus, TodoRelatedType, TrackTimeRelatedType } from '@true-north/enum';
 
 export class TaskService {
   protected taskRepository: TaskRepository;
@@ -65,7 +65,9 @@ export class TaskService {
   async delete(id: string): Promise<boolean> {
     const task = await this.taskRepository.find(id);
     const childCount = await this.taskRepository.repo.count({ where: { parentId: id } as any });
-    const todoCount = await this.todoRepository.repo.count({ where: { taskId: id } as any });
+    const todoCount = await this.todoRepository.repo.count({
+      where: { relatedType: TodoRelatedType.TASK, relatedId: id } as any,
+    });
     if (childCount || todoCount) {
       const impacts = [];
       if (childCount) impacts.push(`${childCount} 个子任务`);
@@ -142,6 +144,9 @@ export class TaskService {
 
   async taskWithRelations(taskId: string): Promise<TaskDto> {
     const entity = await this.taskRepository.findWithRelations(taskId);
+    entity.todoList = await this.todoRepository.repo.find({
+      where: { relatedType: TodoRelatedType.TASK, relatedId: taskId } as any,
+    });
     const result = TaskDto.importEntity(entity);
     result.trackTimeList = (await this.trackTimeRepository.findByFilter({
       relatedType: TrackTimeRelatedType.TASK,

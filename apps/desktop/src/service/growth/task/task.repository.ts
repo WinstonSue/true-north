@@ -136,10 +136,11 @@ export class TaskRepository extends BaseRepositoryImpl<Task, TaskFilterDto> impl
   }
 
   async findWithRelations(id: string, relations?: string[]): Promise<Task> {
-    const defaultRelations = ['parent', 'children', 'goal', 'todoList'];
+    const defaultRelations = ['parent', 'children', 'goal'];
+    const requested = relations || defaultRelations;
     const entity = await this.repo.findOne({
       where: { id },
-      relations: relations || defaultRelations,
+      relations: requested.filter((r) => r !== 'todoList'),
     });
     if (!entity) throw new Error(`任务不存在，ID: ${id}`);
     return entity;

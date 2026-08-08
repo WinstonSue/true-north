@@ -46,6 +46,7 @@ function toOptionalTextValue(value: unknown): string | undefined {
 export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
   PropsType: TodoDetailProviderProps;
   ContextType: {
+    mode: TodoDetailProviderProps['mode'];
     currentTodo: CurrentTodo;
     todoFormData: TodoFormData;
     setTodoFormData: (formData: Partial<TodoFormData>) => void;
@@ -167,6 +168,7 @@ export const [TodoDetailProvider, useTodoDetailContext] = createInjectState<{
   };
 
   return {
+    mode: props.mode,
     currentTodo,
     todoFormData,
     setTodoFormData: (formData: Partial<TodoFormData>) => {

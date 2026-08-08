@@ -1,40 +1,75 @@
 # Todo 技术实现
 
-产品说明见 [待办管理 ProductWiki](../../../apps/prototype/product-wiki/growth/todo/README.md)。
+产品说明见 [待办管理 ProductWiki](../../../apps/prototype/product-wiki/growth/todo/README.md)。重复调度与 `repeat_todo` 见 [重复规则](./repeat.md)。
 
-## 当前代码边界
+## 代码边界
 
 - 控制器：[todo.route-controller.ts](../../../apps/desktop/src/service/growth/todo/todo.route-controller.ts)，前缀 `/todo`。
-- 实例待办与重复待办由控制器按 `TodoRelatedType` 分派到相应服务；普通待办由 `TodoService` 处理，模板和下一实例由 `TodoRepeatService` 处理。
+- **实例**由 `TodoService` 处理；**独立重复定义**由 `TodoRepeatService`（表 `repeat_todo`）处理；**游标推进**由 `RepeatService` 处理。
+- 控制器按 `TodoRelatedType` 分派：`is-repeat` 针对投影/定义，其余针对已落库 `todo`。
 - DTO 位于 `dto/`，VO 来自 `@true-north/vo` 的 `Todo` 命名空间。
 
-## 当前 IPC 路由
+## 模型：实例 vs `repeat_todo`
+
+| | `todo` | `repeat_todo` |
+| --- | --- | --- |
+| 本质 | 某一天的可执行实例 | 独立重复的内容定义（物化来源） |
+| 状态 | 有 `TodoStatus`（todo/done/abandoned） | **无实例状态**；仅有系列生命周期（如 active/ended/abandoned） |
+| 日期 | `planDate` | 当前日在关联的 `repeat.currentDate` |
+| 列表「当前项」 | 自身即列表行 | 查询时投影为视图 DTO（`relatedType=is-repeat`） |
+
+创建独立重复：只建 `repeat` + `repeat_todo`。完成投影：物化一条 `todo` 并推进 `repeat.currentDate`。
+
+## 关联：`relatedType` + `relatedId`（单一归属）
+
+| `relatedType` | `relatedId` | 含义 |
+| --- | --- | --- |
+| `none` | 空 | 独立一次性待办 |
+| `task` | task.id | 任务下的待办 |
+| `habit` | habit.id | 习惯周期/历史实例 |
+| `repeat` | **repeat_todo.id** | 由 `repeat_todo` 物化的实例 |
+| `goal` | goal.id | 目标来源（若使用） |
+| `is-repeat` | — | **仅视图 DTO**，不落库；投影 id = `repeat_todo.id` |
+
+### 类型推断（service / VO）
+
+- Entity/DB：扁平 `relatedType` + `relatedId`。
+- VO/DTO：判别联合；service 用 `narrowTodoRelated`。
+
+## IPC 路由
 
 | 方法 | 路径 | 行为 |
 | --- | --- | --- |
-| POST | `/todo/create` | 创建普通或重复待办 |
-| DELETE | `/todo/delete/:relatedType/:id` | 删除待办或重复模板 |
-| PUT | `/todo/update/:relatedType/:id` | 更新待办或重复模板 |
-| GET | `/todo/find/:relatedType/:id`、`/list`、`/page` | 查询详情、列表和分页 |
-| PUT | `/todo/done/:relatedType/:id`、`/done/batch` | 完成单条或批量完成 |
-| PUT | `/todo/abandon/:relatedType/:id`、`/restore/:relatedType/:id` | 废弃与恢复 |
+| POST | `/todo/create` | 创建普通待办，或带重复规则时创建 `repeat`+`repeat_todo` |
+| DELETE | `/todo/delete/:relatedType/:id` | 删实例；`is-repeat` 删 `repeat_todo`+`repeat`，**不级联**已物化 `todo` |
+| PUT | `/todo/update/:relatedType/:id` | 更新实例或 `repeat_todo` |
+| GET | `/todo/find/:relatedType/:id`、`/list`、`/page` | 详情；**list 与 page（未完成筛选）均合并当前重复视图** |
+| PUT | `/todo/done/:relatedType/:id`、`/done/batch` | 完成；`is-repeat` 走物化+推进 |
+| PUT | `/todo/abandon/:relatedType/:id`、`/restore/:relatedType/:id` | 废弃与恢复（已物化习惯实例不可 restore） |
 
-重复待办的具体生成时机由服务实现决定，不在 ProductWiki 中重复描述为接口契约。不提供 `/todo/start`、`/todo/pause`。
+不提供 `/todo/start`、`/todo/pause`。
+
+## 列表与分页
+
+- `list`：真实 `todo` ∪ `generateTodoByRepeat`（按 `repeat.currentDate`）。
+- `page`：在筛选状态未设或为 `todo` 时同样合并投影，计入 total；筛选 `done`/`abandoned` 时不加投影。
+
+## 删除边界（对齐 ProductWiki）
+
+| 入口 | 删除 |
+| --- | --- |
+| 今天 / 日历 | **不提供**删除（可完成/放弃） |
+| 全部待办 | **提供**删除；进行中重复（`is-repeat`）只能在此删除 |
+
+`DELETE .../is-repeat/:id`：删除 `repeat_todo` 及其 `repeat`；**保留** `relatedType=repeat AND relatedId=:id` 的历史 todo。
 
 ## 原型对齐边界
 
-桌面端增长待办入口为 `/growth/todo/todo-today`、`/growth/todo/todo-calendar` 和 `/growth/todo/todo-all`；`todo-today` 是当前日期工作清单，左侧日程日历可切换选定日期，列表按「已过期 / **未完成** / 已完成 / 已放弃」分组（仅选定今天时显示已过期）。**能力集以 Desktop 为准，页面视觉对齐 Prototype。** 批量完成仅在 `todo-all`（单次 ≤50）；当前页不提供多选批量。独立周视图和统计页已移除，工作台承担聚合统计。
+桌面端入口：`/growth/todo/todo-today`、`todo-calendar`、`todo-all`。批量完成仅在 `todo-all`（单次 ≤50）。
 
-| 产品/原型语义 | 当前实现 | 需要明确的边界 |
-| --- | --- | --- |
-| 状态 | 枚举为 `todo / done / abandoned` | 无 `in_progress`；完成、放弃和恢复必须走受控接口；通用 update 不接受状态流转。历史 `in_progress` 迁移为 `todo`。列表直接露出完成与放弃。 |
-| 创建来源 | 枚举为 `none / goal / habit / task / repeat / is-repeat` | 手动创建禁止写入任务或习惯来源；系统生成待办保留唯一来源，重复模板实例使用 `is-repeat`，历史完成记录使用 `repeat`。 |
-| 计划时间 | Entity/VO 已有 `planDate`、`planStartTime`、`planEndTime` | 起止相等为时间点；不相等为区间。跨日排程不应由界面私自派生。 |
-| 标签 | 无标签字段 | 待办不提供标签能力。 |
-| 专注关联 | 区间 + 未完成待办可打开全局计时器并预关联 `relatedType=todo` | 时间点待办隐藏入口；已有 TrackTime 记录只读展示；结束计时不改待办状态。 |
-| 周期待办 | 一个 Repeat 模板由 `TodoRepeatService` 推进并产生日志待办 | 新建可开关键复；编辑不可切换是否重复，已启用时可调规则细节。见 [重复规则](./repeat.md)。 |
-| 批量完成 | 已有 `/todo/done/batch` | 仅全部待办页暴露；Service 已校验单次最多 50 条，并逐条结算以保证习惯周期可以推进。 |
-| 当前页列表 | TodoAgendaSections + TodoItem | overdue 仅今天；execution row：checkbox+完成，习惯/周期行内未完成；区间待办可开始专注；放弃/删除可留菜单。 |
-| 月历 chip | CalendarCell | 左边框风格对齐原型；悬停新建逻辑保持。 |
-
-原型与桌面端目前共享当前/日历/全部三类入口；ProductWiki 中保留的周视图和统计视图属于后续规划，不应作为当前路由或接口验收项。
+| 产品/原型语义 | 实现边界 |
+| --- | --- |
+| 状态 | `todo / done / abandoned`；通用 update 不接受状态流转 |
+| 周期待办 | 见 [重复规则](./repeat.md)；三视图均展示当前指针实例 |
+| 删除 | 仅全部；删系列不删物化历史 |
+| list / page | 均合并进行中重复投影（未完成筛选） |

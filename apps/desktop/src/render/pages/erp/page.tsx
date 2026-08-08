@@ -111,9 +111,9 @@ export default function ERPPage() {
 
       <Table
         columns={columns}
-        data={products}
+        dataSource={products}
         rowKey="id"
-        border={false}
+        bordered={false}
         className="mt-6"
       />
     </div>

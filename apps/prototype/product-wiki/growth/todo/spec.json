@@ -128,10 +128,10 @@
       "id": "all",
       "name": "全部待办",
       "prototypePage": "todo",
-      "scenario": "筛选与批量治理",
+      "scenario": "筛选与批量治理；含进行中重复当前实例，并提供删除",
       "reference": "growth.todo.view.all",
       "productStatus": "roadmap",
-      "prototypeCoverage": "partial"
+      "prototypeCoverage": "complete"
     },
     {
       "id": "statistics",
@@ -179,10 +179,10 @@
       "entities": [
         "todo"
       ],
-      "description": "独立周期待办只维护当前实例；完成、未完成或逾期后推进下一次，达到结束条件则保留最终状态。",
+      "description": "独立周期待办只维护当前实例，并在当前、日历与全部中展示；结算后留下历史实例并推进下一次，达到结束条件则保留已结算历史。",
       "views": [
         "today",
-        "week",
+        "calendar",
         "all"
       ],
       "reference": "growth.todo.rule.repeat-template",
@@ -216,6 +216,22 @@
         "all"
       ],
       "reference": "growth.todo.rule.edit-no-repeat-toggle",
+      "productStatus": "roadmap",
+      "prototypeCoverage": "complete"
+    },
+    {
+      "id": "delete-boundary",
+      "name": "删除入口与重复删除",
+      "entities": [
+        "todo"
+      ],
+      "description": "当前待办与待办日历不提供删除；全部待办提供删除。进行中的独立重复待办只能在全部待办删除系列定义；删除后停止后续生成，已完成或已放弃的历史实例保留。",
+      "views": [
+        "today",
+        "calendar",
+        "all"
+      ],
+      "reference": "growth.todo.rule.delete-boundary",
       "productStatus": "roadmap",
       "prototypeCoverage": "complete"
     }
@@ -276,6 +292,10 @@
     {
       "id": "growth.todo.rule.edit-no-repeat-toggle",
       "heading": "### 编辑不可切换是否重复"
+    },
+    {
+      "id": "growth.todo.rule.delete-boundary",
+      "heading": "### 删除入口与重复删除"
     },
     {
       "id": "growth.todo.metrics",

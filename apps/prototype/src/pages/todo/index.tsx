@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import dayjs from 'dayjs';
-import { Alert, Button, Calendar, Card, Checkbox, DatePicker, Flex, Modal, Select, Space, Table, Tabs, Tooltip } from '@sue/design-web-react';
-import { Ban, Check, Filter, Play, Plus, RotateCcw, X } from 'lucide-react';
+import { Alert, Button, Calendar, Card, Checkbox, DatePicker, Flex, Modal, Select, Space, Table, Tabs, Tag, Tooltip } from '@sue/design-web-react';
+import { Ban, Check, Filter, Play, Plus, RotateCcw, Trash2, X } from 'lucide-react';
 import { DayAgendaCalendar, ExecutionGroupList, formatDayAgendaTitle, PriorityTag, StateTag } from '../../shared/components';
 import { productRef } from '../../product-wiki';
 import { TODAY } from '../../shared/mock-data';
@@ -18,6 +18,7 @@ type Props = {
   completeTodo: (todo: Todo) => void;
   markTodoIncomplete: (todo: Todo) => void;
   abandonTodo: (todo: Todo) => void;
+  deleteTodo: (todo: Todo) => void;
   onFocusTodo: (todo: Todo) => void;
 };
 
@@ -32,6 +33,7 @@ export function TodosPage({
   completeTodo,
   markTodoIncomplete,
   abandonTodo,
+  deleteTodo,
   onFocusTodo,
 }: Props) {
   const [tab, setTab] = useState('today');
@@ -116,6 +118,7 @@ export function TodosPage({
         : todo.habitId
           ? habits.find((habit) => habit.id === todo.habitId)?.title || '关联习惯'
           : '独立待办';
+  /** 当前/日历：完成与放弃（或周期未完成），不提供删除 */
   const TodoActions = ({ todo }: { todo: Todo }) =>
     todo.status !== 'done' && todo.status !== 'abandoned' ? (
       <>
@@ -137,6 +140,35 @@ export function TodosPage({
         )}
       </>
     ) : null;
+  /** 全部：含删除；重复待办只能在此删除系列定义，已结算历史保留 */
+  const confirmDelete = (todo: Todo) => {
+    const isRepeatSeries = Boolean(todo.repeat && todo.status !== 'done' && todo.status !== 'abandoned');
+    Modal.confirm({
+      title: isRepeatSeries ? '删除重复待办' : '删除待办',
+      content: isRepeatSeries
+        ? '将停止后续重复生成，已完成/已放弃的历史记录会保留。确定删除吗？'
+        : '删除后无法恢复，确定删除该待办吗？',
+      okText: '删除',
+      okButtonProps: { status: 'danger' } as any,
+      cancelText: '取消',
+      onOk: () => deleteTodo(todo),
+    });
+  };
+  const AllTodoActions = ({ todo }: { todo: Todo }) => (
+    <>
+      <TodoActions todo={todo} />
+      {!(todo.habitId && todo.status !== 'done' && todo.status !== 'abandoned') && (
+        <Button
+          icon={<Trash2 size={15} />}
+          size="small"
+          title="删除"
+          aria-label={`删除 ${todo.title}`}
+          data-product-ref={productRef('growth.todo.rule.delete-boundary')}
+          onClick={() => confirmDelete(todo)}
+        />
+      )}
+    </>
+  );
   const columns = [
     {
       title: '',
@@ -175,9 +207,10 @@ export function TodosPage({
     {
       title: '状态',
       render: (_: unknown, todo: Todo) => (
-        <Flex gap={8}>
+        <Flex gap={8} data-product-ref={todo.repeat ? productRef('growth.todo.rule.repeat-template') : undefined}>
           <StateTag status={todo.status} />
-          <TodoActions todo={todo} />
+          {todo.repeat && todo.status === 'todo' ? <Tag color="arcoblue">重复</Tag> : null}
+          <AllTodoActions todo={todo} />
         </Flex>
       ),
     },
