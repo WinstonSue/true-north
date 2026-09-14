@@ -3,7 +3,7 @@
 ```yaml
 document_meta:
   status: 'active'
-  last_updated: '2026-09-11'
+  last_updated: '2026-09-14'
 ```
 
 参见 [AI 域总览](./README.md)。通用 Desktop 分层不在此复述。
@@ -35,7 +35,7 @@ type AiCapability<I, O> = {
 
 ## 2. 运行时
 
-本机编码 Agent（当前为 Codex）按会话准备独立 workspace，经 loopback MCP 调工具。应用级 Agent 选择存在 `runtime/selection-store`；会话可覆盖 `runtimeId`。切换 Agent 会清空该会话原生线程，下一次发送重新开始。
+本机编码 Agent（ChatGPT/`codex`、Claude Code/`claude-code`、Cursor Agent/`cursor-agent`）按会话准备独立 workspace，经 loopback MCP 调工具。ChatGPT 会话配置只保留模型连接字段和 True North MCP，登录态复用 `~/.codex/auth.json`，不继承个人插件、市场、notify 或其他 MCP。Agent 无活动超时或异常退出（含 `exitCode === null`）会结束生成并返回错误。应用级设置存在 `runtime/settings-store`（新对话默认项、启停、路径覆盖；兼容旧 `ai-runtime-selection.json`；未设置时出厂默认 `cursor-agent`）。发送按该会话的 `runtimeId` 解析 Agent，而不是全局默认。会话另存原生线程 ID；切换 Agent 会清空该会话原生线程，下一次发送重新开始。探测与 spawn 由适配器分发：Codex 走 `codex exec --json`，Claude Code 走 `claude -p --output-format stream-json`，Cursor 走 `agent acp`。
 
 历史 HTTP `CompletionRunner` / `AiProvider` / 设置页密钥不是当前执行路径。结构化结果由 Agent 生成后交给业务 Capability 规范化，再写入助手消息的 workspace 块。
 
@@ -75,7 +75,7 @@ type AiCapability<I, O> = {
 | title | 展示标题 |
 | purpose | `chat` / `capture` |
 | refType / refId | 可选业务关联（字符串，由 entity resolver 解释） |
-| runtimeId | 会话所用编码 Agent |
+| runtimeId | 该会话所用编码 Agent；新建时写入本机默认（出厂 Cursor），之后只随本会话切换 |
 | pinned / updatedAt | 列表排序 |
 
 ### Message
@@ -90,6 +90,8 @@ type AiCapability<I, O> = {
 ### 渲染桥
 
 - `AiSessionProvider` 注入 `entitySources`：mention、绑定启动、消息实体跳转、会话列表绑定标签均走该列表。
+- 渲染层按 `conversationId` 缓存消息，按 `streamId` 注册活动流。启动响应返回前到达的 `delta` / `message` / `done` / `error` 会暂存，拿到 `streamId` 后按会话补放。`streaming`、停止按钮从当前正在查看的会话派生。同一会话最多一条流，不同会话可并行。
+- 主进程 `conversation-stream` 认领 `conversationId ↔ streamId`：同一会话拒绝第二条活动流，流结束或启动失败后释放。
 - `createAiWorkspaceHost` 实现 Workbench 的 load/subscribe/patch，内部只调 AI 会话 API。
 - 标题、入口文案、auto-open 来自 `WorkbenchToolDefinition`，不在会话组件里按业务 key 分支。
 
@@ -108,14 +110,17 @@ apps/desktop/src/service/ai/
   agent/tools.ts
   entity/entity-resolver.registry.ts
   conversation/
-  runtime/                 # Agent 探测、MCP、workspace AGENTS.md
+    conversation-stream.ts # 同会话单流认领
+    stream-bus.ts
+  runtime/                 # 多 Agent 适配器、探测、设置、MCP、workspace；Codex 会话配置见 codex-config.ts
   cache/
-  ai.route-controller.ts   # runtime + 会话 + 泛型 capability/bound
+  ai.route-controller.ts   # runtime + settings + 会话 + 泛型 capability/bound
 
 apps/desktop/src/main/ai.composition.ts
 apps/desktop/src/render/app.composition.ts
 apps/desktop/src/render/features/ai/
-  context.tsx              # 会话状态与 Workbench 同步桥
+  context.tsx              # 按会话消息缓存与多流注册表
+  stream-state.ts          # 会话流状态、早到事件缓冲
   entity-source.ts
   workspace-host.ts
 apps/desktop/src/render/features/workbench/

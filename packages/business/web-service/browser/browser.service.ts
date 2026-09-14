@@ -8,11 +8,19 @@ const stateListeners = new Set<StateHandler>();
 let bridgeAttached = false;
 let bridgeListener: ((...args: unknown[]) => void) | null = null;
 
+function readIpcPayload<T>(...args: unknown[]): T | undefined {
+  if (args.length >= 2) return args[1] as T;
+  if (args.length === 1) return args[0] as T;
+  return undefined;
+}
+
 function ensureStateBridge() {
   if (bridgeAttached) return;
   const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
   if (!api?.on) return;
-  bridgeListener = (_event: unknown, payload: BrowserStateVo) => {
+  bridgeListener = (...args: unknown[]) => {
+    const payload = readIpcPayload<BrowserStateVo>(...args);
+    if (!payload || typeof payload !== 'object') return;
     for (const handler of stateListeners) {
       try {
         handler(payload);

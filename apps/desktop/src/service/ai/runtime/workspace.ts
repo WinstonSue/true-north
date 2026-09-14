@@ -5,8 +5,9 @@ import path from 'path';
 import { app } from 'electron';
 import { listAgentTools } from '../agent/tools';
 import { getAgentInstructions } from './agent-instructions';
+import { buildCodexSessionConfig } from './codex-config';
 
-function buildAgentsMd(): string {
+export function buildAgentsMd(): string {
   const tools = listAgentTools();
   const names = tools.map((tool) => tool.name).join('、');
   const domain = getAgentInstructions();
@@ -32,18 +33,31 @@ function ensureDir(dir: string) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
-function writeAgentsMd(workspaceDir: string) {
-  fs.writeFileSync(path.join(workspaceDir, 'AGENTS.md'), buildAgentsMd(), 'utf8');
+export function writeSharedWorkspace(workspaceDir: string) {
+  ensureDir(workspaceDir);
+  const body = buildAgentsMd();
+  fs.writeFileSync(path.join(workspaceDir, 'AGENTS.md'), body, 'utf8');
   try {
     spawnSync('git', ['init'], { cwd: workspaceDir, stdio: 'ignore', timeout: 5_000 });
   } catch {
-    // isolated dir is not required to be a git repo; Codex may use --skip-git-repo-check
+    // isolated dir is not required to be a git repo
   }
+  return body;
+}
+
+export function prepareClaudeWorkspace(workspaceDir: string): string {
+  const body = writeSharedWorkspace(workspaceDir);
+  fs.writeFileSync(path.join(workspaceDir, 'CLAUDE.md'), body, 'utf8');
+  return workspaceDir;
+}
+
+export function prepareCursorWorkspace(workspaceDir: string): string {
+  writeSharedWorkspace(workspaceDir);
+  return workspaceDir;
 }
 
 export function prepareCodexWorkspace(workspaceDir: string, mcpUrl: string): string {
-  ensureDir(workspaceDir);
-  writeAgentsMd(workspaceDir);
+  writeSharedWorkspace(workspaceDir);
   const codexHome = path.join(workspaceDir, '.codex');
   ensureDir(codexHome);
 
@@ -54,21 +68,18 @@ export function prepareCodexWorkspace(workspaceDir: string, mcpUrl: string): str
   } catch {
     userConfig = '';
   }
-  const stripped = userConfig.replace(/\[mcp_servers\.true_north\][\s\S]*?(?=\n\[|$)/g, '').trim();
-  const nextConfig = `${stripped ? `${stripped}\n\n` : ''}[mcp_servers.true_north]\nurl = "${mcpUrl}"\ndefault_tools_approval_mode = "approve"\n`;
-  fs.writeFileSync(path.join(codexHome, 'config.toml'), nextConfig, 'utf8');
+  fs.writeFileSync(path.join(codexHome, 'config.toml'), buildCodexSessionConfig(userConfig, mcpUrl), 'utf8');
 
-  for (const name of ['auth.json']) {
-    const from = path.join(userCodexHome, name);
-    const to = path.join(codexHome, name);
-    if (!fs.existsSync(from) || fs.existsSync(to)) continue;
+  const fromAuth = path.join(userCodexHome, 'auth.json');
+  const toAuth = path.join(codexHome, 'auth.json');
+  if (fs.existsSync(fromAuth) && !fs.existsSync(toAuth)) {
     try {
-      fs.symlinkSync(from, to);
+      fs.symlinkSync(fromAuth, toAuth);
     } catch {
       try {
-        fs.copyFileSync(from, to);
+        fs.copyFileSync(fromAuth, toAuth);
       } catch {
-        // probe/login still uses the user home; spawn can fail as unauthenticated
+        // probe/login still uses the user home
       }
     }
   }

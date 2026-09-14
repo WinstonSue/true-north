@@ -2,6 +2,363 @@
   "changes": [
     {
       "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "编码 Agent 选用改为会话级：每个会话各自记住选择，空白新对话使用本机默认（出厂为 Cursor Agent）。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session",
+        "scope": "module",
+        "name": "AI 会话",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "发送走当前会话选中的编码 Agent；打开历史会话时选择器还原为该会话上次的选择。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:view:conversation",
+        "scope": "view",
+        "name": "会话对话",
+        "reference": "ai.session.view.conversation",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "对话区选择器只改当前会话，不再与本机默认 Agent 同步。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:view:agent-picker",
+        "scope": "view",
+        "name": "编码 Agent 选择器",
+        "reference": "ai.session.view.agent-picker",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "空白新对话的选择器回到本机默认 Agent。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:draft-composer",
+        "scope": "rule",
+        "name": "空白新对话",
+        "reference": "ai.session.rule.draft-composer",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "每个会话各自记住选用；切换只改当前会话之后的发送，关闭后再打开仍保持。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:agent-switch",
+        "scope": "rule",
+        "name": "编码 Agent 切换",
+        "reference": "ai.session.rule.agent-switch",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "已有绑定会话沿用该会话 Agent；新建绑定会话使用本机默认 Agent。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:goal-bound-start",
+        "scope": "rule",
+        "name": "目标绑定发起",
+        "reference": "ai.session.rule.goal-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "已有绑定会话沿用该会话 Agent；新建绑定会话使用本机默认 Agent。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:task-bound-start",
+        "scope": "rule",
+        "name": "任务绑定发起",
+        "reference": "ai.session.rule.task-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "本机默认 Agent 只给之后新建的对话播种，不再与对话区选择器同步。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting",
+        "scope": "module",
+        "name": "本机设置",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "本地 Agent 栏目指定的是新对话默认项；对话区切换不会改这项。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:view:local-agents",
+        "scope": "view",
+        "name": "本地 Agent",
+        "reference": "setting.view.local-agents",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "默认 Agent 只决定之后新建的对话，出厂为 Cursor Agent；对话区切换不再改这项。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:rule:default-agent",
+        "scope": "rule",
+        "name": "默认 Agent 只用于新对话",
+        "reference": "setting.rule.default-agent",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "切换会话不再停止原来的生成；不同会话可以同时生成，停止只作用于当前正在查看的会话。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:view:conversation",
+        "scope": "view",
+        "name": "会话对话",
+        "reference": "ai.session.view.conversation",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "切换不停止原会话、不同会话可并行生成、每个会话分别停止；同一会话一次只能有一条生成。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:parallel-generate",
+        "scope": "rule",
+        "name": "并行生成",
+        "reference": "ai.session.rule.parallel-generate",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "正在生成的会话在侧栏历史中显示状态标记，仍可点选，不会因此停止生成。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:sessions",
+        "scope": "view",
+        "name": "会话历史",
+        "reference": "app-shell.view.sessions",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "正在生成的会话在列表中显示状态标记；点选后台生成的会话不会停止它。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:rule:streaming-status",
+        "scope": "rule",
+        "name": "生成中标记",
+        "reference": "app-shell.rule.streaming-status",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "本机设置除外观外，还管理这台设备上的编码 Agent。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting",
+        "scope": "module",
+        "name": "本机设置",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "设置导航列出外观与本地 Agent 两个栏目。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:view:nav",
+        "scope": "view",
+        "name": "设置导航",
+        "reference": "setting.view.nav",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "在本机设置中管理 ChatGPT、Claude Code 与 Cursor Agent 的启用、探测状态、路径覆盖与默认项。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:view:local-agents",
+        "scope": "view",
+        "name": "本地 Agent",
+        "reference": "setting.view.local-agents",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "每个本机编码 Agent 可单独启用或关闭；关闭后不再出现在对话区选择器。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:rule:enable-agents",
+        "scope": "rule",
+        "name": "本地 Agent 可启停",
+        "reference": "setting.rule.enable-agents",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "默认 Agent 与对话区选用偏好是同一选择；关闭当前默认项时改选第一个仍可用的 Agent。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:rule:default-agent",
+        "scope": "rule",
+        "name": "默认 Agent 立即生效",
+        "reference": "setting.rule.default-agent",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "可为每个本机编码 Agent 指定可执行文件绝对路径；无效时明确说明，不静默回退。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:rule:path-override",
+        "scope": "rule",
+        "name": "可覆盖可执行文件路径",
+        "reference": "setting.rule.path-override",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "每个本机编码 Agent 展示安装、登录、版本与检测路径，并可重新检测。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:rule:probe-status",
+        "scope": "rule",
+        "name": "展示本机探测状态",
+        "reference": "setting.rule.probe-status",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "启用、默认项与路径覆盖只保存在这台设备上。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "setting:rule:agents-local-only",
+        "scope": "rule",
+        "name": "本地 Agent 设置只作用于本机",
+        "reference": "setting.rule.agents-local-only",
+        "wikiId": "setting",
+        "wikiTitle": "本机设置"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "对话区选择器列出已启用的 ChatGPT、Claude Code 与 Cursor Agent；启停与路径在本机设置中管理。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:view:agent-picker",
+        "scope": "view",
+        "name": "编码 Agent 选择器",
+        "reference": "ai.session.view.agent-picker",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "切换 Agent 仍不续跑上一 Agent 线程；已在设置中关闭的项也不可用。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:agent-switch",
+        "scope": "rule",
+        "name": "编码 Agent 切换",
+        "reference": "ai.session.rule.agent-switch",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
       "date": "2026-09-11",
       "event": "changed",
       "summary": "进入某个插件即进入该插件详情，上方只返回插件中心；成长与记账的栏目在插件页内切换，不再占用子路径。",

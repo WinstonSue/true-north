@@ -77,6 +77,7 @@ function SessionPreview({
 function SessionItem({
   conversation,
   active,
+  streaming,
   boundLabel,
   onSelect,
   onRename,
@@ -85,6 +86,7 @@ function SessionItem({
 }: {
   conversation: ConversationVo;
   active: boolean;
+  streaming: boolean;
   boundLabel: string;
   onSelect: () => void;
   onRename: (title: string) => Promise<boolean>;
@@ -200,7 +202,12 @@ function SessionItem({
         />
       ) : (
         <>
-          <span className={styles.sessionTitle}>{conversation.title}</span>
+          <span className={styles.sessionTitleRow}>
+            {streaming ? (
+              <span className={styles.sessionStreamingDot} aria-label="正在生成" />
+            ) : null}
+            <span className={styles.sessionTitle}>{conversation.title}</span>
+          </span>
           <div className={styles.sessionActions}>
             <button
               type="button"
@@ -292,6 +299,7 @@ export function SessionList({
   const {
     conversations,
     activeConversationId,
+    streamingConversationIds,
     selectConversation,
     renameConversation,
     pinConversation,
@@ -320,6 +328,7 @@ export function SessionList({
             key={conversation.id}
             conversation={conversation}
             active={onAiPage && conversation.id === activeConversationId}
+            streaming={streamingConversationIds.includes(conversation.id)}
             boundLabel={boundLabel(conversation.refType, conversation.refId)}
             onSelect={() => selectConversation(conversation.id)}
             onRename={(title) => renameConversation(conversation.id, title)}

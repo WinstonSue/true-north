@@ -20,6 +20,14 @@
       "scenario": "选择这台设备的界面语言与主题",
       "productStatus": "roadmap",
       "reference": "setting.view.appearance"
+    },
+    {
+      "id": "local-agents",
+      "name": "本地 Agent",
+      "route": "/setting/local-agents",
+      "scenario": "管理本机编码 Agent 的启用、探测状态、可执行文件路径覆盖与新对话默认项",
+      "productStatus": "roadmap",
+      "reference": "setting.view.local-agents"
     }
   ],
   "rules": [
@@ -54,23 +62,68 @@
       "views": ["appearance"],
       "reference": "setting.rule.local-only",
       "productStatus": "roadmap"
+    },
+    {
+      "id": "enable-agents",
+      "name": "本地 Agent 可启停",
+      "description": "每个本机编码 Agent 可单独启用或关闭。关闭后不再出现在对话区选择器，也不能作为发送所用 Agent。",
+      "views": ["local-agents"],
+      "reference": "setting.rule.enable-agents",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "default-agent",
+      "name": "默认 Agent 只用于新对话",
+      "description": "默认 Agent 只决定之后新建的对话使用哪一个本机编码 Agent，出厂为 Cursor Agent。在对话区切换不会改这项，也不改已有会话。关闭当前默认项时改选第一个仍可用的 Agent；没有可用项时清空默认。",
+      "views": ["local-agents"],
+      "reference": "setting.rule.default-agent",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "path-override",
+      "name": "可覆盖可执行文件路径",
+      "description": "用户可为本机编码 Agent 指定可执行文件的绝对路径。应用后按该路径探测，不再静默改回自动检测；路径无效时明确说明。恢复自动检测后重新按本机安装位置查找。",
+      "views": ["local-agents"],
+      "reference": "setting.rule.path-override",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "probe-status",
+      "name": "展示本机探测状态",
+      "description": "每个本机编码 Agent 展示启用状态、是否安装、是否登录、版本与检测到的路径。用户可重新检测。未安装、未登录或路径无效时说明原因。",
+      "views": ["local-agents"],
+      "reference": "setting.rule.probe-status",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "agents-local-only",
+      "name": "本地 Agent 设置只作用于本机",
+      "description": "启用、默认项与路径覆盖只保存在这台设备上，不随用户带走，也不进入后续数据传输与同步。",
+      "views": ["local-agents"],
+      "reference": "setting.rule.agents-local-only",
+      "productStatus": "roadmap"
     }
   ],
   "references": [
     {
       "id": "setting.overview",
       "title": "目标与价值",
-      "body": "本机设置是独立全页，从侧栏账户菜单进入，不占用功能侧栏与工作台。左侧是设置菜单，可返回进入前的应用页。用户在此调整这台设备的界面语言与外观。语言与主题立即生效并在下次打开时保持；它们属于本机，不是账号资料。"
+      "body": "本机设置是独立全页，从侧栏账户菜单进入，不占用功能侧栏与工作台。左侧是设置菜单，可返回进入前的应用页。用户在此调整这台设备的界面语言、外观，以及本机编码 Agent 的启用、探测状态、可执行文件路径与新对话默认项。这些选择立即生效并在下次打开时保持；它们属于本机，不是账号资料。"
     },
     {
       "id": "setting.view.nav",
       "title": "设置导航",
-      "body": "设置导航固定在本机设置左侧。顶部返回进入设置前的应用页；没有进入记录时回到 AI 会话。下方列出本机设置栏目，当前只有外观。"
+      "body": "设置导航固定在本机设置左侧。顶部返回进入设置前的应用页；没有进入记录时回到 AI 会话。下方列出本机设置栏目：外观与本地 Agent。"
     },
     {
       "id": "setting.view.appearance",
       "title": "外观",
       "body": "外观是本机设置中的独立栏目。提供界面语言（中文 / English）与主题（跟随系统 / 浅色 / 深色）。选择立即生效，无需另存。语言与主题不在主页面快捷切换。"
+    },
+    {
+      "id": "setting.view.local-agents",
+      "title": "本地 Agent",
+      "body": "本地 Agent 是本机设置中的独立栏目。当前内置 ChatGPT、Claude Code 与 Cursor Agent。每项可启用或关闭，并看到是否安装、是否登录、版本与自动检测路径。用户可覆盖可执行文件的绝对路径并显式应用，或恢复自动检测；也可重新检测与指定新对话使用的默认 Agent。关闭的项不会出现在对话区选择器。对话区切换 Agent 不会改这里的默认项。"
     },
     {
       "id": "setting.rule.independent-shell",
@@ -91,6 +144,31 @@
       "id": "setting.rule.local-only",
       "title": "外观只作用于本机",
       "body": "语言与主题只保存在这台设备上。后续即使用户身份用于传输与同步，也不会带走或覆盖本机外观。"
+    },
+    {
+      "id": "setting.rule.enable-agents",
+      "title": "本地 Agent 可启停",
+      "body": "用户可为每个本机编码 Agent 打开或关闭。关闭后，对话区不再列出该项，之后的发送也不会使用它。"
+    },
+    {
+      "id": "setting.rule.default-agent",
+      "title": "默认 Agent 只用于新对话",
+      "body": "默认 Agent 只决定之后新建的对话走哪一个本机编码 Agent，出厂为 Cursor Agent。只在本机设置里指定。对话区选择器改的是当前会话，不会改这项，也不会改其它已有会话。若关闭当前默认项，改选第一个仍可用的 Agent；若没有可用项，默认被清空，空白新对话不能发送。"
+    },
+    {
+      "id": "setting.rule.path-override",
+      "title": "可覆盖可执行文件路径",
+      "body": "用户可填写可执行文件的绝对路径并应用。之后按该路径探测，不会在失败时悄悄退回自动检测路径。路径无效时直接说明原因。选择恢复自动检测后，再按本机常见安装位置查找。"
+    },
+    {
+      "id": "setting.rule.probe-status",
+      "title": "展示本机探测状态",
+      "body": "每个本机编码 Agent 展示是否启用、是否安装、是否登录、版本与检测到的路径。用户可重新检测。未安装、未登录或覆盖路径无效时，用原因说明当前为什么不能发送。"
+    },
+    {
+      "id": "setting.rule.agents-local-only",
+      "title": "本地 Agent 设置只作用于本机",
+      "body": "启用、默认项与路径覆盖只保存在这台设备上。后续即使用户身份用于传输与同步，也不会带走或覆盖这些本机选择。"
     }
   ]
 }

@@ -26,6 +26,7 @@ export type SessionValue = {
   focusComposer: () => void;
   streaming: boolean;
   streamingAssistantId: string | null;
+  streamingConversationIds: string[];
   streamError: string | null;
   loading: boolean;
   entities: AiEntityRecord[];

@@ -16,6 +16,8 @@ const isElectron = () => {
 
 console.log('============预加载脚本初始化');
 
+const ipcListenerWrappers = new WeakMap<Function, (...args: any[]) => void>();
+
 // 暴露API函数
 const exposeAPI = () => {
   if (isElectron()) {
@@ -45,12 +47,15 @@ const exposeAPI = () => {
       // 文件操作相关 API
       readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
 
-      // 事件监听相关 API
+      // 事件监听相关 API：剥掉 IpcRendererEvent，避免经 contextBridge 传递不可克隆对象
       on: (channel: string, listener: (...args: any[]) => void) => {
-        ipcRenderer.on(channel, listener);
+        const handler = (_event, ...payload) => listener(...payload);
+        ipcListenerWrappers.set(listener, handler);
+        ipcRenderer.on(channel, handler);
       },
       removeListener: (channel: string, listener: (...args: any[]) => void) => {
-        ipcRenderer.removeListener(channel, listener);
+        const handler = ipcListenerWrappers.get(listener) || listener;
+        ipcRenderer.removeListener(channel, handler);
       },
     } as ElectronAPI);
 

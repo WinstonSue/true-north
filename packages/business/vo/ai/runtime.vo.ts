@@ -8,6 +8,36 @@ export type RuntimeAgentVo = {
   unavailableReason?: string;
 };
 
+export type RuntimeAgentManagementVo = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  available: boolean;
+  authenticated: boolean;
+  version?: string;
+  resolvedPath?: string;
+  autoDetectedPath?: string;
+  pathOverride?: string | null;
+  unavailableReason?: string;
+  isDefault: boolean;
+};
+
+export type RuntimeSettingsVo = {
+  defaultRuntimeId: string | null;
+  agents: RuntimeAgentManagementVo[];
+};
+
+export type PutRuntimeAgentSettingsVo = {
+  id: string;
+  enabled?: boolean;
+  pathOverride?: string | null;
+};
+
+export type PutRuntimeSettingsRequestVo = {
+  defaultRuntimeId?: string | null;
+  agents?: PutRuntimeAgentSettingsVo[];
+};
+
 export type RuntimeSelectionVo = {
   runtimeId: string | null;
 };

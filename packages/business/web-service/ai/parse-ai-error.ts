@@ -14,7 +14,7 @@ export function parseAiError(error: unknown): { code: AiErrorCode; message: stri
 export function aiErrorUserMessage(code: AiErrorCode, fallback?: string): string {
   switch (code) {
     case AiErrorCode.NOT_CONFIGURED:
-      return '当前 AI 能力不可用，请确认本机 ChatGPT 已安装并登录';
+      return '当前 AI 能力不可用，请确认本机编码 Agent 已安装、启用并登录';
     case AiErrorCode.PROVIDER_HTTP:
       return '模型服务拒绝请求或鉴权失败';
     case AiErrorCode.TIMEOUT:

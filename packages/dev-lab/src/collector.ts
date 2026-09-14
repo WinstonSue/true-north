@@ -1,10 +1,9 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
-import { isSchemaSql, sanitizeTraceValue, summarizeSql } from './sanitize';
-import type { TraceEntry, TraceSpan, TraceSpanKind } from './types';
+import { isSchemaSql, sanitizeTraceValue, summarizeAiStreamRequest, summarizeAiStreamResponse, summarizeSql } from './sanitize.ts';
+import type { TraceEntry, TraceSpan, TraceSpanKind } from './types.ts';
 
 const RING_SIZE = 200;
-const isDev = process.env.NODE_ENV === 'development';
 
 type AlsStore = {
   ipcId: string;
@@ -18,15 +17,26 @@ type SpanEnd = {
   summary?: string;
 };
 
+export type AiStreamTraceEvent =
+  | { streamId: string; event: 'delta'; chars: number }
+  | { streamId: string; event: 'message'; partKinds: string[] }
+  | { streamId: string; event: 'done'; stopped?: boolean }
+  | { streamId: string; event: 'error'; code?: string };
+
 const als = new AsyncLocalStorage<AlsStore>();
 const entries: TraceEntry[] = [];
 const byId = new Map<string, TraceEntry>();
 const streamToIpc = new Map<string, string>();
+const streamDeltaSpans = new Map<string, { spanId: string; count: number; chars: number }>();
 const listeners = new Set<(snapshot: TraceEntry[]) => void>();
 let emitTimer: ReturnType<typeof setTimeout> | null = null;
 
+function tracingEnabled(): boolean {
+  return process.env.NODE_ENV === 'development' && process.env.TN_DEV_PROFILE !== 'product';
+}
+
 export function isDevTraceEnabled(): boolean {
-  return isDev && process.env.TN_DEV_PROFILE !== 'product';
+  return tracingEnabled();
 }
 
 export function snapshotDevTrace(): TraceEntry[] {
@@ -37,6 +47,7 @@ export function clearDevTrace(): void {
   entries.splice(0, entries.length);
   byId.clear();
   streamToIpc.clear();
+  streamDeltaSpans.clear();
   emit();
 }
 
@@ -51,17 +62,19 @@ export async function runRestTrace<T>(
   req: { method?: string; path?: string; payload?: unknown },
   run: () => Promise<T>
 ): Promise<T> {
-  if (!isDev) return run();
+  if (!tracingEnabled()) return run();
   const id = randomUUID();
   const startedAt = Date.now();
+  const path = String(req?.path || '');
+  const isStreamPath = path.includes('/messages/stream');
   const entry: TraceEntry = {
     id,
     kind: 'ipc',
     startedAt,
     open: true,
     method: String(req?.method || 'GET').toUpperCase(),
-    path: String(req?.path || ''),
-    params: sanitizeTraceValue(req?.payload),
+    path,
+    params: sanitizeTraceValue(isStreamPath ? summarizeAiStreamRequest(req?.payload) : req?.payload),
     spans: [],
   };
   pushEntry(entry);
@@ -69,7 +82,7 @@ export async function runRestTrace<T>(
   try {
     const result = await als.run({ ipcId: id }, run);
     entry.durationMs = Date.now() - startedAt;
-    entry.response = sanitizeTraceValue(result);
+    entry.response = sanitizeTraceValue(isStreamPath ? summarizeAiStreamResponse(result) : result);
     const streamId = extractStreamId(entry.path, result);
     const failed = isFailedResponse(result);
     entry.ok = !failed;
@@ -107,7 +120,7 @@ export async function traceExternal<T>(
   },
   run: (span: TraceSpanCtl) => Promise<T>
 ): Promise<T> {
-  if (!isDev) return run({ setDetail() {}, setSummary() {} });
+  if (!tracingEnabled()) return run({ setDetail() {}, setSummary() {} });
   const startedAt = Date.now();
   const span: TraceSpan = {
     id: randomUUID(),
@@ -139,7 +152,6 @@ export async function traceExternal<T>(
         detail: span.detail,
         summary: span.summary,
       });
-      if (input.kind === 'spawn') closeStream(input.streamId || parent?.streamId || store?.streamId);
       return result;
     } catch (error) {
       finishSpan(span, parent, {
@@ -148,7 +160,6 @@ export async function traceExternal<T>(
         detail: span.detail,
         summary: span.summary,
       });
-      if (input.kind === 'spawn') closeStream(input.streamId || parent?.streamId || store?.streamId);
       throw error;
     }
   };
@@ -163,7 +174,7 @@ export function recordSql(input: {
   error?: string;
   durationMs?: number;
 }): void {
-  if (!isDev || isSchemaSql(input.query)) return;
+  if (!tracingEnabled() || isSchemaSql(input.query)) return;
   const summary = summarizeSql(input.query);
   const parent = findParent(als.getStore()?.streamId);
   if (input.error || input.durationMs != null) {
@@ -210,6 +221,113 @@ export function recordSql(input: {
     error: input.error,
   };
   attachSpan(span, als.getStore()?.streamId);
+}
+
+export function bindStreamToCurrentTrace(streamId: string, conversationId?: string): void {
+  if (!tracingEnabled() || !streamId.trim()) return;
+  const store = als.getStore();
+  if (store?.ipcId) {
+    streamToIpc.set(streamId, store.ipcId);
+    const entry = byId.get(store.ipcId);
+    if (entry) {
+      entry.streamId = streamId;
+      if (conversationId) entry.conversationId = conversationId;
+      entry.open = true;
+    }
+  }
+  const parent = findParent(streamId);
+  if (parent && conversationId && !parent.conversationId) {
+    parent.conversationId = conversationId;
+  }
+  if (parent?.spans.some((span) => span.kind === 'stream' && span.summary === '开始生成')) {
+    emit();
+    return;
+  }
+  attachSpan(
+    {
+      id: randomUUID(),
+      kind: 'stream',
+      startedAt: Date.now(),
+      summary: '开始生成',
+      detail: sanitizeTraceValue({ conversationId, streamId }),
+    },
+    streamId
+  );
+}
+
+export function recordAiStreamEvent(input: AiStreamTraceEvent): void {
+  if (!tracingEnabled() || !input.streamId.trim()) return;
+  const parent = findParent(input.streamId);
+
+  if (input.event === 'delta') {
+    const chars = Number.isFinite(input.chars) ? Math.max(0, input.chars) : 0;
+    const existing = streamDeltaSpans.get(input.streamId);
+    if (existing && parent) {
+      const span = parent.spans.find((item) => item.id === existing.spanId);
+      if (span) {
+        existing.count += 1;
+        existing.chars += chars;
+        span.summary = `输出 ${existing.count} 次 · ${existing.chars} 字`;
+        span.detail = sanitizeTraceValue({ deltaCount: existing.count, deltaChars: existing.chars });
+        span.durationMs = Date.now() - span.startedAt;
+        parent.spans = parent.spans.map((item) => (item.id === span.id ? { ...span } : item));
+        emit();
+        return;
+      }
+    }
+    const span: TraceSpan = {
+      id: randomUUID(),
+      kind: 'stream',
+      startedAt: Date.now(),
+      summary: `输出 1 次 · ${chars} 字`,
+      detail: sanitizeTraceValue({ deltaCount: 1, deltaChars: chars }),
+    };
+    attachSpan(span, input.streamId);
+    streamDeltaSpans.set(input.streamId, { spanId: span.id, count: 1, chars });
+    return;
+  }
+
+  if (input.event === 'message') {
+    const toolCalls = (input.partKinds || []).filter((kind) => kind === 'tool').length;
+    if (!toolCalls) return;
+    attachSpan(
+      {
+        id: randomUUID(),
+        kind: 'stream',
+        startedAt: Date.now(),
+        durationMs: 0,
+        summary: `工具调用 ${toolCalls} 次`,
+        detail: sanitizeTraceValue({ partKinds: input.partKinds, toolCalls }),
+      },
+      input.streamId
+    );
+    return;
+  }
+
+  streamDeltaSpans.delete(input.streamId);
+  const failed = input.event === 'error';
+  const summary = failed ? '失败' : input.stopped ? '已停止' : '已完成';
+  attachSpan(
+    {
+      id: randomUUID(),
+      kind: 'stream',
+      startedAt: Date.now(),
+      durationMs: 0,
+      summary,
+      detail: sanitizeTraceValue(failed ? { code: input.code } : { stopped: Boolean(input.stopped) }),
+      error: failed ? input.code || 'INTERNAL' : undefined,
+    },
+    input.streamId
+  );
+  if (failed) {
+    const ipcId = streamToIpc.get(input.streamId);
+    const entry = ipcId ? byId.get(ipcId) : parent;
+    if (entry) {
+      entry.ok = false;
+      entry.error = input.code || 'INTERNAL';
+    }
+  }
+  closeStream(input.streamId);
 }
 
 function pushEntry(entry: TraceEntry): void {

@@ -1,151 +1,115 @@
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import { spawnSync } from 'child_process';
-import type { RuntimeAgentDef, RuntimeProbeResult } from './types';
-import { RUNTIME_AGENT_DEFS } from './registry';
+import type { RuntimeAgentManagementVo, RuntimeAgentVo } from '@true-north/vo';
+import { clearBinaryCache, resolveBinary, resolveOverridePath } from './binary';
+import { resolveDefaultRuntimeId } from './preferred-agent';
+import { readAgentSettings, readRuntimeSettings } from './settings-store';
+import { listAdapters } from './adapters';
+import type { RuntimeAdapter } from './adapters/types';
+import type { RuntimeProbeResult } from './types';
 
-const resolvedPathCache = new Map<string, string>();
+const probeCache = new Map<string, RuntimeProbeResult>();
 
-function extraSearchDirs(): string[] {
-  const home = os.homedir();
-  const dirs = [
-    '/usr/local/bin',
-    '/opt/homebrew/bin',
-    '/Applications/ChatGPT.app/Contents/Resources',
-    path.join(home, 'Applications', 'ChatGPT.app', 'Contents', 'Resources'),
-    path.join(home, '.local', 'bin'),
-    path.join(home, '.npm-global', 'bin'),
-    path.join(home, '.cursor', 'bin'),
-    path.join(home, '.codex', 'bin'),
-  ];
-  if (process.platform === 'win32') {
-    const localApp = process.env.LOCALAPPDATA;
-    const roaming = process.env.APPDATA;
-    if (localApp) {
-      dirs.push(path.join(localApp, 'Programs', 'cursor'));
-      dirs.push(path.join(localApp, 'cursor'));
-    }
-    if (roaming) {
-      dirs.push(path.join(roaming, 'npm'));
-      dirs.push(path.join(roaming, 'npm', 'bin'));
-    }
-    dirs.push(path.join(home, 'AppData', 'Roaming', 'npm'));
-    dirs.push('C:\\Program Files\\nodejs');
-    dirs.push('C:\\Program Files\\Git\\usr\\bin');
-  }
-  return dirs;
+function cacheKey(adapter: RuntimeAdapter, enabled: boolean, pathOverride: string | null): string {
+  return `${adapter.id}|${enabled ? '1' : '0'}|${pathOverride || ''}`;
 }
 
-function pathDirs(): string[] {
-  const fromEnv = (process.env.PATH || '')
-    .split(path.delimiter)
-    .map((item) => item.trim())
-    .filter(Boolean);
-  const seen = new Set<string>();
-  const ordered: string[] = [];
-  for (const dir of [...fromEnv, ...extraSearchDirs()]) {
-    const normalized = path.resolve(dir);
-    if (seen.has(normalized)) continue;
-    seen.add(normalized);
-    ordered.push(normalized);
-  }
-  return ordered;
+export function invalidateProbeCache() {
+  probeCache.clear();
+  clearBinaryCache();
 }
 
-function candidateNames(bin: string): string[] {
-  if (process.platform !== 'win32') return [bin];
-  if (path.extname(bin)) return [bin];
-  return [`${bin}.exe`, `${bin}.cmd`, bin];
-}
-
-function isRunnable(file: string): boolean {
-  try {
-    const stat = fs.statSync(file);
-    if (!stat.isFile()) return false;
-    fs.accessSync(file, fs.constants.X_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export function resolveBinary(binaries: string[]): string | undefined {
-  const cacheKey = binaries.join('|');
-  const cached = resolvedPathCache.get(cacheKey);
-  if (cached && isRunnable(cached)) return cached;
-
-  for (const dir of pathDirs()) {
-    for (const bin of binaries) {
-      for (const name of candidateNames(bin)) {
-        const candidate = path.join(dir, name);
-        if (isRunnable(candidate)) {
-          resolvedPathCache.set(cacheKey, candidate);
-          return candidate;
-        }
-      }
-    }
-  }
-  return undefined;
-}
-
-function runCli(binPath: string, args: string[]): { status: number | null; stdout: string; stderr: string } {
-  const result = spawnSync(binPath, args, {
-    encoding: 'utf8',
-    timeout: 12_000,
-    env: process.env,
-    shell: false,
-  });
+export function toRuntimeAgentVo(result: RuntimeProbeResult): RuntimeAgentVo {
   return {
-    status: result.status,
-    stdout: result.stdout || '',
-    stderr: result.stderr || '',
+    id: result.id,
+    name: result.name,
+    available: result.available,
+    authenticated: result.authenticated,
+    unavailableReason: result.unavailableReason,
   };
 }
 
-function probeCodexAuth(binPath: string): boolean {
-  const result = runCli(binPath, ['login', 'status']);
-  return result.status === 0;
+export function toRuntimeAgentManagementVo(
+  result: RuntimeProbeResult,
+  defaultRuntimeId: string | null
+): RuntimeAgentManagementVo {
+  return {
+    id: result.id,
+    name: result.name,
+    enabled: result.enabled,
+    available: result.available,
+    authenticated: result.authenticated,
+    version: result.version,
+    resolvedPath: result.resolvedPath,
+    autoDetectedPath: result.autoDetectedPath,
+    pathOverride: result.pathOverride,
+    unavailableReason: result.unavailableReason,
+    isDefault: defaultRuntimeId === result.id,
+  };
 }
 
-export function probeAgent(def: RuntimeAgentDef): RuntimeProbeResult {
-  const resolvedPath = resolveBinary(def.binaries);
-  if (!resolvedPath) {
-    return {
-      id: def.id,
-      name: def.name,
-      available: false,
-      authenticated: false,
-      unavailableReason: '未安装 ChatGPT',
-    };
+async function probeAdapter(adapter: RuntimeAdapter): Promise<RuntimeProbeResult> {
+  const settings = readAgentSettings(adapter.id);
+  const key = cacheKey(adapter, settings.enabled, settings.pathOverride);
+  const cached = probeCache.get(key);
+  if (cached) return cached;
+
+  const extraDirs = adapter.extraSearchDirs?.() || [];
+  const autoDetectedPath = resolveBinary(adapter.binaries, extraDirs);
+  let resolvedPath: string | undefined;
+  let unavailableReason: string | undefined;
+
+  if (settings.pathOverride) {
+    resolvedPath = resolveOverridePath(settings.pathOverride);
+    if (!resolvedPath) {
+      unavailableReason = '覆盖路径无效';
+    }
+  } else {
+    resolvedPath = autoDetectedPath;
+    if (!resolvedPath) unavailableReason = adapter.unavailableInstallReason();
   }
 
-  const authenticated = probeCodexAuth(resolvedPath);
-  if (!authenticated) {
-    return {
-      id: def.id,
-      name: def.name,
-      available: false,
-      authenticated: false,
-      resolvedPath,
-      unavailableReason: '未登录',
-    };
+  let authenticated = false;
+  let version: string | undefined;
+  if (resolvedPath) {
+    try {
+      version = (await adapter.probeVersion?.(resolvedPath)) || undefined;
+    } catch {
+      version = undefined;
+    }
+    try {
+      authenticated = await adapter.probeAuth(resolvedPath);
+    } catch {
+      authenticated = false;
+    }
+    if (!authenticated && !unavailableReason) unavailableReason = '未登录';
   }
 
-  return {
-    id: def.id,
-    name: def.name,
-    available: true,
-    authenticated: true,
+  const available = Boolean(settings.enabled && resolvedPath && authenticated);
+  const result: RuntimeProbeResult = {
+    id: adapter.id,
+    name: adapter.name,
+    enabled: settings.enabled,
+    available,
+    authenticated,
+    version,
     resolvedPath,
+    autoDetectedPath,
+    pathOverride: settings.pathOverride,
+    unavailableReason: settings.enabled
+      ? unavailableReason
+      : unavailableReason || '已在设置中关闭',
   };
+  if (!settings.enabled) {
+    result.available = false;
+    result.unavailableReason = '已在设置中关闭';
+  }
+  probeCache.set(key, result);
+  return result;
 }
 
-export function probeAllAgents(): RuntimeProbeResult[] {
-  return RUNTIME_AGENT_DEFS.map(probeAgent);
+export async function probeAllAgents(): Promise<RuntimeProbeResult[]> {
+  return Promise.all(listAdapters().map((adapter) => probeAdapter(adapter)));
 }
 
-export function toRuntimeAgentVo(result: RuntimeProbeResult) {
-  const { resolvedPath: _resolvedPath, ...vo } = result;
-  return vo;
+export function currentDefaultRuntimeId(): string {
+  return resolveDefaultRuntimeId(readRuntimeSettings().defaultRuntimeId);
 }

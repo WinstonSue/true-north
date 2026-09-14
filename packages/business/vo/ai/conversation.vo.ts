@@ -70,6 +70,7 @@ export type MessageVo = {
 export type CreateConversationRequestVo = {
   title?: string;
   purpose?: ConversationPurpose;
+  runtimeId?: string;
 };
 
 export type RenameConversationRequestVo = {
@@ -115,6 +116,7 @@ export type AiChatStreamDoneEventVo = {
   streamId: string;
   event: 'done';
   message: MessageVo;
+  stopped?: boolean;
 };
 
 export type AiChatStreamErrorEventVo = {

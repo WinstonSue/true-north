@@ -1,7 +1,12 @@
 import type { RuntimeAgentVo } from '@true-north/vo';
 import type { AiMessagePartVo, MessageVo } from '@true-north/vo';
 
-export type RuntimeAgentId = 'codex';
+export const RUNTIME_AGENT_IDS = ['codex', 'claude-code', 'cursor-agent'] as const;
+export type RuntimeAgentId = (typeof RUNTIME_AGENT_IDS)[number];
+
+export function isRuntimeAgentId(id: string): id is RuntimeAgentId {
+  return (RUNTIME_AGENT_IDS as readonly string[]).includes(id);
+}
 
 export type RuntimeAgentDef = {
   id: RuntimeAgentId;
@@ -10,7 +15,11 @@ export type RuntimeAgentDef = {
 };
 
 export type RuntimeProbeResult = RuntimeAgentVo & {
+  enabled: boolean;
   resolvedPath?: string;
+  autoDetectedPath?: string;
+  pathOverride?: string | null;
+  version?: string;
 };
 
 export type StreamSessionContext = {

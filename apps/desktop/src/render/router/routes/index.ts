@@ -31,6 +31,7 @@ export const userRoute: IRoute = {
   key: '/user',
   ignore: true,
   breadcrumb: true,
+  loader: () => import('@/features/user'),
   meta: { icon: User },
 };
 

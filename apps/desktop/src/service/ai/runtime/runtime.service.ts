@@ -2,16 +2,27 @@ import type {
   AiMessagePartVo,
   AiTextPartVo,
   MessageVo,
+  PutRuntimeSettingsRequestVo,
   RuntimeAgentVo,
   RuntimeSelectionVo,
+  RuntimeSettingsVo,
 } from '@true-north/vo';
 import { AiPlatformError } from '../ai-error';
 import { emitStream } from '../conversation/stream-bus';
-import { spawnCodex } from './adapters/codex';
+import { getAdapter, requireAdapter } from './adapters';
 import { mcpUrl } from './mcp/loopback-server';
-import { probeAllAgents, toRuntimeAgentVo } from './probe';
+import { resolvePreferredAgent } from './preferred-agent';
+import {
+  currentDefaultRuntimeId,
+  invalidateProbeCache,
+  probeAllAgents,
+  toRuntimeAgentManagementVo,
+  toRuntimeAgentVo,
+} from './probe';
 import { agentDef } from './registry';
-import { readRuntimeId, writeRuntimeId } from './selection-store';
+import { normalizePathOverride } from './settings-schema';
+import { readRuntimeId, readRuntimeSettings, writeRuntimeId, writeRuntimeSettings } from './settings-store';
+import { unexpectedRuntimeFailure } from './runtime-exit';
 import { bindStreamSession, unbindStreamSession } from './stream-session';
 import type { RuntimeProbeResult, RuntimeSpawnInput, StreamSessionContext } from './types';
 import { conversationWorkspaceDir } from './workspace';
@@ -106,20 +117,16 @@ function enqueueLock() {
   };
 }
 
-export function resolvePreferredAgent(probes: RuntimeProbeResult[]): RuntimeProbeResult | undefined {
-  const saved = readRuntimeId();
-  const savedProbe = saved ? probes.find((item) => item.id === saved) : undefined;
-  if (savedProbe?.available) return savedProbe;
-  return probes.find((item) => item.available) || savedProbe || probes[0];
-}
+export { resolvePreferredAgent };
 
 export class RuntimeService {
-  listAgents(): RuntimeAgentVo[] {
-    return probeAllAgents().map(toRuntimeAgentVo);
+  async listAgents(): Promise<RuntimeAgentVo[]> {
+    const probes = await probeAllAgents();
+    return probes.filter((item) => item.enabled).map(toRuntimeAgentVo);
   }
 
   getSelection(): RuntimeSelectionVo {
-    return { runtimeId: readRuntimeId() };
+    return { runtimeId: currentDefaultRuntimeId() };
   }
 
   putSelection(runtimeId: string): RuntimeSelectionVo {
@@ -127,12 +134,60 @@ export class RuntimeService {
     if (!def) {
       throw AiPlatformError.agentUnavailable(`未知编码 Agent: ${runtimeId}`);
     }
+    const settings = readRuntimeSettings();
+    if (settings.agents[def.id] && settings.agents[def.id].enabled === false) {
+      throw AiPlatformError.agentUnavailable(`${def.name} 已在设置中关闭`);
+    }
     return { runtimeId: writeRuntimeId(def.id) };
   }
 
-  resolveForSend(): RuntimeProbeResult {
-    const probes = probeAllAgents();
-    const selected = resolvePreferredAgent(probes);
+  async getSettings(): Promise<RuntimeSettingsVo> {
+    const probes = await probeAllAgents();
+    const defaultRuntimeId = currentDefaultRuntimeId();
+    return {
+      defaultRuntimeId,
+      agents: probes.map((item) => toRuntimeAgentManagementVo(item, defaultRuntimeId)),
+    };
+  }
+
+  async putSettings(body: PutRuntimeSettingsRequestVo): Promise<RuntimeSettingsVo> {
+    const current = readRuntimeSettings();
+    if ('defaultRuntimeId' in body) {
+      const nextDefault = body.defaultRuntimeId;
+      if (nextDefault !== undefined && nextDefault !== null && !agentDef(nextDefault)) {
+        throw AiPlatformError.agentUnavailable(`未知编码 Agent: ${nextDefault}`);
+      }
+      current.defaultRuntimeId = nextDefault?.trim() ? nextDefault.trim() : null;
+    }
+    for (const patch of body.agents || []) {
+      const def = agentDef(patch.id);
+      if (!def) throw AiPlatformError.agentUnavailable(`未知编码 Agent: ${patch.id}`);
+      const prev = current.agents[def.id] || { enabled: true, pathOverride: null };
+      if (typeof patch.enabled === 'boolean') prev.enabled = patch.enabled;
+      if ('pathOverride' in patch) {
+        const normalized = normalizePathOverride(patch.pathOverride);
+        if (normalized.ok === false) throw AiPlatformError.internal(normalized.message);
+        prev.pathOverride = normalized.value;
+      }
+      current.agents[def.id] = prev;
+    }
+    writeRuntimeSettings(current);
+    invalidateProbeCache();
+
+    let settings = await this.getSettings();
+    const currentDefault = settings.agents.find((item) => item.id === settings.defaultRuntimeId);
+    if (currentDefault && !currentDefault.enabled) {
+      const fallback = settings.agents.find((item) => item.enabled && item.available);
+      writeRuntimeId(fallback?.id || null);
+      invalidateProbeCache();
+      settings = await this.getSettings();
+    }
+    return settings;
+  }
+
+  async resolveForSend(preferredRuntimeId?: string | null): Promise<RuntimeProbeResult> {
+    const probes = (await probeAllAgents()).filter((item) => item.enabled);
+    const selected = resolvePreferredAgent(probes, preferredRuntimeId ?? readRuntimeId());
     if (!selected) {
       throw AiPlatformError.agentUnavailable('没有可用的编码 Agent');
     }
@@ -154,12 +209,14 @@ export class RuntimeService {
     assistantId: string;
     prompt: string;
     resumeThreadId?: string;
+    preferredRuntimeId?: string | null;
     signal: AbortSignal;
     persistParts: (parts: AiMessagePartVo[]) => Promise<MessageVo>;
   }): Promise<{ message: MessageVo; threadId?: string; runtimeId: string }> {
-    const selected = this.resolveForSend();
+    const selected = await this.resolveForSend(input.preferredRuntimeId);
+    const adapter = getAdapter(selected.id);
     const def = agentDef(selected.id);
-    if (!def || !selected.resolvedPath) {
+    if (!adapter || !def || !selected.resolvedPath) {
       throw AiPlatformError.agentUnavailable('当前选择不可用');
     }
 
@@ -205,9 +262,9 @@ export class RuntimeService {
       },
     };
 
-    let spawnResult: Awaited<ReturnType<typeof spawnCodex>>;
+    let spawnResult: Awaited<ReturnType<typeof adapter.spawn>>;
     try {
-      spawnResult = await spawnCodex(spawnInput);
+      spawnResult = await adapter.spawn(spawnInput);
     } finally {
       unbindStreamSession(input.streamId);
     }
@@ -224,9 +281,9 @@ export class RuntimeService {
       return { message, threadId, runtimeId: def.id };
     }
 
-    if (spawnResult.exitCode && spawnResult.exitCode !== 0) {
-      const detail = spawnResult.stderr.trim().slice(0, 400);
-      throw AiPlatformError.internal(detail || '编码 Agent 退出异常');
+    const runtimeFailure = unexpectedRuntimeFailure(spawnResult.exitCode, spawnResult.stderr);
+    if (runtimeFailure) {
+      throw AiPlatformError.internal(runtimeFailure);
     }
 
     const message = await enqueue(() => {
@@ -241,3 +298,4 @@ export class RuntimeService {
 }
 
 export const runtimeService = new RuntimeService();
+export { requireAdapter };

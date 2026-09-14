@@ -1,4 +1,4 @@
-export type TraceSpanKind = 'sql' | 'spawn' | 'mcp';
+export type TraceSpanKind = 'sql' | 'spawn' | 'mcp' | 'stream';
 
 export type TraceEntryKind = 'ipc' | TraceSpanKind;
 
@@ -25,6 +25,7 @@ export type TraceEntry = {
   params?: unknown;
   response?: unknown;
   streamId?: string;
+  conversationId?: string;
   summary?: string;
   spans: TraceSpan[];
 };

@@ -40,6 +40,34 @@ export function summarizeSql(query: string): string {
   return `${compact.slice(0, 180)}…`;
 }
 
+export function summarizeAiStreamRequest(payload: unknown): unknown {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return undefined;
+  const record = payload as Record<string, unknown>;
+  const text = typeof record.text === 'string' ? record.text : '';
+  const entityCount = Array.isArray(record.entityLinks) ? record.entityLinks.length : 0;
+  return { textChars: text.length, entityCount };
+}
+
+export function summarizeAiStreamResponse(result: unknown): unknown {
+  if (!result || typeof result !== 'object' || Array.isArray(result)) return undefined;
+  const record = result as { code?: unknown; data?: unknown };
+  const data: Record<string, unknown> =
+    record.data && typeof record.data === 'object' && !Array.isArray(record.data)
+      ? (record.data as Record<string, unknown>)
+      : (result as Record<string, unknown>);
+  const user = data.user && typeof data.user === 'object' ? (data.user as { id?: unknown }) : undefined;
+  const assistant =
+    data.assistant && typeof data.assistant === 'object'
+      ? (data.assistant as { id?: unknown })
+      : undefined;
+  return {
+    code: record.code,
+    streamId: typeof data.streamId === 'string' ? data.streamId : undefined,
+    userId: typeof user?.id === 'string' ? user.id : undefined,
+    assistantId: typeof assistant?.id === 'string' ? assistant.id : undefined,
+  };
+}
+
 export function isSchemaSql(query: string): boolean {
   const sql = query.replace(/\s+/g, ' ').trim().toUpperCase();
   return (

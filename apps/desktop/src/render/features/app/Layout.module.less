@@ -1,33 +1,24 @@
-.layout-sider-wrap {
-  position: relative;
+.splitterWrap {
+  min-width: 0;
+  min-height: 0;
+}
+
+.splitter {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.asidePanel,
+.contentPanel {
+  padding: 0 !important;
+  overflow: hidden !important;
   min-width: 0;
 }
 
-.resizeHandle {
-  position: absolute;
-  top: 0;
-  right: -2px;
-  bottom: 0;
-  z-index: 3;
-  width: 4px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: col-resize;
-}
-
-.resizeHandle:hover,
-.resizeHandleActive {
-  background: var(--sue-color-primary);
-}
-
-.resizing {
-  cursor: col-resize;
-  user-select: none;
-}
-
-.layout-sider {
-  height: 100%;
+.asidePanel {
+  background: var(--sue-color-bg-container);
 
   ::-webkit-scrollbar {
     width: 12px;
@@ -45,23 +36,28 @@
     background-color: var(--color-text-3);
   }
 
-  &::after {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 0;
-    right: -1px;
-    width: 1px;
-    height: 100%;
-    background-color: var(--color-border);
-  }
-
-  > :global(.sue-layout-sider-children) {
+  > :global(*) {
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
   }
+}
+
+.contentPanel > :global(*) {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.splitterDragger:global(.sue-splitter-bar-dragger)::after {
+  display: none;
+}
+
+.splitterDragger:global(.sue-splitter-bar-dragger):hover::before,
+.splitterDraggerActive:global(.sue-splitter-bar-dragger-active)::before {
+  background: var(--sue-color-primary) !important;
 }
 
 .icon {

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { ConfigProvider, message, theme as sueTheme } from '@sue/design-web-react';
@@ -219,4 +219,17 @@ function LifeToolkitApp() {
   );
 }
 
-createRoot(document.getElementById('root') as HTMLElement).render(<LifeToolkitApp />);
+type ReactRootContainer = HTMLElement & {
+  __trueNorthReactRoot?: Root;
+};
+
+const rootContainer = document.getElementById('root') as ReactRootContainer | null;
+if (!rootContainer) {
+  throw new Error('#root is required');
+}
+
+// Keep one root when Vite re-evaluates this entry module during HMR so React
+// never has two roots mutating the same container.
+const root = rootContainer.__trueNorthReactRoot ?? createRoot(rootContainer);
+rootContainer.__trueNorthReactRoot = root;
+root.render(<LifeToolkitApp />);

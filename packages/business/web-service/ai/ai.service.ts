@@ -14,9 +14,11 @@ import type {
   PatchWorkspaceRequestVo,
   PinConversationRequestVo,
   PutRuntimeSelectionRequestVo,
+  PutRuntimeSettingsRequestVo,
   RenameConversationRequestVo,
   RuntimeAgentVo,
   RuntimeSelectionVo,
+  RuntimeSettingsVo,
   StartMessageStreamRequestVo,
   StartMessageStreamResponseVo,
   TaskDecomposeRequestVo,
@@ -50,11 +52,21 @@ const streamListeners = new Set<StreamHandler>();
 let bridgeAttached = false;
 let bridgeListener: ((...args: any[]) => void) | null = null;
 
+function readIpcPayload<T>(...args: unknown[]): T | undefined {
+  if (args.length >= 2) return args[1] as T;
+  if (args.length === 1) return args[0] as T;
+  return undefined;
+}
+
 function ensureStreamBridge() {
   if (bridgeAttached) return;
   const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
   if (!api?.on) return;
-  bridgeListener = (_event: unknown, payload: AiChatStreamEventVo) => {
+  bridgeListener = (...args: unknown[]) => {
+    const payload = readIpcPayload<AiChatStreamEventVo>(...args);
+    if (!payload || typeof payload !== 'object' || !('event' in payload) || !('streamId' in payload)) {
+      return;
+    }
     for (const handler of streamListeners) {
       try {
         handler(payload);
@@ -70,6 +82,14 @@ function ensureStreamBridge() {
 export default class AiService {
   static async listRuntimeAgents(): Promise<AiResult<RuntimeAgentVo[]>> {
     return wrap(() => AiController.listRuntimeAgents());
+  }
+
+  static async getRuntimeSettings(): Promise<AiResult<RuntimeSettingsVo>> {
+    return wrap(() => AiController.getRuntimeSettings());
+  }
+
+  static async putRuntimeSettings(body: PutRuntimeSettingsRequestVo): Promise<AiResult<RuntimeSettingsVo>> {
+    return wrap(() => AiController.putRuntimeSettings(body));
   }
 
   static async getRuntimeSelection(): Promise<AiResult<RuntimeSelectionVo>> {

@@ -6,6 +6,7 @@
   overflow: hidden;
   min-width: 600px;
   max-width: 800px;
+  width: 100%;
 
   > * {
     min-height: 0;
@@ -56,8 +57,36 @@
   color: var(--sue-color-primary);
 }
 
+.sessionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sessionStreamingDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sue-color-primary);
+  animation: sessionStreamingPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sessionStreamingPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .sessionTitle {
   display: block;
+  flex: 1;
+  min-width: 0;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;

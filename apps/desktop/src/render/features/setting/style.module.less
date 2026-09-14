@@ -31,3 +31,44 @@
   font-weight: 500;
   color: var(--color-text-1);
 }
+
+.lead {
+  color: var(--color-text-2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.agentCard {
+  padding: 16px;
+}
+
+.agentCard + .agentCard {
+  border-top: 1px solid var(--sue-color-border-secondary);
+}
+
+.status {
+  color: var(--color-text-2);
+  font-size: 13px;
+}
+
+.meta {
+  color: var(--color-text-3);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.pathRow {
+  width: 100%;
+}
+
+.pathRow :global(input) {
+  min-width: 0;
+}
+
+.badge {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--sue-color-primary-bg);
+  color: var(--sue-color-primary);
+  font-size: 11px;
+}

@@ -14,14 +14,22 @@ import type {
   StartMessageStreamResponseVo,
 } from '@true-north/vo';
 import { workspaceEntityRef } from '@true-north/vo';
+import { bindStreamToCurrentTrace } from '@true-north/dev-lab/collector';
 import { AiPlatformError } from '../ai-error';
 import { entityResolverRegistry } from '../entity/entity-resolver.registry';
 import { agentDef } from '../runtime/registry';
 import { killChildProcess, runtimeService } from '../runtime';
+import { readRuntimeId } from '../runtime/settings-store';
 import { AiConversation } from './conversation.entity';
 import { AiConversationRepository } from './conversation.repository';
 import { AiMessage } from './message.entity';
 import { AiMessageRepository } from './message.repository';
+import {
+  nextRuntimeThreadId,
+  runtimeIdForConversation,
+  shouldResumeRuntimeThread,
+} from './conversation-runtime';
+import { claimConversationStream } from './conversation-stream';
 import {
   cancelStream,
   emitStream,
@@ -121,11 +129,16 @@ export class ConversationService {
     return list.map(toConversationVo);
   }
 
-  async createBlank(title?: string, purpose?: 'chat' | 'capture'): Promise<ConversationVo> {
+  async createBlank(title?: string, purpose?: 'chat' | 'capture', runtimeId?: string): Promise<ConversationVo> {
+    const requested = runtimeId?.trim();
+    if (requested && !agentDef(requested)) {
+      throw AiPlatformError.agentUnavailable('未知编码 Agent');
+    }
     const entity = new AiConversation();
     entity.title = (title || DEFAULT_TITLE).trim() || DEFAULT_TITLE;
     entity.pinned = false;
     entity.purpose = purpose || 'chat';
+    entity.runtimeId = runtimeIdForConversation(requested, readRuntimeId());
     const saved = await this.conversationRepository.create(entity);
     return toConversationVo(saved);
   }
@@ -151,6 +164,7 @@ export class ConversationService {
     entity.refType = type as 'goal' | 'task';
     entity.refId = id;
     entity.pinned = false;
+    entity.runtimeId = runtimeIdForConversation(undefined, readRuntimeId());
     const saved = await this.conversationRepository.create(entity);
     return { conversation: toConversationVo(saved), created: true };
   }
@@ -189,9 +203,11 @@ export class ConversationService {
       throw AiPlatformError.agentUnavailable('未知编码 Agent');
     }
     const conversation = await this.conversationRepository.find(conversationId);
-    if (conversation.runtimeId !== runtimeId) {
-      conversation.runtimeThreadId = null;
-    }
+    conversation.runtimeThreadId = nextRuntimeThreadId(
+      conversation.runtimeId,
+      runtimeId,
+      conversation.runtimeThreadId
+    );
     conversation.runtimeId = runtimeId;
     conversation.updatedAt = new Date();
     const saved = await this.conversationRepository.update(conversation);
@@ -214,47 +230,57 @@ export class ConversationService {
       throw AiPlatformError.internal('消息内容不能为空');
     }
 
-    runtimeService.resolveForSend();
-
     const conversation = await this.conversationRepository.find(conversationId);
-    const user = new AiMessage();
-    user.conversationId = conversationId;
-    user.role = AiMessageRole.USER;
-    const userPart: AiTextPartVo = { type: 'text', text: trimmed };
-    if (entityLinks?.length) {
-      userPart.entityLinks = entityLinks;
-    }
-    user.parts = [userPart];
-    const savedUser = await this.messageRepository.create(user);
-
-    const assistant = new AiMessage();
-    assistant.conversationId = conversationId;
-    assistant.role = AiMessageRole.ASSISTANT;
-    assistant.parts = [{ type: 'text', text: '' }];
-    const savedAssistant = await this.messageRepository.create(assistant);
-
-    conversation.updatedAt = new Date();
-    await this.conversationRepository.update(conversation);
-
+    await runtimeService.resolveForSend(runtimeIdForConversation(conversation.runtimeId, readRuntimeId()));
     const streamId = randomUUID();
-    const signal = registerStreamAbort(streamId);
+    const claimed = claimConversationStream(conversationId, streamId);
+    if (claimed.ok === false) {
+      throw AiPlatformError.internal(claimed.message);
+    }
+    bindStreamToCurrentTrace(streamId, conversationId);
 
-    void this.dispatchOutboundMessage({
-      streamId,
-      conversationId,
-      assistantId: savedAssistant.id,
-      signal,
-    });
+    try {
+      const user = new AiMessage();
+      user.conversationId = conversationId;
+      user.role = AiMessageRole.USER;
+      const userPart: AiTextPartVo = { type: 'text', text: trimmed };
+      if (entityLinks?.length) {
+        userPart.entityLinks = entityLinks;
+      }
+      user.parts = [userPart];
+      const savedUser = await this.messageRepository.create(user);
 
-    return {
-      user: toMessageVo(savedUser),
-      assistant: toMessageVo(savedAssistant),
-      streamId,
-    };
+      const assistant = new AiMessage();
+      assistant.conversationId = conversationId;
+      assistant.role = AiMessageRole.ASSISTANT;
+      assistant.parts = [{ type: 'text', text: '' }];
+      const savedAssistant = await this.messageRepository.create(assistant);
+
+      conversation.updatedAt = new Date();
+      await this.conversationRepository.update(conversation);
+
+      const signal = registerStreamAbort(streamId);
+
+      void this.dispatchOutboundMessage({
+        streamId,
+        conversationId,
+        assistantId: savedAssistant.id,
+        signal,
+      });
+
+      return {
+        user: toMessageVo(savedUser),
+        assistant: toMessageVo(savedAssistant),
+        streamId,
+      };
+    } catch (error) {
+      finishStream(streamId);
+      throw error;
+    }
   }
 
   cancelStream(streamId: string): { ok: true } {
-    killChildProcess(streamId);
+    void killChildProcess(streamId);
     cancelStream(streamId);
     return { ok: true };
   }
@@ -329,15 +355,20 @@ export class ConversationService {
         return vo;
       };
 
-      const selected = runtimeService.resolveForSend();
-      const resume =
-        conversation.runtimeId === selected.id && Boolean(conversation.runtimeThreadId?.trim());
+      const preferred = runtimeIdForConversation(conversation.runtimeId, readRuntimeId());
+      const selected = await runtimeService.resolveForSend(preferred);
+      const resume = shouldResumeRuntimeThread(
+        conversation.runtimeId,
+        conversation.runtimeThreadId,
+        selected.id
+      );
       const result = await runtimeService.runChat({
         streamId,
         conversationId,
         assistantId,
         prompt: buildRuntimePrompt(withoutPlaceholder, resume, latestUserText),
         resumeThreadId: resume ? conversation.runtimeThreadId || undefined : undefined,
+        preferredRuntimeId: preferred,
         signal,
         persistParts,
       });
@@ -347,7 +378,7 @@ export class ConversationService {
       if (result.threadId) latest.runtimeThreadId = result.threadId;
       latest.updatedAt = new Date();
       await this.conversationRepository.update(latest);
-      emitStream({ streamId, event: 'done', message: result.message });
+      emitStream({ streamId, event: 'done', message: result.message, stopped: signal.aborted });
     } catch (error) {
       const code =
         error instanceof AiPlatformError
@@ -366,7 +397,7 @@ export class ConversationService {
       emitStream({ streamId, event: 'error', code, messageText });
     } finally {
       finishStream(streamId);
-      killChildProcess(streamId);
+      await killChildProcess(streamId);
     }
   }
 }

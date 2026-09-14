@@ -14,7 +14,6 @@ import { message } from '@sue/design-web-react';
 import type {
   AiChatStreamEventVo,
   AiEntityLinkVo,
-  AiTextPartVo,
   AiWorkspacePartVo,
   ConversationVo,
   MessageVo,
@@ -25,20 +24,28 @@ import { AiService } from '@true-north/web-service';
 import { useWorkbench } from '../workbench';
 import type { WorkbenchToolRegistry } from '../workbench/types';
 import type { AiEntityRecord, AiEntitySource } from './entity-source';
+import { resolveAgentId } from './agent-selection';
+import {
+  applyDeltaToMessages,
+  applyFetchedMessages,
+  applyMessageToList,
+  enqueuePendingStreamEvent,
+  findStreamByConversation,
+  findStreamById,
+  markStreamSuppressError,
+  materializeBeginStream,
+  patchConversationMessages,
+  removeStream,
+  streamingConversationIds,
+  type PendingStreamBuffers,
+  type StreamRegistry,
+} from './stream-state';
 import type { AiDraft, SessionValue, ComposerInputRef } from './types';
 
 const EMPTY_DRAFT: AiDraft = { text: '', links: [] };
 
 function isAiPath(pathname: string) {
   return pathname === '/ai' || pathname.startsWith('/ai/');
-}
-
-function resolveAgentId(agents: RuntimeAgentVo[], savedId: string | null): string {
-  const saved = savedId ? agents.find((item) => item.id === savedId) : undefined;
-  if (saved?.available) return saved.id;
-  const firstAvailable = agents.find((item) => item.available);
-  if (firstAvailable) return firstAvailable.id;
-  return savedId || agents[0]?.id || '';
 }
 
 const AiSessionContext = createContext<SessionValue | null>(null);
@@ -59,73 +66,6 @@ function collectEntityRefs(messages: MessageVo[]): AiEntityLinkVo[] {
     }
   }
   return [...map.values()];
-}
-
-function appendDelta(item: MessageVo, delta: string): MessageVo {
-  const parts = [...(item.parts || [])];
-  const last = parts[parts.length - 1];
-  if (last && last.type === 'text') {
-    parts[parts.length - 1] = { ...last, text: `${last.text || ''}${delta}` };
-  } else {
-    parts.push({ type: 'text', text: delta });
-  }
-  return { ...item, parts };
-}
-
-function concatTextParts(parts: MessageVo['parts']): string {
-  return parts
-    .filter((part): part is AiTextPartVo => part.type === 'text')
-    .map((part) => part.text || '')
-    .join('');
-}
-
-function collectLinks(parts: MessageVo['parts']): AiEntityLinkVo[] {
-  const links: AiEntityLinkVo[] = [];
-  for (const part of parts) {
-    if (part.type === 'text') {
-      links.push(...(part.entityLinks || []));
-    }
-  }
-  return links;
-}
-
-function mergeAssistantMessage(local: MessageVo, incoming: MessageVo): MessageVo {
-  const localParts = local.parts || [];
-  const incomingParts = incoming.parts || [];
-  const localText = concatTextParts(localParts);
-  const incomingText = concatTextParts(incomingParts);
-  const localLinks = collectLinks(localParts);
-  const incomingLinks = collectLinks(incomingParts);
-
-  let text = incomingText;
-  let entityLinks = incomingLinks;
-  if (localText.startsWith(incomingText) || incomingText.startsWith(localText)) {
-    if (localText.length >= incomingText.length) {
-      text = localText;
-      entityLinks = localLinks;
-    }
-  }
-
-  const textPart: AiTextPartVo = entityLinks.length
-    ? { type: 'text', text, entityLinks }
-    : { type: 'text', text };
-  const parts: MessageVo['parts'] = [];
-  let insertedText = false;
-  for (const part of incomingParts) {
-    if (part.type === 'text') {
-      if (!insertedText) {
-        parts.push(textPart);
-        insertedText = true;
-      }
-    } else {
-      parts.push(part);
-    }
-  }
-  if (!insertedText && text) {
-    parts.unshift(textPart);
-  }
-
-  return { ...incoming, parts };
 }
 
 function linksInText(text: string, links: AiEntityLinkVo[]): AiEntityLinkVo[] {
@@ -189,33 +129,65 @@ export function AiSessionProvider({
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<ConversationVo[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [activeMessages, setActiveMessages] = useState<MessageVo[]>([]);
+  const [messagesByConversation, setMessagesByConversation] = useState<Record<string, MessageVo[]>>(
+    {}
+  );
   const [draft, setDraftState] = useState<AiDraft>(EMPTY_DRAFT);
-  const [streaming, setStreaming] = useState(false);
+  const [streamRegistry, setStreamRegistry] = useState<StreamRegistry>({});
   const [streamError, setStreamError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [entities, setEntities] = useState<AiEntityRecord[]>([]);
   const [codingAgents, setCodingAgents] = useState<RuntimeAgentVo[]>([]);
+  const [defaultAgentId, setDefaultAgentId] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState('');
-  const [pendingThreadReset, setPendingThreadReset] = useState(false);
-  const streamIdRef = useRef<string | null>(null);
-  const streamingConversationIdRef = useRef<string | null>(null);
-  const suppressStreamErrorRef = useRef(false);
+  const [pendingThreadResetById, setPendingThreadResetById] = useState<Record<string, boolean>>({});
   const composerInputRef = useRef<ComposerInputRef>(null);
-  const autoOpenOnDoneRef = useRef(false);
   const openToolTabRef = useRef(openToolTab);
   openToolTabRef.current = openToolTab;
-  const assistantIdRef = useRef<string | null>(null);
-  const [streamingAssistantId, setStreamingAssistantId] = useState<string | null>(null);
+  const toolsRef = useRef(tools);
+  toolsRef.current = tools;
   const conversationIdRef = useRef<string | null>(null);
   const creatingConversationRef = useRef(false);
+  const streamRegistryRef = useRef(streamRegistry);
+  streamRegistryRef.current = streamRegistry;
+  const messagesCacheRef = useRef(messagesByConversation);
+  messagesCacheRef.current = messagesByConversation;
+  const pendingStreamEventsRef = useRef<PendingStreamBuffers>({});
   conversationIdRef.current = activeConversationId;
+
+  const commitStreamRegistry = useCallback(
+    (updater: (registry: StreamRegistry) => StreamRegistry) => {
+      setStreamRegistry((registry) => {
+        const next = updater(registry);
+        streamRegistryRef.current = next;
+        return next;
+      });
+    },
+    []
+  );
+
+  const commitMessages = useCallback(
+    (updater: (cache: Record<string, MessageVo[]>) => Record<string, MessageVo[]>) => {
+      setMessagesByConversation((cache) => {
+        const next = updater(cache);
+        messagesCacheRef.current = next;
+        return next;
+      });
+    },
+    []
+  );
 
   const activeConversation = conversations.find((item) => item.id === activeConversationId);
   const selectedAgent = codingAgents.find((item) => item.id === selectedAgentId);
   const canSend = Boolean(selectedAgent?.available);
+  const activeStream = findStreamByConversation(streamRegistry, activeConversationId);
+  const streaming = Boolean(activeStream);
+  const streamingAssistantId = activeStream?.assistantId ?? null;
+  const activeMessages = activeConversationId
+    ? messagesByConversation[activeConversationId] || []
+    : [];
   const threadWillReset = Boolean(
-    pendingThreadReset ||
+    (activeConversationId && pendingThreadResetById[activeConversationId]) ||
       (activeConversation?.runtimeId && activeConversation.runtimeId !== selectedAgentId)
   );
 
@@ -272,11 +244,74 @@ export function AiSessionProvider({
     const result = await AiService.listMessages(conversationId);
     if (result.ok === false) {
       message.error(result.message);
-      setActiveMessages([]);
       return;
     }
-    setActiveMessages(result.data);
-  }, []);
+    commitMessages((cache) =>
+      applyFetchedMessages(
+        cache,
+        conversationId,
+        result.data,
+        Boolean(findStreamByConversation(streamRegistryRef.current, conversationId))
+      )
+    );
+  }, [commitMessages]);
+
+  const beginStream = useCallback(
+    (input: {
+      conversationId: string;
+      streamId: string;
+      user: MessageVo;
+      assistant: MessageVo;
+      autoOpenOnDone: boolean;
+    }) => {
+      const started = materializeBeginStream({
+        cache: messagesCacheRef.current,
+        registry: streamRegistryRef.current,
+        pending: pendingStreamEventsRef.current,
+        conversationId: input.conversationId,
+        streamId: input.streamId,
+        user: input.user,
+        assistant: input.assistant,
+        autoOpenOnDone: input.autoOpenOnDone,
+      });
+      pendingStreamEventsRef.current = started.pending;
+      streamRegistryRef.current = started.registry;
+      messagesCacheRef.current = started.cache;
+      setStreamRegistry(started.registry);
+      setMessagesByConversation(started.cache);
+
+      if (started.terminal?.event === 'done') {
+        setPendingThreadResetById((prev) => {
+          if (!prev[input.conversationId]) return prev;
+          const next = { ...prev };
+          delete next[input.conversationId];
+          return next;
+        });
+        if (shouldAutoOpenWorkspace(started.terminal.message, input.autoOpenOnDone, toolsRef.current)) {
+          const part = started.terminal.message.parts.find(
+            (entry): entry is AiWorkspacePartVo => entry.type === 'workspace'
+          );
+          if (part) {
+            void openToolTabRef.current({
+              conversationId: started.terminal.message.conversationId,
+              messageId: started.terminal.message.id,
+              workspaceKey: part.workspaceKey,
+              title: toolTabTitle(part, toolsRef.current),
+              payload: part.payload,
+            });
+          }
+        }
+        void refreshConversations(conversationIdRef.current);
+      } else if (started.terminal?.event === 'error') {
+        if (conversationIdRef.current === input.conversationId) {
+          setStreamError(started.terminal.messageText);
+        }
+        message.error(started.terminal.messageText);
+        void loadMessages(input.conversationId);
+      }
+    },
+    [loadMessages, refreshConversations]
+  );
 
   const loadMeta = useCallback(async () => {
     const [entityLists, agentsResult, selectionResult] = await Promise.all([
@@ -288,7 +323,7 @@ export function AiSessionProvider({
     const agents = agentsResult.ok === false ? [] : agentsResult.data;
     setCodingAgents(agents);
     const savedId = selectionResult.ok === false ? null : selectionResult.data.runtimeId;
-    setSelectedAgentId(resolveAgentId(agents, savedId));
+    setDefaultAgentId(resolveAgentId(agents, savedId));
   }, [entitySources]);
 
   useEffect(() => {
@@ -306,13 +341,32 @@ export function AiSessionProvider({
   }, [loadMeta, refreshConversations]);
 
   useEffect(() => {
-    if (!activeConversationId) {
-      setActiveMessages([]);
-      return;
-    }
-    if (streamIdRef.current) return;
+    if (!onAiPage) return;
+    void loadMeta();
+  }, [loadMeta, onAiPage]);
+
+  useEffect(() => {
+    if (!activeConversationId) return;
+    if (creatingConversationRef.current) return;
+    if (findStreamByConversation(streamRegistryRef.current, activeConversationId)) return;
     void loadMessages(activeConversationId);
   }, [activeConversationId, loadMessages]);
+
+  useEffect(() => {
+    if (creatingConversationRef.current) return;
+    if (!codingAgents.length) return;
+    if (!activeConversationId) return;
+    const conversation = conversations.find((item) => item.id === activeConversationId);
+    if (!conversation) return;
+    setSelectedAgentId(resolveAgentId(codingAgents, conversation.runtimeId || defaultAgentId));
+  }, [activeConversationId, conversations, codingAgents, defaultAgentId]);
+
+  useEffect(() => {
+    if (creatingConversationRef.current) return;
+    if (activeConversationId) return;
+    if (!codingAgents.length) return;
+    setSelectedAgentId(resolveAgentId(codingAgents, defaultAgentId));
+  }, [activeConversationId, codingAgents, defaultAgentId]);
 
   const attemptedEntityKeysRef = useRef(new Set<string>());
 
@@ -336,7 +390,9 @@ export function AiSessionProvider({
         const found = await source.find(ref.id);
         if (!cancelled && found) {
           setEntities((items) =>
-            items.some((item) => item.type === found.type && item.id === found.id) ? items : [...items, found]
+            items.some((item) => item.type === found.type && item.id === found.id)
+              ? items
+              : [...items, found]
           );
         }
       }
@@ -376,22 +432,20 @@ export function AiSessionProvider({
 
         if (bound.data.created) {
           setStreamError(null);
-          setStreaming(true);
-          autoOpenOnDoneRef.current = true;
           const result = await AiService.startMessageStream(bound.data.conversation.id, {
             text: `请帮我拆解 @${link.label}`,
             entityLinks: [link],
           });
           if (result.ok === false) {
-            setStreaming(false);
-            setStreamingAssistantId(null);
             message.error(result.message);
-          } else if (!cancelled) {
-            streamIdRef.current = result.data.streamId;
-            streamingConversationIdRef.current = bound.data.conversation.id;
-            assistantIdRef.current = result.data.assistant.id;
-            setStreamingAssistantId(result.data.assistant.id);
-            setActiveMessages([result.data.user, result.data.assistant]);
+          } else {
+            beginStream({
+              conversationId: bound.data.conversation.id,
+              streamId: result.data.streamId,
+              user: result.data.user,
+              assistant: result.data.assistant,
+              autoOpenOnDone: true,
+            });
           }
         }
 
@@ -408,7 +462,7 @@ export function AiSessionProvider({
     return () => {
       cancelled = true;
     };
-  }, [entitySources, onAiPage, searchParams, refreshConversations, setSearchParams]);
+  }, [beginStream, entitySources, onAiPage, searchParams, refreshConversations, setSearchParams]);
 
   useEffect(() => {
     if (!onAiPage) return;
@@ -420,7 +474,7 @@ export function AiSessionProvider({
       }
       return;
     }
-    if (creatingConversationRef.current || streamIdRef.current) return;
+    if (creatingConversationRef.current) return;
     if (activeConversationId) {
       setActiveConversationId(null);
     }
@@ -428,94 +482,103 @@ export function AiSessionProvider({
 
   useEffect(() => {
     const unsubscribe = AiService.subscribeChatStream((event: AiChatStreamEventVo) => {
-      if (!streamIdRef.current || event.streamId !== streamIdRef.current) return;
+      const stream = findStreamById(streamRegistryRef.current, event.streamId);
+      if (!stream) {
+        if (event.event === 'message' || event.event === 'done') {
+          commitMessages((cache) =>
+            patchConversationMessages(cache, event.message.conversationId, (msgs) =>
+              applyMessageToList(msgs, event.message)
+            )
+          );
+        }
+        pendingStreamEventsRef.current = enqueuePendingStreamEvent(
+          pendingStreamEventsRef.current,
+          event
+        );
+        return;
+      }
 
       if (event.event === 'delta') {
-        const assistantId = assistantIdRef.current;
-        if (!assistantId) return;
-        setActiveMessages((items) =>
-          items.map((item) => (item.id === assistantId ? appendDelta(item, event.delta) : item))
+        commitMessages((cache) =>
+          patchConversationMessages(cache, stream.conversationId, (msgs) =>
+            applyDeltaToMessages(msgs, stream.assistantId, event.delta)
+          )
         );
         return;
       }
 
       if (event.event === 'message') {
-        setActiveMessages((items) =>
-          items.map((item) =>
-            item.id === event.message.id ? mergeAssistantMessage(item, event.message) : item
+        commitMessages((cache) =>
+          patchConversationMessages(cache, stream.conversationId, (msgs) =>
+            applyMessageToList(msgs, event.message)
           )
         );
         return;
       }
 
       if (event.event === 'done') {
-        setActiveMessages((items) =>
-          items.map((item) =>
-            item.id === event.message.id ? mergeAssistantMessage(item, event.message) : item
+        commitMessages((cache) =>
+          patchConversationMessages(cache, stream.conversationId, (msgs) =>
+            applyMessageToList(msgs, event.message)
           )
         );
-        const forceOpen = autoOpenOnDoneRef.current;
-        autoOpenOnDoneRef.current = false;
-        if (shouldAutoOpenWorkspace(event.message, forceOpen, tools)) {
-          const part = event.message.parts.find((entry): entry is AiWorkspacePartVo => entry.type === 'workspace');
+        commitStreamRegistry((registry) => removeStream(registry, event.streamId));
+        setPendingThreadResetById((prev) => {
+          if (!prev[stream.conversationId]) return prev;
+          const next = { ...prev };
+          delete next[stream.conversationId];
+          return next;
+        });
+        if (shouldAutoOpenWorkspace(event.message, stream.autoOpenOnDone, toolsRef.current)) {
+          const part = event.message.parts.find(
+            (entry): entry is AiWorkspacePartVo => entry.type === 'workspace'
+          );
           if (part) {
             void openToolTabRef.current({
               conversationId: event.message.conversationId,
               messageId: event.message.id,
               workspaceKey: part.workspaceKey,
-              title: toolTabTitle(part, tools),
+              title: toolTabTitle(part, toolsRef.current),
               payload: part.payload,
             });
           }
         }
-        streamIdRef.current = null;
-        streamingConversationIdRef.current = null;
-        assistantIdRef.current = null;
-        setStreamingAssistantId(null);
-        setStreaming(false);
-        setPendingThreadReset(false);
         void refreshConversations(conversationIdRef.current);
         return;
       }
 
       if (event.event === 'error') {
-        autoOpenOnDoneRef.current = false;
-        const suppressed = suppressStreamErrorRef.current;
-        suppressStreamErrorRef.current = false;
-        streamIdRef.current = null;
-        streamingConversationIdRef.current = null;
-        assistantIdRef.current = null;
-        setStreamingAssistantId(null);
-        setStreaming(false);
+        const suppressed = stream.suppressError;
+        commitStreamRegistry((registry) => removeStream(registry, event.streamId));
         if (suppressed) return;
-        setStreamError(event.messageText);
-        message.error(event.messageText);
-        if (conversationIdRef.current) {
-          void loadMessages(conversationIdRef.current);
+        if (conversationIdRef.current === stream.conversationId) {
+          setStreamError(event.messageText);
         }
+        message.error(event.messageText);
+        void loadMessages(stream.conversationId);
       }
     });
     return unsubscribe;
-  }, [loadMessages, refreshConversations, tools]);
+  }, [commitMessages, commitStreamRegistry, loadMessages, refreshConversations]);
 
-  const selectConversation = useCallback((id: string) => {
-    setActiveConversationId(id);
-    setStreamError(null);
-    setPendingThreadReset(false);
-    if (!onAiPage) {
-      navigate(`/ai?conversationId=${encodeURIComponent(id)}`);
-      return;
-    }
-    const next = withoutEntityParams(searchParams, entitySources);
-    next.set('conversationId', id);
-    setSearchParams(next, { replace: true });
-  }, [entitySources, navigate, onAiPage, searchParams, setSearchParams]);
+  const selectConversation = useCallback(
+    (id: string) => {
+      setActiveConversationId(id);
+      setStreamError(null);
+      if (!onAiPage) {
+        navigate(`/ai?conversationId=${encodeURIComponent(id)}`);
+        return;
+      }
+      const next = withoutEntityParams(searchParams, entitySources);
+      next.set('conversationId', id);
+      setSearchParams(next, { replace: true });
+    },
+    [entitySources, navigate, onAiPage, searchParams, setSearchParams]
+  );
 
   const createBlankConversation = useCallback(async () => {
     setActiveConversationId(null);
-    setActiveMessages([]);
     setStreamError(null);
-    setPendingThreadReset(false);
     if (!onAiPage) {
       navigate('/ai');
       return;
@@ -553,24 +616,34 @@ export function AiSessionProvider({
 
   const deleteConversation = useCallback(
     async (id: string) => {
-      const streamId = streamIdRef.current;
-      if (streamingConversationIdRef.current === id && streamId) {
-        suppressStreamErrorRef.current = true;
-        await AiService.cancelMessageStream(streamId);
+      const stream = findStreamByConversation(streamRegistryRef.current, id);
+      if (stream) {
+        commitStreamRegistry((registry) => markStreamSuppressError(registry, stream.streamId));
+        await AiService.cancelMessageStream(stream.streamId);
       }
       const result = await AiService.deleteConversation(id);
       if (result.ok === false) {
-        suppressStreamErrorRef.current = false;
         message.error(result.message);
         return;
       }
+      commitStreamRegistry((registry) => (stream ? removeStream(registry, stream.streamId) : registry));
+      commitMessages((cache) => {
+        if (!(id in cache)) return cache;
+        const next = { ...cache };
+        delete next[id];
+        return next;
+      });
+      setPendingThreadResetById((prev) => {
+        if (!prev[id]) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
       const remaining = conversations.filter((item) => item.id !== id);
       setConversations(remaining);
       if (conversationIdRef.current !== id) return;
       setActiveConversationId(null);
-      setActiveMessages([]);
       setStreamError(null);
-      setPendingThreadReset(false);
       if (onAiPage) {
         const next = withoutEntityParams(searchParams, entitySources);
         next.delete('conversationId');
@@ -578,7 +651,7 @@ export function AiSessionProvider({
         requestAnimationFrame(() => focusComposer());
       }
     },
-    [conversations, entitySources, focusComposer, onAiPage, searchParams, setSearchParams]
+    [commitMessages, commitStreamRegistry, conversations, entitySources, focusComposer, onAiPage, searchParams, setSearchParams]
   );
 
   const selectCodingAgent = useCallback(
@@ -586,54 +659,56 @@ export function AiSessionProvider({
       const next = codingAgents.find((item) => item.id === id);
       if (!next?.available) return;
       const previousRuntimeId = activeConversation?.runtimeId;
-      const selection = await AiService.putRuntimeSelection({ runtimeId: id });
-      if (selection.ok === false) {
-        message.error(selection.message);
+      if (!activeConversationId) {
+        setSelectedAgentId(id);
+        return;
+      }
+      const patched = await AiService.patchConversationRuntime(activeConversationId, {
+        runtimeId: id,
+      });
+      if (patched.ok === false) {
+        message.error(patched.message);
         return;
       }
       setSelectedAgentId(id);
-      if (activeConversationId) {
-        const patched = await AiService.patchConversationRuntime(activeConversationId, { runtimeId: id });
-        if (patched.ok === false) {
-          message.error(patched.message);
-          return;
-        }
-        setConversations((items) =>
-          items.map((item) => (item.id === activeConversationId ? patched.data : item))
-        );
-        if (previousRuntimeId && previousRuntimeId !== id) {
-          setPendingThreadReset(true);
-          message.info(`之后的发送将由「${next.name}」重新开始，不会续跑上一 Agent 的对话线程。`);
-        }
+      setConversations((items) =>
+        items.map((item) => (item.id === activeConversationId ? patched.data : item))
+      );
+      if (previousRuntimeId && previousRuntimeId !== id) {
+        setPendingThreadResetById((prev) => ({ ...prev, [activeConversationId]: true }));
+        message.info(`之后的发送将由「${next.name}」重新开始，不会续跑上一 Agent 的对话线程。`);
       }
     },
     [activeConversation?.runtimeId, activeConversationId, codingAgents]
   );
 
   const cancelStreaming = useCallback(async () => {
-    const streamId = streamIdRef.current;
-    if (!streamId) return;
-    await AiService.cancelMessageStream(streamId);
-  }, []);
+    const stream = findStreamByConversation(streamRegistryRef.current, conversationIdRef.current);
+    if (!stream) return;
+    commitStreamRegistry((registry) => markStreamSuppressError(registry, stream.streamId));
+    await AiService.cancelMessageStream(stream.streamId);
+    commitStreamRegistry((registry) => removeStream(registry, stream.streamId));
+    void loadMessages(stream.conversationId);
+  }, [commitStreamRegistry, loadMessages]);
 
   const sendUserMessage = useCallback(async () => {
     const text = draft.text.trim();
-    if (!text || streaming || !canSend) return;
+    if (!text || !canSend) return;
+    if (findStreamByConversation(streamRegistryRef.current, activeConversationId)) return;
     const entityLinks = linksInText(text, draft.links);
 
     setDraftState(EMPTY_DRAFT);
     setStreamError(null);
-    setStreaming(true);
-    autoOpenOnDoneRef.current = false;
 
     let conversationId = activeConversationId;
     if (!conversationId) {
       creatingConversationRef.current = true;
-      const created = await AiService.createConversation({ title: titleFromFirstMessage(text) });
+      const created = await AiService.createConversation({
+        title: titleFromFirstMessage(text),
+        runtimeId: selectedAgentId || undefined,
+      });
       if (created.ok === false) {
         creatingConversationRef.current = false;
-        setStreaming(false);
-        setStreamingAssistantId(null);
         setDraftState({ text, links: entityLinks });
         message.error(created.message);
         return;
@@ -641,14 +716,6 @@ export function AiSessionProvider({
       conversationId = created.data.id;
       setConversations((items) => [created.data, ...items]);
       setActiveConversationId(conversationId);
-      if (selectedAgentId) {
-        const patched = await AiService.patchConversationRuntime(conversationId, { runtimeId: selectedAgentId });
-        if (patched.ok) {
-          setConversations((items) =>
-            items.map((item) => (item.id === conversationId ? patched.data : item))
-          );
-        }
-      }
       const next = withoutEntityParams(searchParams, entitySources);
       next.set('conversationId', conversationId);
       setSearchParams(next, { replace: true });
@@ -659,27 +726,27 @@ export function AiSessionProvider({
       entityLinks: entityLinks.length ? entityLinks : undefined,
     });
     if (result.ok === false) {
-      setStreaming(false);
-      setStreamingAssistantId(null);
       setDraftState({ text, links: entityLinks });
       message.error(result.message);
       return;
     }
 
-    streamIdRef.current = result.data.streamId;
-    streamingConversationIdRef.current = conversationId;
-    assistantIdRef.current = result.data.assistant.id;
-    setStreamingAssistantId(result.data.assistant.id);
-    setActiveMessages((items) => [...items, result.data.user, result.data.assistant]);
+    beginStream({
+      conversationId,
+      streamId: result.data.streamId,
+      user: result.data.user,
+      assistant: result.data.assistant,
+      autoOpenOnDone: false,
+    });
   }, [
     activeConversationId,
+    beginStream,
     canSend,
     draft,
     entitySources,
     searchParams,
     selectedAgentId,
     setSearchParams,
-    streaming,
   ]);
 
   const openWorkspace = useCallback(
@@ -695,7 +762,7 @@ export function AiSessionProvider({
         payload: part.payload,
       });
     },
-    [activeConversationId, activeMessages, openToolTab, tools],
+    [activeConversationId, activeMessages, openToolTab, tools]
   );
 
   const openEntity = useCallback(
@@ -727,6 +794,7 @@ export function AiSessionProvider({
     focusComposer,
     streaming,
     streamingAssistantId,
+    streamingConversationIds: streamingConversationIds(streamRegistry),
     streamError,
     loading,
     entities,

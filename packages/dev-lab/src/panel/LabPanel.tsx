@@ -219,6 +219,12 @@ function EntryDetail({ entry }: { entry: TraceEntry }) {
           <dd className="labPre">{entry.streamId}</dd>
         </dl>
       ) : null}
+      {entry.conversationId ? (
+        <dl className="labBlock">
+          <dt>conversationId</dt>
+          <dd className="labPre">{entry.conversationId}</dd>
+        </dl>
+      ) : null}
       {entry.kind === 'ipc' ? (
         <>
           <dl className="labBlock">

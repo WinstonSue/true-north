@@ -14,9 +14,11 @@ import type {
   PatchWorkspaceRequestVo,
   PinConversationRequestVo,
   PutRuntimeSelectionRequestVo,
+  PutRuntimeSettingsRequestVo,
   RenameConversationRequestVo,
   RuntimeAgentVo,
   RuntimeSelectionVo,
+  RuntimeSettingsVo,
   StartMessageStreamRequestVo,
   StartMessageStreamResponseVo,
   TaskDecomposeRequestVo,
@@ -54,6 +56,14 @@ export default class AiController {
 
   static async listRuntimeAgents() {
     return request<RuntimeAgentVo[]>({ method: 'get' })(`/ai/runtime/agents`);
+  }
+
+  static async getRuntimeSettings() {
+    return request<RuntimeSettingsVo>({ method: 'get' })(`/ai/runtime/settings`);
+  }
+
+  static async putRuntimeSettings(body: PutRuntimeSettingsRequestVo) {
+    return request<RuntimeSettingsVo>({ method: 'put' })(`/ai/runtime/settings`, body);
   }
 
   static async getRuntimeSelection() {

@@ -14,9 +14,11 @@ import type {
   PatchWorkspaceRequestVo,
   PinConversationRequestVo,
   PutRuntimeSelectionRequestVo,
+  PutRuntimeSettingsRequestVo,
   RenameConversationRequestVo,
   RuntimeAgentVo,
   RuntimeSelectionVo,
+  RuntimeSettingsVo,
   StartMessageStreamRequestVo,
   StartMessageStreamResponseVo,
   TaskDecomposeRequestVo,
@@ -43,13 +45,31 @@ export class AiController {
   @Get('/runtime/agents', { description: '本机编码 Agent 探测列表' })
   async listRuntimeAgents(): Promise<RuntimeAgentVo[]> {
     try {
-      return this.runtime.listAgents();
+      return await this.runtime.listAgents();
     } catch (error) {
       throw toIpcError(error);
     }
   }
 
-  @Get('/runtime/selection', { description: '读取应用级编码 Agent 偏好' })
+  @Get('/runtime/settings', { description: '读取本机编码 Agent 设置与探测状态' })
+  async getRuntimeSettings(): Promise<RuntimeSettingsVo> {
+    try {
+      return await this.runtime.getSettings();
+    } catch (error) {
+      throw toIpcError(error);
+    }
+  }
+
+  @Put('/runtime/settings', { description: '写入本机编码 Agent 设置并重新探测' })
+  async putRuntimeSettings(@Body() body: PutRuntimeSettingsRequestVo): Promise<RuntimeSettingsVo> {
+    try {
+      return await this.runtime.putSettings(body || {});
+    } catch (error) {
+      throw toIpcError(error);
+    }
+  }
+
+  @Get('/runtime/selection', { description: '读取新对话默认编码 Agent' })
   async getRuntimeSelection(): Promise<RuntimeSelectionVo> {
     try {
       return this.runtime.getSelection();
@@ -58,7 +78,7 @@ export class AiController {
     }
   }
 
-  @Put('/runtime/selection', { description: '写入应用级编码 Agent 偏好' })
+  @Put('/runtime/selection', { description: '写入新对话默认编码 Agent' })
   async putRuntimeSelection(@Body() body: PutRuntimeSelectionRequestVo): Promise<RuntimeSelectionVo> {
     try {
       if (!body?.runtimeId?.trim()) throw AiPlatformError.internal('缺少 runtimeId');
@@ -113,7 +133,11 @@ export class AiController {
   @Post('/conversations', { description: '创建空白会话' })
   async createConversation(@Body() body: CreateConversationRequestVo): Promise<ConversationVo> {
     try {
-      return await this.conversations.createBlank(body?.title, body?.purpose === 'capture' ? 'capture' : 'chat');
+      return await this.conversations.createBlank(
+        body?.title,
+        body?.purpose === 'capture' ? 'capture' : 'chat',
+        body?.runtimeId
+      );
     } catch (error) {
       throw toIpcError(error);
     }

@@ -68,6 +68,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@agentclientprotocol/sdk':
+        specifier: ^1.4.0
+        version: 1.4.0(zod@3.25.76)
       '@loadable/component':
         specifier: ^5.13.2
         version: 5.16.7(react@18.3.1)
@@ -716,6 +719,11 @@ importers:
         version: 6.0.3
 
 packages:
+
+  '@agentclientprotocol/sdk@1.4.0':
+    resolution: {integrity: sha512-/eufudw+aFY1LKLolT6yFE6UMmYRl7fMJ/DEONSIyR6wI3slHWITBsANRGqXEY8FRzqUxwh7QEaGiZHcJPVThg==}
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
 
   '@ant-design/colors@7.2.1':
     resolution: {integrity: sha512-lCHDcEzieu4GA3n8ELeZ5VQ8pKQAWcGGLRTQ50aQM2iqPpq2evTxER84jfdPvsPAtEcZ7m44NI45edFMo8oOYQ==}
@@ -7002,6 +7010,10 @@ packages:
         optional: true
 
 snapshots:
+
+  '@agentclientprotocol/sdk@1.4.0(zod@3.25.76)':
+    dependencies:
+      zod: 3.25.76
 
   '@ant-design/colors@7.2.1':
     dependencies:

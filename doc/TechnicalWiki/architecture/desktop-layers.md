@@ -90,15 +90,16 @@ render/pages/
 - Lab（仅 `pnpm dev`）：iframe 加载 `@true-north/dev-lab` 的 `labPageRoute`（`Lab.html` + `Lab.tsx`，只 `bootstrapLabPanel()`）。preload 仅 lab profile 暴露 `labPanel` IPC 桥；iframe 经 `postMessage` 与宿主 `bindLabFrame` 通信
 - DevTools：对 app `webContents` 调用 `openDevTools()` / `toggleDevTools()`，不托管分栏、不改 `appView` bounds
 - 主进程用 `wikiDockPreferred` / `labDockPreferred` 同步菜单与 `window.__devDock` 的 tab / 显隐，不把 Lab 装进独立 `labView`
-- 生产构建不挂 dock、不包装 REST、不采集 SQL / spawn / MCP
+- 生产构建不挂 dock、不包装 REST、不采集 SQL / spawn / MCP / stream
 
-Lab 当前第一个工具是**请求时间线**：一条 IPC 一行，展开可看 params、response、duration 以及子 span（sql / spawn / mcp）。并行的 `/task/list` 各占一行并用 `AsyncLocalStorage` 把 SQL 挂到对应 IPC。AI 的 `startMessageStream` 会在 handler 返回后继续跑 Codex/MCP，后续 span 通过已有 `streamId` 挂回同一行。
+Lab 当前第一个工具是**请求时间线**：一条 IPC 一行，展开可看 params、response、duration 以及子 span（sql / spawn / mcp / stream）。并行的 `/task/list` 各占一行并用 `AsyncLocalStorage` 把 SQL 挂到对应 IPC。AI 的 `startMessageStream` 在 handler 返回前就把 `streamId` 绑到该行；后续 spawn / MCP / 生成事件通过 `streamId` 挂回同一行。生成事件只记次数、字符数、工具调用和终态，不写入用户输入或模型正文。`done` / `error` 才关闭该行，spawn 结束不会提前关掉。
 
 采集器在 `@true-north/dev-lab`（`packages/dev-lab`）：约 200 条环形缓冲，敏感字段按 `password|apiKey|authorization|secret|token` 脱敏。desktop 只留宿主适配：
 
 - REST：`src/main/dev-trace/ipc-hook.ts` 在 `initIpcRouter()` 里、`registerIpcHandlers` 之前包装 `ipcMain.handle('REST')`（`electron-ipc-restful` 无拦截器 API）
 - TypeORM：`src/main/dev-trace/sql-logger.ts` DEV 自定义 `Logger`（`logQuery` / `logQueryError`），忽略 schema/migration
 - Codex `spawnCodex` 与 loopback MCP `tools/call`：一行 `traceExternal`（`@true-north/dev-lab/collector`），不把 prompt 打进时间线
+- AI 生成推送：`emitStream` 记 `stream` span（开始 / 输出次数与字数 / 工具调用 / 完成、停止或失败），`/messages/stream` 的 params 只保留 `textChars` 与 `entityCount`
 
 ## 相关文档
 

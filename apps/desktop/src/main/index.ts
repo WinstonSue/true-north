@@ -14,6 +14,7 @@ import { initIpcRouter } from './ipc-handlers';
 import { bootPluginPlatform, startHostMcp } from '../plugin/host';
 import { setupDatabaseCleanup } from '../service/db/init';
 import { embeddedBrowserHost } from '../service/browser';
+import { bindStreamRenderer } from '../service/ai/conversation/stream-bus';
 import { EMBEDDED_BROWSER_PARTITION } from '@true-north/vo';
 import { labChannel } from '@true-north/dev-lab';
 import { subscribeDevTrace } from '@true-north/dev-lab/collector';
@@ -301,6 +302,9 @@ function createWindow() {
       if (contents && !contents.isDestroyed()) contents.send(channel, payload);
     },
   });
+
+  const streamContents = appContents();
+  if (streamContents) bindStreamRenderer(streamContents);
 
   mainWindow.on('closed', () => {
     embeddedBrowserHost.detach();
