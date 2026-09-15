@@ -4,7 +4,6 @@ import {
   normalizeCaptureSuggestion,
   type ActivityEntityRef,
   type CaptureAdopter,
-  type TodaySectionContribution,
   type TodaySectionSnapshot,
 } from '@true-north/plugin-sdk';
 import { ActivityDomain, ActivitySource } from '@true-north/enum';
@@ -67,6 +66,7 @@ function toLinkVo(entity: ActivityLink): ActivityLinkVo {
     entityId: entity.entityId,
     role: entity.role,
     label: entity.label,
+    uri: entity.uri,
     createdAt: toIso(entity.createdAt),
     updatedAt: toIso(entity.updatedAt),
   };
@@ -86,7 +86,9 @@ function toActivityVo(entity: Activity, links: ActivityLink[]): ActivityVo {
   };
 }
 
-function resolveLinkInput(link: CreateActivityVo['links'][number]): ActivityEntityRef & { role?: string; label?: string } {
+function resolveLinkInput(
+  link: CreateActivityVo['links'][number],
+): ActivityEntityRef & { role?: string; label?: string; uri?: string } {
   if (link.pluginId && link.entityType) {
     return {
       pluginId: link.pluginId,
@@ -94,15 +96,16 @@ function resolveLinkInput(link: CreateActivityVo['links'][number]): ActivityEnti
       entityId: link.entityId,
       role: link.role,
       label: link.label,
+      uri: link.uri,
     };
   }
   const ref = hostRefFromDomain(String(link.domain || 'todo'), link.entityId);
-  return { ...ref, role: link.role, label: link.label };
+  return { ...ref, role: link.role, label: link.label, uri: link.uri };
 }
 
 export class ActivityService {
   private captureAdopters = new Map<string, CaptureAdopter>();
-  private todayCollectors: TodaySectionContribution[] = [];
+  private todayCollectors: Array<{ collect: () => Promise<TodaySectionSnapshot> }> = [];
   private workspaceWriter: {
     patch(messageId: string, payload: Record<string, unknown>, manager?: EntityManager): Promise<void>;
   } | null = null;
@@ -111,7 +114,7 @@ export class ActivityService {
     this.captureAdopters = new Map(adopters.map((adopter) => [adopter.type, adopter]));
   }
 
-  configureToday(collectors: TodaySectionContribution[]) {
+  configureToday(collectors: Array<{ collect: () => Promise<TodaySectionSnapshot> }>) {
     this.todayCollectors = collectors;
   }
 
@@ -150,6 +153,7 @@ export class ActivityService {
               entityId: ref.entityId,
               role: ref.role,
               label: ref.label,
+              uri: ref.uri,
             });
           }),
         )
@@ -235,6 +239,7 @@ export class ActivityService {
         entityId: created.entityId,
         role: created.role,
         label: created.label,
+        uri: created.uri,
         domain: hostDomainFromRef(created) as CreateActivityVo['links'][number]['domain'],
       });
       accepted.set(suggestion.id, { ...suggestion, status: 'accepted' });

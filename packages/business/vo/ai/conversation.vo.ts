@@ -6,6 +6,12 @@ export type AiEntityLinkVo = {
   label: string;
 };
 
+export type PluginResourceAttachmentVo = {
+  uri: string;
+  label?: string;
+  skill?: string;
+};
+
 export type AiTextPartVo = {
   type: 'text';
   text: string;
@@ -54,8 +60,7 @@ export type ConversationVo = {
   createdAt?: string;
   pinned: boolean;
   purpose?: ConversationPurpose;
-  refType?: string;
-  refId?: string;
+  attachments?: PluginResourceAttachmentVo[];
   runtimeId?: string;
 };
 
@@ -83,7 +88,7 @@ export type PinConversationRequestVo = {
 
 export type StartMessageStreamRequestVo = {
   text: string;
-  entityLinks?: AiEntityLinkVo[];
+  attachments?: PluginResourceAttachmentVo[];
 };
 
 export type StartMessageStreamResponseVo = {

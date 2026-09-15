@@ -2,13 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   appendTabOrder,
-  clearPluginViewTargetState,
   isWebTabId,
   needsFallbackWebTab,
   neighborId,
   pluginViewTabId,
   upsertPluginViewTab,
-  withPluginViewTarget,
+  withPluginViewSnapshot,
 } from '../tab-state.ts';
 
 test('plugin view tabs reuse a stable id and focus existing entries', () => {
@@ -24,28 +23,24 @@ test('plugin view tabs reuse a stable id and focus existing entries', () => {
   assert.deepEqual(appendTabOrder(['web-1', id], id), ['web-1', id]);
 });
 
-test('plugin view targets update in place and bump generation', () => {
+test('plugin view snapshots update in place and bump revision', () => {
   const id = pluginViewTabId('growth.goal');
-  const opened = withPluginViewTarget(undefined, { id, title: '目标' }, { type: 'goal', id: 'g1' });
-  assert.deepEqual(opened.target, { type: 'goal', id: 'g1' });
-  assert.equal(opened.targetGeneration, 1);
+  const opened = withPluginViewSnapshot(undefined, { id, title: '目标' }, { id: 'g1' });
+  assert.deepEqual(opened.params, { id: 'g1' });
+  assert.equal(opened.revision, 1);
 
-  const switched = withPluginViewTarget(opened, { id, title: '目标' }, { type: 'goal', id: 'g2' });
-  assert.deepEqual(switched.target, { type: 'goal', id: 'g2' });
-  assert.equal(switched.targetGeneration, 2);
+  const switched = withPluginViewSnapshot(opened, { id, title: '目标' }, { id: 'g2' });
+  assert.deepEqual(switched.params, { id: 'g2' });
+  assert.equal(switched.revision, 2);
 
-  const replayed = withPluginViewTarget(switched, { id, title: '目标' }, { type: 'goal', id: 'g2' });
-  assert.deepEqual(replayed.target, { type: 'goal', id: 'g2' });
-  assert.equal(replayed.targetGeneration, 3);
+  const replayed = withPluginViewSnapshot(switched, { id, title: '目标' }, { id: 'g2' });
+  assert.deepEqual(replayed.params, { id: 'g2' });
+  assert.equal(replayed.revision, 3);
 
-  const preserved = withPluginViewTarget(replayed, { id, title: '目标树' });
+  const preserved = withPluginViewSnapshot(replayed, { id, title: '目标树' });
   assert.equal(preserved.title, '目标树');
-  assert.deepEqual(preserved.target, { type: 'goal', id: 'g2' });
-  assert.equal(preserved.targetGeneration, 3);
-
-  const cleared = clearPluginViewTargetState(preserved);
-  assert.equal(cleared.target, undefined);
-  assert.equal(cleared.targetGeneration, 4);
+  assert.deepEqual(preserved.params, { id: 'g2' });
+  assert.equal(preserved.revision, 3);
   assert.equal(upsertPluginViewTab([replayed], switched).length, 1);
 });
 

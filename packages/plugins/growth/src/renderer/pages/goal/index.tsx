@@ -1,11 +1,12 @@
 'use client';
 
 import { GoalProvider } from './context';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Flex, Tabs } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import { useWorkbenchViewRuntimeOptional } from '@true-north/plugin-sdk/renderer';
+import { usePluginViewState } from '@true-north/plugin-sdk/renderer';
+import { goalViewCodec } from '../../../contract/view-state';
 import GoalMain from './goal-main';
 import GoalAside from './goal-aside';
 import GoalMindMap from '../mind-map';
@@ -30,19 +31,14 @@ const GoalTreeView: React.FC = () => {
 };
 
 export default function Goal() {
-  const viewRuntime = useWorkbenchViewRuntimeOptional();
-  const [activeTab, setActiveTab] = useState('tree');
-
-  useEffect(() => {
-    if (viewRuntime?.target?.type === 'goal') setActiveTab('tree');
-  }, [viewRuntime?.generation, viewRuntime?.target]);
+  const [state, setState] = usePluginViewState(goalViewCodec);
 
   return (
     <GoalProvider>
       <Flex vertical container="full" className={styles.page}>
         <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
+          activeKey={state.tab}
+          onChange={(tab) => setState((prev) => ({ ...prev, tab: tab as typeof prev.tab }))}
           className={styles.tabs}
           tabBarStyle={{ padding: '0 16px' }}
           items={[

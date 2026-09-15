@@ -35,9 +35,9 @@ export const todayListItemSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   href: z.string().optional(),
+  uri: z.string().min(1).optional(),
   overdue: z.boolean().optional(),
   pluginId: z.string().min(1).optional(),
-  entityType: z.string().min(1).optional(),
   actions: z.array(todayListItemActionSchema).optional(),
   meta: z.record(z.unknown()).optional(),
 });
@@ -63,6 +63,12 @@ export const todaySectionSnapshotSchema = z.object({
 });
 
 export type TodaySectionSnapshot = z.infer<typeof todaySectionSnapshotSchema>;
+
+export type TodaySectionValues = {
+  value?: number;
+  items?: TodayListItem[];
+  timer?: TodaySectionSnapshot['timer'];
+};
 
 export function mergeTodaySections(parts: TodaySectionSnapshot[][]): TodaySectionSnapshot[] {
   const merged = parts.flat();

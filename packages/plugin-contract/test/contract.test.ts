@@ -8,105 +8,97 @@ import {
   mergeTodaySections,
   namespacedId,
   pluginPath,
+  ipcRoute,
+  mcpName,
+  pluginResourceUri,
+  parsePluginResourceUri,
   ACTIVITY_TODAY_INVALIDATE_EVENT,
 } from '../src/index.ts';
 
-test('round-trips a serializable v2 manifest', () => {
+test('round-trips a serializable manifest and defaults apiVersion to 0', () => {
   const manifest = definePluginManifest({
     pluginId: 'expense',
-    apiVersion: PLUGIN_API_VERSION,
     version: '0.1.0',
     catalog: { nameKey: 'menu.expense' },
-    hostCapabilities: ['activity', 'storage', 'workbench', 'ipc'],
     contributions: {
-      ipc: { expense: { routePrefix: '/expense' } },
-      workbench: {
-        views: { transaction: { nameKey: 'menu.expense.transaction', order: 10 } },
-      },
+      ipc: { expense: {} },
+      views: { transaction: { nameKey: 'menu.expense.transaction', order: 10, default: true } },
       activity: {
-        captureTypes: { transaction: { type: 'expense.transaction' } },
-        entityTypes: ['transaction'],
+        captureTypes: { transaction: {} },
         today: { spent: { kind: 'metric', titleKey: 'plugins.hub.spent' } },
       },
-      storage: { capability: 'self-managed', entityTypes: ['transaction', 'budget'] },
+      storage: { capability: 'self-managed' },
     },
   });
   const json = JSON.parse(JSON.stringify(manifest));
   const parsed = parsePluginManifest(json);
+  assert.equal(parsed.apiVersion, 0);
+  assert.equal(PLUGIN_API_VERSION, 0);
   assert.deepEqual(parsed.pluginId, 'expense');
   assert.equal(pluginPath('expense'), '/plugins/expense');
   assert.equal(namespacedId('expense', 'transaction'), 'expense.transaction');
-  assert.equal(parsed.contributions.workbench?.views?.transaction?.nameKey, 'menu.expense.transaction');
+  assert.equal(ipcRoute('expense', 'expense'), '/expense/expense');
+  assert.equal(parsed.contributions.views?.transaction?.nameKey, 'menu.expense.transaction');
 });
 
-test('rejects duplicate workbench views across plugins', () => {
+test('rejects duplicate views across plugins', () => {
   const issues = validateManifests([
     definePluginManifest({
       pluginId: 'a',
-      apiVersion: PLUGIN_API_VERSION,
       version: '1',
       catalog: { nameKey: 'a' },
-      contributions: {
-        workbench: { views: { shared: { id: 'shared.view' } } },
-      },
+      contributions: { views: { shared: { nameKey: 'shared' } } },
     }),
     definePluginManifest({
       pluginId: 'b',
-      apiVersion: PLUGIN_API_VERSION,
       version: '1',
       catalog: { nameKey: 'b' },
-      contributions: {
-        workbench: { views: { other: { id: 'shared.view' } } },
-      },
+      contributions: { views: { shared: { nameKey: 'other' } } },
     }),
   ]);
-  assert.equal(issues.some((issue) => issue.code === 'duplicate-view'), true);
+  assert.equal(issues.some((issue) => issue.code === 'duplicate-view'), false);
+  const clash = validateManifests([
+    definePluginManifest({
+      pluginId: 'growth',
+      version: '1',
+      catalog: { nameKey: 'a' },
+      contributions: { views: { todo: { nameKey: 'todo' } } },
+    }),
+    definePluginManifest({
+      pluginId: 'growth-extra',
+      version: '1',
+      catalog: { nameKey: 'b' },
+      contributions: { views: { todo: { nameKey: 'todo' } } },
+    }),
+  ]);
+  assert.equal(clash.some((issue) => issue.code === 'duplicate-view'), false);
 });
 
-test('rejects duplicate routes, tools, and namespaced entity types', () => {
+test('rejects duplicate ipc routes and mcp tools', () => {
   const issues = validateManifests([
     definePluginManifest({
       pluginId: 'a',
-      apiVersion: PLUGIN_API_VERSION,
       version: '1',
       catalog: { nameKey: 'a' },
       contributions: {
-        ipc: { one: { routePrefix: '/dup' } },
-        ai: { tools: { shared: { name: 'shared_tool' } }, entityTypes: ['goal'] },
+        ipc: { one: {} },
+        ai: { mcp: { tools: { shared: {} } } },
       },
     }),
     definePluginManifest({
       pluginId: 'b',
-      apiVersion: PLUGIN_API_VERSION,
       version: '1',
       catalog: { nameKey: 'b' },
       contributions: {
-        ipc: { two: { routePrefix: '/dup' } },
-        ai: { tools: { shared: { name: 'shared_tool' } }, entityTypes: ['goal'] },
+        ipc: { one: {} },
+        ai: { mcp: { tools: { shared: {} } } },
       },
     }),
   ]);
   const codes = new Set(issues.map((issue) => issue.code));
-  assert.equal(codes.has('duplicate-controller'), true);
-  assert.equal(codes.has('duplicate-tool'), true);
-  assert.equal(codes.has('duplicate-entity-type'), false);
-});
-
-test('same plugin may overlap storage, activity, and ai entity types', () => {
-  const issues = validateManifests([
-    definePluginManifest({
-      pluginId: 'growth',
-      apiVersion: PLUGIN_API_VERSION,
-      version: '1',
-      catalog: { nameKey: 'growth' },
-      contributions: {
-        ai: { entityTypes: ['goal'] },
-        activity: { entityTypes: ['goal', 'todo'] },
-        storage: { capability: 'self-managed', entityTypes: ['goal', 'todo'] },
-      },
-    }),
-  ]);
-  assert.equal(issues.some((issue) => issue.code === 'duplicate-entity-type'), false);
+  assert.equal(codes.has('duplicate-controller'), false);
+  assert.equal(ipcRoute('a', 'one') !== ipcRoute('b', 'one'), true);
+  assert.equal(mcpName('a', 'shared') !== mcpName('b', 'shared'), true);
 });
 
 test('merges today sections by order', () => {
@@ -118,30 +110,16 @@ test('merges today sections by order', () => {
   assert.equal(merged[1]?.value, 10);
 });
 
-test('rejects duplicate AI rule ids across plugins', () => {
-  const issues = validateManifests([
-    definePluginManifest({
-      pluginId: 'a',
-      apiVersion: PLUGIN_API_VERSION,
-      version: '1',
-      catalog: { nameKey: 'a' },
-      contributions: {
-        ai: { rules: { one: { id: 'shared.rule' } } },
-      },
-    }),
-    definePluginManifest({
-      pluginId: 'b',
-      apiVersion: PLUGIN_API_VERSION,
-      version: '1',
-      catalog: { nameKey: 'b' },
-      contributions: {
-        ai: { rules: { two: { id: 'shared.rule' } } },
-      },
-    }),
-  ]);
-  assert.equal(issues.some((issue) => issue.code === 'duplicate-rule'), true);
-});
-
 test('today invalidate event is a stable activity channel', () => {
   assert.equal(ACTIVITY_TODAY_INVALIDATE_EVENT, 'activity.today.invalidate');
+});
+
+test('resource URIs stay opaque and round-trip local ids', () => {
+  assert.equal(pluginResourceUri('growth', 'goals', 'g1'), 'tn://growth/goals/g1');
+  assert.deepEqual(parsePluginResourceUri('tn://growth/goals/g1'), {
+    pluginId: 'growth',
+    collection: 'goals',
+    id: 'g1',
+  });
+  assert.equal(parsePluginResourceUri('/plugins/growth?view=goal'), null);
 });

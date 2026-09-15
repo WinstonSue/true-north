@@ -6,51 +6,43 @@ document_meta:
   last_updated: '2026-09-15'
 ```
 
-The plugin kernel is a serializable v2 contract plus instance-owned hosts. Built-in plugins load in-process today; a future isolated loader can return RPC/iframe proxies against the same contract. Manifests never contain functions.
+The plugin kernel is a serializable API 0 contract plus instance-owned hosts. Built-in plugins load in-process today. Manifests never contain functions.
 
 ## Contract
 
-- `@true-north/plugin-contract` is the JSON-safe schema: plugin id, catalog metadata, requested host capabilities, and contribution maps keyed by local id.
-- API version is `2.0`. Hosts namespace contribution ids from `pluginId` + local id (`contributionKey` / `namespacedId`).
-- Entity refs are `{ pluginId, entityType, entityId }`. Legacy domain mapping stays in the desktop host only.
-- Today snapshots are generic `metric` | `list` | `timer` sections. New plugins do not add SDK fields.
-- Storage capability is `self-managed`. The contract does not depend on React, TypeORM, Electron, `@true-north/vo`, or business enums.
+- `@true-north/plugin-contract` is the JSON-safe schema. Each plugin keeps a single `src/manifest.ts` as the static SSOT; `package.json` only holds npm metadata and exports.
+- `PLUGIN_API_VERSION` is the number `0`. Schema default-fills `apiVersion`; plugin manifests do not repeat it.
+- Contribution map keys are local ids. Host helpers derive global ids, IPC roots, MCP names, and resource URIs: `contributionKey`, `ipcRoute`, `mcpName`, `pluginResourceUri`.
+- Manifest contributions cover `ipc`, `views`, `workbench`, `activity`, `storage`, `shell`, and `ai.skills` / `ai.mcp`. There are no `hostCapabilities`, storage entity catalogs, or AI entity types.
+- Plugin resources are opaque `tn://{pluginId}/{collection}/{id}` URIs. The host stores and forwards URIs; it does not parse goal/task/id.
 
 ## SDK
 
 - `@true-north/plugin-sdk` re-exports the contract plus `defineMainImplementation` / `defineRendererImplementation`.
-- Author surfaces: `./main`, `./renderer`, optional `./sqlite`. The root barrel has no bind helpers, React hooks, TypeORM handles, or first-party plugin ids.
-- Runtime modules bind implementations to manifest keys. `reconcileMain` / `reconcileRenderer` fail boot on missing, extra, or drifted keys (including controller `routePrefix`, e.g. `/trackTime` vs `/track-time`, workbench view ids, and `ai.rules`).
-- AI plugins declare executable agent rules in `contributions.ai.rules`. The host injects those rules into `AGENTS.md`. ProductWiki rules stay product narrative and are not the runtime source. Generation reads current bounds from tools; adopt re-validates; domain services remain the last gate.
+- Implementations return local-key maps (`ipc.todo.controller`, `views.todo.load`, `ai.mcp.tools.searchGoals.execute`). `materializeMain` / `materializeRenderer` merge static metadata with behavior and fail boot on missing or extra keys.
+- Renderer IPC is prefixed with `/{pluginId}` so existing relative controller paths keep working.
+- Shared view runtime: `PluginViewSnapshot = { viewId, params }`, `usePluginViewState(codec)`, plus page and Workbench adapters. Features do not read React Router.
+
+## AI
+
+- The host owns one Agent session, one aggregated `true_north` MCP, stream, audit, and cancel.
+- Plugins provide Agent Skills directories (`skills/{id}/SKILL.md`) and MCP tools/resources/prompts. The host namespaces public tool names (`growth.searchGoals`) and mounts skill directories into the conversation workspace.
+- `AGENTS.md` keeps host constraints and a skill index; it does not paste skill bodies. Domain rules live in `SKILL.md` and plugin tools.
+- Plugin-initiated AI uses `host.ai.start` with a resource URI, optional skill, and initial message. Conversations store generic attachments, not `refType/refId`.
 
 ## Host
 
-- `apps/desktop/src/plugin/desktop-plugins.ts` is the only Node-safe first-party registry of manifests, package ids, and wiki roots.
-- Main and renderer each keep a typed loader map (`main-loaders.ts`, `renderer-loaders.ts`) that must be an exact `Record<FirstPartyPluginId, loader>`.
-- `DesktopPluginHost` owns catalog, scoped storage, AI registries, Activity, IPC routes, activation, and dispose. Context is built only from requested capabilities.
-- Runtime loads into a temporary registry, activates in dependency order, reconciles, then publishes IPC/AI/Activity. Failure rolls back in reverse. Main-process boot failure exits before IPC/windows. Quit awaits a single `host.dispose()`.
-- Renderer boot returns a `RendererPlatform` instance provided through React. Boot failure shows an error page. `PluginStage` wraps each plugin in an ErrorBoundary; unknown plugins render 404.
+- `apps/desktop/src/plugin/desktop-plugins.ts` imports `@true-north/plugin-*/manifest`.
+- `DesktopPluginHost` materializes main handles, registers IPC by derived route prefixes, and publishes a `PluginAiRegistry` plus `AgentToolRegistry`.
+- Renderer boot materializes views, workspaces, actions, shell slots, scopes, and `openResource`. There is no plugin-root `load` or entity presenter catalog.
+- `PluginViewFrame` mounts the same Feature on the plugin page and in Workbench. The page adapter writes `?view={localView}&...params`; Workbench stores the same snapshot on a single tab per view and bumps `revision`.
 
 ## First-party plugins
 
-`growth`, `expense`, `purchase`, and `library` are independent packages. Each keeps a single `src/plugin.ts` manifest. AI session, Workbench, and Activity are host platforms, not plugins.
+`growth`, `expense`, `purchase`, and `library` are independent packages with `./manifest`, `./contract`, `./main`, `./renderer`, and `./wiki` exports. AI session, Workbench, and Activity remain host platforms.
 
-Shared UI lives in `@true-north/plugin-ui`. Plugins must not import `@/`, desktop source, or central domain modules from `@true-north/web-service`.
-
-## Storage
-
-Each plugin receives an exclusive directory (`plugin-data/{pluginId}` in DEV, `{userData}/plugins/{pluginId}` in production) and exposes processed records through `PluginQueryPort`. First-party plugins open their own SQLite in that space. Host DataSource keeps User, AI, and Activity.
-
-## Pages and shell
-
-User entry is `/plugins`. Sidebar is AI + Plugins. Today/Activity aggregation is a host section on the plugin center. Compatibility redirects remain for `/plugins/activity`, `/activity/*`, and former domain paths.
-
-Each first-party plugin exposes one aggregate `load` page at `/plugins/{id}` and one or more reusable `workbench.views` (stable ids such as `growth.todo`). The aggregate page only composes those views. Workbench opens the same views as `plugin-view` tabs via the new-tab picker or session entity links (`AiEntitySource.workbenchViewId` plus a tab target); AI workspaces remain `workbench.workspaces`.
-
-Host commands include `host.workbench.open` and `host.browser.open`. Growth registers `growth.open-focus` as a renderer host action.
-
-Today sections are registered collectors (`activity.today` in the manifest, `todaySections` at activate). Plugins push `activity.invalidateToday()` when their data changes so the host re-collects and the sidebar bell refreshes without waiting for the popover to reopen.
+Growth exposes todo/task/habit/goal views, goal/task decompose skills, and namespaced MCP tools/resources. Expense uses a plugin `ViewScope` so its three views share one provider on the plugin page and get isolated scopes in Workbench.
 
 ## Deferred
 
-Disk discovery/install/update, package signatures, permission UI, utility-process/iframe sandbox, and hot unload. This kernel's serializable manifest, capability-scoped context, and loader maps are the seams for that work.
+Disk discovery/install/update, package signatures, permission UI, utility-process/iframe sandbox, per-plugin MCP servers, and SDK `./host` packaging.

@@ -1,18 +1,19 @@
-import type { ActivityPort, PluginMainContext } from '@true-north/plugin-sdk';
+import type { ActivityPort, AiCachePort, PluginMainContext } from '@true-north/plugin-sdk';
+import { pluginResourceUri } from '@true-north/plugin-contract';
 
 const PLUGIN_ID = 'growth';
 
 let activityPort: ActivityPort | null = null;
-let aiContext: PluginMainContext['ai'] | null = null;
+let cachePort: AiCachePort | null = null;
 
 export function bindGrowthContext(ctx: PluginMainContext) {
   activityPort = ctx.activity;
-  aiContext = ctx.ai;
+  cachePort = ctx.cache;
 }
 
-export function growthAi(): PluginMainContext['ai'] {
-  if (!aiContext) throw new Error('Growth AI context is not bound');
-  return aiContext;
+export function growthCache(): AiCachePort {
+  if (!cachePort) throw new Error('Growth cache is not bound');
+  return cachePort;
 }
 
 export async function recordGrowthActivity(input: {
@@ -34,6 +35,7 @@ export async function recordGrowthActivity(input: {
           pluginId: PLUGIN_ID,
           entityType: input.entityType,
           entityId: input.entityId,
+          uri: pluginResourceUri(PLUGIN_ID, `${input.entityType}s`, input.entityId),
           role: input.role,
           label: input.label,
         },
@@ -46,7 +48,12 @@ export async function recordGrowthActivity(input: {
 
 export async function unlinkGrowthEntity(entityType: string, entityId: string) {
   try {
-    await activityPort?.unlink({ pluginId: PLUGIN_ID, entityType, entityId });
+    await activityPort?.unlink({
+      pluginId: PLUGIN_ID,
+      entityType,
+      entityId,
+      uri: pluginResourceUri(PLUGIN_ID, `${entityType}s`, entityId),
+    });
   } catch {
     // activity card is supplementary
   }

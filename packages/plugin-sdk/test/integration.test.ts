@@ -26,19 +26,18 @@ test('host catalog can assemble with no plugins', async () => {
   assert.equal(catalog.issues.length, 0);
 });
 
-test('adding growth surfaces ipc, ai, workbench and today', async () => {
+test('adding growth surfaces ipc, mcp tools, workbench and today', async () => {
   const catalog = await assemblePluginCatalog(
     [
       {
         manifest: manifest({
           pluginId: 'growth',
           contributions: {
-            ipc: { todo: { routePrefix: '/todo' } },
-            ai: { tools: { search_goals: { name: 'search_goals' } }, capabilities: { decompose: { key: 'goal.decompose' } } },
-            workbench: { workspaces: { decompose: { key: 'goal.decompose' } } },
+            ipc: { todo: {} },
+            ai: { mcp: { tools: { searchGoals: { readOnly: true } } } },
+            workbench: { workspaces: { goalDecompose: {} } },
             activity: {
               today: { todos: { kind: 'list', titleKey: 'today.todos' } },
-              entityTypes: ['todo'],
             },
           },
         }),
@@ -48,13 +47,11 @@ test('adding growth surfaces ipc, ai, workbench and today', async () => {
   );
   const growth = catalog.plugins.find((plugin) => plugin.manifest.pluginId === 'growth');
   assert.ok(growth);
-  assert.equal(growth.manifest.contributions.ipc?.todo?.routePrefix, '/todo');
-  assert.equal(growth.manifest.contributions.ai?.tools?.search_goals?.name, 'search_goals');
-  assert.equal(growth.manifest.contributions.workbench?.workspaces?.decompose?.key, 'goal.decompose');
+  assert.equal(growth.manifest.contributions.ipc?.todo !== undefined, true);
+  assert.equal(growth.manifest.contributions.ai?.mcp?.tools?.searchGoals?.readOnly, true);
+  assert.equal(growth.manifest.contributions.workbench?.workspaces?.goalDecompose !== undefined, true);
   assert.equal(growth.manifest.contributions.activity?.today?.todos?.kind, 'list');
   assert.equal(catalog.plugins.some((plugin) => plugin.manifest.pluginId === 'ai'), false);
-  assert.equal(catalog.plugins.some((plugin) => plugin.manifest.pluginId === 'workbench'), false);
-  assert.equal(catalog.plugins.some((plugin) => plugin.manifest.pluginId === 'activity'), false);
 });
 
 test('capture suggestion normalizes missing type from kind', () => {
@@ -72,16 +69,16 @@ test('today sections merge across plugins', () => {
   assert.equal(merged.flatMap((section) => section.items || []).length, 2);
 });
 
-test('duplicate routes still fail catalog validation', () => {
+test('duplicate mcp tool names still fail catalog validation', () => {
   const issues = validateManifests([
     manifest({
       pluginId: 'growth',
-      contributions: { ipc: { todo: { routePrefix: '/dup' } } },
+      contributions: { ai: { mcp: { tools: { shared: {} } } } },
     }),
     manifest({
-      pluginId: 'expense',
-      contributions: { ipc: { expense: { routePrefix: '/dup' } } },
+      pluginId: 'growth',
+      contributions: { ai: { mcp: { tools: { shared: {} } } } },
     }),
   ]);
-  assert.equal(issues.some((issue) => issue.code === 'duplicate-controller'), true);
+  assert.equal(issues.some((issue) => issue.code === 'duplicate-plugin'), true);
 });

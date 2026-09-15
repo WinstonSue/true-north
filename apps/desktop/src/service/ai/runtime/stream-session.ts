@@ -1,4 +1,4 @@
-import type { StreamSessionContext } from './types';
+import type { StreamSessionContext } from './types.ts';
 
 const sessions = new Map<string, StreamSessionContext>();
 

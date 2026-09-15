@@ -1,4 +1,9 @@
-import type { ActivityPort, CreateActivityInput, TodaySectionContribution, CaptureAdopter } from '@true-north/plugin-sdk';
+import type {
+  ActivityPort,
+  CreateActivityInput,
+  CaptureAdopter,
+  TodaySectionSnapshot,
+} from '@true-north/plugin-sdk';
 import type { ActivityEntityRef } from '@true-north/plugin-sdk';
 import { activityService } from './activity.service';
 import { emitTodayInvalidate } from './today-bus';
@@ -16,8 +21,9 @@ const activityPort: ActivityPort = {
         entityType: link.entityType,
         entityId: link.entityId,
         role: link.role,
-        label: link.label,
-      })),
+            label: link.label,
+            uri: link.uri,
+          })),
     });
   },
   unlink: async (ref) => {
@@ -40,6 +46,8 @@ export function bindCaptureAdopters(adopters: CaptureAdopter[]) {
   activityService.configureCaptureAdopters(adopters);
 }
 
-export function bindTodayContributions(contributions: TodaySectionContribution[]) {
+export function bindTodayContributions(
+  contributions: Array<{ collect: () => Promise<TodaySectionSnapshot> }>,
+) {
   activityService.configureToday(contributions);
 }

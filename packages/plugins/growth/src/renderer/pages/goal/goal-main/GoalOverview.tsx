@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Button, Col, Flex, Row, Space, Statistic, Tag } from '@sue/design-web-react';
 import dayjs from 'dayjs';
 import { Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { HOST_AI_START } from '@true-north/plugin-sdk';
+import { useHostActions } from '@true-north/plugin-sdk/renderer';
+import { growthGoalUri, growthIds } from '@true-north/plugin-growth/contract';
 import { useGoalContext } from '../context';
 import { useGoalDetailContext } from '../../components/goal-detail/context';
 import { HabitService } from '../../../../client';
@@ -10,7 +12,7 @@ import { IMPORTANCE_MAP } from '../../constants';
 import styles from './style.module.less';
 
 const GoalOverview: React.FC = () => {
-  const navigate = useNavigate();
+  const hostActions = useHostActions();
   const { selectedGoal } = useGoalContext();
   const { currentGoal } = useGoalDetailContext();
   const [habitCount, setHabitCount] = useState(0);
@@ -58,7 +60,14 @@ const GoalOverview: React.FC = () => {
         </Space>
           <Button
             icon={<Sparkles size={15} />}
-            onClick={() => navigate(`/ai?goalId=${encodeURIComponent(goal.id)}`)}
+            onClick={() =>
+              void hostActions.invoke(HOST_AI_START, {
+                uri: growthGoalUri(goal.id),
+                label: goal.name,
+                skill: growthIds.skills.goalDecompose,
+                message: `请帮我拆解 ${goal.name}`,
+              })
+            }
           >
             AI 拆解
           </Button>

@@ -5,11 +5,10 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import {
   assemblePluginCatalog,
   disposeOrder,
-  reconcileMain,
-  AiPlatformError,
+  materializeMain,
+  type MaterializedMain,
   type PluginCatalog,
   type PluginMainContext,
-  type PluginMainHandles,
   type PluginMainModule,
 } from '@true-north/plugin-sdk';
 import {
@@ -18,51 +17,39 @@ import {
   createHostStorageRuntime,
   ensureEntitySchema,
   PluginSchemaLedger,
+  resolvePluginPackageRoot,
+  resolveSkillRoots,
+  validateSkillRoots,
   type HostStorageRuntime,
 } from '@true-north/plugin-sdk/main';
+import { firstPartyPlugins, type FirstPartyPluginId } from './desktop-plugins';
 import { createSqlLogger } from '../main/dev-trace';
 import { User } from '../service/users/user.entity';
 import { aiEntities } from '../service/ai/entities';
 import { aiMigrations } from '../service/ai/migrations';
 import { activityEntities } from '../service/activity/entities';
-import { ActivityLink } from '../service/activity/activity-link.entity';
 import { ActivityController, activityAiContribution, activityService } from '../service/activity';
 import { emitTodayInvalidate } from '../service/activity/today-bus';
-import { CapabilityRegistry } from '../service/ai/capability/capability.registry';
 import { AgentToolRegistry } from '../service/ai/agent/tools';
-import { EntityResolverRegistry } from '../service/ai/entity/entity-resolver.registry';
 import { cacheService, fingerprintPromptContext } from '../service/ai/cache/ai-suggestion-cache.service';
-import { addAgentInstructions } from '../service/ai/runtime/agent-instructions';
-import { addAgentRules } from '../service/ai/runtime/agent-rules';
-import { attachAiRegistries } from '../service/ai/contribution';
+import { attachAiRegistries, registerHostAiInstructions } from '../service/ai/contribution';
+import { PluginAiRegistry } from '../service/ai/plugin-ai.registry';
 import { runtimeService } from '../service/ai/runtime';
 import { AiController, conversationService, startMcpServer, stopMcpServer } from '../service/ai';
 import { firstPartyMainDescriptors } from './main-loaders';
 import { HOST_ACTIVITY_STORE_ID, HOST_AI_STORE_ID } from './host-ids';
 import { getPluginHost, getPluginHostOptional, setActiveHost } from './active-host';
 
-const LEGACY_DOMAIN_TO_REF: Record<string, { pluginId: string; entityType: string }> = {
-  todo: { pluginId: 'growth', entityType: 'todo' },
-  habit: { pluginId: 'growth', entityType: 'habit' },
-  task: { pluginId: 'growth', entityType: 'task' },
-  goal: { pluginId: 'growth', entityType: 'goal' },
-  focus: { pluginId: 'growth', entityType: 'track-time' },
-  expense: { pluginId: 'expense', entityType: 'transaction' },
-  purchase: { pluginId: 'purchase', entityType: 'purchase' },
-  bookmark: { pluginId: 'library', entityType: 'bookmark' },
-};
-
 type ActivatedPlugin = {
   pluginId: string;
   module: PluginMainModule;
-  handles: PluginMainHandles;
+  materialized: MaterializedMain;
 };
 
 export class DesktopPluginHost {
   readonly storage = new StorageRegistry();
-  readonly capabilities = new CapabilityRegistry();
   readonly agentTools = new AgentToolRegistry();
-  readonly entityResolvers = new EntityResolverRegistry();
+  readonly pluginAi = new PluginAiRegistry();
 
   catalog: PluginCatalog | null = null;
   dataSource: DataSource | null = null;
@@ -123,6 +110,7 @@ export class DesktopPluginHost {
               entityId: link.entityId,
               role: link.role,
               label: link.label,
+              uri: link.uri,
             })),
           });
         },
@@ -133,13 +121,10 @@ export class DesktopPluginHost {
           emitTodayInvalidate();
         },
       },
-      ai: {
-        getCapability: (key) => this.capabilities.get(key),
-        cache: {
-          fingerprintPromptContext,
-          findMatching: (input) => cacheService.findMatching(input),
-          upsert: (input) => cacheService.upsert(input),
-        },
+      cache: {
+        fingerprintPromptContext,
+        findMatching: (input) => cacheService.findMatching(input),
+        upsert: (input) => cacheService.upsert(input),
       },
     };
   }
@@ -175,26 +160,23 @@ export class DesktopPluginHost {
     this.storage.bind(HOST_AI_STORE_ID, this.hostRuntime);
     this.storage.bind(HOST_ACTIVITY_STORE_ID, this.hostRuntime);
     await applyPluginMigrations(this.hostRuntime, HOST_AI_STORE_ID, aiMigrations);
-    await this.migrateActivityLegacyRefs();
   }
 
-  async migrateActivityLegacyRefs() {
-    if (!this.hostRuntime) return;
-    const repo = this.hostRuntime.getRepository(ActivityLink);
-    const links = await repo.find();
-    for (const link of links) {
-      if (link.pluginId && link.entityType) continue;
-      const mapped = LEGACY_DOMAIN_TO_REF[String(link.domain)];
-      if (!mapped) continue;
-      link.pluginId = mapped.pluginId;
-      link.entityType = mapped.entityType;
-      await repo.save(link);
-    }
-  }
-
-  private throwIfIssues(issues: CatalogIssueLike[]) {
+  private throwIfIssues(issues: Array<{ message: string }>) {
     if (!issues.length) return;
     throw new Error(issues.map((issue) => issue.message).join('\n'));
+  }
+
+  private resolveFirstPartySkillRoots(pluginId: string) {
+    const meta = firstPartyPlugins[pluginId as FirstPartyPluginId];
+    if (!meta) return undefined;
+    const contributions = meta.manifest.contributions as {
+      ai?: { skills?: Record<string, { root: string }> };
+    };
+    return resolveSkillRoots(
+      resolvePluginPackageRoot(meta.packageName, import.meta.url),
+      contributions.ai?.skills,
+    );
   }
 
   async boot() {
@@ -211,9 +193,12 @@ export class DesktopPluginHost {
           throw new Error(`Plugin ${plugin.manifest.pluginId} has no main implementation`);
         }
         const handles = await plugin.main.activate(this.createPluginMainContext(plugin.manifest.pluginId));
-        const issues = reconcileMain(plugin.manifest, handles);
-        this.throwIfIssues(issues);
-        pending.push({ pluginId: plugin.manifest.pluginId, module: plugin.main, handles });
+        const materialized = materializeMain(plugin.manifest, handles);
+        this.throwIfIssues(materialized.issues);
+        const skillRoots = this.resolveFirstPartySkillRoots(plugin.manifest.pluginId) || materialized.skillRoots;
+        materialized.skillRoots = skillRoots;
+        this.throwIfIssues(validateSkillRoots(plugin.manifest.pluginId, skillRoots));
+        pending.push({ pluginId: plugin.manifest.pluginId, module: plugin.main, materialized });
       }
     } catch (error) {
       for (const item of [...pending].reverse()) {
@@ -232,29 +217,18 @@ export class DesktopPluginHost {
   private publish() {
     attachAiRegistries({
       agentTools: this.agentTools,
-      entityResolvers: this.entityResolvers,
+      pluginAi: this.pluginAi,
     });
-    this.registerAiContribution(activityAiContribution as never, 'activity');
-    for (const item of this.activated) {
-      if (item.handles.ai) this.registerAiContribution(item.handles.ai as never, item.pluginId);
-      const query = item.handles.query;
-      if (!query) continue;
-      const plugin = this.catalog?.plugins.find((entry) => entry.manifest.pluginId === item.pluginId);
-      for (const type of plugin?.manifest.contributions.ai?.entityTypes || []) {
-        this.entityResolvers.register({
-          type,
-          async resolve(id: string) {
-            const record = await query.get(type, id);
-            if (!record) {
-              throw AiPlatformError.contextNotFound(`${type} 不存在或已删除: ${id}`);
-            }
-            return { type: record.entityType, id: record.id, name: record.label };
-          },
-        });
-      }
+    if (activityAiContribution.tools?.length) {
+      this.agentTools.register(activityAiContribution.tools);
     }
-    activityService.configureCaptureAdopters(this.activated.flatMap((item) => item.handles.captureAdopters || []));
-    activityService.configureToday(this.activated.flatMap((item) => item.handles.todaySections || []));
+    registerHostAiInstructions(activityAiContribution.agentInstructions);
+    for (const item of this.activated) {
+      this.pluginAi.register(item.pluginId, item.materialized);
+      if (item.materialized.tools.length) this.agentTools.register(item.materialized.tools);
+    }
+    activityService.configureCaptureAdopters(this.activated.flatMap((item) => item.materialized.captureAdopters));
+    activityService.configureToday(this.activated.flatMap((item) => item.materialized.todaySections));
     activityService.configureWorkspaceWriter({
       patch: async (messageId, payload, manager) => {
         await conversationService.patchWorkspacePayload(messageId, { payload }, manager);
@@ -263,46 +237,14 @@ export class DesktopPluginHost {
     this.published = true;
   }
 
-  registerAiContribution(
-    contribution: {
-      capabilities?: Array<{ key: string; execute(input: never): Promise<unknown> }>;
-      tools?: Parameters<AgentToolRegistry['register']>[0];
-      entityResolvers?: Array<{ type: string; resolve(id: string): Promise<{ type: string; id: string; name: string }> }>;
-      agentInstructions?: string;
-      rules?: Array<{ id: string; description: string; tools?: string[] }>;
-    },
-    pluginId = 'host',
-  ) {
-    for (const capability of contribution.capabilities || []) {
-      this.capabilities.register(capability);
-    }
-    if (contribution.tools?.length) this.agentTools.register(contribution.tools);
-    for (const resolver of contribution.entityResolvers || []) {
-      this.entityResolvers.register(resolver);
-    }
-    if (contribution.agentInstructions?.trim()) {
-      addAgentInstructions(contribution.agentInstructions.trim());
-    }
-    if (contribution.rules?.length) {
-      addAgentRules(pluginId, contribution.rules);
-    }
-  }
-
   collectIpcControllers() {
     if (!this.published || !this.catalog) {
       throw new Error('Plugin host has not published IPC handles');
     }
     return [
-      { id: 'ai', routePrefix: '/ai', controller: new AiController(conversationService, runtimeService, this.capabilities) },
+      { id: 'ai', routePrefix: '/ai', controller: new AiController(conversationService, runtimeService) },
       { id: 'activity', routePrefix: '/activity', controller: new ActivityController() },
-      ...this.activated.flatMap((item) =>
-        Object.entries(item.handles.ipcControllers || {}).map(([id, spec]) => ({
-          id: `${item.pluginId}:${id}`,
-          routePrefix: this.catalog!.plugins.find((plugin) => plugin.manifest.pluginId === item.pluginId)?.manifest
-            .contributions.ipc?.[id]?.routePrefix || `/${id}`,
-          controller: spec.controller,
-        })),
-      ),
+      ...this.activated.flatMap((item) => item.materialized.ipc),
     ];
   }
 
@@ -310,6 +252,7 @@ export class DesktopPluginHost {
     const order = this.catalog ? disposeOrder(this.catalog.plugins.map((plugin) => plugin.manifest)) : [];
     for (const pluginId of order) {
       const item = this.activated.find((entry) => entry.pluginId === pluginId);
+      this.agentTools.unregister(this.pluginAi.unregister(pluginId));
       await item?.module.dispose?.();
     }
     this.activated = [];
@@ -334,8 +277,6 @@ export class DesktopPluginHost {
     return stopMcpServer();
   }
 }
-
-type CatalogIssueLike = { message: string };
 
 export { getPluginHost } from './active-host';
 

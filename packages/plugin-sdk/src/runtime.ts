@@ -4,16 +4,10 @@ import type {
   ActivityPort,
   CaptureAdopter,
   PluginManifest,
-  PluginQueryPort,
   PluginSpace,
   ShellSlotId,
-  TodaySectionSnapshot,
+  TodaySectionValues,
 } from '@true-north/plugin-contract';
-
-export type AiCapability<I = unknown, O = unknown> = {
-  key: string;
-  execute(input: I): Promise<O>;
-};
 
 export type AiCachePort = {
   fingerprintPromptContext(promptContext: string): string;
@@ -32,8 +26,7 @@ export type AiCachePort = {
   }): Promise<void>;
 };
 
-export type AgentTool = {
-  name: string;
+export type AgentToolSpec = {
   description: string;
   parameters: Record<string, unknown>;
   schema: { parse(value: unknown): unknown };
@@ -41,23 +34,24 @@ export type AgentTool = {
   execute: (args: Record<string, unknown>, ctx: { appendWorkspace: (part: unknown) => void }) => Promise<string>;
 };
 
-export type EntityResolver = {
-  type: string;
-  resolve(id: string): Promise<{ type: string; id: string; name: string; label?: string } | null>;
+export type AgentTool = AgentToolSpec & { name: string };
+
+export type PluginResourceContent = {
+  uri: string;
+  mimeType?: string;
+  text?: string;
+  blob?: string;
 };
 
-export type AgentRule = {
-  id: string;
-  description: string;
-  tools?: string[];
+export type PluginResourceProvider = {
+  list(): Promise<Array<{ uri: string; name?: string; mimeType?: string }>>;
+  read(uri: string): Promise<PluginResourceContent | null>;
 };
 
-export type AiContribution = {
-  capabilities?: AiCapability[];
-  tools?: AgentTool[];
-  entityResolvers?: EntityResolver[];
-  agentInstructions?: string;
-  rules?: AgentRule[];
+export type PluginPromptProvider = {
+  description?: string;
+  arguments?: Array<{ name: string; description?: string; required?: boolean }>;
+  get(args: Record<string, string>): Promise<{ messages: Array<{ role: string; content: { type: 'text'; text: string } }> }>;
 };
 
 export type WorkbenchHostActions = {
@@ -73,28 +67,13 @@ export type WorkbenchToolProps<TPayload = Record<string, unknown>> = {
 };
 
 export type WorkbenchToolDefinition<TPayload = Record<string, unknown>> = {
-  workspaceKey: string;
+  workspaceKey?: string;
   title: (payload: TPayload) => string;
   entryLabel: (payload: TPayload) => string;
   autoOpen?: (input: { payload: TPayload; message: { parts: Array<Record<string, unknown>> } | unknown; force: boolean }) => boolean;
   parsePayload: (payload: Record<string, unknown>) => TPayload;
   Component: ComponentType<WorkbenchToolProps<TPayload>>;
 };
-
-export type WorkbenchActionContribution = {
-  id: string;
-  run: (input: Record<string, unknown>) => Promise<void>;
-};
-
-export type WorkbenchViewContribution = {
-  id: string;
-  pluginId: string;
-  nameKey: string;
-  order?: number;
-  load: () => Promise<{ default: ComponentType }>;
-};
-
-export const WORKBENCH_EXTRACT_ACTION = 'workbench.extract';
 
 export type WorkbenchExtractHandler = (input: {
   result: unknown;
@@ -110,30 +89,16 @@ export type WorkbenchWorkspaceHost = {
   patch(messageId: string, payload: Record<string, unknown>): Promise<Record<string, unknown>>;
 };
 
-export type AiEntityRecord = {
-  type: string;
-  id: string;
-  label: string;
-};
-
-export type WorkbenchViewTarget = {
-  type: string;
-  id: string;
-};
-
-export type WorkbenchViewOpenInput = {
+export type PluginViewSnapshot = {
   viewId: string;
-  target?: WorkbenchViewTarget;
+  params: Record<string, string>;
 };
 
-export type AiEntitySource = {
-  type: string;
-  kindLabel: string;
-  boundKindLabel: string;
-  searchParam: string;
-  workbenchViewId: string;
-  list(): Promise<AiEntityRecord[]>;
-  find(id: string): Promise<AiEntityRecord | null>;
+export type PluginViewOpenRequest = PluginViewSnapshot;
+
+export type ViewStateCodec<T> = {
+  decode(params: Record<string, string>): T;
+  encode(state: T): Record<string, string>;
 };
 
 export type PluginIcon = ComponentType<{
@@ -145,18 +110,6 @@ export type PluginIcon = ComponentType<{
 export type LocaleContribution = {
   pluginId: string;
   messages: Record<string, Record<string, string>>;
-};
-
-export type EntityPresenter = {
-  pluginId: string;
-  entityType: string;
-  kindLabel: string;
-  openPath(entityId: string): string;
-};
-
-export type TodaySectionContribution = {
-  id: string;
-  collect(): Promise<TodaySectionSnapshot>;
 };
 
 export type PluginIpcPort = {
@@ -188,22 +141,34 @@ export class HostActionRegistry implements HostActionPort {
   }
 }
 
+export type PluginAiStartInput = {
+  uri?: string;
+  label?: string;
+  skill?: string;
+  message?: string;
+};
+
 export type PluginMainContext = {
   pluginId: string;
   space: PluginSpace;
   activity: ActivityPort;
-  ai: {
-    getCapability<I = unknown, O = unknown>(key: string): AiCapability<I, O>;
-    cache: AiCachePort;
-  };
+  cache: AiCachePort;
 };
 
 export type PluginMainHandles = {
-  ipcControllers?: Record<string, { controller: object }>;
-  ai?: AiContribution;
-  query?: PluginQueryPort;
-  captureAdopters?: CaptureAdopter[];
-  todaySections?: TodaySectionContribution[];
+  ipc?: Record<string, { controller: object }>;
+  activity?: {
+    capture?: Record<string, { adopt: CaptureAdopter['adopt'] }>;
+    today?: Record<string, { collect(): Promise<TodaySectionValues> }>;
+  };
+  ai?: {
+    mcp?: {
+      tools?: Record<string, AgentToolSpec>;
+      resources?: Record<string, PluginResourceProvider>;
+      prompts?: Record<string, PluginPromptProvider>;
+    };
+    skillRoots?: Record<string, string>;
+  };
 };
 
 export type PluginMainModule = {
@@ -240,20 +205,30 @@ export type PluginRuntimeEntry = {
   descriptionKey?: string;
   categoryKey?: string;
   keywords?: string[];
+};
+
+export type WorkbenchViewContribution = {
+  id: string;
+  pluginId: string;
+  nameKey: string;
+  order?: number;
+  default?: boolean;
   load: () => Promise<{ default: ComponentType }>;
 };
 
 export type PluginRendererHandles = {
   icon?: PluginIcon;
-  load: () => Promise<{ default: ComponentType }>;
-  workbenchTools?: WorkbenchToolDefinition[];
-  workbenchActions?: WorkbenchActionContribution[];
-  workbenchViews?: WorkbenchViewContribution[];
-  entitySources?: AiEntitySource[];
-  entityPresenters?: EntityPresenter[];
-  shellSlots?: ShellSlotContribution[];
   locales?: LocaleContribution[];
-  actions?: Record<string, (input?: unknown) => void>;
+  scope?: ComponentType<{ children?: ReactNode }>;
+  views?: Record<string, { load: () => Promise<{ default: ComponentType }> }>;
+  workbench?: {
+    workspaces?: Record<string, WorkbenchToolDefinition>;
+    actions?: Record<string, { run: (input: Record<string, unknown>) => Promise<void> }>;
+  };
+  shell?: {
+    slots?: Record<string, { render: ComponentType<{ children?: ReactNode }> }>;
+  };
+  openResource?: (uri: string) => PluginViewOpenRequest | null;
 };
 
 export type PluginRendererModule = {
@@ -263,7 +238,7 @@ export type PluginRendererModule = {
 export type PluginDescriptor = {
   manifest: PluginManifest;
   loadMain?: () => Promise<{ createMain: () => PluginMainModule | Promise<PluginMainModule> } | PluginMainModule>;
-  loadRenderer?: () => Promise<
-    { createRenderer: () => PluginRendererModule } | PluginRendererModule
-  >;
+  loadRenderer?: () => Promise<{ createRenderer: () => PluginRendererModule } | PluginRendererModule>;
 };
+
+export const HOST_AI_START = 'host.ai.start';

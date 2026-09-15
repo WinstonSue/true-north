@@ -63,7 +63,7 @@ export function NewTabPicker({ 'data-product-ref': productRefAttr }: { 'data-pro
             }
             const view = (platform.workbenchViews || []).find((item) => item.id === key);
             if (!view) return;
-            void openPluginView({ viewId: view.id });
+            void openPluginView({ viewId: view.id, params: {} });
           },
         }}
       >

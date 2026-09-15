@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { message } from '@sue/design-web-react';
 import { BrowserService } from '@true-north/web-service';
 import { HOST_BROWSER_OPEN, HOST_WORKBENCH_OPEN } from '@true-north/plugin-sdk';
-import type { WorkbenchViewOpenInput, WorkbenchViewTarget } from '@true-north/plugin-sdk';
+import type { PluginViewOpenRequest } from '@true-north/plugin-sdk';
 import {
   useHostActions,
   useLocale,
@@ -38,13 +38,12 @@ import { createWorkbenchToolRegistry } from './types';
 import type { WorkbenchViewContribution } from '@true-north/plugin-sdk';
 import {
   appendTabOrder,
-  clearPluginViewTargetState,
   isWebTabId,
   needsFallbackWebTab,
   neighborId,
   pluginViewTabId,
   upsertPluginViewTab,
-  withPluginViewTarget,
+  withPluginViewSnapshot,
 } from './tab-state';
 
 const DEFAULT_WIDTH = 480;
@@ -84,13 +83,13 @@ export type WorkbenchPluginViewTab = {
   viewId: string;
   pluginId: string;
   title: string;
-  target?: WorkbenchViewTarget;
-  targetGeneration?: number;
+  params: Record<string, string>;
+  revision: number;
 };
 
 export type WorkbenchTab = WorkbenchWebTab | WorkbenchToolTab | WorkbenchPluginViewTab;
 
-export type PluginViewInput = WorkbenchViewOpenInput;
+export type PluginViewInput = PluginViewOpenRequest;
 
 export type TabInput = {
   conversationId: string;
@@ -124,7 +123,7 @@ type WorkbenchContextValue = {
   activateTab: (id: string) => Promise<void>;
   openToolTab: (input: TabInput) => Promise<void>;
   openPluginView: (input: PluginViewInput) => Promise<void>;
-  clearPluginViewTarget: (viewId: string) => void;
+  updatePluginViewParams: (viewId: string, params: Record<string, string>) => void;
   requestFollowUp: (conversationId: string, text: string) => void;
   clearFollowUp: () => void;
   navigate: (url: string) => Promise<void>;
@@ -392,7 +391,7 @@ export function WorkbenchProvider({
       }
       const id = pluginViewTabId(view.id);
       const existing = pluginViewTabsRef.current.find((tab) => tab.id === id);
-      const nextTab = withPluginViewTarget(
+      const nextTab = withPluginViewSnapshot(
         existing,
         {
           kind: 'plugin-view' as const,
@@ -401,7 +400,7 @@ export function WorkbenchProvider({
           pluginId: view.pluginId,
           title: t[view.nameKey] || view.nameKey,
         },
-        input.target,
+        input.params || {},
       );
       setPluginViewTabs((prev) => upsertPluginViewTab(prev, nextTab));
       setTabOrder((prev) => appendTabOrder(prev, id));
@@ -411,10 +410,12 @@ export function WorkbenchProvider({
     [ensureOpen, platform.workbenchViews, t],
   );
 
-  const clearPluginViewTarget = useCallback((viewId: string) => {
+  const updatePluginViewParams = useCallback((viewId: string, params: Record<string, string>) => {
     const id = pluginViewTabId(viewId);
     setPluginViewTabs((prev) =>
-      prev.map((tab) => (tab.id === id ? clearPluginViewTargetState(tab) : tab)),
+      prev.map((tab) =>
+        tab.id === id ? withPluginViewSnapshot(tab, { ...tab, title: tab.title }, params) : tab,
+      ),
     );
   }, []);
 
@@ -581,7 +582,7 @@ export function WorkbenchProvider({
       activateTab,
       openToolTab,
       openPluginView,
-      clearPluginViewTarget,
+      updatePluginViewParams,
       requestFollowUp,
       clearFollowUp,
       navigate: navigateUrl,
@@ -602,7 +603,7 @@ export function WorkbenchProvider({
       close,
       closeTab,
       createTab,
-      clearPluginViewTarget,
+      updatePluginViewParams,
       extractActiveTab,
       goBack,
       goForward,

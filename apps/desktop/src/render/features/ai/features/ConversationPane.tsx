@@ -43,9 +43,6 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
     streaming,
     streamingAssistantId,
     openWorkspace,
-    openEntity,
-    entities,
-    entitySources,
     codingAgents,
     selectedAgentId,
     selectedAgent,
@@ -59,17 +56,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
   const [mentionIndex, setMentionIndex] = useState(0);
 
   const mention = mentionOpen ? readMentionQuery(draft.text, cursor) : null;
-  const mentionItems = useMemo(() => {
-    if (!mention) return [] as MentionItem[];
-    const keyword = mention.query.trim().toLowerCase();
-    const all: MentionItem[] = entities.map((entity) => ({
-      type: entity.type,
-      id: entity.id,
-      label: entity.label,
-    }));
-    if (!keyword) return all.slice(0, 12);
-    return all.filter((item) => item.label.toLowerCase().includes(keyword)).slice(0, 12);
-  }, [entities, mention]);
+  const mentionItems = useMemo(() => [] as MentionItem[], []);
 
   useEffect(() => {
     setMentionIndex(0);
@@ -180,7 +167,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
             }}
           >
             <span className={styles.mentionKind}>
-              {entitySources.find((source) => source.type === item.type)?.kindLabel || item.type}
+            <span className={styles.mentionKind}>{item.type}</span>
             </span>
             <span>{item.label}</span>
           </button>
@@ -210,7 +197,6 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
                 <MessageParts
                   message={message}
                   streaming={streaming && message.id === streamingAssistantId}
-                  onOpenEntity={openEntity}
                   onOpenWorkspace={openWorkspace}
                 />
               </MessageContent>
@@ -243,7 +229,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
           placeholder={
             canSend
               ? activeConversation
-                ? `继续追问，输入 @ 引用${entitySources.map((source) => source.kindLabel).join('或') || '实体'}…`
+                ? '继续追问…'
                 : '记下今天的事，或直接提问…'
               : unavailableReason
           }

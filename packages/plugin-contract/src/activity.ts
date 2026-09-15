@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import { pluginResourceRefSchema } from './resource.ts';
 
 export const activityEntityRefSchema = z.object({
   pluginId: z.string().min(1),
   entityType: z.string().min(1),
   entityId: z.string().min(1),
+  uri: z.string().min(1).optional(),
 });
 
 export type ActivityEntityRef = z.infer<typeof activityEntityRefSchema>;
@@ -35,3 +37,5 @@ export type ActivityPort = {
 export const ACTIVITY_RECORD_EVENT = 'activity.record';
 export const ACTIVITY_UNLINK_EVENT = 'activity.unlink';
 export const ACTIVITY_TODAY_INVALIDATE_EVENT = 'activity.today.invalidate';
+
+export { pluginResourceRefSchema };

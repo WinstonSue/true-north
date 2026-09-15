@@ -9,6 +9,7 @@ export type ActivityLinkVo = BaseEntityVo & {
   entityId: string;
   role?: ActivityLinkRole | `${ActivityLinkRole}` | string;
   label?: string;
+  uri?: string;
 };
 
 export type ActivityVo = BaseEntityVo & {
@@ -33,6 +34,7 @@ export type CreateActivityVo = {
     entityId: string;
     role?: string;
     label?: string;
+    uri?: string;
   }>;
 };
 
@@ -56,6 +58,7 @@ export type HomeTodayVo = {
       id: string;
       label: string;
       href?: string;
+      uri?: string;
       overdue?: boolean;
       pluginId?: string;
       entityType?: string;

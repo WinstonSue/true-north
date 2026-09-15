@@ -8,25 +8,22 @@ import type { TodayCommand, TodayListItemAction, TodaySectionSnapshot } from '@t
 import { ACTIVITY_TODAY_INVALIDATE_EVENT } from '@true-north/plugin-sdk';
 import { ActivityController } from '@true-north/web-service';
 import { useHostActions, usePluginIpc, useRendererPlatform } from '@true-north/plugin-sdk/renderer';
+import { navigatePluginResource } from '@/plugin/PluginViewFrame';
 import useLocale from '../../utils/useLocale';
 import styles from './style/index.module.less';
 
-function openPresenter(
+function openTodayItem(
   navigate: ReturnType<typeof useNavigate>,
   platform: ReturnType<typeof useRendererPlatform>,
-  pluginId: string | undefined,
-  entityType: string | undefined,
-  entityId: string,
+  uri?: string,
   href?: string,
 ) {
   if (href) {
     navigate(href);
     return;
   }
-  const presenter = platform.entityPresenters.find(
-    (item) => item.pluginId === pluginId && item.entityType === entityType,
-  );
-  navigate(presenter?.openPath(entityId) || '/plugins');
+  if (navigatePluginResource(navigate, platform, uri)) return;
+  navigate('/plugins');
 }
 
 function pendingCount(today: HomeTodayVo | null): number {
@@ -108,7 +105,7 @@ function TodayContent({
                       size="small"
                       type="link"
                       onClick={() =>
-                        openPresenter(navigate, platform, item.pluginId, item.entityType, item.id, item.href)
+                        openTodayItem(navigate, platform, item.uri, item.href)
                       }
                     >
                       {t['today.open']}

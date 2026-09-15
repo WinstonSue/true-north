@@ -27,9 +27,9 @@ sequenceDiagram
 
 ## render 层约定
 
-- 宿主页面：`render/features/`（AI 会话、工作台面板）与 `render/plugin/`（插件中心、PluginStage）
-- 插件业务 UI 在 `packages/plugins/{id}/src/renderer`：`features/` 是可独立挂载的功能组件，`pages/index.tsx` 只组合它们给 `/plugins/{id}`，`views.ts` 把同一套功能注册给 Workbench
-- 路由：`render/router/`
+- 宿主页面：`render/features/`（AI 会话、工作台面板）与 `render/plugin/`（插件中心、PluginStage、PluginViewFrame）
+- 插件业务 UI 在 `packages/plugins/{id}/src/renderer`：`features/` 是可独立挂载的功能组件。插件页与 Workbench 共用 `PluginViewFrame` + `PluginViewSnapshot`，不再另写聚合页或 `views.ts`
+- 路由：`render/router/`；插件页 URL 为 `/plugins/{pluginId}?view={localView}&...params`
 - 模块状态：使用 `createInjectState`（`render/utils/createInjectState.tsx`），每功能块独立 Provider + hook
 - 样式：CSS Modules（`*.module.less`）+ Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合。按单元素视觉声明条数分流：≤3 优先 Tailwind；3–5 有定制或较长用 Modules，否则 Tailwind；>5 用 Modules。计数不含 `Flex` / `Row` / `Col` 布局 props。页面壳层优先使用 `Flex`（`container="full|fixed|fill"`）。`fixed` 不自动撑满交叉轴：列父加 `w-full`，行父加 `h-full`（对齐已移除的 `FlexibleContainer.Fixed`）。UI 落地细则见项目 skill「框架规范 · React UI规范」
 - UI 组件：布局/表单/反馈直接用 `@sue/design-web-react` 公开 API；图标用 `lucide-react`。禁止再引入 Arco 风格 compat（已移除的 `Typography`/`Icon*`/`Grid`/`Result`/`Steps`/`List` 等 shim）。业务一等能力（`RepeatSelector`、`ContextMenu`）放在 `@/components`；HTTP 错误提示直接用 design-web 的 `message`
@@ -59,10 +59,10 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
 
 ## 插件页面模块
 
-一等插件包 `packages/plugins/{growth,expense,purchase,library}` 各自提供：
+一等插件包 `packages/plugins/{growth,expense,purchase,library}` 各自提供独立 `src/manifest.ts`、main/renderer 实现：
 
-- 聚合页：`/plugins/{id}`，只负责导航与组合
-- 可复用功能视图：Workbench 新标签选择器按 id 打开（如 `growth.todo`、`expense.transaction`）
+- 插件页：宿主按 manifest `views` 生成 tabs，加载 `features/{localId}`
+- Workbench：同一 Feature，snapshot 存在标签上（同 view 单标签，`revision` 递增）
 - 会话工具：仍由 `workbench.workspaces` 贡献（如目标/任务拆解）
 
 业务规则与模块产品说明见 [ProductWiki · Growth](../../../packages/plugins/growth/wiki/growth/spec.json)。

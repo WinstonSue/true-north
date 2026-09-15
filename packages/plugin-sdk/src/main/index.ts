@@ -35,3 +35,4 @@ export {
   createRepositoryQueryPort,
 } from '../host/plugin-sqlite.ts';
 export type { OpenPluginSqliteStoreOptions, PluginMigration, QuerySource } from '../host/plugin-sqlite.ts';
+export { resolvePluginPackageRoot, resolveSkillRoots, validateSkillRoots } from '../skills.ts';

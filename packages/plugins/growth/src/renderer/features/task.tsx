@@ -1,48 +1,35 @@
 'use client';
 
-import { useState } from 'react';
 import { TabsPage } from '@true-north/plugin-ui';
 import { CreateButton } from '@true-north/plugin-ui';
 import { useTaskDetail } from '../pages/components';
 import { AgendaProvider, useAgendaDate } from '../pages/components/day-agenda/context';
-import { growthHref } from '@true-north/plugin-growth/contract';
-import type { GrowthTab } from '@true-north/plugin-growth/contract';
-import { useWorkbenchViewRuntimeOptional } from '@true-north/plugin-sdk/renderer';
+import { usePluginViewState } from '@true-north/plugin-sdk/renderer';
+import { taskViewCodec } from '../../contract/view-state';
 import { TaskDetailPane } from '../pages/task/detail/TaskDrawer';
 import TaskToday from '../pages/task/task-today';
 import TaskCalendar from '../pages/task/task-calendar';
 import TaskAll from '../pages/task/task-all';
 
-const TASK_TABS: Array<{ tab: Extract<GrowthTab, 'today' | 'calendar' | 'all'>; name: string }> = [
-  { tab: 'today', name: '当前任务' },
-  { tab: 'calendar', name: '任务日历' },
-  { tab: 'all', name: '全部任务' },
+const TASK_TABS = [
+  { tab: 'today' as const, name: '当前任务' },
+  { tab: 'calendar' as const, name: '任务日历' },
+  { tab: 'all' as const, name: '全部任务' },
 ];
 
-function parseTaskTab(tab?: GrowthTab): Extract<GrowthTab, 'today' | 'calendar' | 'all'> {
-  return tab === 'calendar' || tab === 'all' ? tab : 'today';
-}
-
-function TaskPageContent({
-  tab,
-  onSelectTab,
-}: {
-  tab: Extract<GrowthTab, 'today' | 'calendar' | 'all'>;
-  onSelectTab: (tab: Extract<GrowthTab, 'today' | 'calendar' | 'all'>) => void;
-}) {
+function TaskPageContent() {
+  const [state, setState] = usePluginViewState(taskViewCodec);
   const { openCreateDrawer } = useTaskDetail();
   const { selectedDate } = useAgendaDate();
-  const currentTab = parseTaskTab(tab);
 
   return (
     <TabsPage
       tabs={TASK_TABS.map((item) => ({
         name: item.name,
         key: item.tab,
-        href: growthHref({ area: 'task', tab: item.tab }),
-        active: currentTab === item.tab,
+        active: state.tab === item.tab,
       }))}
-      onSelect={(item) => onSelectTab(parseTaskTab(item.key as GrowthTab))}
+      onSelect={(item) => setState({ tab: (item.key as typeof state.tab) || 'today' })}
       extra={
         <CreateButton
           onClick={() => {
@@ -59,45 +46,30 @@ function TaskPageContent({
         </CreateButton>
       }
     >
-      {currentTab === 'calendar' ? <TaskCalendar /> : null}
-      {currentTab === 'all' ? <TaskAll /> : null}
-      {currentTab === 'today' ? <TaskToday /> : null}
+      {state.tab === 'calendar' ? <TaskCalendar /> : null}
+      {state.tab === 'all' ? <TaskAll /> : null}
+      {state.tab === 'today' ? <TaskToday /> : null}
     </TabsPage>
   );
 }
 
-export default function TaskFeature({
-  tab,
-  onTabChange,
-}: {
-  tab?: GrowthTab;
-  onTabChange?: (tab: GrowthTab) => void;
-} = {}) {
-  const viewRuntime = useWorkbenchViewRuntimeOptional();
-  const focusedTaskId = viewRuntime?.target?.type === 'task' ? viewRuntime.target.id : undefined;
-  const [localTab, setLocalTab] = useState<GrowthTab>(tab ?? 'today');
-  const currentTab = parseTaskTab(tab ?? localTab);
+export default function TaskFeature() {
+  const [state, setState] = usePluginViewState(taskViewCodec);
 
-  if (focusedTaskId) {
+  if (state.id) {
     return (
       <TaskDetailPane
-        key={`${focusedTaskId}:${viewRuntime?.generation ?? 0}`}
-        taskId={focusedTaskId}
+        key={state.id}
+        taskId={state.id}
         compact
-        onClose={() => viewRuntime?.clearTarget()}
+        onClose={() => setState({ tab: 'today' })}
       />
     );
   }
 
   return (
     <AgendaProvider>
-      <TaskPageContent
-        tab={currentTab}
-        onSelectTab={(next) => {
-          if (onTabChange) onTabChange(next);
-          else setLocalTab(next);
-        }}
-      />
+      <TaskPageContent />
     </AgendaProvider>
   );
 }

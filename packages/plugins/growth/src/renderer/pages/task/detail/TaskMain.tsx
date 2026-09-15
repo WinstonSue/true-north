@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import { Tabs, Tag, Dropdown, Menu, Button, Modal, message, Flex, Empty } from '@sue/design-web-react';
 import dayjs from 'dayjs';
 import { Check, Ellipsis, Sparkles, Trash2, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { HOST_AI_START } from '@true-north/plugin-sdk';
+import { useHostActions } from '@true-north/plugin-sdk/renderer';
+import { growthTaskUri, growthIds } from '@true-north/plugin-growth/contract';
 
 import { TaskVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
@@ -44,7 +46,7 @@ const STATUS_CONFIG = {
 };
 
 const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted, onEdit }) => {
-  const navigate = useNavigate();
+  const hostActions = useHostActions();
   const { refreshData } = useTaskDetailContext();
   const { openEditDrawer: openTodoDrawer } = useTodoDetail();
   const { open: openFocusTimer } = useFocusTimer();
@@ -219,7 +221,14 @@ const TaskMain: React.FC<TaskMainProps> = ({ task, onDeleted, onEdit }) => {
           <Button
             type="text"
             icon={<Sparkles size={15} />}
-            onClick={() => navigate(`/ai?taskId=${encodeURIComponent(task.id)}`)}
+            onClick={() =>
+              void hostActions.invoke(HOST_AI_START, {
+                uri: growthTaskUri(task.id),
+                label: task.name,
+                skill: growthIds.skills.taskDecompose,
+                message: `请帮我拆解 ${task.name}`,
+              })
+            }
           >
             AI 拆解
           </Button>

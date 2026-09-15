@@ -3,12 +3,8 @@ import type {
   CancelStreamResponseVo,
   ConversationVo,
   CreateConversationRequestVo,
-  EnsureBoundConversationRequestVo,
-  EnsureBoundConversationResponseVo,
-  EnsureBoundGoalRequestVo,
-  EnsureBoundTaskRequestVo,
-  GoalDecomposeRequestVo,
-  GoalDecomposeResponseVo,
+  EnsureResourceConversationRequestVo,
+  EnsureResourceConversationResponseVo,
   MessageVo,
   PatchConversationRuntimeRequestVo,
   PatchWorkspaceRequestVo,
@@ -21,11 +17,8 @@ import type {
   RuntimeSettingsVo,
   StartMessageStreamRequestVo,
   StartMessageStreamResponseVo,
-  TaskDecomposeRequestVo,
-  TaskDecomposeResponseVo,
 } from '@true-north/vo';
 import { AiPlatformError, toIpcError } from './ai-error';
-import type { CapabilityRegistry } from './capability/capability.registry';
 import { conversationService } from './conversation/conversation.service';
 import { runtimeService } from './runtime';
 
@@ -34,13 +27,7 @@ export class AiController {
   constructor(
     private readonly conversations = conversationService,
     private readonly runtime = runtimeService,
-    private readonly capabilities?: CapabilityRegistry,
   ) {}
-
-  private capabilityRegistry(): CapabilityRegistry {
-    if (!this.capabilities) throw new Error('AI capabilities are not attached');
-    return this.capabilities;
-  }
 
   @Get('/runtime/agents', { description: '本机编码 Agent 探测列表' })
   async listRuntimeAgents(): Promise<RuntimeAgentVo[]> {
@@ -88,34 +75,13 @@ export class AiController {
     }
   }
 
-  @Post('/capabilities/goal/decompose', { description: '目标拆解' })
-  async decomposeGoal(@Body() body: GoalDecomposeRequestVo): Promise<GoalDecomposeResponseVo> {
+  @Post('/conversations/resource', { description: '确保资源附件会话' })
+  async ensureResourceConversation(
+    @Body() body: EnsureResourceConversationRequestVo
+  ): Promise<EnsureResourceConversationResponseVo> {
     try {
-      if (!body?.goalId?.trim()) throw AiPlatformError.internal('缺少 goalId');
-      return (await this.capabilityRegistry().get('goal.decompose').execute(body)) as GoalDecomposeResponseVo;
-    } catch (error) {
-      throw toIpcError(error);
-    }
-  }
-
-  @Post('/capabilities/task/decompose', { description: '任务拆解' })
-  async decomposeTask(@Body() body: TaskDecomposeRequestVo): Promise<TaskDecomposeResponseVo> {
-    try {
-      if (!body?.taskId?.trim()) throw AiPlatformError.internal('缺少 taskId');
-      return (await this.capabilityRegistry().get('task.decompose').execute(body)) as TaskDecomposeResponseVo;
-    } catch (error) {
-      throw toIpcError(error);
-    }
-  }
-
-  @Post('/capabilities/:key', { description: '执行已注册 Capability' })
-  async executeCapability(
-    @Param('key') key: string,
-    @Body() body: Record<string, unknown>
-  ): Promise<unknown> {
-    try {
-      if (!key?.trim()) throw AiPlatformError.internal('缺少 capability key');
-      return await this.capabilityRegistry().get(key.trim()).execute(body || {});
+      if (!body?.uri?.trim()) throw AiPlatformError.internal('缺少 uri');
+      return await this.conversations.ensureResourceConversation(body);
     } catch (error) {
       throw toIpcError(error);
     }
@@ -147,35 +113,6 @@ export class AiController {
   async ensureCaptureInbox(): Promise<ConversationVo> {
     try {
       return await this.conversations.ensureCaptureInbox();
-    } catch (error) {
-      throw toIpcError(error);
-    }
-  }
-
-  @Post('/conversations/bound', { description: '确保业务实体绑定会话' })
-  async ensureBoundConversation(
-    @Body() body: EnsureBoundConversationRequestVo
-  ): Promise<EnsureBoundConversationResponseVo> {
-    try {
-      return await this.conversations.ensureBoundConversation(body?.refType, body?.refId);
-    } catch (error) {
-      throw toIpcError(error);
-    }
-  }
-
-  @Post('/conversations/bound/goal', { description: '确保目标绑定会话' })
-  async ensureBoundGoal(@Body() body: EnsureBoundGoalRequestVo): Promise<EnsureBoundConversationResponseVo> {
-    try {
-      return await this.conversations.ensureBoundConversation('goal', body?.goalId);
-    } catch (error) {
-      throw toIpcError(error);
-    }
-  }
-
-  @Post('/conversations/bound/task', { description: '确保任务绑定会话' })
-  async ensureBoundTask(@Body() body: EnsureBoundTaskRequestVo): Promise<EnsureBoundConversationResponseVo> {
-    try {
-      return await this.conversations.ensureBoundConversation('task', body?.taskId);
     } catch (error) {
       throw toIpcError(error);
     }
@@ -248,11 +185,7 @@ export class AiController {
   ): Promise<StartMessageStreamResponseVo> {
     try {
       if (!id?.trim()) throw AiPlatformError.internal('缺少 conversationId');
-      return await this.conversations.startMessageStream(
-        id.trim(),
-        body?.text || '',
-        body?.entityLinks
-      );
+      return await this.conversations.startMessageStream(id.trim(), body?.text || '');
     } catch (error) {
       throw toIpcError(error);
     }

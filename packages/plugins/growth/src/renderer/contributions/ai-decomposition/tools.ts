@@ -1,4 +1,4 @@
-import { GoalDecomposeKey, TaskDecomposeKey } from '@true-north/enum';
+import { GoalDecomposeKey, TaskDecomposeKey } from '@true-north/plugin-growth/contract';
 import type { AiDecomposePayloadVo } from '@true-north/vo';
 import { parseDecomposePayload, workspaceEntityRef } from '@true-north/vo';
 import type { WorkbenchToolDefinition } from '@true-north/plugin-sdk';

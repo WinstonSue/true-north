@@ -1,17 +1,28 @@
-export { PLUGIN_API_VERSION, PLUGIN_HUB_PATH, namespacedId, pluginPath, SHELL_SLOT_IDS } from './ids.ts';
-export type { PluginApiVersion, HostCapabilityId, ShellSlotId } from './ids.ts';
+export {
+  PLUGIN_API_VERSION,
+  PLUGIN_HUB_PATH,
+  namespacedId,
+  pluginPath,
+  contributionKey,
+  ipcRoute,
+  mcpName,
+  pluginResourceUri,
+  parsePluginResourceUri,
+  SHELL_SLOT_IDS,
+} from './ids.ts';
+export type { PluginApiVersion, ShellSlotId } from './ids.ts';
 
 export {
   pluginManifestSchema,
   definePluginManifest,
   parsePluginManifest,
-  contributionKey,
   pluginContributionsSchema,
+  derivedContributionId,
 } from './manifest.ts';
 export type { PluginManifest } from './manifest.ts';
 
 export { hostStorageCapabilitySchema } from './storage.ts';
-export type { HostStorageCapability, PluginSpace, PluginRecord, PluginQueryPort } from './storage.ts';
+export type { HostStorageCapability, PluginSpace } from './storage.ts';
 
 export {
   captureSuggestionSchema,
@@ -36,6 +47,9 @@ export {
 } from './activity.ts';
 export type { ActivityEntityRef, ActivityLinkRef, CreateActivityInput, ActivityPort } from './activity.ts';
 
+export { pluginResourceRefSchema } from './resource.ts';
+export type { PluginResourceRef } from './resource.ts';
+
 export {
   todaySectionKindSchema,
   todaySectionDescriptorSchema,
@@ -46,6 +60,7 @@ export type {
   TodaySectionKind,
   TodaySectionDescriptor,
   TodaySectionSnapshot,
+  TodaySectionValues,
   TodayListItem,
   TodayListItemAction,
   TodayCommand,

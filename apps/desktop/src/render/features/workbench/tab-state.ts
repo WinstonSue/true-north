@@ -28,35 +28,27 @@ export function appendTabOrder(order: string[], id: string): string[] {
   return order.includes(id) ? order : [...order, id];
 }
 
-export type PluginViewTargetState = {
-  target?: { type: string; id: string };
-  targetGeneration?: number;
+export type PluginViewSnapshotState = {
+  params: Record<string, string>;
+  revision: number;
 };
 
-export function withPluginViewTarget<T>(
-  existing: T | undefined,
+export function withPluginViewSnapshot<T extends { id: string; title: string }>(
+  existing: (T & PluginViewSnapshotState) | undefined,
   next: T,
-  target?: { type: string; id: string },
-): T & PluginViewTargetState {
-  const previous = existing as PluginViewTargetState | undefined;
-  if (!target) {
+  params?: Record<string, string>,
+): T & PluginViewSnapshotState {
+  const previous = existing as PluginViewSnapshotState | undefined;
+  if (!params) {
     return {
       ...next,
-      target: previous?.target,
-      targetGeneration: previous?.targetGeneration,
+      params: previous?.params || {},
+      revision: previous?.revision ?? 0,
     };
   }
   return {
     ...next,
-    target,
-    targetGeneration: (previous?.targetGeneration ?? 0) + 1,
-  };
-}
-
-export function clearPluginViewTargetState<T>(tab: T): T & PluginViewTargetState {
-  return {
-    ...tab,
-    target: undefined,
-    targetGeneration: ((tab as PluginViewTargetState).targetGeneration ?? 0) + 1,
+    params,
+    revision: (previous?.revision ?? 0) + 1,
   };
 }

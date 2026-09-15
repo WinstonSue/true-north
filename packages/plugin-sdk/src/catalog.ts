@@ -71,4 +71,4 @@ export async function assemblePluginCatalog(
   return { plugins, order, issues };
 }
 
-export { reconcileMain, reconcileRenderer } from './reconcile.ts';
+export { reconcileMain, reconcileRenderer, materializeMain, materializeRenderer } from './materialize.ts';

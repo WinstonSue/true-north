@@ -50,25 +50,13 @@ export type PatchConversationRuntimeRequestVo = {
   runtimeId: string;
 };
 
-export type EnsureBoundConversationRequestVo = {
-  refType: string;
-  refId: string;
+export type EnsureResourceConversationRequestVo = {
+  uri: string;
+  label?: string;
+  skill?: string;
 };
 
-export type EnsureBoundGoalRequestVo = {
-  goalId: string;
-};
-
-export type EnsureBoundTaskRequestVo = {
-  taskId: string;
-};
-
-export type EnsureBoundConversationResponseVo = {
+export type EnsureResourceConversationResponseVo = {
   conversation: ConversationVo;
   created: boolean;
-};
-
-export type ExecuteCapabilityRequestVo = {
-  key: string;
-  input: Record<string, unknown>;
 };

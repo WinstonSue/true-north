@@ -16,13 +16,23 @@ export { WorkbenchRuntimeContext, useWorkbench, useWorkbenchOptional } from './w
 export type { WorkbenchRuntimeValue, WorkbenchToolRegistry } from './workbench.ts';
 
 export {
+  PluginViewRuntimeProvider,
+  usePluginViewRuntime,
+  usePluginViewRuntimeOptional,
+  usePluginViewState,
   WorkbenchViewRuntimeProvider,
   useWorkbenchViewRuntime,
   useWorkbenchViewRuntimeOptional,
 } from './view-runtime.tsx';
-export type { WorkbenchViewRuntimeValue } from './view-runtime.tsx';
+export type { PluginViewRuntimeValue, PluginViewMode, WorkbenchViewRuntimeValue } from './view-runtime.tsx';
 
-export { HostActionRegistry } from '../runtime.ts';
+export { HostActionRegistry, HOST_AI_START } from '../runtime.ts';
+export {
+  localViewId,
+  snapshotFromSearchParams,
+  searchParamsFromSnapshot,
+  hrefFromSnapshot,
+} from '../view-adapter.ts';
 export type {
   PluginIpcPort,
   HostActionPort,
@@ -31,10 +41,9 @@ export type {
   PluginRendererModule,
   PluginRuntimeEntry,
   WorkbenchViewContribution,
-  WorkbenchViewTarget,
-  WorkbenchViewOpenInput,
+  PluginViewSnapshot,
+  PluginViewOpenRequest,
+  ViewStateCodec,
   ShellSlotContribution,
   LocaleContribution,
-  EntityPresenter,
-  AiEntitySource,
 } from '../runtime.ts';

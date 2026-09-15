@@ -9,16 +9,3 @@ export type PluginSpace = {
   rootDir: string;
   legacySharedDbPath?: string;
 };
-
-export type PluginRecord = {
-  pluginId: string;
-  entityType: string;
-  id: string;
-  label: string;
-  payload?: Record<string, unknown>;
-};
-
-export type PluginQueryPort = {
-  get(entityType: string, id: string): Promise<PluginRecord | null>;
-  list(query: { entityType: string; q?: string; limit?: number }): Promise<PluginRecord[]>;
-};

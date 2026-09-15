@@ -1,18 +1,16 @@
 import type { ReactNode } from 'react';
 import { Clock, Sprout } from 'lucide-react';
 import { Tooltip } from '@sue/design-web-react';
-import { defineRendererImplementation } from '@true-north/plugin-sdk';
+import { defineRendererImplementation, parsePluginResourceUri } from '@true-north/plugin-sdk';
 import { useHostActions } from '@true-north/plugin-sdk/renderer';
 import { useEffect } from 'react';
-import { growthManifest } from '../plugin';
-import { growthHref } from '../contract';
+import { growthManifest } from '../manifest';
+import { growthIds } from '../contract';
 import { growthLocales } from './locales';
-import { growthWorkbenchTools } from './contributions/ai-decomposition/tools';
-import { growthEntitySources } from './pages/ai/entity-sources';
+import { goalDecomposeTool, taskDecomposeTool } from './contributions/ai-decomposition/tools';
 import { FocusTimerProvider, useFocusTimer } from './pages/focus-timer';
 import { TaskDrawerHost } from './pages/task/detail/TaskDrawer';
 import { bindPluginIpc } from '../client';
-import { growthWorkbenchViews } from './views';
 
 function FocusTimerSlot({ children }: { children?: ReactNode }) {
   return <FocusTimerProvider>{children}</FocusTimerProvider>;
@@ -41,22 +39,43 @@ export function createRenderer() {
       bindPluginIpc(ctx.ipc);
       return {
         icon: Sprout,
-        load: () => import('./pages/index'),
-        workbenchTools: growthWorkbenchTools,
-        workbenchViews: growthWorkbenchViews,
         locales: [growthLocales],
-        entitySources: growthEntitySources,
-        shellSlots: [
-          { slot: 'app-providers', pluginId: 'growth', id: 'focus-timer', order: 30, render: FocusTimerSlot },
-          { slot: 'page-overlay', pluginId: 'growth', id: 'task-drawer', order: 10, render: TaskDrawerSlot },
-          { slot: 'aside-actions', pluginId: 'growth', id: 'focus-action', order: 10, render: FocusActionSlot },
-        ],
-        entityPresenters: [
-          { pluginId: 'growth', entityType: 'todo', kindLabel: '待办', openPath: () => growthHref({ area: 'todo' }) },
-          { pluginId: 'growth', entityType: 'task', kindLabel: '任务', openPath: () => growthHref({ area: 'task' }) },
-          { pluginId: 'growth', entityType: 'habit', kindLabel: '习惯', openPath: (id) => growthHref({ area: 'habit', tab: 'detail', id }) },
-          { pluginId: 'growth', entityType: 'goal', kindLabel: '目标', openPath: () => growthHref({ area: 'goal' }) },
-        ],
+        views: {
+          todo: { load: () => import('./features/todo') },
+          task: { load: () => import('./features/task') },
+          habit: { load: () => import('./features/habit') },
+          goal: { load: () => import('./features/goal') },
+        },
+        workbench: {
+          workspaces: {
+            goalDecompose: goalDecomposeTool,
+            taskDecompose: taskDecomposeTool,
+          },
+        },
+        shell: {
+          slots: {
+            focusTimer: { render: FocusTimerSlot },
+            taskDrawer: { render: TaskDrawerSlot },
+            focusAction: { render: FocusActionSlot },
+          },
+        },
+        openResource(uri) {
+          const parsed = parsePluginResourceUri(uri);
+          if (!parsed || parsed.pluginId !== 'growth' || !parsed.id) return null;
+          if (parsed.collection === 'goals') {
+            return { viewId: growthIds.views.goal, params: { tab: 'tree', id: parsed.id } };
+          }
+          if (parsed.collection === 'tasks') {
+            return { viewId: growthIds.views.task, params: { id: parsed.id } };
+          }
+          if (parsed.collection === 'habits') {
+            return { viewId: growthIds.views.habit, params: { tab: 'detail', id: parsed.id } };
+          }
+          if (parsed.collection === 'todos') {
+            return { viewId: growthIds.views.todo, params: {} };
+          }
+          return null;
+        },
       };
     },
   });

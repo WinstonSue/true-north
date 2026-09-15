@@ -10,10 +10,12 @@ import type {
 
 type RecordKeys<T> = T extends Record<string, unknown> ? keyof T & string : never;
 
-export type TypedMainHandles<M extends PluginManifest> = Omit<PluginMainHandles, 'ipcControllers'> & {
-  ipcControllers?: [RecordKeys<NonNullable<M['contributions']['ipc']>>] extends [never]
-    ? PluginMainHandles['ipcControllers']
-    : Record<RecordKeys<NonNullable<M['contributions']['ipc']>>, { controller: object }>;
+type ExactKeys<Declared, Actual> = [RecordKeys<Declared>] extends [never]
+  ? Actual
+  : Record<RecordKeys<Declared>, unknown> & Actual;
+
+export type TypedMainHandles<M extends PluginManifest> = PluginMainHandles & {
+  ipc?: ExactKeys<NonNullable<M['contributions']['ipc']>, NonNullable<PluginMainHandles['ipc']>>;
 };
 
 export function defineMainImplementation<const M extends PluginManifest>(

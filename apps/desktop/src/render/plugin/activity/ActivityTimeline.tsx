@@ -7,6 +7,7 @@ import type { ActivityVo, HomeTodayVo } from '@true-north/vo';
 import { ActivityController } from '@true-north/web-service';
 import { ACTIVITY_TODAY_INVALIDATE_EVENT } from '@true-north/plugin-sdk';
 import { useRendererPlatform } from '@true-north/plugin-sdk/renderer';
+import { navigatePluginResource } from '../PluginViewFrame';
 import dayjs from 'dayjs';
 import useLocale from '@/utils/useLocale';
 import { pluginPaths } from '../paths';
@@ -17,13 +18,8 @@ function openLink(
   platform: ReturnType<typeof useRendererPlatform>,
   link: ActivityVo['links'][number],
 ) {
-  const presenter = platform.entityPresenters.find((item) => {
-    if (link.pluginId && link.entityType) {
-      return item.pluginId === link.pluginId && item.entityType === link.entityType;
-    }
-    return false;
-  });
-  navigate(presenter?.openPath(link.entityId) || pluginPaths.root);
+  if (navigatePluginResource(navigate, platform, link.uri)) return;
+  navigate(pluginPaths.root);
 }
 
 function formatDuration(totalSeconds: number | undefined, t: Record<string, string>) {

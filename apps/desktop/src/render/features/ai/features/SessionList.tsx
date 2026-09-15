@@ -329,7 +329,7 @@ export function SessionList({
             conversation={conversation}
             active={onAiPage && conversation.id === activeConversationId}
             streaming={streamingConversationIds.includes(conversation.id)}
-            boundLabel={boundLabel(conversation.refType, conversation.refId)}
+            boundLabel={boundLabel(conversation)}
             onSelect={() => selectConversation(conversation.id)}
             onRename={(title) => renameConversation(conversation.id, title)}
             onPin={(pinned) => pinConversation(conversation.id, pinned)}

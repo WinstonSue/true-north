@@ -2,9 +2,10 @@ import http from 'http';
 import type { IncomingMessage, ServerResponse } from 'http';
 import { randomUUID } from 'crypto';
 import type { AiMessagePartVo, AiToolPartVo, AiWorkspacePartVo } from '@true-north/vo';
-import { executeAgentTool, listAgentTools, summarizeToolArgs } from '../../agent/tools';
+import { executeAgentTool, listAgentTools, summarizeToolArgs } from '../../agent/tools.ts';
+import { getPluginAiRegistryOptional } from '../../plugin-ai.registry.ts';
 import { traceExternal } from '@true-north/dev-lab/collector';
-import { getStreamSession } from '../stream-session';
+import { getStreamSession } from '../stream-session.ts';
 
 const PROTOCOL_VERSIONS = ['2025-03-26', '2024-11-05'];
 const DEFAULT_PROTOCOL = '2025-03-26';
@@ -141,7 +142,11 @@ async function handleRpc(message: JsonRpcRequest, streamId?: string): Promise<un
     const protocolVersion = PROTOCOL_VERSIONS.includes(requested) ? requested : DEFAULT_PROTOCOL;
     return {
       protocolVersion,
-      capabilities: { tools: { listChanged: false } },
+      capabilities: {
+        tools: { listChanged: false },
+        resources: { listChanged: false, subscribe: false },
+        prompts: { listChanged: false },
+      },
       serverInfo: { name: 'true-north', version: '0.2.0' },
     };
   }
@@ -190,8 +195,53 @@ async function handleRpc(message: JsonRpcRequest, streamId?: string): Promise<un
     );
   }
 
-  if (method === 'resources/list' || method === 'prompts/list') {
-    return { resources: [], prompts: [] };
+  if (method === 'resources/list') {
+    const registry = getPluginAiRegistryOptional();
+    const resources = registry ? await registry.listResources() : [];
+    return { resources: resources.map((item) => ({ uri: item.uri, name: item.name, mimeType: item.mimeType })) };
+  }
+
+  if (method === 'resources/templates/list') {
+    const registry = getPluginAiRegistryOptional();
+    return { resourceTemplates: registry?.listResourceTemplates() || [] };
+  }
+
+  if (method === 'resources/read') {
+    const uri = typeof params.uri === 'string' ? params.uri : '';
+    const registry = getPluginAiRegistryOptional();
+    const content = uri && registry ? await registry.readResource(uri) : null;
+    if (!content) {
+      throw Object.assign(new Error(`Unknown resource: ${uri}`), { code: -32602 });
+    }
+    return {
+      contents: [
+        {
+          uri: content.uri,
+          mimeType: content.mimeType,
+          text: content.text,
+          blob: content.blob,
+        },
+      ],
+    };
+  }
+
+  if (method === 'prompts/list') {
+    const registry = getPluginAiRegistryOptional();
+    return { prompts: registry?.listPrompts() || [] };
+  }
+
+  if (method === 'prompts/get') {
+    const name = typeof params.name === 'string' ? params.name : '';
+    const args =
+      params.arguments && typeof params.arguments === 'object' && !Array.isArray(params.arguments)
+        ? (params.arguments as Record<string, string>)
+        : {};
+    const registry = getPluginAiRegistryOptional();
+    const prompt = name && registry ? await registry.getPrompt(name, args) : null;
+    if (!prompt) {
+      throw Object.assign(new Error(`Unknown prompt: ${name}`), { code: -32602 });
+    }
+    return prompt;
   }
 
   throw Object.assign(new Error(`Method not found: ${method}`), { code: -32601 });

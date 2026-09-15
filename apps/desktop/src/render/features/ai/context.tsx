@@ -21,9 +21,8 @@ import type {
 import { workspaceEntityRef } from '@true-north/vo';
 import { AiService } from '@true-north/web-service';
 import { useWorkbench } from '../workbench';
+import { useRendererPlatform } from '@true-north/plugin-sdk/renderer';
 import type { WorkbenchToolRegistry } from '../workbench/types';
-import type { AiEntityRecord, AiEntitySource } from './entity-source';
-import { pluginViewInputFromEntity } from './entity-source';
 import { resolveAgentId } from './agent-selection';
 import {
   applyDeltaToMessages,
@@ -102,9 +101,9 @@ function shouldAutoOpenWorkspace(
   }
 }
 
-function withoutEntityParams(params: URLSearchParams, sources: AiEntitySource[]) {
-  const next = new URLSearchParams(params);
-  for (const source of sources) next.delete(source.searchParam);
+function conversationSearch(id?: string | null) {
+  const next = new URLSearchParams();
+  if (id) next.set('conversationId', id);
   return next;
 }
 
@@ -116,15 +115,14 @@ function titleFromFirstMessage(text: string): string {
 
 export function AiSessionProvider({
   children,
-  entitySources,
 }: {
   children: ReactNode;
-  entitySources: AiEntitySource[];
 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const onAiPage = isAiPath(location.pathname);
   const { openToolTab, openPluginView, pendingFollowUp, clearFollowUp, tools } = useWorkbench();
+  const platform = useRendererPlatform();
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<ConversationVo[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -135,7 +133,6 @@ export function AiSessionProvider({
   const [streamRegistry, setStreamRegistry] = useState<StreamRegistry>({});
   const [streamError, setStreamError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [entities, setEntities] = useState<AiEntityRecord[]>([]);
   const [codingAgents, setCodingAgents] = useState<RuntimeAgentVo[]>([]);
   const [defaultAgentId, setDefaultAgentId] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState('');
@@ -206,8 +203,7 @@ export function AiSessionProvider({
     if (!pendingFollowUp) return;
     if (!onAiPage) return;
     if (pendingFollowUp.conversationId !== activeConversationId) {
-      const next = withoutEntityParams(searchParams, entitySources);
-      next.set('conversationId', pendingFollowUp.conversationId);
+      const next = conversationSearch(pendingFollowUp.conversationId);
       setSearchParams(next, { replace: true });
       return;
     }
@@ -217,7 +213,7 @@ export function AiSessionProvider({
   }, [
     activeConversationId,
     clearFollowUp,
-    entitySources,
+    clearFollowUp,
     focusComposer,
     onAiPage,
     pendingFollowUp,
@@ -313,17 +309,15 @@ export function AiSessionProvider({
   );
 
   const loadMeta = useCallback(async () => {
-    const [entityLists, agentsResult, selectionResult] = await Promise.all([
-      Promise.all(entitySources.map((source) => source.list())),
+    const [agentsResult, selectionResult] = await Promise.all([
       AiService.listRuntimeAgents(),
       AiService.getRuntimeSelection(),
     ]);
-    setEntities(entityLists.flat());
     const agents = agentsResult.ok === false ? [] : agentsResult.data;
     setCodingAgents(agents);
     const savedId = selectionResult.ok === false ? null : selectionResult.data.runtimeId;
     setDefaultAgentId(resolveAgentId(agents, savedId));
-  }, [entitySources]);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -368,100 +362,8 @@ export function AiSessionProvider({
   }, [activeConversationId, codingAgents, defaultAgentId]);
 
   const attemptedEntityKeysRef = useRef(new Set<string>());
-
-  useEffect(() => {
-    const refs = collectEntityRefs(activeMessages);
-    if (!refs.length) return;
-
-    let cancelled = false;
-    (async () => {
-      for (const ref of refs) {
-        if (cancelled) return;
-        const key = `${ref.type}:${ref.id}`;
-        if (attemptedEntityKeysRef.current.has(key)) continue;
-        if (entities.some((item) => item.type === ref.type && item.id === ref.id)) {
-          attemptedEntityKeysRef.current.add(key);
-          continue;
-        }
-        attemptedEntityKeysRef.current.add(key);
-        const source = entitySources.find((item) => item.type === ref.type);
-        if (!source) continue;
-        const found = await source.find(ref.id);
-        if (!cancelled && found) {
-          setEntities((items) =>
-            items.some((item) => item.type === found.type && item.id === found.id)
-              ? items
-              : [...items, found]
-          );
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activeMessages, entities, entitySources]);
-
-  useEffect(() => {
-    if (!onAiPage) return;
-    const matched = entitySources
-      .map((source) => ({ source, id: searchParams.get(source.searchParam) }))
-      .find((item) => item.id);
-    if (!matched?.id) return;
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const found = await matched.source.find(matched.id!);
-        if (!found) {
-          message.error(`未找到${matched.source.boundKindLabel}`);
-          return;
-        }
-        const link: AiEntityLinkVo = { type: found.type, id: found.id, label: found.label };
-        if (cancelled) return;
-
-        const bound = await AiService.ensureBoundConversation({ refType: link.type, refId: link.id });
-        if (bound.ok === false) {
-          message.error(bound.message);
-          return;
-        }
-        if (cancelled) return;
-
-        await refreshConversations(bound.data.conversation.id);
-
-        if (bound.data.created) {
-          setStreamError(null);
-          const result = await AiService.startMessageStream(bound.data.conversation.id, {
-            text: `请帮我拆解 @${link.label}`,
-            entityLinks: [link],
-          });
-          if (result.ok === false) {
-            message.error(result.message);
-          } else {
-            beginStream({
-              conversationId: bound.data.conversation.id,
-              streamId: result.data.streamId,
-              user: result.data.user,
-              assistant: result.data.assistant,
-              autoOpenOnDone: true,
-            });
-          }
-        }
-
-        const next = withoutEntityParams(searchParams, entitySources);
-        next.set('conversationId', bound.data.conversation.id);
-        setSearchParams(next, { replace: true });
-      } catch (error) {
-        if (!cancelled) {
-          message.error(error instanceof Error ? error.message : '发起拆解会话失败');
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [beginStream, entitySources, onAiPage, searchParams, refreshConversations, setSearchParams]);
+  void attemptedEntityKeysRef;
+  void collectEntityRefs;
 
   useEffect(() => {
     if (!onAiPage) return;
@@ -568,11 +470,9 @@ export function AiSessionProvider({
         navigate(`/ai?conversationId=${encodeURIComponent(id)}`);
         return;
       }
-      const next = withoutEntityParams(searchParams, entitySources);
-      next.set('conversationId', id);
-      setSearchParams(next, { replace: true });
+      setSearchParams(conversationSearch(id), { replace: true });
     },
-    [entitySources, navigate, onAiPage, searchParams, setSearchParams]
+    [navigate, onAiPage, setSearchParams]
   );
 
   const createBlankConversation = useCallback(async () => {
@@ -582,11 +482,9 @@ export function AiSessionProvider({
       navigate('/ai');
       return;
     }
-    const next = withoutEntityParams(searchParams, entitySources);
-    next.delete('conversationId');
-    setSearchParams(next, { replace: true });
+    setSearchParams(conversationSearch(null), { replace: true });
     requestAnimationFrame(() => focusComposer());
-  }, [entitySources, focusComposer, navigate, onAiPage, searchParams, setSearchParams]);
+  }, [focusComposer, navigate, onAiPage, setSearchParams]);
 
   const renameConversation = useCallback(async (id: string, title: string) => {
     const result = await AiService.renameConversation(id, { title });
@@ -644,13 +542,11 @@ export function AiSessionProvider({
       setActiveConversationId(null);
       setStreamError(null);
       if (onAiPage) {
-        const next = withoutEntityParams(searchParams, entitySources);
-        next.delete('conversationId');
-        setSearchParams(next, { replace: true });
+        setSearchParams(conversationSearch(null), { replace: true });
         requestAnimationFrame(() => focusComposer());
       }
     },
-    [commitMessages, commitStreamRegistry, conversations, entitySources, focusComposer, onAiPage, searchParams, setSearchParams]
+    [commitMessages, commitStreamRegistry, conversations, focusComposer, onAiPage, setSearchParams]
   );
 
   const selectCodingAgent = useCallback(
@@ -715,15 +611,10 @@ export function AiSessionProvider({
       conversationId = created.data.id;
       setConversations((items) => [created.data, ...items]);
       setActiveConversationId(conversationId);
-      const next = withoutEntityParams(searchParams, entitySources);
-      next.set('conversationId', conversationId);
-      setSearchParams(next, { replace: true });
+      setSearchParams(conversationSearch(conversationId), { replace: true });
     }
 
-    const result = await AiService.startMessageStream(conversationId, {
-      text,
-      entityLinks: entityLinks.length ? entityLinks : undefined,
-    });
+    const result = await AiService.startMessageStream(conversationId, { text });
     if (result.ok === false) {
       setDraftState({ text, links: entityLinks });
       message.error(result.message);
@@ -742,9 +633,7 @@ export function AiSessionProvider({
     beginStream,
     canSend,
     draft,
-    entitySources,
-    searchParams,
-    selectedAgentId,
+    setSearchParams,
     setSearchParams,
   ]);
 
@@ -764,28 +653,22 @@ export function AiSessionProvider({
     [activeConversationId, activeMessages, openToolTab, tools]
   );
 
-  const openEntity = useCallback(
-    (type: string, id: string) => {
-      const input = pluginViewInputFromEntity(entitySources, type, id);
-      if (!input) {
-        message.warning('无法打开该引用');
+  const openResource = useCallback(
+    (uri: string) => {
+      const request = platform.openResource(uri);
+      if (!request) {
+        message.warning('无法打开该资源');
         return;
       }
-      void openPluginView(input);
+      void openPluginView(request);
     },
-    [entitySources, openPluginView]
+    [openPluginView, platform],
   );
 
-  const boundLabel = useCallback(
-    (refType?: string, refId?: string) => {
-      if (!refType || !refId) return '';
-      const source = entitySources.find((item) => item.type === refType);
-      const entity = entities.find((item) => item.type === refType && item.id === refId);
-      const kind = source?.boundKindLabel || source?.kindLabel || refType;
-      return `${kind} · ${entity?.label || kind}`;
-    },
-    [entities, entitySources]
-  );
+  const boundLabel = useCallback((conversation?: ConversationVo) => {
+    const attachment = conversation?.attachments?.[0];
+    return attachment?.label || attachment?.uri || '';
+  }, []);
 
   const value: SessionValue = {
     conversations,
@@ -801,8 +684,6 @@ export function AiSessionProvider({
     streamingConversationIds: streamingConversationIds(streamRegistry),
     streamError,
     loading,
-    entities,
-    entitySources,
     codingAgents,
     selectedAgentId,
     selectedAgent,
@@ -817,7 +698,7 @@ export function AiSessionProvider({
     sendUserMessage,
     cancelStreaming,
     openWorkspace,
-    openEntity,
+    openResource,
     boundLabel,
   };
 

@@ -3,11 +3,16 @@ export {
   PLUGIN_HUB_PATH,
   namespacedId,
   pluginPath,
+  contributionKey,
+  ipcRoute,
+  mcpName,
+  pluginResourceUri,
+  parsePluginResourceUri,
   SHELL_SLOT_IDS,
   pluginManifestSchema,
   definePluginManifest,
   parsePluginManifest,
-  contributionKey,
+  derivedContributionId,
   hostStorageCapabilitySchema,
   captureSuggestionSchema,
   capturePayloadSchema,
@@ -17,6 +22,7 @@ export {
   ACTIVITY_RECORD_EVENT,
   ACTIVITY_UNLINK_EVENT,
   ACTIVITY_TODAY_INVALIDATE_EVENT,
+  pluginResourceRefSchema,
   todaySectionKindSchema,
   todaySectionDescriptorSchema,
   todaySectionSnapshotSchema,
@@ -27,13 +33,10 @@ export {
 } from '@true-north/plugin-contract';
 export type {
   PluginApiVersion,
-  HostCapabilityId,
   ShellSlotId,
   PluginManifest,
   HostStorageCapability,
   PluginSpace,
-  PluginRecord,
-  PluginQueryPort,
   CaptureSuggestion,
   CapturePayload,
   AdoptCaptureRequest,
@@ -44,56 +47,63 @@ export type {
   ActivityLinkRef,
   CreateActivityInput,
   ActivityPort,
+  PluginResourceRef,
   TodaySectionKind,
   TodaySectionDescriptor,
   TodaySectionSnapshot,
+  TodaySectionValues,
   TodayListItem,
   TodayListItemAction,
   TodayCommand,
   CatalogIssue,
 } from '@true-north/plugin-contract';
 
-export { assemblePluginCatalog, reconcileMain, reconcileRenderer } from './catalog.ts';
+export { assemblePluginCatalog, materializeMain, materializeRenderer, reconcileMain, reconcileRenderer } from './catalog.ts';
 export type { PluginCatalog, AssembledPlugin, AssembleCatalogOptions } from './catalog.ts';
+export type { MaterializedMain, MaterializedRenderer } from './materialize.ts';
+export {
+  localViewId,
+  snapshotFromSearchParams,
+  searchParamsFromSnapshot,
+  hrefFromSnapshot,
+} from './view-adapter.ts';
 
 export { defineMainImplementation, defineRendererImplementation } from './define.ts';
 export type { TypedMainHandles } from './define.ts';
 
-export { HostActionRegistry, WORKBENCH_EXTRACT_ACTION } from './runtime.ts';
+export { HostActionRegistry, HOST_AI_START } from './runtime.ts';
 export { HOST_WORKBENCH_OPEN, HOST_BROWSER_OPEN } from './host-commands.ts';
 export type {
-  AiCapability,
   AiCachePort,
+  AgentToolSpec,
   AgentTool,
-  AgentRule,
-  EntityResolver,
-  AiContribution,
+  PluginResourceContent,
+  PluginResourceProvider,
+  PluginPromptProvider,
   WorkbenchHostActions,
   WorkbenchToolProps,
   WorkbenchToolDefinition,
-  WorkbenchActionContribution,
-  WorkbenchViewContribution,
   WorkbenchExtractHandler,
   WorkbenchWorkspaceHost,
-  AiEntityRecord,
-  AiEntitySource,
-  WorkbenchViewTarget,
-  WorkbenchViewOpenInput,
+  PluginViewSnapshot,
+  PluginViewOpenRequest,
+  ViewStateCodec,
   PluginIcon,
   LocaleContribution,
-  EntityPresenter,
-  TodaySectionContribution,
   PluginIpcPort,
   HostActionPort,
+  PluginAiStartInput,
   PluginMainContext,
   PluginMainHandles,
   PluginMainModule,
   PluginRendererContext,
   ShellSlotContribution,
   PluginRuntimeEntry,
+  WorkbenchViewContribution,
   PluginRendererHandles,
   PluginRendererModule,
   PluginDescriptor,
 } from './runtime.ts';
 
 export { AiPlatformError, parseAiError, toIpcError } from './ai-error.ts';
+export { prefixPluginIpc } from './ipc-prefix.ts';

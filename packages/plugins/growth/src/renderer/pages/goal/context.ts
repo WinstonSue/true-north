@@ -4,7 +4,8 @@ import { GoalService, TaskService } from '../../../client';
 import { message } from '@sue/design-web-react';
 import { GoalStatus, GoalType, Importance, Difficulty } from '@true-north/enum';
 import { createInjectState } from '@true-north/common-web-utils';
-import { useWorkbenchViewRuntimeOptional } from '@true-north/plugin-sdk/renderer';
+import { usePluginViewState } from '@true-north/plugin-sdk/renderer';
+import { goalViewCodec } from '../../../contract/view-state';
 
 interface GoalFilters {
   status?: GoalStatus[];
@@ -50,13 +51,11 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
   const [selectedGoal, setSelectedGoal] = useState<GoalVo | null>(null);
 
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
-  const viewRuntime = useWorkbenchViewRuntimeOptional();
+  const [viewState] = usePluginViewState(goalViewCodec);
 
   useEffect(() => {
-    const target = viewRuntime?.target;
-    if (!target || target.type !== 'goal') return;
-    setSelectedGoalId(target.id);
-  }, [viewRuntime?.generation, viewRuntime?.target]);
+    if (viewState.id) setSelectedGoalId(viewState.id);
+  }, [viewState.id]);
 
   // 获取目标树数据 - 只获取根节点
   const fetchGoalTree = useCallback(async () => {

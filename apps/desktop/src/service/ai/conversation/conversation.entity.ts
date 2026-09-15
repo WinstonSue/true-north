@@ -1,17 +1,15 @@
 import 'reflect-metadata';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '@true-north/plugin-sdk/main';
+import type { PluginResourceAttachmentVo } from '@true-north/vo';
 
 @Entity('ai_conversation')
 export class AiConversation extends BaseEntity {
   @Column('varchar', { length: 255 })
   title!: string;
 
-  @Column('varchar', { length: 16, nullable: true })
-  refType?: 'goal' | 'task' | null;
-
-  @Column('varchar', { nullable: true })
-  refId?: string | null;
+  @Column('simple-json', { nullable: true })
+  attachments?: PluginResourceAttachmentVo[] | null;
 
   @Column('varchar', { length: 64, nullable: true })
   runtimeId?: string | null;

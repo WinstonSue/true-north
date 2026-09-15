@@ -72,6 +72,7 @@ export type CaptureAdoptedLink = {
   pluginId: string;
   entityType: string;
   entityId: string;
+  uri?: string;
   role?: string;
   label?: string;
 };

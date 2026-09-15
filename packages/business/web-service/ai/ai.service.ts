@@ -3,12 +3,8 @@ import type {
   CancelStreamResponseVo,
   ConversationVo,
   CreateConversationRequestVo,
-  EnsureBoundConversationRequestVo,
-  EnsureBoundConversationResponseVo,
-  EnsureBoundGoalRequestVo,
-  EnsureBoundTaskRequestVo,
-  GoalDecomposeRequestVo,
-  GoalDecomposeResponseVo,
+  EnsureResourceConversationRequestVo,
+  EnsureResourceConversationResponseVo,
   MessageVo,
   PatchConversationRuntimeRequestVo,
   PatchWorkspaceRequestVo,
@@ -21,8 +17,6 @@ import type {
   RuntimeSettingsVo,
   StartMessageStreamRequestVo,
   StartMessageStreamResponseVo,
-  TaskDecomposeRequestVo,
-  TaskDecomposeResponseVo,
 } from '@true-north/vo';
 import { AI_CONVERSATION_STREAM_CHANNEL } from '@true-north/vo';
 import AiController from '../controller/ai';
@@ -100,16 +94,10 @@ export default class AiService {
     return wrap(() => AiController.putRuntimeSelection(body));
   }
 
-  static async executeCapability<T>(key: string, body: Record<string, unknown>): Promise<AiResult<T>> {
-    return wrap(() => AiController.executeCapability<T>(key, body));
-  }
-
-  static async decomposeGoal(body: GoalDecomposeRequestVo): Promise<AiResult<GoalDecomposeResponseVo>> {
-    return wrap(() => AiController.decomposeGoal(body));
-  }
-
-  static async decomposeTask(body: TaskDecomposeRequestVo): Promise<AiResult<TaskDecomposeResponseVo>> {
-    return wrap(() => AiController.decomposeTask(body));
+  static async ensureResourceConversation(
+    body: EnsureResourceConversationRequestVo
+  ): Promise<AiResult<EnsureResourceConversationResponseVo>> {
+    return wrap(() => AiController.ensureResourceConversation(body));
   }
 
   static async listConversations(): Promise<AiResult<ConversationVo[]>> {
@@ -122,20 +110,6 @@ export default class AiService {
 
   static async ensureCaptureInbox(): Promise<AiResult<ConversationVo>> {
     return wrap(() => AiController.ensureCaptureInbox());
-  }
-
-  static async ensureBoundConversation(
-    body: EnsureBoundConversationRequestVo
-  ): Promise<AiResult<EnsureBoundConversationResponseVo>> {
-    return wrap(() => AiController.ensureBoundConversation(body));
-  }
-
-  static async ensureBoundGoal(body: EnsureBoundGoalRequestVo): Promise<AiResult<EnsureBoundConversationResponseVo>> {
-    return wrap(() => AiController.ensureBoundGoal(body));
-  }
-
-  static async ensureBoundTask(body: EnsureBoundTaskRequestVo): Promise<AiResult<EnsureBoundConversationResponseVo>> {
-    return wrap(() => AiController.ensureBoundTask(body));
   }
 
   static async patchConversationRuntime(

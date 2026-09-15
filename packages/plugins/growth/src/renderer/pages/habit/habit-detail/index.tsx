@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import {
   Card,
   Button,
@@ -31,9 +30,7 @@ import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import styles from '../style.module.less';
 
-export const HabitDetailPage: React.FC<{ id?: string }> = ({ id: idProp }) => {
-  const [params] = useSearchParams();
-  const id = idProp || params.get('id') || undefined;
+export const HabitDetailPage: React.FC<{ id?: string }> = ({ id }) => {
   const { refreshHabits, openList } = useHabitContext();
 
   const [habit, setHabit] = useState<HabitVo | null>(null);

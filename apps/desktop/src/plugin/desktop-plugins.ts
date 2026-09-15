@@ -1,8 +1,8 @@
 import type { PluginDescriptor, PluginManifest } from '@true-north/plugin-sdk';
-import { growthManifest } from '@true-north/plugin-growth/plugin';
-import { expenseManifest } from '@true-north/plugin-expense/plugin';
-import { purchaseManifest } from '@true-north/plugin-purchase/plugin';
-import { libraryManifest } from '@true-north/plugin-library/plugin';
+import { growthManifest } from '@true-north/plugin-growth/manifest';
+import { expenseManifest } from '@true-north/plugin-expense/manifest';
+import { purchaseManifest } from '@true-north/plugin-purchase/manifest';
+import { libraryManifest } from '@true-north/plugin-library/manifest';
 
 export const FIRST_PARTY_PLUGIN_IDS = ['growth', 'expense', 'purchase', 'library'] as const;
 export type FirstPartyPluginId = (typeof FIRST_PARTY_PLUGIN_IDS)[number];

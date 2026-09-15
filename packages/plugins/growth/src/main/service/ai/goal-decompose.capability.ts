@@ -1,9 +1,10 @@
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
-import { AiSuggestionKind, GoalDecomposeKey } from '@true-north/enum';
+import { AiSuggestionKind } from '@true-north/enum';
 import type { GoalDecomposeRequestVo, GoalDecomposeResponseVo } from '@true-north/vo';
 import { AiPlatformError } from '@true-north/plugin-sdk';
-import { growthAi } from '../../context';
+import { GoalDecomposeKey } from '../../../contract';
+import { growthCache } from '../../context';
 import { goalContextBuilder } from './goal-context.builder';
 import { normalizeDecomposeSuggestions, refreshDecomposeConflicts } from './decompose-normalize';
 
@@ -27,11 +28,11 @@ export class GoalDecomposeCapability {
 
   async execute(input: GoalDecomposeRequestVo): Promise<GoalDecomposeResponseVo> {
     const context = await goalContextBuilder.build(input.goalId);
-    const contextFingerprint = growthAi().cache.fingerprintPromptContext(context.promptContext);
+    const contextFingerprint = growthCache().fingerprintPromptContext(context.promptContext);
 
     const hasDrafts = Array.isArray(input.suggestions) && input.suggestions.length > 0;
     if (!hasDrafts) {
-      const cached = await growthAi().cache.findMatching<GoalDecomposeResponseVo>({
+      const cached = await growthCache().findMatching<GoalDecomposeResponseVo>({
         capabilityKey: this.key,
         refType: REF_TYPE,
         refId: input.goalId,
@@ -82,7 +83,7 @@ export class GoalDecomposeCapability {
       suggestions,
     };
 
-    await growthAi().cache.upsert({
+    await growthCache().upsert({
       capabilityKey: this.key,
       refType: REF_TYPE,
       refId: input.goalId,

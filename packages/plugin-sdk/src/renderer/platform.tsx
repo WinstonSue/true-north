@@ -1,14 +1,12 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import type {
-  AiEntitySource,
-  EntityPresenter,
   HostActionPort,
   LocaleContribution,
   PluginIpcPort,
   PluginRendererContext,
   PluginRuntimeEntry,
+  PluginViewOpenRequest,
   ShellSlotContribution,
-  WorkbenchActionContribution,
   WorkbenchToolDefinition,
   WorkbenchViewContribution,
   WorkbenchWorkspaceHost,
@@ -20,14 +18,14 @@ export type RendererPlatformState = {
   plugins: PluginRuntimeEntry[];
   shellSlots: ShellSlotContribution[];
   workbenchTools: WorkbenchToolDefinition[];
-  workbenchActions: WorkbenchActionContribution[];
+  workbenchActions: Array<{ id: string; run: (input: Record<string, unknown>) => Promise<void> }>;
   workbenchViews: WorkbenchViewContribution[];
   locales: LocaleContribution[];
-  entityPresenters: EntityPresenter[];
-  entitySources: AiEntitySource[];
   ipc: PluginIpcPort;
   hostActions: HostActionPort;
   workspaceHost?: WorkbenchWorkspaceHost;
+  scopes: Record<string, React.ComponentType<{ children?: ReactNode }>>;
+  openResource: (uri: string) => PluginViewOpenRequest | null;
   error?: string;
 };
 
@@ -58,14 +56,6 @@ export class RendererPlatform {
     return this.state.locales;
   }
 
-  get entityPresenters() {
-    return this.state.entityPresenters;
-  }
-
-  get entitySources() {
-    return this.state.entitySources;
-  }
-
   get ipc() {
     return this.state.ipc;
   }
@@ -76,6 +66,10 @@ export class RendererPlatform {
 
   get error() {
     return this.state.error;
+  }
+
+  openResource(uri: string) {
+    return this.state.openResource(uri);
   }
 }
 

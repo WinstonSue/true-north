@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ActivityCaptureKey } from '@true-north/enum';
 import { type AgentTool } from '@true-north/plugin-sdk';
-import { getPluginHost } from '../../../plugin/active-host';
+import { activityCaptureCapability } from './activity-capture.capability';
 
 const captureDraftSchema = z.object({
   kind: z.enum(['todo', 'expense', 'purchase', 'bookmark']),
@@ -63,9 +63,11 @@ const captureActivity: AgentTool = {
   schema: captureSchema,
   async execute(args, ctx) {
     const parsed = captureSchema.parse(args);
-    const result = await getPluginHost().capabilities.get<typeof parsed, { runId: string; suggestions: unknown[] }>(
-      ActivityCaptureKey,
-    ).execute(parsed);
+    const result = await activityCaptureCapability.execute({
+      analysisSummary: parsed.analysisSummary,
+      sourceText: parsed.sourceText,
+      suggestions: parsed.suggestions ?? [],
+    });
     ctx.appendWorkspace({
       type: 'workspace',
       workspaceKey: ActivityCaptureKey,

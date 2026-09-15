@@ -4,11 +4,6 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./plugin": {
-      "types": "./src/plugin.ts",
-      "import": "./src/plugin.ts",
-      "default": "./src/plugin.ts"
-    },
     "./manifest": {
       "types": "./src/manifest.ts",
       "import": "./src/manifest.ts",

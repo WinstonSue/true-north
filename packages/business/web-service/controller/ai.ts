@@ -3,12 +3,8 @@ import type {
   CancelStreamResponseVo,
   ConversationVo,
   CreateConversationRequestVo,
-  EnsureBoundConversationRequestVo,
-  EnsureBoundConversationResponseVo,
-  EnsureBoundGoalRequestVo,
-  EnsureBoundTaskRequestVo,
-  GoalDecomposeRequestVo,
-  GoalDecomposeResponseVo,
+  EnsureResourceConversationRequestVo,
+  EnsureResourceConversationResponseVo,
   MessageVo,
   PatchConversationRuntimeRequestVo,
   PatchWorkspaceRequestVo,
@@ -21,8 +17,6 @@ import type {
   RuntimeSettingsVo,
   StartMessageStreamRequestVo,
   StartMessageStreamResponseVo,
-  TaskDecomposeRequestVo,
-  TaskDecomposeResponseVo,
 } from '@true-north/vo';
 
 export default class AiController {
@@ -74,28 +68,8 @@ export default class AiController {
     return request<RuntimeSelectionVo>({ method: 'put' })(`/ai/runtime/selection`, body);
   }
 
-  static async executeCapability<T>(key: string, body: Record<string, unknown>) {
-    return request<T>({ method: 'post' })(`/ai/capabilities/${encodeURIComponent(key)}`, body);
-  }
-
-  static async decomposeGoal(body: GoalDecomposeRequestVo) {
-    return request<GoalDecomposeResponseVo>({ method: 'post' })(`/ai/capabilities/goal/decompose`, body);
-  }
-
-  static async decomposeTask(body: TaskDecomposeRequestVo) {
-    return request<TaskDecomposeResponseVo>({ method: 'post' })(`/ai/capabilities/task/decompose`, body);
-  }
-
-  static async ensureBoundConversation(body: EnsureBoundConversationRequestVo) {
-    return request<EnsureBoundConversationResponseVo>({ method: 'post' })(`/ai/conversations/bound`, body);
-  }
-
-  static async ensureBoundGoal(body: EnsureBoundGoalRequestVo) {
-    return request<EnsureBoundConversationResponseVo>({ method: 'post' })(`/ai/conversations/bound/goal`, body);
-  }
-
-  static async ensureBoundTask(body: EnsureBoundTaskRequestVo) {
-    return request<EnsureBoundConversationResponseVo>({ method: 'post' })(`/ai/conversations/bound/task`, body);
+  static async ensureResourceConversation(body: EnsureResourceConversationRequestVo) {
+    return request<EnsureResourceConversationResponseVo>({ method: 'post' })(`/ai/conversations/resource`, body);
   }
 
   static async patchConversationRuntime(id: string, body: PatchConversationRuntimeRequestVo) {

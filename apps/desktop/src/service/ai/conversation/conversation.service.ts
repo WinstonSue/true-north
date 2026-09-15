@@ -2,21 +2,20 @@ import { randomUUID } from 'crypto';
 import type { EntityManager } from 'typeorm';
 import { AiMessageRole } from '@true-north/enum';
 import type {
-  AiEntityLinkVo,
   AiMessagePartVo,
   AiTextPartVo,
   AiWorkspacePartVo,
   ConversationVo,
-  EnsureBoundConversationResponseVo,
+  EnsureResourceConversationResponseVo,
   MessageVo,
   PatchConversationRuntimeRequestVo,
   PatchWorkspaceRequestVo,
+  PluginResourceAttachmentVo,
   StartMessageStreamResponseVo,
 } from '@true-north/vo';
 import { workspaceEntityRef } from '@true-north/vo';
 import { bindStreamToCurrentTrace } from '@true-north/dev-lab/collector';
 import { AiPlatformError } from '../ai-error';
-import { entityResolverRegistry } from '../entity/entity-resolver.registry';
 import { agentDef } from '../runtime/registry';
 import { killChildProcess, runtimeService } from '../runtime';
 import { readRuntimeId } from '../runtime/settings-store';
@@ -56,8 +55,7 @@ function toConversationVo(entity: AiConversation): ConversationVo {
     createdAt: toIso(entity.createdAt),
     pinned: Boolean(entity.pinned),
     purpose: entity.purpose || 'chat',
-    refType: entity.refType || undefined,
-    refId: entity.refId || undefined,
+    attachments: entity.attachments || undefined,
     runtimeId: entity.runtimeId || undefined,
   };
 }
@@ -72,9 +70,11 @@ function toMessageVo(entity: AiMessage): MessageVo {
   };
 }
 
-function formatEntityLinks(links: AiEntityLinkVo[] | undefined): string {
-  if (!links?.length) return '';
-  return links.map((link) => `@${link.label} {${link.type}:${link.id}}`).join(', ');
+function formatAttachments(attachments: PluginResourceAttachmentVo[] | null | undefined): string {
+  if (!attachments?.length) return '';
+  return attachments
+    .map((item) => `- ${item.label || item.uri} (${item.uri})${item.skill ? ` skill=${item.skill}` : ''}`)
+    .join('\n');
 }
 
 function textFromParts(parts: AiMessagePartVo[]): string {
@@ -82,8 +82,7 @@ function textFromParts(parts: AiMessagePartVo[]): string {
   for (const part of parts) {
     if (part.type === 'text') {
       const body = part.text || '';
-      const refs = formatEntityLinks(part.entityLinks);
-      texts.push(refs ? `${body}\n[引用: ${refs}]`.trim() : body);
+      texts.push(body);
     } else if (part.type === 'workspace') {
       const ref = workspaceEntityRef(part.payload);
       const refLabel = ref ? ` ${ref.type}:${ref.id} ${ref.label}` : '';
@@ -149,32 +148,22 @@ export class ConversationService {
     return this.createBlank('收集箱', 'capture');
   }
 
-  async ensureBoundConversation(refType: string, refId: string): Promise<EnsureBoundConversationResponseVo> {
-    const type = refType?.trim();
-    const id = refId?.trim();
-    if (!type) throw AiPlatformError.internal('缺少 refType');
-    if (!id) throw AiPlatformError.internal('缺少 refId');
-    const resolved = await entityResolverRegistry().resolve(type, id);
-    const existing = await this.conversationRepository.findByFilter({ refType: type, refId: id });
-    if (existing[0]) {
-      return { conversation: toConversationVo(existing[0]), created: false };
+  async ensureResourceConversation(input: PluginResourceAttachmentVo): Promise<EnsureResourceConversationResponseVo> {
+    const uri = input.uri?.trim();
+    if (!uri) throw AiPlatformError.internal('缺少资源 URI');
+    const existing = (await this.conversationRepository.findByFilter({})).find((item) =>
+      (item.attachments || []).some((attachment) => attachment.uri === uri),
+    );
+    if (existing) {
+      return { conversation: toConversationVo(existing), created: false };
     }
     const entity = new AiConversation();
-    entity.title = `拆解：${resolved.name}`;
-    entity.refType = type as 'goal' | 'task';
-    entity.refId = id;
+    entity.title = input.label ? `拆解：${input.label}` : '资源会话';
+    entity.attachments = [{ uri, label: input.label, skill: input.skill }];
     entity.pinned = false;
     entity.runtimeId = runtimeIdForConversation(undefined, readRuntimeId());
     const saved = await this.conversationRepository.create(entity);
     return { conversation: toConversationVo(saved), created: true };
-  }
-
-  async ensureBoundGoal(goalId: string): Promise<EnsureBoundConversationResponseVo> {
-    return this.ensureBoundConversation('goal', goalId);
-  }
-
-  async ensureBoundTask(taskId: string): Promise<EnsureBoundConversationResponseVo> {
-    return this.ensureBoundConversation('task', taskId);
   }
 
   async rename(conversationId: string, title?: string): Promise<ConversationVo> {
@@ -223,7 +212,6 @@ export class ConversationService {
   async startMessageStream(
     conversationId: string,
     text: string,
-    entityLinks?: AiEntityLinkVo[]
   ): Promise<StartMessageStreamResponseVo> {
     const trimmed = text?.trim();
     if (!trimmed) {
@@ -244,9 +232,6 @@ export class ConversationService {
       user.conversationId = conversationId;
       user.role = AiMessageRole.USER;
       const userPart: AiTextPartVo = { type: 'text', text: trimmed };
-      if (entityLinks?.length) {
-        userPart.entityLinks = entityLinks;
-      }
       user.parts = [userPart];
       const savedUser = await this.messageRepository.create(user);
 
@@ -362,11 +347,16 @@ export class ConversationService {
         conversation.runtimeThreadId,
         selected.id
       );
+      const attachmentNote = formatAttachments(conversation.attachments);
+      const historyPrompt = buildRuntimePrompt(withoutPlaceholder, resume, latestUserText);
+      const prompt = resume
+        ? latestUserText
+        : [attachmentNote ? `当前会话附件:\n${attachmentNote}` : '', historyPrompt].filter(Boolean).join('\n\n');
       const result = await runtimeService.runChat({
         streamId,
         conversationId,
         assistantId,
-        prompt: buildRuntimePrompt(withoutPlaceholder, resume, latestUserText),
+        prompt,
         resumeThreadId: resume ? conversation.runtimeThreadId || undefined : undefined,
         preferredRuntimeId: preferred,
         signal,

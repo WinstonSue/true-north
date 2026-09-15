@@ -1,71 +1,67 @@
 import { z } from 'zod';
-import { PLUGIN_API_VERSION, SHELL_SLOT_IDS } from './ids.ts';
+import { PLUGIN_API_VERSION, SHELL_SLOT_IDS, contributionKey } from './ids.ts';
 import { todaySectionDescriptorSchema } from './today.ts';
 
-export const ipcContributionSchema = z.object({
-  routePrefix: z.string().min(1),
-});
-
-export const keyedContributionSchema = z.object({
-  key: z.string().min(1).optional(),
-});
-
-export const namedContributionSchema = z.object({
-  name: z.string().min(1).optional(),
-});
-
-export const typedContributionSchema = z.object({
-  type: z.string().min(1).optional(),
-});
-
-export const idContributionSchema = z.object({
-  id: z.string().min(1).optional(),
-});
+export const emptyContributionSchema = z.object({}).strict();
 
 export const shellSlotContributionSchema = z.object({
   slot: z.enum(SHELL_SLOT_IDS),
   order: z.number().optional(),
 });
 
-export const workbenchViewContributionSchema = z.object({
-  id: z.string().min(1).optional(),
-  nameKey: z.string().min(1).optional(),
+export const viewContributionSchema = z.object({
+  nameKey: z.string().min(1),
   order: z.number().optional(),
+  default: z.boolean().optional(),
+});
+
+export const skillContributionSchema = z.object({
+  root: z.string().min(1),
+});
+
+export const mcpToolContributionSchema = z.object({
+  readOnly: z.boolean().optional(),
+});
+
+export const mcpResourceContributionSchema = z.object({
+  uriTemplate: z.string().min(1),
 });
 
 export const pluginContributionsSchema = z.object({
-  ipc: z.record(z.string().min(1), ipcContributionSchema).optional(),
-  ai: z
-    .object({
-      capabilities: z.record(z.string().min(1), keyedContributionSchema).optional(),
-      tools: z.record(z.string().min(1), namedContributionSchema).optional(),
-      entityTypes: z.array(z.string().min(1)).optional(),
-      rules: z.record(z.string().min(1), idContributionSchema).optional(),
-    })
-    .optional(),
+  ipc: z.record(z.string().min(1), emptyContributionSchema).optional(),
+  views: z.record(z.string().min(1), viewContributionSchema).optional(),
   workbench: z
     .object({
-      workspaces: z.record(z.string().min(1), keyedContributionSchema).optional(),
-      actions: z.record(z.string().min(1), idContributionSchema).optional(),
-      views: z.record(z.string().min(1), workbenchViewContributionSchema).optional(),
+      workspaces: z.record(z.string().min(1), emptyContributionSchema).optional(),
+      actions: z.record(z.string().min(1), emptyContributionSchema).optional(),
     })
     .optional(),
   activity: z
     .object({
-      captureTypes: z.record(z.string().min(1), typedContributionSchema).optional(),
-      entityTypes: z.array(z.string().min(1)).optional(),
+      captureTypes: z.record(z.string().min(1), emptyContributionSchema).optional(),
       today: z.record(z.string().min(1), todaySectionDescriptorSchema).optional(),
     })
     .optional(),
   storage: z
     .object({
       capability: z.literal('self-managed'),
-      entityTypes: z.array(z.string().min(1)),
     })
     .optional(),
   shell: z
     .object({
       slots: z.record(z.string().min(1), shellSlotContributionSchema).optional(),
+    })
+    .optional(),
+  ai: z
+    .object({
+      skills: z.record(z.string().min(1), skillContributionSchema).optional(),
+      mcp: z
+        .object({
+          tools: z.record(z.string().min(1), mcpToolContributionSchema).optional(),
+          resources: z.record(z.string().min(1), mcpResourceContributionSchema).optional(),
+          prompts: z.record(z.string().min(1), emptyContributionSchema).optional(),
+        })
+        .optional(),
     })
     .optional(),
 });
@@ -80,28 +76,26 @@ export const pluginCatalogMetaSchema = z.object({
 
 export const pluginManifestSchema = z.object({
   pluginId: z.string().min(1).regex(/^[a-z][a-z0-9-]*$/),
-  apiVersion: z.literal(PLUGIN_API_VERSION),
+  apiVersion: z.literal(PLUGIN_API_VERSION).default(PLUGIN_API_VERSION),
   version: z.string().min(1),
   dependencies: z.array(z.string().min(1)).optional(),
   catalog: pluginCatalogMetaSchema,
-  hostCapabilities: z.array(z.enum(['activity', 'ai', 'storage', 'workbench', 'ipc'])).optional(),
   contributions: pluginContributionsSchema.default({}),
 });
 
 export type PluginManifest = z.infer<typeof pluginManifestSchema>;
+export type PluginManifestInput = z.input<typeof pluginManifestSchema>;
 
-export function definePluginManifest<const M extends PluginManifest>(manifest: M): M {
-  return pluginManifestSchema.parse(manifest) as M;
+export function definePluginManifest<const M extends PluginManifestInput>(
+  manifest: M,
+): M & { apiVersion: typeof PLUGIN_API_VERSION } {
+  return pluginManifestSchema.parse(manifest) as M & { apiVersion: typeof PLUGIN_API_VERSION };
 }
 
 export function parsePluginManifest(input: unknown): PluginManifest {
   return pluginManifestSchema.parse(input);
 }
 
-export function contributionKey(
-  pluginId: string,
-  localId: string,
-  explicit?: string,
-): string {
-  return explicit || `${pluginId}.${localId}`;
+export function derivedContributionId(manifest: PluginManifest, localId: string): string {
+  return contributionKey(manifest.pluginId, localId);
 }

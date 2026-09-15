@@ -1,14 +1,15 @@
 import { z } from 'zod';
-import { GoalDecomposeKey, TaskDecomposeKey } from '@true-north/enum';
 import type { AiSuggestionDraftVo, AiWorkspaceSuggestionVo } from '@true-north/vo';
 import { type AgentTool } from '@true-north/plugin-sdk';
-import { growthAi } from '../../context';
+import { GoalDecomposeKey, TaskDecomposeKey } from '../../../contract';
 import { GoalRepository } from '../goal/goal.repository';
 import { GoalFilterDto } from '../goal/dto';
 import { TaskRepository } from '../task/task.repository';
 import { TaskFilterDto } from '../task/dto';
 import { goalContextBuilder } from './goal-context.builder';
 import { taskContextBuilder } from './task-context.builder';
+import { goalDecomposeCapability } from './goal-decompose.capability';
+import { taskDecomposeCapability } from './task-decompose.capability';
 
 const SEARCH_CAP = 8;
 
@@ -207,9 +208,7 @@ const decomposeGoal: AgentTool = {
   async execute(args, ctx) {
     const { goalId, analysisSummary, suggestions: drafts } = decomposeGoalSchema.parse(args);
     const [result, context] = await Promise.all([
-      growthAi().getCapability<typeof drafts, { runId: string; analysisSummary: string; suggestions: AiWorkspaceSuggestionVo[] }>(
-        GoalDecomposeKey,
-      ).execute({
+      goalDecomposeCapability.execute({
         goalId,
         analysisSummary,
         suggestions: drafts as AiSuggestionDraftVo[],
@@ -267,9 +266,7 @@ const decomposeTask: AgentTool = {
   async execute(args, ctx) {
     const { taskId, analysisSummary, suggestions: drafts } = decomposeTaskSchema.parse(args);
     const [result, context] = await Promise.all([
-      growthAi().getCapability<typeof drafts, { runId: string; analysisSummary: string; suggestions: AiWorkspaceSuggestionVo[] }>(
-        TaskDecomposeKey,
-      ).execute({
+      taskDecomposeCapability.execute({
         taskId,
         analysisSummary,
         suggestions: drafts as AiSuggestionDraftVo[],
@@ -297,11 +294,11 @@ const decomposeTask: AgentTool = {
   },
 };
 
-export const growthAgentTools: AgentTool[] = [
+export const growthMcpTools: Record<string, AgentTool> = {
   searchGoals,
   searchTasks,
   getGoal,
   getTask,
   decomposeGoal,
   decomposeTask,
-];
+};

@@ -1,4 +1,4 @@
-export const PLUGIN_API_VERSION = '2.0' as const;
+export const PLUGIN_API_VERSION = 0 as const;
 
 export type PluginApiVersion = typeof PLUGIN_API_VERSION;
 
@@ -8,13 +8,34 @@ export function pluginPath(pluginId: string): string {
   return `${PLUGIN_HUB_PATH}/${pluginId}`;
 }
 
-export function namespacedId(pluginId: string, localId: string): string {
-  if (!localId) return pluginId;
-  if (localId.startsWith(`${pluginId}.`)) return localId;
+export function contributionKey(pluginId: string, localId: string): string {
   return `${pluginId}.${localId}`;
 }
 
-export type HostCapabilityId = 'activity' | 'ai' | 'storage' | 'workbench' | 'ipc';
+export function namespacedId(pluginId: string, localId: string): string {
+  return contributionKey(pluginId, localId);
+}
+
+export function ipcRoute(pluginId: string, localId: string): string {
+  return `/${pluginId}/${localId}`;
+}
+
+export function mcpName(pluginId: string, localId: string): string {
+  return contributionKey(pluginId, localId);
+}
+
+export function pluginResourceUri(pluginId: string, collection: string, id?: string): string {
+  const base = `tn://${pluginId}/${collection}`;
+  return id ? `${base}/${id}` : base;
+}
+
+export function parsePluginResourceUri(
+  uri: string,
+): { pluginId: string; collection: string; id?: string } | null {
+  const match = uri.match(/^tn:\/\/([a-z][a-z0-9-]*)\/([^/]+)(?:\/(.+))?$/);
+  if (!match) return null;
+  return { pluginId: match[1], collection: match[2], id: match[3] };
+}
 
 export const SHELL_SLOT_IDS = [
   'app-providers',

@@ -3,12 +3,15 @@ import type { NavigateFunction } from 'react-router-dom';
 import {
   assemblePluginCatalog,
   HostActionRegistry,
+  hrefFromSnapshot,
+  materializeRenderer,
   pluginPath,
-  reconcileRenderer,
+  prefixPluginIpc,
   type PluginIpcPort,
   type PluginRendererContext,
   type PluginRendererHandles,
   type PluginRuntimeEntry,
+  type PluginViewOpenRequest,
 } from '@true-north/plugin-sdk';
 import { RendererPlatform } from '@true-north/plugin-sdk/renderer';
 import type { IRoute } from '@/router/routes';
@@ -56,21 +59,24 @@ export async function bootRendererPlugins(lang = 'zh-CN'): Promise<RendererPlatf
   const hostActions = new HostActionRegistry();
   const ipc = createRendererIpcPort();
   const handlesById = new Map<string, PluginRendererHandles>();
+  const materializedById = new Map<string, ReturnType<typeof materializeRenderer>>();
 
   for (const plugin of catalog.plugins) {
+    const pluginIpc = prefixPluginIpc(ipc, `/${plugin.manifest.pluginId}`);
     const ctx: PluginRendererContext = {
       pluginId: plugin.manifest.pluginId,
       locale: { lang, t: (key) => key },
-      ipc,
+      ipc: pluginIpc,
       navigate: dummyNavigate as NavigateFunction,
       hostActions,
     };
     const handles = plugin.renderer?.activate(ctx);
-    const issues = reconcileRenderer(plugin.manifest, handles);
-    if (issues.length) {
-      throw new Error(issues.map((issue) => issue.message).join('\n'));
+    const materialized = materializeRenderer(plugin.manifest, handles);
+    if (materialized.issues.length) {
+      throw new Error(materialized.issues.map((issue) => issue.message).join('\n'));
     }
     if (handles) handlesById.set(plugin.manifest.pluginId, handles);
+    materializedById.set(plugin.manifest.pluginId, materialized);
   }
 
   const plugins = catalog.plugins
@@ -85,42 +91,48 @@ export async function bootRendererPlugins(lang = 'zh-CN'): Promise<RendererPlatf
         descriptionKey: plugin.manifest.catalog.descriptionKey,
         categoryKey: plugin.manifest.catalog.categoryKey,
         keywords: plugin.manifest.catalog.keywords,
-        load: handles.load,
       };
     })
     .sort((a, b) => (a.order || 0) - (b.order || 0));
 
+  const openers = catalog.plugins.map((plugin) => {
+    const handles = handlesById.get(plugin.manifest.pluginId);
+    return handles?.openResource;
+  });
+
   return new RendererPlatform({
     lang,
     plugins,
-    shellSlots: catalog.plugins.flatMap((plugin) => handlesById.get(plugin.manifest.pluginId)?.shellSlots || []),
+    shellSlots: catalog.plugins.flatMap((plugin) => materializedById.get(plugin.manifest.pluginId)?.shellSlots || []),
     workbenchTools: [
       ...activityWorkbenchTools,
-      ...catalog.plugins.flatMap((plugin) => handlesById.get(plugin.manifest.pluginId)?.workbenchTools || []),
+      ...catalog.plugins.flatMap((plugin) => materializedById.get(plugin.manifest.pluginId)?.workspaces || []),
     ],
-    workbenchActions: catalog.plugins.flatMap(
-      (plugin) => handlesById.get(plugin.manifest.pluginId)?.workbenchActions || [],
-    ),
-    workbenchViews: catalog.plugins.flatMap((plugin) =>
-      (handlesById.get(plugin.manifest.pluginId)?.workbenchViews || []).map((view) => ({
-        ...view,
-        pluginId: plugin.manifest.pluginId,
-        nameKey: view.nameKey,
-        order: view.order,
-        load: view.load,
-      })),
-    ),
+    workbenchActions: catalog.plugins.flatMap((plugin) => materializedById.get(plugin.manifest.pluginId)?.actions || []),
+    workbenchViews: catalog.plugins.flatMap((plugin) => materializedById.get(plugin.manifest.pluginId)?.views || []),
     locales: catalog.plugins.flatMap((plugin) => handlesById.get(plugin.manifest.pluginId)?.locales || []),
-    entityPresenters: catalog.plugins.flatMap(
-      (plugin) => handlesById.get(plugin.manifest.pluginId)?.entityPresenters || [],
+    scopes: Object.fromEntries(
+      catalog.plugins.flatMap((plugin) => {
+        const scope = handlesById.get(plugin.manifest.pluginId)?.scope;
+        return scope ? [[plugin.manifest.pluginId, scope]] : [];
+      }),
     ),
-    entitySources: catalog.plugins.flatMap(
-      (plugin) => handlesById.get(plugin.manifest.pluginId)?.entitySources || [],
-    ),
+    openResource: (uri: string): PluginViewOpenRequest | null => {
+      for (const open of openers) {
+        const request = open?.(uri);
+        if (request) return request;
+      }
+      return null;
+    },
     ipc,
     hostActions,
     workspaceHost: createAiWorkspaceHost(),
   });
+}
+
+export function pluginViewPageHref(request: PluginViewOpenRequest) {
+  const pluginId = request.viewId.split('.')[0] || '';
+  return hrefFromSnapshot(pluginId, request);
 }
 
 export function pluginRoutes(): IRoute[] {

@@ -1,18 +1,11 @@
 import { z } from 'zod';
-import type { AiWorkspacePartVo } from '@true-north/vo';
+import type { AgentTool } from '@true-north/plugin-sdk';
 
 export type ToolExecutionContext = {
-  appendWorkspace: (part: AiWorkspacePartVo) => void;
+  appendWorkspace: (part: unknown) => void;
 };
 
-export type AgentTool = {
-  name: string;
-  description: string;
-  parameters: Record<string, unknown>;
-  schema: z.ZodTypeAny;
-  readOnly?: boolean;
-  execute: (args: Record<string, unknown>, ctx: ToolExecutionContext) => Promise<string>;
-};
+export type { AgentTool };
 
 export class AgentToolRegistry {
   private readonly tools: AgentTool[] = [];
@@ -30,6 +23,14 @@ export class AgentToolRegistry {
 
   list(): AgentTool[] {
     return this.tools;
+  }
+
+  unregister(names: string[]) {
+    const drop = new Set(names);
+    for (const name of drop) this.byName.delete(name);
+    const next = this.tools.filter((tool) => !drop.has(tool.name));
+    this.tools.length = 0;
+    this.tools.push(...next);
   }
 
   find(name: string): AgentTool | undefined {

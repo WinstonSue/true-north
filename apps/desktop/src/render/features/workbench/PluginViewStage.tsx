@@ -1,16 +1,13 @@
 import { useMemo } from 'react';
-import {
-  useRendererPlatform,
-  WorkbenchViewRuntimeProvider,
-} from '@true-north/plugin-sdk/renderer';
-import { PluginLazyStage } from '@/plugin/PluginStage';
+import { useRendererPlatform } from '@true-north/plugin-sdk/renderer';
+import { PluginViewFrame } from '@/plugin/PluginViewFrame';
 import { useWorkbench } from './context';
 import type { WorkbenchPluginViewTab } from './context';
 import styles from './style.module.less';
 
 export function PluginViewStage({ tab }: { tab: WorkbenchPluginViewTab }) {
   const views = useRendererPlatform().workbenchViews || [];
-  const { clearPluginViewTarget } = useWorkbench();
+  const { updatePluginViewParams } = useWorkbench();
   const view = useMemo(() => views.find((item) => item.id === tab.viewId), [tab.viewId, views]);
 
   if (!view) {
@@ -19,16 +16,14 @@ export function PluginViewStage({ tab }: { tab: WorkbenchPluginViewTab }) {
 
   return (
     <div className={styles.pluginStage}>
-      <WorkbenchViewRuntimeProvider
-        value={{
-          viewId: tab.viewId,
-          target: tab.target ?? null,
-          generation: tab.targetGeneration ?? 0,
-          clearTarget: () => clearPluginViewTarget(tab.viewId),
-        }}
-      >
-        <PluginLazyStage pluginId={view.pluginId} load={view.load} />
-      </WorkbenchViewRuntimeProvider>
+      <PluginViewFrame
+        pluginId={view.pluginId}
+        snapshot={{ viewId: tab.viewId, params: tab.params || {} }}
+        revision={tab.revision}
+        mode="workbench"
+        load={view.load}
+        onParamsChange={(params) => updatePluginViewParams(tab.viewId, params)}
+      />
     </div>
   );
 }

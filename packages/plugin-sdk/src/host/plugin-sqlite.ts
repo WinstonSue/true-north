@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { DataSource, type EntityTarget, type ObjectLiteral } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import type { PluginQueryPort, PluginRecord, PluginSpace } from '@true-north/plugin-contract';
+import type { PluginSpace } from '@true-north/plugin-contract';
 import { PluginSchemaLedger } from './schema-ledger.entity.ts';
 import { ensureEntitySchema } from './ensure-schema.ts';
 import {
@@ -163,11 +163,18 @@ export type QuerySource<T extends ObjectLiteral = ObjectLiteral> = {
   label: (row: T) => string;
 };
 
+export type PluginRecord = {
+  pluginId: string;
+  entityType: string;
+  id: string;
+  label: string;
+};
+
 export function createRepositoryQueryPort(
   pluginId: string,
   runtime: HostStorageRuntime,
   sources: QuerySource[],
-): PluginQueryPort {
+) {
   const byType = new Map(sources.map((source) => [source.entityType, source]));
 
   function toRecord(source: QuerySource, row: ObjectLiteral): PluginRecord {
@@ -180,13 +187,13 @@ export function createRepositoryQueryPort(
   }
 
   return {
-    async get(entityType, id) {
+    async get(entityType: string, id: string) {
       const source = byType.get(entityType);
       if (!source) return null;
       const row = await runtime.getRepository(source.entity).findOne({ where: { id } as never });
       return row ? toRecord(source, row) : null;
     },
-    async list(query) {
+    async list(query: { entityType: string; q?: string; limit?: number }) {
       const source = byType.get(query.entityType);
       if (!source) return [];
       const rows = await runtime.getRepository(source.entity).find();

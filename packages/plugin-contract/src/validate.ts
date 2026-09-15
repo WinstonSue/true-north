@@ -1,6 +1,5 @@
-import { PLUGIN_API_VERSION, namespacedId } from './ids.ts';
+import { PLUGIN_API_VERSION, contributionKey, ipcRoute, mcpName } from './ids.ts';
 import type { PluginManifest } from './manifest.ts';
-import { contributionKey } from './manifest.ts';
 
 export type CatalogIssue = {
   code:
@@ -11,14 +10,14 @@ export type CatalogIssue = {
     | 'duplicate-controller'
     | 'duplicate-tool'
     | 'duplicate-workspace'
-    | 'duplicate-entity-type'
-    | 'duplicate-capability'
     | 'duplicate-action'
     | 'duplicate-view'
     | 'duplicate-capture'
     | 'duplicate-today'
     | 'duplicate-slot'
-    | 'duplicate-rule'
+    | 'duplicate-skill'
+    | 'duplicate-resource'
+    | 'duplicate-prompt'
     | 'reconcile';
   message: string;
   pluginId?: string;
@@ -99,14 +98,14 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
   const controllers = new Map<string, string>();
   const tools = new Map<string, string>();
   const workspaces = new Map<string, string>();
-  const entityTypes = new Map<string, string>();
-  const capabilities = new Map<string, string>();
   const actions = new Map<string, string>();
   const views = new Map<string, string>();
   const captures = new Map<string, string>();
   const today = new Map<string, string>();
   const slots = new Map<string, string>();
-  const rules = new Map<string, string>();
+  const skills = new Map<string, string>();
+  const resources = new Map<string, string>();
+  const prompts = new Map<string, string>();
 
   function claim(
     map: Map<string, string>,
@@ -131,78 +130,36 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
 
   for (const manifest of manifests) {
     const contrib = manifest.contributions;
-    for (const [id, ipc] of Object.entries(contrib.ipc || {})) {
-      claim(controllers, ipc.routePrefix, manifest.pluginId, 'duplicate-controller', 'controller route');
+    for (const id of Object.keys(contrib.ipc || {})) {
+      claim(controllers, ipcRoute(manifest.pluginId, id), manifest.pluginId, 'duplicate-controller', 'controller route');
+    }
+    for (const id of Object.keys(contrib.ai?.mcp?.tools || {})) {
+      claim(tools, mcpName(manifest.pluginId, id), manifest.pluginId, 'duplicate-tool', 'tool');
+    }
+    for (const [id, resource] of Object.entries(contrib.ai?.mcp?.resources || {})) {
+      claim(resources, resource.uriTemplate, manifest.pluginId, 'duplicate-resource', 'resource');
       void id;
     }
-    for (const [id, tool] of Object.entries(contrib.ai?.tools || {})) {
-      claim(tools, tool.name || id, manifest.pluginId, 'duplicate-tool', 'tool');
+    for (const id of Object.keys(contrib.ai?.mcp?.prompts || {})) {
+      claim(prompts, mcpName(manifest.pluginId, id), manifest.pluginId, 'duplicate-prompt', 'prompt');
     }
-    for (const [id, cap] of Object.entries(contrib.ai?.capabilities || {})) {
-      claim(
-        capabilities,
-        contributionKey(manifest.pluginId, id, cap.key),
-        manifest.pluginId,
-        'duplicate-capability',
-        'capability',
-      );
+    for (const id of Object.keys(contrib.ai?.skills || {})) {
+      claim(skills, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-skill', 'skill');
     }
-    for (const [id, rule] of Object.entries(contrib.ai?.rules || {})) {
-      claim(
-        rules,
-        contributionKey(manifest.pluginId, id, rule.id),
-        manifest.pluginId,
-        'duplicate-rule',
-        'ai rule',
-      );
+    for (const id of Object.keys(contrib.workbench?.workspaces || {})) {
+      claim(workspaces, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-workspace', 'workspace key');
     }
-    for (const [id, workspace] of Object.entries(contrib.workbench?.workspaces || {})) {
-      claim(
-        workspaces,
-        contributionKey(manifest.pluginId, id, workspace.key),
-        manifest.pluginId,
-        'duplicate-workspace',
-        'workspace key',
-      );
+    for (const id of Object.keys(contrib.workbench?.actions || {})) {
+      claim(actions, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-action', 'workbench action');
     }
-    for (const [id, action] of Object.entries(contrib.workbench?.actions || {})) {
-      claim(
-        actions,
-        contributionKey(manifest.pluginId, id, action.id),
-        manifest.pluginId,
-        'duplicate-action',
-        'workbench action',
-      );
+    for (const id of Object.keys(contrib.views || {})) {
+      claim(views, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-view', 'view');
     }
-    for (const [id, view] of Object.entries(contrib.workbench?.views || {})) {
-      claim(
-        views,
-        contributionKey(manifest.pluginId, id, view.id),
-        manifest.pluginId,
-        'duplicate-view',
-        'workbench view',
-      );
-    }
-    for (const entityType of contrib.storage?.entityTypes || []) {
-      claim(entityTypes, namespacedId(manifest.pluginId, entityType), manifest.pluginId, 'duplicate-entity-type', 'entity type');
-    }
-    for (const entityType of contrib.ai?.entityTypes || []) {
-      claim(entityTypes, namespacedId(manifest.pluginId, entityType), manifest.pluginId, 'duplicate-entity-type', 'entity type');
-    }
-    for (const entityType of contrib.activity?.entityTypes || []) {
-      claim(entityTypes, namespacedId(manifest.pluginId, entityType), manifest.pluginId, 'duplicate-entity-type', 'entity type');
-    }
-    for (const [id, capture] of Object.entries(contrib.activity?.captureTypes || {})) {
-      claim(
-        captures,
-        contributionKey(manifest.pluginId, id, capture.type),
-        manifest.pluginId,
-        'duplicate-capture',
-        'capture type',
-      );
+    for (const id of Object.keys(contrib.activity?.captureTypes || {})) {
+      claim(captures, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-capture', 'capture type');
     }
     for (const id of Object.keys(contrib.activity?.today || {})) {
-      claim(today, namespacedId(manifest.pluginId, id), manifest.pluginId, 'duplicate-today', 'today section');
+      claim(today, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-today', 'today section');
     }
     for (const [id, slot] of Object.entries(contrib.shell?.slots || {})) {
       claim(slots, `${slot.slot}:${id}`, manifest.pluginId, 'duplicate-slot', 'shell slot');

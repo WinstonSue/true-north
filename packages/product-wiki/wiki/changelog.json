@@ -2,6 +2,65 @@
   "changes": [
     {
       "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "从目标发起时附带该条资源打开或复用会话，不再绑定目标实体。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:goal-bound-start",
+        "scope": "rule",
+        "name": "目标资源发起",
+        "reference": "ai.session.rule.goal-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "从任务发起时附带该条资源打开或复用会话，不再绑定任务实体。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:task-bound-start",
+        "scope": "rule",
+        "name": "任务资源发起",
+        "reference": "ai.session.rule.task-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "会话列表悬停展示附带资源名称；置顶、重命名不改附带资源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:rule:session-maintain",
+        "scope": "rule",
+        "name": "会话维护",
+        "reference": "app-shell.rule.session-maintain",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "从目标或任务发起 AI 时附带该条资源打开或复用会话；主对话不再提供全局目标/任务点选。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session",
+        "scope": "module",
+        "name": "AI 会话",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
       "date": "2026-09-14",
       "event": "changed",
       "summary": "编码 Agent 选用改为会话级：每个会话各自记住选择，空白新对话使用本机默认（出厂为 Cursor Agent）。",

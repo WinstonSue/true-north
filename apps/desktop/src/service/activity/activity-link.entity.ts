@@ -25,4 +25,7 @@ export class ActivityLink extends BaseEntity {
 
   @Column('varchar', { length: 255, nullable: true })
   label?: string;
+
+  @Column('varchar', { length: 512, nullable: true })
+  uri?: string;
 }

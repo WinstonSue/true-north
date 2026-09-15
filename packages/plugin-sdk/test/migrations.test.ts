@@ -29,8 +29,11 @@ test('growth and ai migrations skip missing tables and stay storage-handle based
   assert.match(growth, /sqlite_master/);
   assert.match(growth, /names\.has\(/);
   assert.match(ai, /PluginStorageHandle/);
-  assert.match(ai, /Legacy importer labels/);
+  assert.match(ai, /sqlite_master/);
+  assert.match(ai, /ai_message/);
   assert.doesNotMatch(ai, /from '@true-north\/plugin-growth/);
+  assert.doesNotMatch(ai, /ref_type/);
+  assert.doesNotMatch(ai, /goal\/task/);
 });
 
 test('empty shared-store queries are safe to repeat', async () => {

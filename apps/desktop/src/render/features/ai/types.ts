@@ -1,18 +1,16 @@
 import type { RefObject } from 'react';
 import { Input, type GetRef } from '@sue/design-web-react';
 import type {
-  AiEntityLinkVo,
   ConversationVo,
   MessageVo,
   RuntimeAgentVo,
 } from '@true-north/vo';
-import type { AiEntityRecord, AiEntitySource } from './entity-source';
 
 export type ComposerInputRef = GetRef<typeof Input.TextArea>;
 
 export type AiDraft = {
   text: string;
-  links: AiEntityLinkVo[];
+  links: Array<{ type: string; id: string; label: string }>;
 };
 
 export type SessionValue = {
@@ -29,8 +27,6 @@ export type SessionValue = {
   streamingConversationIds: string[];
   streamError: string | null;
   loading: boolean;
-  entities: AiEntityRecord[];
-  entitySources: AiEntitySource[];
   codingAgents: RuntimeAgentVo[];
   selectedAgentId: string;
   selectedAgent: RuntimeAgentVo | undefined;
@@ -45,6 +41,6 @@ export type SessionValue = {
   sendUserMessage: () => Promise<void>;
   cancelStreaming: () => Promise<void>;
   openWorkspace: (messageId: string) => void;
-  openEntity: (type: string, id: string) => void;
-  boundLabel: (refType?: string, refId?: string) => string;
+  openResource: (uri: string) => void;
+  boundLabel: (conversation?: ConversationVo) => string;
 };

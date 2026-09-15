@@ -143,3 +143,14 @@ test('AI session, Workbench, and Activity live on the host, not as plugins', () 
   assert.equal(existsSync(join(repoRoot, 'packages/plugins/workbench')), false);
   assert.equal(existsSync(join(repoRoot, 'packages/plugins/activity')), false);
 });
+
+test('host AI no longer binds goal/task entities or capability routes', () => {
+  const leftover = rg([
+    '-n',
+    'CapabilityRegistry|EntityResolverRegistry|/ai/capabilities|bound/goal|bound/task|refType === [\'"]goal[\'"]|FROM \\$\\{refType\\}',
+    'apps/desktop/src',
+    '--glob',
+    '!**/node_modules/**',
+  ]);
+  assert.equal(leftover.trim(), '');
+});

@@ -1,10 +1,10 @@
 import { Wallet } from 'lucide-react';
-import { defineRendererImplementation } from '@true-north/plugin-sdk';
-import { expenseManifest } from '../plugin';
-import { expenseHref } from '../contract';
+import { defineRendererImplementation, parsePluginResourceUri } from '@true-north/plugin-sdk';
+import { expenseManifest } from '../manifest';
+import { expenseIds } from '../contract';
 import { expenseLocales } from './locales';
 import { bindPluginIpc } from '../client';
-import { expenseWorkbenchViews } from './views';
+import { ExpensesProvider } from './pages/context';
 
 export function createRenderer() {
   return defineRendererImplementation(expenseManifest, {
@@ -12,12 +12,18 @@ export function createRenderer() {
       bindPluginIpc(ctx.ipc);
       return {
         icon: Wallet,
-        load: () => import('./pages/index'),
-        workbenchViews: expenseWorkbenchViews,
         locales: [expenseLocales],
-        entityPresenters: [
-          { pluginId: 'expense', entityType: 'transaction', kindLabel: '记账', openPath: () => expenseHref('transaction') },
-        ],
+        scope: ExpensesProvider,
+        views: {
+          transaction: { load: () => import('./features/transaction') },
+          budget: { load: () => import('./features/budget') },
+          overview: { load: () => import('./features/overview') },
+        },
+        openResource(uri) {
+          const parsed = parsePluginResourceUri(uri);
+          if (!parsed || parsed.pluginId !== 'expense') return null;
+          return { viewId: expenseIds.views.transaction, params: parsed.id ? { id: parsed.id } : {} };
+        },
       };
     },
   });
