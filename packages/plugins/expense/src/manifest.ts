@@ -14,15 +14,15 @@ export const expenseManifest = definePluginManifest({
   contributions: {
     ipc: { expense: {} },
     views: {
-      transaction: { nameKey: 'menu.expense.transaction', order: 10, default: true },
+      transaction: { nameKey: 'menu.expense.transaction', order: 10 },
       budget: { nameKey: 'menu.expense.budget', order: 20 },
       overview: { nameKey: 'menu.expense.overview', order: 30 },
     },
+    page: {},
     activity: {
       captureTypes: { transaction: {} },
       today: { spent: { kind: 'metric', titleKey: 'plugins.hub.spent', order: 10 } },
     },
-    storage: { capability: 'self-managed' },
   },
 });
 

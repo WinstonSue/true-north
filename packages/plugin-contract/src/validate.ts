@@ -1,6 +1,10 @@
 import { PLUGIN_API_VERSION, contributionKey, ipcRoute, mcpName } from './ids.ts';
 import type { PluginManifest } from './manifest.ts';
 
+/**
+ * 清单目录级问题。`reconcile` 表示声明的贡献 key 与 main/renderer 实现不一致。
+ * 其余 duplicate-* 比较的是派生后的全局键（路由、MCP 名、贡献 id、资源 URI）。
+ */
 export type CatalogIssue = {
   code:
     | 'api-version'
@@ -51,6 +55,7 @@ function topoSort(manifests: PluginManifest[]): { order: string[]; cycles: strin
   return { order, cycles };
 }
 
+/** 校验 apiVersion、依赖、环、以及跨插件派生键冲突。 */
 export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
   const issues: CatalogIssue[] = [];
   const ids = new Set<string>();
@@ -170,10 +175,12 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
   return issues;
 }
 
+/** 按 `dependencies` 拓扑排序后的启动顺序。 */
 export function activationOrder(manifests: PluginManifest[]): string[] {
   return topoSort(manifests).order;
 }
 
+/** 启动顺序的逆序，用于销毁。 */
 export function disposeOrder(manifests: PluginManifest[]): string[] {
   return [...activationOrder(manifests)].reverse();
 }

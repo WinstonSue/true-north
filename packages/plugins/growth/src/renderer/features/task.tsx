@@ -1,35 +1,28 @@
 'use client';
 
-import { TabsPage } from '@true-north/plugin-ui';
 import { CreateButton } from '@true-north/plugin-ui';
 import { useTaskDetail } from '../pages/components';
 import { AgendaProvider, useAgendaDate } from '../pages/components/day-agenda/context';
-import { usePluginViewState } from '@true-north/plugin-sdk/renderer';
+import { usePluginViewRuntime, usePluginViewState } from '@true-north/plugin-sdk/renderer';
 import { taskViewCodec } from '../../contract/view-state';
 import { TaskDetailPane } from '../pages/task/detail/TaskDrawer';
 import TaskToday from '../pages/task/task-today';
 import TaskCalendar from '../pages/task/task-calendar';
 import TaskAll from '../pages/task/task-all';
-
-const TASK_TABS = [
-  { tab: 'today' as const, name: '当前任务' },
-  { tab: 'calendar' as const, name: '任务日历' },
-  { tab: 'all' as const, name: '全部任务' },
-];
+import { GrowthPage } from '../ui/GrowthPage';
+import { CompactViewNav } from '../ui/CompactViewNav';
+import { growthIds } from '../../contract';
+import { growthNavigation, usesCompactNav } from '../layout/nav';
 
 function TaskPageContent() {
+  const { mode } = usePluginViewRuntime();
   const [state, setState] = usePluginViewState(taskViewCodec);
   const { openCreateDrawer } = useTaskDetail();
   const { selectedDate } = useAgendaDate();
+  const children = growthNavigation.find((group) => group.view === 'task')?.children || [];
 
   return (
-    <TabsPage
-      tabs={TASK_TABS.map((item) => ({
-        name: item.name,
-        key: item.tab,
-        active: state.tab === item.tab,
-      }))}
-      onSelect={(item) => setState({ tab: (item.key as typeof state.tab) || 'today' })}
+    <GrowthPage
       extra={
         <CreateButton
           onClick={() => {
@@ -45,11 +38,21 @@ function TaskPageContent() {
           新建任务
         </CreateButton>
       }
+      compactNav={
+        mode === 'workbench' && usesCompactNav(mode) ? (
+          <CompactViewNav
+            viewId={growthIds.views.task}
+            children={children}
+            activeTab={state.tab}
+            onSelect={(tab) => setState({ tab: (tab as typeof state.tab) || 'today' })}
+          />
+        ) : null
+      }
     >
       {state.tab === 'calendar' ? <TaskCalendar /> : null}
       {state.tab === 'all' ? <TaskAll /> : null}
       {state.tab === 'today' ? <TaskToday /> : null}
-    </TabsPage>
+    </GrowthPage>
   );
 }
 

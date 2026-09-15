@@ -14,8 +14,9 @@ export const libraryManifest = definePluginManifest({
   contributions: {
     ipc: { library: {} },
     views: {
-      search: { nameKey: 'menu.library', order: 10, default: true },
+      search: { nameKey: 'menu.library', order: 10 },
     },
+    page: {},
     workbench: {
       actions: { extract: {} },
     },
@@ -23,7 +24,6 @@ export const libraryManifest = definePluginManifest({
       captureTypes: { bookmark: {} },
       today: { bookmarks: { kind: 'metric', titleKey: 'plugins.hub.bookmarks', order: 30 } },
     },
-    storage: { capability: 'self-managed' },
   },
 });
 

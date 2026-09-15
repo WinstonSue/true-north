@@ -1,5 +1,6 @@
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { useCallback, useContext, useMemo, type ReactNode } from 'react';
 import type { PluginViewSnapshot, ViewStateCodec } from '../runtime.ts';
+import { sharedReactContext } from './shared-context.ts';
 
 export type PluginViewMode = 'page' | 'workbench';
 
@@ -10,7 +11,10 @@ export type PluginViewRuntimeValue = {
   setParams: (params: Record<string, string>) => void;
 };
 
-const PluginViewRuntimeContext = createContext<PluginViewRuntimeValue | null>(null);
+const PluginViewRuntimeContext = sharedReactContext<PluginViewRuntimeValue | null>(
+  '__true_north_plugin_view_runtime_context__',
+  null,
+);
 
 export function PluginViewRuntimeProvider({
   value,

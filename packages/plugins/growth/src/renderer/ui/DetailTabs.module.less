@@ -1,0 +1,26 @@
+.tabs {
+  height: 100%;
+  min-height: 0;
+}
+
+.tabs :global(.sue-tabs-nav) {
+  margin: 0;
+  padding: 0 var(--growth-page-pad-x);
+}
+
+.tabs :global(.sue-tabs-body-holder),
+.tabs :global(.sue-tabs-content-holder),
+.tabs :global(.sue-tabs-body) {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.tabs :global(.sue-tabs-content),
+.tabs :global(.sue-tabs-tabpane) {
+  height: 100%;
+}
+
+.tabs :global(.sue-tabs-tabpane) {
+  padding: var(--growth-space-2) var(--growth-page-pad-x) var(--growth-space-3);
+}

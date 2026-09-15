@@ -1,11 +1,11 @@
 # Habit 技术实现
 
-产品说明见 [习惯管理 ProductWiki](../../../packages/product-wiki/wiki/growth/habit/spec.json)。重复调度见 [重复规则](./repeat.md)。
+产品说明见 [习惯管理 ProductWiki](../../../packages/plugins/growth/wiki/growth/habit/spec.json)。重复调度见 [重复规则](./repeat.md)。
 
 ## 代码边界
 
-- 控制器：[habit.route-controller.ts](../../../apps/desktop/src/service/growth/habit/habit.route-controller.ts)，前缀 `/habit`。
-- 服务位于 `apps/desktop/src/service/growth/habit/`；创建/更新时通过 `@true-north/components-repeat` 校验规则，规则与游标落在共享 **`repeat`**（`habit.repeatId`），Habit 自身不再重复存储规则列。
+- 控制器：[habit.route-controller.ts](../../../packages/plugins/growth/src/main/service/habit/habit.route-controller.ts)，前缀 `/habit`。
+- 服务位于 `packages/plugins/growth/src/main/service/habit/`；创建/更新时通过 `@true-north/components-repeat` 校验规则，规则与游标落在共享 **`repeat`**（`habit.repeatId`），Habit 自身不再重复存储规则列。
 - Habit **不是** `repeat_todo`：额外拥有目标关联、streak、pause/activate 等产品语义。
 - 打卡走 Todo 结算接口（`relatedType=habit`）；游标推进复用 `RepeatService.settleCurrent`。
 - DTO 位于 `dto/`，VO 来自 `@true-north/vo` 的 `Habit` 命名空间。

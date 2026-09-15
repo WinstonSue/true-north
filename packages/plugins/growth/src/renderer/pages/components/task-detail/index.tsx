@@ -1,6 +1,6 @@
 import { Drawer, Popover } from '@sue/design-web-react';
 import { useState } from 'react';
-import { drawerBodyStyles } from '@true-north/plugin-ui';
+import { drawerShellStyles } from '../../../ui';
 import TaskEditor, { TaskEditorProps } from './TaskEditor';
 import TaskCreator, { TaskCreatorProps } from './TaskCreator';
 
@@ -19,7 +19,7 @@ export function useTaskDetail() {
       ...rest,
       title: '编辑任务',
       size: 800,
-      styles: drawerBodyStyles,
+      styles: drawerShellStyles,
       content: (
         <TaskEditor
           {...contentProps}
@@ -41,7 +41,7 @@ export function useTaskDetail() {
       ...rest,
       title: '新建任务',
       size: 800,
-      styles: drawerBodyStyles,
+      styles: drawerShellStyles,
       content: (
         <TaskCreator
           {...contentProps}

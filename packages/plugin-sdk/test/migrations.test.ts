@@ -3,14 +3,13 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { PluginStorageHandle } from '../src/sqlite/index.ts';
+import type { PluginStorageHandle } from '../src/main/index.ts';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 
 function emptyStore(pluginId: string): PluginStorageHandle {
   return {
     pluginId,
-    capability: 'self-managed',
     async query(sql) {
       if (sql.includes('sqlite_master')) return [];
       if (sql.includes('PRAGMA table_info')) return [];

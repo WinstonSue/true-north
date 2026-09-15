@@ -2,7 +2,7 @@
 
 ## 标准 Growth 模块文件
 
-路径：`apps/desktop/src/service/growth/{module}/`
+路径：`packages/plugins/growth/src/main/service/{module}/`
 
 ```
 {module}/
@@ -55,14 +55,14 @@ Entity → DTO.exportVo() → VO
 
 ## RouteController 职责摘要
 
-- 使用 `@business/decorators` 声明 HTTP 风格路径（运行时写入 `electron-ipc-restful` 元数据）
+- 使用 `@true-north/plugin-sdk/main` 声明 HTTP 风格路径（运行时写入 `electron-ipc-restful` 元数据）
 - 接收 VO 查询/Body
 - 实例化 DTO 并调用 `importPageVo` / `importCreateVo` 等
 - 调用 Service，将结果 `map(exportVo)`
 - 返回 `ResponsePageVo` / 单条 VO 等标准响应类型
 - 构造器默认注入模块 service 单例，供主进程无参实例化注册
 
-参考实现：`apps/desktop/src/service/growth/todo/todo.route-controller.ts`。
+参考实现：`packages/plugins/growth/src/main/service/todo/todo.route-controller.ts`。
 
 ## 安全与校验
 

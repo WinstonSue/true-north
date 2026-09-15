@@ -24,13 +24,10 @@ const profileDefine = {
 const pluginSdkSrc = path.resolve(currentDirPath, '../../packages/plugin-sdk/src');
 const pluginSdkMain = path.resolve(pluginSdkSrc, 'main/index.ts');
 const pluginSdkRenderer = path.resolve(pluginSdkSrc, 'renderer/index.ts');
-const pluginSdkSqlite = path.resolve(pluginSdkSrc, 'sqlite/index.ts');
 
 const pluginSdkAliases = [
   { find: '@true-north/plugin-sdk/renderer', replacement: pluginSdkRenderer },
-  { find: '@true-north/plugin-sdk/sqlite', replacement: pluginSdkSqlite },
   { find: '@true-north/plugin-sdk/main', replacement: pluginSdkMain },
-  { find: '@true-north/plugin-sdk/host', replacement: pluginSdkMain },
   { find: '@true-north/plugin-sdk', replacement: pluginSdkSrc },
 ];
 
@@ -98,8 +95,6 @@ export default defineConfig({
     resolve: {
       alias: [
         ...pluginSdkAliases,
-        { find: '@business', replacement: path.resolve(srcDir, 'service') },
-        { find: '@db', replacement: path.resolve(srcDir, 'service/db') },
         { find: '@', replacement: path.resolve(srcDir, 'main') },
         { find: '@true-north/enum', replacement: path.resolve(currentDirPath, '../../packages/business/enum/index.ts') },
         { find: '@true-north/vo', replacement: path.resolve(currentDirPath, '../../packages/business/vo/index.ts') },
@@ -125,13 +120,9 @@ export default defineConfig({
           'reflect-metadata',
           'class-validator',
           'class-transformer',
-          'uuid',
           /^react-dnd/,
           /^dnd-core/,
           /^immutability-helper/,
-          'chinese-holiday-calendar',
-          // 只保留必要的外部依赖，让 @true-north 包被正确打包
-          '@true-north/electron-typeorm',
           '@sue/extract',
         ],
       },
@@ -180,7 +171,6 @@ export default defineConfig({
           'reflect-metadata',
           'class-validator',
           'class-transformer',
-          'uuid',
           /^react-dnd/,
           /^dnd-core/,
           /^immutability-helper/,
@@ -307,7 +297,7 @@ export default defineConfig({
         'lodash-es',
         'marked',
       ],
-      exclude: ['@true-north/common-web-utils', 'chinese-holiday-calendar'],
+      exclude: ['@true-north/common-web-utils'],
     },
   },
 });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { FilterBar } from '../../../ui';
 import { TaskFilters } from './TaskFilters';
 import { Flex } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
@@ -21,9 +22,9 @@ function TaskAll() {
   return (
     <ProductSurface id={productRef('growth.task.view.all')}>
     <Flex vertical container="full" className={styles.page}>
-      <Flex container="fixed" className={styles.filters}>
+      <FilterBar>
         <TaskFilters />
-      </Flex>
+      </FilterBar>
 
       <Flex container="fill" className={styles.table}>
         <TaskTable />

@@ -1,6 +1,6 @@
 # 重复规则技术实现
 
-产品说明见 [重复规则 ProductWiki](../../../packages/product-wiki/wiki/growth/repeat/spec.json)。
+产品说明见 [重复规则 ProductWiki](../../../packages/plugins/growth/wiki/growth/repeat/spec.json)。
 
 重复分为两层：**共享调度实体 `repeat`**（Desktop 持久化）与 **规则算法包** `@true-north/components-repeat`（不落库）。不单独注册 RouteController；由 `repeat_todo` 与 Habit 关联使用。
 
@@ -9,7 +9,7 @@
 | 层 | 路径 | 职责 |
 | --- | --- | --- |
 | 算法包 | [packages/components/repeat](../../../packages/components/repeat)（`@true-north/components-repeat`） | `RepeatRule` 解析、`assertRepeat`、`calculateNextDate`；不决定状态迁移或事务 |
-| 调度实体 | `apps/desktop/src/service/growth/repeat/` | 表 `repeat`：规则字段 + **`currentDate` 游标**；`RepeatService.settleCurrent` 推进或结束 |
+| 调度实体 | `packages/plugins/growth/src/main/service/repeat/` | 表 `repeat`：规则字段 + **`currentDate` 游标**；`RepeatService.settleCurrent` 推进或结束 |
 | 内容主人 | `repeat_todo`（独立重复）、`habit`（习惯） | 各挂 `repeatId`；不各自再存一份规则列 |
 
 ## 三层关系

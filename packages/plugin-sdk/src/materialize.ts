@@ -4,19 +4,13 @@ import {
   mcpName,
   type CatalogIssue,
   type PluginManifest,
-  type TodaySectionDescriptor,
   type TodaySectionSnapshot,
-  type CaptureAdopter,
 } from '@true-north/plugin-contract';
+import { extensionPoints, pluginCatalogEntry, type TodayExtension } from './extension-points.ts';
+import type { ExtensionRegistration } from './extension-registry.ts';
 import type {
-  AgentTool,
   PluginMainHandles,
-  PluginPromptProvider,
   PluginRendererHandles,
-  PluginResourceProvider,
-  ShellSlotContribution,
-  WorkbenchToolDefinition,
-  WorkbenchViewContribution,
 } from './runtime.ts';
 
 function asSet(values: Array<string | undefined>): Set<string> {
@@ -48,13 +42,7 @@ function equalSets(expected: Set<string>, actual: Set<string>, pluginId: string,
 
 export type MaterializedMain = {
   issues: CatalogIssue[];
-  ipc: Array<{ id: string; routePrefix: string; controller: object }>;
-  captureAdopters: CaptureAdopter[];
-  todaySections: Array<{ id: string; descriptor: TodaySectionDescriptor; collect: () => Promise<TodaySectionSnapshot> }>;
-  tools: AgentTool[];
-  resources: Array<{ localId: string; uriTemplate: string; provider: PluginResourceProvider }>;
-  prompts: Array<{ localId: string; name: string; provider: PluginPromptProvider }>;
-  skillRoots: Record<string, string>;
+  registrations: ExtensionRegistration[];
 };
 
 export function materializeMain(manifest: PluginManifest, handles: PluginMainHandles | undefined): MaterializedMain {
@@ -62,21 +50,12 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
   const issues: CatalogIssue[] = [];
   if (!handles) {
     const declared =
-      manifest.contributions.ipc ||
-      manifest.contributions.ai ||
-      manifest.contributions.activity ||
-      manifest.contributions.storage;
+      manifest.contributions.ipc || manifest.contributions.ai || manifest.contributions.activity;
     return {
       issues: declared
         ? [{ code: 'reconcile', pluginId, message: `Plugin ${pluginId} has no main implementation` }]
         : [],
-      ipc: [],
-      captureAdopters: [],
-      todaySections: [],
-      tools: [],
-      resources: [],
-      prompts: [],
-      skillRoots: {},
+      registrations: [],
     };
   }
 
@@ -137,69 +116,133 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
     ),
   );
 
-  const todaySections = Object.entries(manifest.contributions.activity?.today || {}).flatMap(([localId, descriptor]) => {
-    const collect = handles.activity?.today?.[localId]?.collect;
-    if (!collect) return [];
-    const id = contributionKey(pluginId, localId);
-    return [
-      {
-        id,
-        descriptor,
-        collect: async (): Promise<TodaySectionSnapshot> => {
-          const values = await collect();
-          return {
-            id,
-            kind: descriptor.kind,
-            titleKey: descriptor.titleKey,
-            order: descriptor.order,
-            unit: descriptor.unit,
-            value: values.value,
-            items: values.items,
-            timer: values.timer,
-          };
-        },
-      },
-    ];
-  });
+  const registrations: ExtensionRegistration[] = [];
 
-  return {
-    issues,
-    ipc: Object.entries(handles.ipc || {}).map(([localId, spec]) => ({
-      id: `${pluginId}:${localId}`,
-      routePrefix: ipcRoute(pluginId, localId),
-      controller: spec.controller,
-    })),
-    captureAdopters: Object.entries(handles.activity?.capture || {}).map(([localId, spec]) => ({
-      type: contributionKey(pluginId, localId),
-      adopt: spec.adopt,
-    })),
-    todaySections,
-    tools: Object.entries(handles.ai?.mcp?.tools || {}).map(([localId, tool]) => ({
-      ...tool,
-      name: mcpName(pluginId, localId),
-      readOnly: tool.readOnly ?? manifest.contributions.ai?.mcp?.tools?.[localId]?.readOnly,
-    })),
-    resources: Object.entries(handles.ai?.mcp?.resources || {}).map(([localId, provider]) => ({
-      localId,
-      uriTemplate: manifest.contributions.ai?.mcp?.resources?.[localId]?.uriTemplate || '',
-      provider,
-    })),
-    prompts: Object.entries(handles.ai?.mcp?.prompts || {}).map(([localId, provider]) => ({
-      localId,
-      name: mcpName(pluginId, localId),
-      provider,
-    })),
-    skillRoots: handles.ai?.skillRoots || {},
-  };
+  for (const [localId, spec] of Object.entries(handles.ipc || {})) {
+    registrations.push({
+      point: extensionPoints.ipc,
+      key: `${pluginId}:${localId}`,
+      value: {
+        id: `${pluginId}:${localId}`,
+        routePrefix: ipcRoute(pluginId, localId),
+        controller: spec.controller,
+      },
+    });
+  }
+
+  for (const [localId, spec] of Object.entries(handles.activity?.capture || {})) {
+    registrations.push({
+      point: extensionPoints.capture,
+      key: contributionKey(pluginId, localId),
+      value: {
+        type: contributionKey(pluginId, localId),
+        adopt: spec.adopt,
+      },
+    });
+  }
+
+  for (const [localId, descriptor] of Object.entries(manifest.contributions.activity?.today || {})) {
+    const collect = handles.activity?.today?.[localId]?.collect;
+    if (!collect) continue;
+    const id = contributionKey(pluginId, localId);
+    const today: TodayExtension = {
+      id,
+      descriptor,
+      collect: async (): Promise<TodaySectionSnapshot> => {
+        const values = await collect();
+        return {
+          id,
+          kind: descriptor.kind,
+          titleKey: descriptor.titleKey,
+          order: descriptor.order,
+          unit: descriptor.unit,
+          value: values.value,
+          items: values.items,
+          timer: values.timer,
+        };
+      },
+    };
+    registrations.push({
+      point: extensionPoints.today,
+      key: id,
+      order: descriptor.order,
+      value: today,
+    });
+  }
+
+  for (const [localId, tool] of Object.entries(handles.ai?.mcp?.tools || {})) {
+    const name = mcpName(pluginId, localId);
+    registrations.push({
+      point: extensionPoints.mcpTool,
+      key: name,
+      value: {
+        ...tool,
+        name,
+        readOnly: tool.readOnly ?? manifest.contributions.ai?.mcp?.tools?.[localId]?.readOnly,
+      },
+    });
+  }
+
+  for (const [localId, provider] of Object.entries(handles.ai?.mcp?.resources || {})) {
+    const resource = manifest.contributions.ai?.mcp?.resources?.[localId];
+    const key = contributionKey(pluginId, localId);
+    registrations.push({
+      point: extensionPoints.mcpResource,
+      key,
+      value: {
+        pluginId,
+        localId,
+        uriTemplate: resource?.uriTemplate || '',
+        provider,
+      },
+    });
+    if (resource?.mention) {
+      registrations.push({
+        point: extensionPoints.mention,
+        key,
+        order: resource.mention.order,
+        value: {
+          pluginId,
+          localId,
+          labelKey: resource.mention.labelKey,
+          provider,
+        },
+      });
+    }
+  }
+
+  for (const [localId, provider] of Object.entries(handles.ai?.mcp?.prompts || {})) {
+    const name = mcpName(pluginId, localId);
+    registrations.push({
+      point: extensionPoints.mcpPrompt,
+      key: name,
+      value: {
+        pluginId,
+        localId,
+        name,
+        provider,
+      },
+    });
+  }
+
+  for (const [localId, root] of Object.entries(handles.ai?.skillRoots || {})) {
+    registrations.push({
+      point: extensionPoints.skill,
+      key: contributionKey(pluginId, localId),
+      value: {
+        pluginId,
+        localId,
+        root,
+      },
+    });
+  }
+
+  return { issues, registrations };
 }
 
 export type MaterializedRenderer = {
   issues: CatalogIssue[];
-  views: WorkbenchViewContribution[];
-  workspaces: WorkbenchToolDefinition[];
-  actions: Array<{ id: string; run: (input: Record<string, unknown>) => Promise<void> }>;
-  shellSlots: ShellSlotContribution[];
-  openResource?: PluginRendererHandles['openResource'];
+  registrations: ExtensionRegistration[];
 };
 
 export function materializeRenderer(
@@ -210,10 +253,7 @@ export function materializeRenderer(
   if (!handles) {
     return {
       issues: [{ code: 'reconcile', pluginId, message: `Plugin ${pluginId} has no renderer implementation` }],
-      views: [],
-      workspaces: [],
-      actions: [],
-      shellSlots: [],
+      registrations: [],
     };
   }
   const issues: CatalogIssue[] = [];
@@ -249,40 +289,121 @@ export function materializeRenderer(
       'shell slot',
     ),
   );
-
-  return {
-    issues,
-    views: Object.entries(manifest.contributions.views || {}).flatMap(([localId, spec]) => {
-      const load = handles.views?.[localId]?.load;
-      if (!load) return [];
-      return [
-        {
-          id: contributionKey(pluginId, localId),
-          pluginId,
-          nameKey: spec.nameKey,
-          order: spec.order,
-          default: spec.default,
-          load,
-        },
-      ];
-    }),
-    workspaces: Object.entries(handles.workbench?.workspaces || {}).map(([localId, tool]) => ({
-      ...tool,
-      workspaceKey: contributionKey(pluginId, localId),
-    })),
-    actions: Object.entries(handles.workbench?.actions || {}).map(([localId, action]) => ({
-      id: contributionKey(pluginId, localId),
-      run: action.run,
-    })),
-    shellSlots: Object.entries(handles.shell?.slots || {}).map(([localId, slot]) => ({
-      id: localId,
+  if (manifest.contributions.page && !handles.page?.load) {
+    issues.push({
+      code: 'reconcile',
       pluginId,
-      slot: manifest.contributions.shell?.slots?.[localId]?.slot || 'page-overlay',
+      message: `Plugin ${pluginId} declared page but did not implement it`,
+    });
+  }
+  if (!manifest.contributions.page && handles.page?.load) {
+    issues.push({
+      code: 'reconcile',
+      pluginId,
+      message: `Plugin ${pluginId} implemented undeclared page`,
+    });
+  }
+
+  const registrations: ExtensionRegistration[] = [
+    {
+      point: extensionPoints.plugin,
+      key: pluginId,
+      order: manifest.catalog.order,
+      value: pluginCatalogEntry(manifest, handles.icon),
+    },
+  ];
+
+  for (const [localId, spec] of Object.entries(manifest.contributions.views || {})) {
+    const load = handles.views?.[localId]?.load;
+    if (!load) continue;
+    registrations.push({
+      point: extensionPoints.view,
+      key: contributionKey(pluginId, localId),
+      order: spec.order,
+      value: {
+        id: contributionKey(pluginId, localId),
+        pluginId,
+        nameKey: spec.nameKey,
+        order: spec.order,
+        load,
+      },
+    });
+  }
+
+  for (const [localId, tool] of Object.entries(handles.workbench?.workspaces || {})) {
+    registrations.push({
+      point: extensionPoints.workspace,
+      key: contributionKey(pluginId, localId),
+      value: {
+        ...tool,
+        workspaceKey: contributionKey(pluginId, localId),
+      },
+    });
+  }
+
+  for (const [localId, action] of Object.entries(handles.workbench?.actions || {})) {
+    registrations.push({
+      point: extensionPoints.workbenchAction,
+      key: contributionKey(pluginId, localId),
+      value: {
+        id: contributionKey(pluginId, localId),
+        run: action.run,
+      },
+    });
+  }
+
+  for (const [localId, slot] of Object.entries(handles.shell?.slots || {})) {
+    registrations.push({
+      point: extensionPoints.shellSlot,
+      key: `${pluginId}:${localId}`,
       order: manifest.contributions.shell?.slots?.[localId]?.order,
-      render: slot.render,
-    })),
-    openResource: handles.openResource,
-  };
+      value: {
+        id: localId,
+        pluginId,
+        slot: manifest.contributions.shell?.slots?.[localId]?.slot || 'page-overlay',
+        order: manifest.contributions.shell?.slots?.[localId]?.order,
+        render: slot.render,
+      },
+    });
+  }
+
+  for (const locale of handles.locales || []) {
+    registrations.push({
+      point: extensionPoints.locale,
+      key: locale.pluginId || pluginId,
+      value: locale,
+    });
+  }
+
+  if (handles.scope) {
+    registrations.push({
+      point: extensionPoints.scope,
+      key: pluginId,
+      value: { pluginId, Component: handles.scope },
+    });
+  }
+
+  if (handles.openResource) {
+    const open = handles.openResource;
+    registrations.push({
+      point: extensionPoints.resourceOpener,
+      key: pluginId,
+      value: { open },
+    });
+  }
+
+  if (handles.page?.load) {
+    registrations.push({
+      point: extensionPoints.pageShell,
+      key: pluginId,
+      value: {
+        pluginId,
+        load: handles.page.load,
+      },
+    });
+  }
+
+  return { issues, registrations };
 }
 
 export function reconcileMain(manifest: PluginManifest, handles: PluginMainHandles | undefined): CatalogIssue[] {

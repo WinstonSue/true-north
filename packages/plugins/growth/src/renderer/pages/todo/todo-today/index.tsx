@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Flex } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import styles from './style.module.less';
+import { AgendaPage } from '../../../ui';
 import { TodoService } from '../../../../client';
 import { TodoVo, TodoWithoutRelationsVo } from '@true-north/vo';
 import { TodoStatus } from '@true-north/enum';
@@ -117,37 +116,32 @@ export default function TodoToday() {
 
   return (
     <ProductSurface id={productRef('growth.todo.view.today')}>
-    <Flex container="full">
-      <Flex vertical container="fixed" className={styles.sidebar}>
-        <DayAgendaCalendar
-          value={selectedDate}
-          onChange={setSelectedDate}
-          visibleMonth={visibleMonth}
-          onVisibleMonthChange={setVisibleMonth}
-          itemCounts={calendarCounts}
-        />
-      </Flex>
-      <Flex vertical container="fill" className={styles.main}>
-        <Flex container="fixed" align="center" className={styles.toolbar}>
-          <h1 className={styles.title}>{formatAgendaTitle(selectedDate)}</h1>
-        </Flex>
-        <Flex container="fill" className={styles.content}>
-          <TodoAgendaSections
-            groups={[
-              ...(isSelectedToday
-                ? [{ key: 'expired', label: '已过期', todoList: expiredTodos }]
-                : []),
-              { key: 'scheduled', label: '未完成', todoList: scheduledTodos },
-              { key: 'done', label: '已完成', todoList: doneTodos },
-              { key: 'abandoned', label: '已放弃', todoList: abandonedTodos },
-            ]}
-            emptyLabel="当天没有待办"
-            onClickTodo={showTodoDetail}
-            refreshTodoList={refreshData}
+      <AgendaPage
+        title={formatAgendaTitle(selectedDate)}
+        calendar={
+          <DayAgendaCalendar
+            value={selectedDate}
+            onChange={setSelectedDate}
+            visibleMonth={visibleMonth}
+            onVisibleMonthChange={setVisibleMonth}
+            itemCounts={calendarCounts}
           />
-        </Flex>
-      </Flex>
-    </Flex>
+        }
+      >
+        <TodoAgendaSections
+          groups={[
+            ...(isSelectedToday
+              ? [{ key: 'expired', label: '已过期', todoList: expiredTodos }]
+              : []),
+            { key: 'scheduled', label: '未完成', todoList: scheduledTodos },
+            { key: 'done', label: '已完成', todoList: doneTodos },
+            { key: 'abandoned', label: '已放弃', todoList: abandonedTodos },
+          ]}
+          emptyLabel="当天没有待办"
+          onClickTodo={showTodoDetail}
+          refreshTodoList={refreshData}
+        />
+      </AgendaPage>
     </ProductSurface>
   );
 }

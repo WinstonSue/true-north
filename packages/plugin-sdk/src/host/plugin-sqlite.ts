@@ -145,7 +145,7 @@ export async function openPluginSqliteStore(options: OpenPluginSqliteStoreOption
   if (!existed && options.space.legacySharedDbPath) {
     await importLegacySqliteTables(dataSource, options.space.legacySharedDbPath, options.extraLegacyTables);
   }
-  const runtime = createHostStorageRuntime(dataSource, undefined, { capability: 'self-managed' });
+  const runtime = createHostStorageRuntime(dataSource);
   await applyPluginMigrations(runtime, options.pluginId, options.migrations);
   return runtime;
 }

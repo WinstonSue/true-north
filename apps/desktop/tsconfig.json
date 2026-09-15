@@ -23,7 +23,6 @@
     "types": ["node"],
     "paths": {
       "@/*": ["./src/render/*"],
-      "@business/*": ["./src/service/*"],
       "@true-north/dev-lab": ["../../packages/dev-lab/src/index.ts"],
       "@true-north/dev-lab/*": ["../../packages/dev-lab/src/*"]
     }

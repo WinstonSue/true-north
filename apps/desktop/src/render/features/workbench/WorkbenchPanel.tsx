@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Flex, Input } from '@sue/design-web-react';
 import { ChevronLeft, ChevronRight, Compass, Download, Loader2, RefreshCw, X } from 'lucide-react';
 import { ProductSurface } from '@ylib/product-surface-react';
@@ -8,6 +8,8 @@ import { useWorkbench } from './context';
 import { ToolStage } from './ToolStage';
 import { PluginViewStage } from './PluginViewStage';
 import { NewTabPicker } from './NewTabPicker';
+import { useBrowserOverlay } from './use-browser-overlay';
+import { snapNativeBrowserBounds } from '../../../service/browser/browser-visibility';
 import styles from './style.module.less';
 
 const EMPTY_BOUNDS = { x: 0, y: 0, width: 0, height: 0 };
@@ -141,31 +143,83 @@ function ExtractButton({ 'data-product-ref': productRefAttr }: ProductSurfaceHos
   );
 }
 
-function Stage({ 'data-product-ref': productRefAttr }: ProductSurfaceHostProps) {
+function Stage({
+  'data-product-ref': productRefAttr,
+  screenshot,
+}: ProductSurfaceHostProps & { screenshot: string | null }) {
   const { activeWebTab } = useWorkbench();
-  if (activeWebTab?.url) return <div className={styles.stageFill} data-product-ref={productRefAttr} />;
+  const showingPage = Boolean(activeWebTab?.url);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const [placeholderBox, setPlaceholderBox] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!showingPage) return undefined;
+    const fill = fillRef.current;
+    if (!fill) return undefined;
+    const publish = () => {
+      const rect = fill.getBoundingClientRect();
+      const snapped = snapNativeBrowserBounds({ x: rect.x, y: rect.y, width: rect.width, height: rect.height });
+      setPlaceholderBox({
+        left: snapped.x - rect.x,
+        top: snapped.y - rect.y,
+        width: snapped.width,
+        height: snapped.height,
+      });
+    };
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(fill);
+    window.addEventListener('resize', publish);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', publish);
+    };
+  }, [showingPage]);
+
+  if (!showingPage) {
+    return (
+      <Flex
+        vertical
+        container="full"
+        align="center"
+        justify="center"
+        className={styles.empty}
+        data-product-ref={productRefAttr}
+      >
+        <Compass size={64} className={styles.emptyIcon} />
+        <p className={styles.emptyTitle}>开始浏览</p>
+        <p className={styles.emptyHint}>输入 URL 以打开页面</p>
+      </Flex>
+    );
+  }
 
   return (
-    <Flex
-      vertical
-      container="full"
-      align="center"
-      justify="center"
-      className={styles.empty}
-      data-product-ref={productRefAttr}
-    >
-      <Compass size={64} className={styles.emptyIcon} />
-      <p className={styles.emptyTitle}>开始浏览</p>
-      <p className={styles.emptyHint}>输入 URL 以打开页面</p>
-    </Flex>
+    <div ref={fillRef} className={styles.stageFill} data-product-ref={productRefAttr}>
+      <div
+        className={styles.stagePlaceholder}
+        style={{
+          ...(screenshot ? { backgroundImage: `url('${screenshot}')` } : {}),
+          ...(placeholderBox
+            ? {
+                left: placeholderBox.left,
+                top: placeholderBox.top,
+                width: placeholderBox.width,
+                height: placeholderBox.height,
+              }
+            : {}),
+        }}
+      />
+    </div>
   );
 }
 
 export function WorkbenchPanel() {
-  const { open, width, setWidth, reportBounds, activeTab } = useWorkbench();
+  const { open, width, setWidth, reportBounds, activeTab, activeWebTab } = useWorkbench();
   const [dragging, setDragging] = useState(false);
-  const holeRef = useRef<HTMLDivElement>(null);
+  const [holeNode, setHoleNode] = useState<HTMLDivElement | null>(null);
   const showingWeb = activeTab?.kind === 'web';
+  const overlayEnabled = Boolean(open && showingWeb && activeWebTab?.url && holeNode);
+  const { screenshot } = useBrowserOverlay(holeNode, overlayEnabled);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -173,11 +227,10 @@ export function WorkbenchPanel() {
       reportBounds(EMPTY_BOUNDS);
       return undefined;
     }
-    const node = holeRef.current;
-    if (!node) return undefined;
+    if (!holeNode) return undefined;
 
     const publish = () => {
-      const rect = node.getBoundingClientRect();
+      const rect = holeNode.getBoundingClientRect();
       reportBounds({
         x: rect.x,
         y: rect.y,
@@ -188,14 +241,14 @@ export function WorkbenchPanel() {
 
     publish();
     const observer = new ResizeObserver(publish);
-    observer.observe(node);
+    observer.observe(holeNode);
     window.addEventListener('resize', publish);
     return () => {
       observer.disconnect();
       window.removeEventListener('resize', publish);
       reportBounds(EMPTY_BOUNDS);
     };
-  }, [open, reportBounds, showingWeb]);
+  }, [holeNode, open, reportBounds, showingWeb]);
 
   useEffect(() => {
     if (!dragging) return undefined;
@@ -234,7 +287,7 @@ export function WorkbenchPanel() {
             <AddressBar />
           </ProductSurface>
         ) : null}
-        <div ref={holeRef} className={styles.stageWrap}>
+        <div ref={setHoleNode} className={styles.stageWrap}>
           {activeTab?.kind === 'tool' ? (
             <ProductSurface id={productRef('workbench.view.tool-stage')}>
               <ToolStage tab={activeTab} />
@@ -245,7 +298,7 @@ export function WorkbenchPanel() {
             </ProductSurface>
           ) : (
             <ProductSurface id={productRef('workbench.view.stage')}>
-              <Stage />
+              <Stage screenshot={screenshot} />
             </ProductSurface>
           )}
         </div>

@@ -51,7 +51,7 @@
 ### 第一阶段：数据格式定义
 
 #### 1.1 Entity 定义（数据模型）
-**位置**: `apps/desktop/src/service/growth/{module}/`（entity、dto、service、repository、route-controller）
+**位置**: `packages/plugins/growth/src/main/service/{module}/`（entity、dto、service、repository、route-controller）
 
 **核心原则**:
 - 继承 `BaseEntity` 获取基础字段
@@ -60,7 +60,7 @@
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/{module}.entity.ts
+// packages/plugins/growth/src/main/service/{domain}/{module}/{module}.entity.ts
 import { BaseEntity } from "../../base/base.entity";
 import { EntityStatus, EntityType } from "@true-north/enum";
 import { Entity, Column, ManyToOne, JoinColumn } from "typeorm";
@@ -113,7 +113,7 @@ export class Module extends ModuleModel {
 ```
 
 #### 1.2 DTO 定义（数据传输对象）
-**位置**: `apps/desktop/src/service/growth/{domain}/{module}/dto/`
+**位置**: `packages/plugins/growth/src/main/service/{domain}/{module}/dto/`
 
 **核心原则**:
 - 区分创建、更新、查询等不同场景的 DTO
@@ -122,7 +122,7 @@ export class Module extends ModuleModel {
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/dto/create-{module}.dto.ts
+// packages/plugins/growth/src/main/service/{domain}/{module}/dto/create-{module}.dto.ts
 import { IsString, IsOptional, IsEnum, IsNumber, IsISO8601 } from "class-validator";
 import { Type } from "class-transformer";
 import { EntityStatus } from "@true-north/enum";
@@ -199,7 +199,7 @@ export namespace ModuleVO {
 ### 第二阶段：业务逻辑实现
 
 #### 2.1 Repository 定义（数据访问层）
-**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.repository.ts`
+**位置**: `packages/plugins/growth/src/main/service/{domain}/{module}/*.repository.ts`
 
 **核心原则**:
 - 实现数据访问接口
@@ -208,7 +208,7 @@ export namespace ModuleVO {
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/{module}.repository.ts
+// packages/plugins/growth/src/main/service/{domain}/{module}/{module}.repository.ts
 import { Module } from "./entities/{module}.entity";
 import { ModuleDto, CreateModuleDto, UpdateModuleDto } from "./dto";
 
@@ -239,7 +239,7 @@ export abstract class ModuleRepository {
 ### 第三阶段：业务逻辑
 
 #### 3.1 Repository Interface 定义（数据访问契约）
-**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.repository.ts`
+**位置**: `packages/plugins/growth/src/main/service/{domain}/{module}/*.repository.ts`
 
 **核心原则**:
 - 定义数据访问的统一接口
@@ -248,7 +248,7 @@ export abstract class ModuleRepository {
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/{module}.repository.ts
+// packages/plugins/growth/src/main/service/{domain}/{module}/{module}.repository.ts
 import { Module } from "./{module}.entity";
 import { CreateModuleDto, UpdateModuleDto, ModulePageFilterDto, ModuleListFilterDto, ModuleDto } from "./dto";
 
@@ -282,7 +282,7 @@ export interface ModuleRepository {
 ```
 
 #### 3.2 Repository 实现（SQLite / TypeORM）
-**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.repository.ts`
+**位置**: `packages/plugins/growth/src/main/service/{domain}/{module}/*.repository.ts`
 
 **核心原则**:
 - 使用 TypeORM 实现复杂查询
@@ -291,7 +291,7 @@ export interface ModuleRepository {
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/{module}.repository.ts
+// packages/plugins/growth/src/main/service/{domain}/{module}/{module}.repository.ts
 @Injectable()
 export class ModuleRepository {
   constructor(
@@ -427,7 +427,7 @@ export class ModuleRepository {
 ```
 
 #### 3.4 Service 定义（业务服务）
-**位置**: `apps/desktop/src/service/growth/{domain}/{module}/*.service.ts`
+**位置**: `packages/plugins/growth/src/main/service/{domain}/{module}/*.service.ts`
 
 **核心原则**:
 - 实现业务规则和逻辑处理
@@ -436,7 +436,7 @@ export class ModuleRepository {
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{domain}/{module}/{module}.service.ts
+// packages/plugins/growth/src/main/service/{domain}/{module}/{module}.service.ts
 export class ModuleService {
   protected moduleRepository: ModuleRepository;
 
@@ -494,11 +494,11 @@ export class ModuleService {
 
 ### 第四阶段：RouteController（IPC + VO 边界）
 
-**位置**: `apps/desktop/src/service/growth/{module}/{module}.route-controller.ts`
+**位置**: `packages/plugins/growth/src/main/service/{module}/{module}.route-controller.ts`
 
 **核心原则**:
 - 唯一 Controller：同时承担 REST 路径声明与 VO ↔ DTO
-- 装饰器使用 `@business/decorators`（桥接 `electron-ipc-restful`）
+- 装饰器使用 `@true-north/plugin-sdk/main`（桥接 `electron-ipc-restful`）
 - 业务规则仍在 Service；不另建 `*.controller.ts` 透传层
 - 在 `src/main/ipc-handlers.ts` 注册 Class（构造器默认注入 service 单例）
 
@@ -506,8 +506,8 @@ export class ModuleService {
 
 **示例代码**:
 ```typescript
-// apps/desktop/src/service/growth/{module}/{module}.route-controller.ts
-import { Controller, Post, Get, Body, Query } from '@business/decorators';
+// packages/plugins/growth/src/main/service/{module}/{module}.route-controller.ts
+import { Controller, Post, Get, Body, Query } from '@true-north/plugin-sdk/main';
 import { ModuleService, moduleService as defaultModuleService } from './{module}.service';
 
 @Controller('/{module}')

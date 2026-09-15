@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import type { AgentTool } from '@true-north/plugin-sdk';
+import { extensionPoints, type AgentTool } from '@true-north/plugin-sdk';
+import { getMainExtensionsOptional } from '../../../plugin/extensions.ts';
 
 export type ToolExecutionContext = {
   appendWorkspace: (part: unknown) => void;
@@ -7,51 +8,12 @@ export type ToolExecutionContext = {
 
 export type { AgentTool };
 
-export class AgentToolRegistry {
-  private readonly tools: AgentTool[] = [];
-  private readonly byName = new Map<string, AgentTool>();
-
-  register(tools: AgentTool[]) {
-    for (const tool of tools) {
-      if (this.byName.has(tool.name)) {
-        throw new Error(`重复注册工具: ${tool.name}`);
-      }
-      this.tools.push(tool);
-      this.byName.set(tool.name, tool);
-    }
-  }
-
-  list(): AgentTool[] {
-    return this.tools;
-  }
-
-  unregister(names: string[]) {
-    const drop = new Set(names);
-    for (const name of drop) this.byName.delete(name);
-    const next = this.tools.filter((tool) => !drop.has(tool.name));
-    this.tools.length = 0;
-    this.tools.push(...next);
-  }
-
-  find(name: string): AgentTool | undefined {
-    return this.byName.get(name);
-  }
-}
-
-let attached: AgentToolRegistry | null = null;
-
-export function attachAgentToolRegistry(registry: AgentToolRegistry) {
-  attached = registry;
-}
-
 export function findAgentTool(name: string): AgentTool | undefined {
-  if (!attached) throw new Error('Agent tools are not attached');
-  return attached.find(name);
+  return getMainExtensionsOptional()?.get(extensionPoints.mcpTool, name);
 }
 
 export function listAgentTools(): AgentTool[] {
-  if (!attached) throw new Error('Agent tools are not attached');
-  return attached.list();
+  return getMainExtensionsOptional()?.list(extensionPoints.mcpTool) || [];
 }
 
 function summarizeArgs(args: Record<string, unknown>): string {

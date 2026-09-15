@@ -9,11 +9,6 @@
       "import": "./src/manifest.ts",
       "default": "./src/manifest.ts"
     },
-    "./contract": {
-      "types": "./src/contract/index.ts",
-      "import": "./src/contract/index.ts",
-      "default": "./src/contract/index.ts"
-    },
     "./main": {
       "types": "./src/main/index.ts",
       "import": "./src/main/index.ts",
@@ -23,25 +18,18 @@
       "types": "./src/renderer/index.tsx",
       "import": "./src/renderer/index.tsx",
       "default": "./src/renderer/index.tsx"
-    },
-    "./wiki": {
-      "types": "./wiki/index.ts",
-      "import": "./wiki/index.ts",
-      "default": "./wiki/index.ts"
     }
   },
   "dependencies": {
     "@true-north/plugin-contract": "workspace:*",
     "@true-north/plugin-sdk": "workspace:*",
-    "@true-north/plugin-ui": "workspace:*",
     "@true-north/enum": "workspace:*",
     "@true-north/vo": "workspace:*",
     "@sue/design-web-react": "0.0.3-beta.1",
     "lucide-react": "^0.460.0",
     "@ylib/product-surface-react": "0.0.2",
     "@ylib/product-server": "0.0.7",
-    "dayjs": "^1.11.13",
-    "zod": "^3.24.1"
+    "dayjs": "^1.11.13"
   },
   "peerDependencies": {
     "react": "^18.0.0",

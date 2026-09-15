@@ -11,7 +11,7 @@ True North 不再在 `doc/{version}/` 写独立 PRD。产品需求的事实来�
 | 本版实现 | `doc/{version}/TDD.md` | 技术设计；版本目录可再放其它技术文件，不放 PRD |
 | 工程规范 | [TechnicalWiki](../TechnicalWiki.md) | 架构、分层、代码约定 |
 
-具体模块内容直接读 wiki，例如 [growth/spec.json](../../../packages/product-wiki/wiki/growth/spec.json)。
+具体模块内容直接读 wiki，例如 [growth/spec.json](../../../packages/plugins/growth/wiki/growth/spec.json)。
 
 ## 与 ProductWiki 现状吻合的模型
 

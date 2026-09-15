@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { session, WebContentsView, type BaseWindow, type WebContents } from 'electron';
-import type { BrowserBoundsVo, BrowserExtractResultVo, BrowserStateVo, BrowserTabVo } from '@true-north/vo';
+import type {
+  BrowserBoundsVo,
+  BrowserExtractResultVo,
+  BrowserScreenshotVo,
+  BrowserStateVo,
+  BrowserTabVo,
+} from '@true-north/vo';
 import {
   BROWSER_STATE_CHANNEL,
   EMBEDDED_BROWSER_PARTITION,
@@ -9,12 +15,19 @@ import {
   normalizeBrowserUrl,
 } from '@true-north/vo';
 import { extractFromContents } from '../extract';
+import {
+  EMPTY_BROWSER_BOUNDS,
+  boundsAreValid,
+  isBrowserPhysicallyVisible,
+  snapNativeBrowserBounds,
+} from './browser-visibility';
 
 type SendFn = (channel: string, payload: BrowserStateVo) => void;
 
 type HostAttach = {
   window: BaseWindow;
   send: SendFn;
+  hostContents?: WebContents | null;
 };
 
 type TabRecord = {
@@ -25,8 +38,6 @@ type TabRecord = {
   view: WebContentsView | null;
 };
 
-const EMPTY_BOUNDS: BrowserBoundsVo = { x: 0, y: 0, width: 0, height: 0 };
-
 const VIEW_PREFERENCES = {
   sandbox: true,
   nodeIntegration: false,
@@ -35,13 +46,10 @@ const VIEW_PREFERENCES = {
   partition: EMBEDDED_BROWSER_PARTITION,
 };
 
+const SCREENSHOT_RETRIES = 5;
+
 function roundBounds(bounds: BrowserBoundsVo): BrowserBoundsVo {
-  return {
-    x: Math.round(bounds.x),
-    y: Math.round(bounds.y),
-    width: Math.max(0, Math.round(bounds.width)),
-    height: Math.max(0, Math.round(bounds.height)),
-  };
+  return snapNativeBrowserBounds(bounds);
 }
 
 function navigationFlags(contents: WebContents | undefined): { canGoBack: boolean; canGoForward: boolean } {
@@ -53,13 +61,31 @@ function navigationFlags(contents: WebContents | undefined): { canGoBack: boolea
   return { canGoBack: false, canGoForward: false };
 }
 
+function canSetVisible(view: WebContentsView): boolean {
+  return typeof (view as WebContentsView & { setVisible?: (next: boolean) => void }).setVisible === 'function';
+}
+
+function nativeVisible(view: WebContentsView): boolean {
+  const readable = view as WebContentsView & { getVisible?: () => boolean };
+  return typeof readable.getVisible === 'function' ? Boolean(readable.getVisible()) : true;
+}
+
+function setNativeVisible(view: WebContentsView, visible: boolean): void {
+  const writable = view as WebContentsView & { setVisible?: (next: boolean) => void };
+  writable.setVisible?.(visible);
+}
+
+const OFFSCREEN_BOUNDS: BrowserBoundsVo = { x: -10000, y: -10000, width: 1, height: 1 };
+
 export class EmbeddedBrowserHost {
   private window: BaseWindow | null = null;
   private send: SendFn | null = null;
+  private hostContents: WebContents | null = null;
   private visible = false;
+  private occluded = false;
   private activeTabId: string | null = null;
   private tabs: TabRecord[] = [];
-  private bounds: BrowserBoundsVo = EMPTY_BOUNDS;
+  private bounds: BrowserBoundsVo = EMPTY_BROWSER_BOUNDS;
   private attached = new Set<WebContentsView>();
   private sessionGuarded = false;
   private resizeBound = false;
@@ -68,6 +94,7 @@ export class EmbeddedBrowserHost {
     this.detach();
     this.window = options.window;
     this.send = options.send;
+    this.hostContents = options.hostContents ?? null;
     if (!this.resizeBound) {
       this.window.on('resize', () => this.syncViews());
       this.resizeBound = true;
@@ -83,10 +110,12 @@ export class EmbeddedBrowserHost {
     this.tabs = [];
     this.activeTabId = null;
     this.visible = false;
-    this.bounds = EMPTY_BOUNDS;
+    this.occluded = false;
+    this.bounds = EMPTY_BROWSER_BOUNDS;
     this.attached.clear();
     this.window = null;
     this.send = null;
+    this.hostContents = null;
     this.resizeBound = false;
   }
 
@@ -100,8 +129,15 @@ export class EmbeddedBrowserHost {
 
   setVisible(visible: boolean): BrowserStateVo {
     this.visible = visible;
+    if (!visible) this.occluded = false;
     this.syncViews();
     return this.emitState();
+  }
+
+  setOccluded(occluded: boolean): BrowserStateVo {
+    this.occluded = occluded;
+    this.syncViews();
+    return this.getState();
   }
 
   setBounds(bounds: BrowserBoundsVo): BrowserStateVo {
@@ -184,6 +220,41 @@ export class EmbeddedBrowserHost {
     return extractFromContents(contents, url);
   }
 
+  async captureScreenshot(tabId: string): Promise<BrowserScreenshotVo> {
+    const tab = this.requireTab(tabId);
+    const view = tab.view;
+    const contents = view?.webContents;
+    const url = contents && !contents.isDestroyed() ? contents.getURL() || tab.url : tab.url;
+    if (!url || !view || !contents || contents.isDestroyed()) {
+      return { tabId, url: url || '', mimeType: 'image/png', dataUrl: null };
+    }
+    const wasVisible = nativeVisible(view);
+    if (!wasVisible) {
+      setNativeVisible(view, true);
+      setNativeVisible(view, false);
+    }
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt < SCREENSHOT_RETRIES; attempt += 1) {
+      try {
+        const image = await contents.capturePage(undefined, { stayHidden: true });
+        if (!wasVisible) setNativeVisible(view, false);
+        else if (nativeVisible(view) !== true) setNativeVisible(view, true);
+        const dataUrl = `data:image/png;base64,${image.toPNG().toString('base64')}`;
+        return { tabId, url, mimeType: 'image/png', dataUrl };
+      } catch (error) {
+        if (error instanceof Error && error.message === 'UnknownVizError') {
+          lastError = error;
+          await new Promise((resolve) => setTimeout(resolve, 16));
+          continue;
+        }
+        if (!wasVisible) setNativeVisible(view, false);
+        throw error;
+      }
+    }
+    if (!wasVisible) setNativeVisible(view, false);
+    throw lastError || new Error(`Failed to capture screenshot after ${SCREENSHOT_RETRIES} attempts`);
+  }
+
   private createTabInternal(): TabRecord {
     const tab: TabRecord = {
       id: randomUUID(),
@@ -226,6 +297,7 @@ export class EmbeddedBrowserHost {
     const view = new WebContentsView({ webPreferences: VIEW_PREFERENCES });
     this.bindContents(tab.id, view.webContents);
     tab.view = view;
+    setNativeVisible(view, false);
     return view;
   }
 
@@ -285,42 +357,64 @@ export class EmbeddedBrowserHost {
 
   private syncViews(): void {
     const active = this.tabs.find((tab) => tab.id === this.activeTabId);
-    const showActive = this.visible && Boolean(active?.url) && Boolean(active?.view);
+    const showActive = isBrowserPhysicallyVisible({
+      visible: this.visible,
+      hasActiveUrl: Boolean(active?.url && active.view),
+      boundsValid: boundsAreValid(this.bounds),
+      occluded: this.occluded,
+    });
     for (const tab of this.tabs) {
       if (!tab.view) continue;
       const show = showActive && tab.id === this.activeTabId;
       if (show) this.showView(tab.view);
-      else this.hideView(tab.view);
+      else this.hideView(tab.view, { detach: false });
     }
   }
 
   private showView(view: WebContentsView): void {
     if (!this.window || this.window.isDestroyed()) return;
-    const bounds = this.bounds;
-    if (bounds.width <= 0 || bounds.height <= 0) {
-      this.hideView(view);
-      return;
-    }
-    if (!this.attached.has(view)) {
-      this.window.contentView.addChildView(view);
-      this.attached.add(view);
-    }
-    view.setBounds(bounds);
+    this.attachView(view);
+    view.setBounds(this.bounds);
+    setNativeVisible(view, true);
   }
 
-  private hideView(view: WebContentsView): void {
-    if (this.attached.has(view) && this.window && !this.window.isDestroyed()) {
-      this.window.contentView.removeChildView(view);
+  private hideView(view: WebContentsView, options?: { detach?: boolean }): void {
+    if (view.webContents.isFocused()) {
+      const host = this.hostContents;
+      if (host && !host.isDestroyed()) host.focus();
     }
-    this.attached.delete(view);
-    view.setBounds(EMPTY_BOUNDS);
+    setNativeVisible(view, false);
+    if (options?.detach) {
+      if (this.attached.has(view) && this.window && !this.window.isDestroyed()) {
+        this.window.contentView.removeChildView(view);
+      }
+      this.attached.delete(view);
+      view.setBounds(EMPTY_BROWSER_BOUNDS);
+      return;
+    }
+    if (!canSetVisible(view)) {
+      view.setBounds({
+        ...OFFSCREEN_BOUNDS,
+        width: Math.max(1, this.bounds.width),
+        height: Math.max(1, this.bounds.height),
+      });
+      return;
+    }
+    if (this.attached.has(view)) view.setBounds(this.bounds);
+  }
+
+  private attachView(view: WebContentsView): void {
+    if (!this.window || this.window.isDestroyed()) return;
+    if (this.attached.has(view)) return;
+    this.window.contentView.addChildView(view);
+    this.attached.add(view);
   }
 
   private destroyView(tab: TabRecord): void {
     const view = tab.view;
     tab.view = null;
     if (!view) return;
-    this.hideView(view);
+    this.hideView(view, { detach: true });
     const contents = view.webContents;
     if (!contents.isDestroyed()) contents.close();
   }

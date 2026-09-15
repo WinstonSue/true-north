@@ -1,8 +1,6 @@
 import type { DataSource, EntityManager, EntityTarget, ObjectLiteral, Repository, TreeRepository } from 'typeorm';
-import type { HostStorageCapability } from '@true-north/plugin-contract';
 
 export type HostStorageRuntime = {
-  capability: HostStorageCapability;
   dataSource: DataSource;
   manager: EntityManager;
   query(sql: string, params?: unknown[]): Promise<unknown>;
@@ -13,7 +11,6 @@ export type HostStorageRuntime = {
 
 export type PluginStorageHandle = {
   pluginId: string;
-  capability: HostStorageCapability;
   query(sql: string, params?: unknown[]): Promise<unknown>;
   runInTransaction<T>(run: (tx: PluginStorageHandle) => Promise<T>): Promise<T>;
 };
@@ -45,13 +42,11 @@ export class StorageRegistry {
 export function createHostStorageRuntime(
   dataSource: DataSource,
   manager?: EntityManager,
-  options?: { capability?: HostStorageCapability; registry?: StorageRegistry },
+  options?: { registry?: StorageRegistry },
 ): HostStorageRuntime {
-  const capability = options?.capability ?? 'self-managed';
   const registry = options?.registry;
   const target = manager ?? dataSource;
   const runtime: HostStorageRuntime = {
-    capability,
     dataSource,
     manager: manager ?? dataSource.manager,
     query: (sql, params) => target.query(sql, params as never),
@@ -60,7 +55,7 @@ export function createHostStorageRuntime(
     runInTransaction: async (run) => {
       if (manager) return run(runtime);
       return dataSource.transaction(async (tx) => {
-        const nested = createHostStorageRuntime(dataSource, tx, { capability, registry });
+        const nested = createHostStorageRuntime(dataSource, tx, { registry });
         const ownedIds = registry?.idsForDataSource(dataSource) || [];
         const previous = ownedIds.map((id) => [id, registry?.get(id)] as const);
         for (const id of ownedIds) registry?.bind(id, nested);
@@ -81,7 +76,6 @@ export function createHostStorageRuntime(
 export function asPluginStorageHandle(pluginId: string, runtime: HostStorageRuntime): PluginStorageHandle {
   return {
     pluginId,
-    capability: runtime.capability,
     query: (sql, params) => runtime.query(sql, params),
     runInTransaction: (run) => runtime.runInTransaction((tx) => run(asPluginStorageHandle(pluginId, tx))),
   };

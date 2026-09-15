@@ -125,6 +125,14 @@
       "views": ["capture-review"],
       "reference": "workbench.rule.adopt-all-or-nothing",
       "productStatus": "roadmap"
+    },
+    {
+      "id": "overlay-above-stage",
+      "name": "宿主浮层优先于网页舞台",
+      "description": "与浏览舞台重叠的宿主浮层（对话框、抽屉、下拉、选择器、气泡、菜单、通知等）出现时，网页必须让出画面，不能盖住浮层；让出后舞台保持原来的画面，不另外压暗。浮层关闭后网页保持原来的地址、滚动和登录状态。不相交的浮层不隐藏网页。",
+      "views": ["shell", "stage"],
+      "reference": "workbench.rule.overlay-above-stage",
+      "productStatus": "roadmap"
     }
   ],
   "references": [
@@ -151,7 +159,7 @@
     {
       "id": "workbench.view.stage",
       "title": "浏览舞台",
-      "body": "舞台在当前为网页标签时呈现网页。新标签页显示开始浏览，并提示输入网址以打开页面。打开网址后，网页只出现在舞台内，不覆盖标签栏与地址栏。"
+      "body": "舞台在当前为网页标签时呈现网页。新标签页显示开始浏览，并提示输入网址以打开页面。打开网址后，网页只出现在舞台内，不覆盖标签栏与地址栏。与舞台重叠的宿主浮层出现时，网页让出画面，舞台仍保持原来的亮度。"
     },
     {
       "id": "workbench.view.tool-stage",
@@ -212,6 +220,11 @@
       "id": "workbench.rule.adopt-all-or-nothing",
       "title": "确认采纳整笔提交",
       "body": "确认采纳时，所选建议要么全部写入对应领域并生成一张活动卡，要么全部不写。失败时不留下半张活动卡，也不把建议标成已采纳。"
+    },
+    {
+      "id": "workbench.rule.overlay-above-stage",
+      "title": "宿主浮层优先于网页舞台",
+      "body": "对话框、抽屉、下拉、选择器、气泡、菜单、通知等宿主浮层如果盖到浏览舞台上，网页必须让出画面，用户要能看见并点到完整浮层。让出后舞台保持原来的画面，不另外压暗。浮层关掉后，原来的网址、滚动位置和登录状态仍在。没有碰到舞台的浮层不改变网页。"
     }
   ]
 }

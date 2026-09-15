@@ -1,4 +1,11 @@
-import type { BrowserBoundsVo, BrowserNavigateRequestVo, BrowserStateVo, BrowserVisibleRequestVo } from '@true-north/vo';
+import type {
+  BrowserBoundsVo,
+  BrowserNavigateRequestVo,
+  BrowserOccludedRequestVo,
+  BrowserScreenshotVo,
+  BrowserStateVo,
+  BrowserVisibleRequestVo,
+} from '@true-north/vo';
 import { BROWSER_STATE_CHANNEL } from '@true-north/vo';
 import BrowserController from '../controller/browser';
 
@@ -46,6 +53,10 @@ export default class BrowserService {
     return BrowserController.setBounds(bounds);
   }
 
+  static setOccluded(occluded: boolean) {
+    return BrowserController.setOccluded({ occluded } satisfies BrowserOccludedRequestVo);
+  }
+
   static createTab(url?: string) {
     return BrowserController.createTab(url);
   }
@@ -76,6 +87,10 @@ export default class BrowserService {
 
   static extractTab(id: string) {
     return BrowserController.extractTab(id);
+  }
+
+  static captureScreenshot(id: string) {
+    return BrowserController.captureScreenshot(id);
   }
 
   static subscribeState(handler: StateHandler): () => void {

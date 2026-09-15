@@ -19,10 +19,16 @@ export function createRenderer() {
           budget: { load: () => import('./features/budget') },
           overview: { load: () => import('./features/overview') },
         },
+        page: {
+          load: () => import('./layout/ExpensePage'),
+        },
         openResource(uri) {
           const parsed = parsePluginResourceUri(uri);
           if (!parsed || parsed.pluginId !== 'expense') return null;
-          return { viewId: expenseIds.views.transaction, params: parsed.id ? { id: parsed.id } : {} };
+          return {
+            viewId: expenseIds.views.transaction,
+            params: parsed.id ? { view: 'transaction', id: parsed.id } : { view: 'transaction' },
+          };
         },
       };
     },

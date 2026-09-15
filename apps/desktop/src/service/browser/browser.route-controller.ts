@@ -3,10 +3,12 @@ import type {
   BrowserBoundsVo,
   BrowserExtractResultVo,
   BrowserNavigateRequestVo,
+  BrowserOccludedRequestVo,
+  BrowserScreenshotVo,
   BrowserStateVo,
   BrowserVisibleRequestVo,
 } from '@true-north/vo';
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@business/decorators';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@true-north/plugin-sdk/main';
 import { embeddedBrowserHost } from './embedded-browser.host';
 
 @Controller('/browser')
@@ -31,6 +33,11 @@ export class BrowserController {
       width: Number(body?.width) || 0,
       height: Number(body?.height) || 0,
     });
+  }
+
+  @Put('/occluded', { description: '宿主浮层遮挡时隐藏原生网页' })
+  async setOccluded(@Body() body: BrowserOccludedRequestVo): Promise<BrowserStateVo> {
+    return this.host.setOccluded(Boolean(body?.occluded));
   }
 
   @Post('/tabs', { description: '新建标签' })
@@ -71,5 +78,10 @@ export class BrowserController {
   @Post('/tabs/:id/extract', { description: '拉取当前标签正文并落盘' })
   async extractTab(@Param('id') id: string): Promise<BrowserExtractResultVo> {
     return this.host.extractTab(id);
+  }
+
+  @Post('/tabs/:id/screenshot', { description: '截取当前标签用于浮层占位' })
+  async captureScreenshot(@Param('id') id: string): Promise<BrowserScreenshotVo> {
+    return this.host.captureScreenshot(id);
   }
 }

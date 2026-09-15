@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Input, Select } from '@sue/design-web-react';
 import { ProductSurface, type ProductSurfaceHostProps } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import type { AiEntityLinkVo } from '@true-north/vo';
+import type { AiResourceMentionVo } from '@true-north/vo';
+import { AiService } from '@true-north/web-service';
+import useLocale from '@/utils/useLocale';
 import {
   Conversation,
   ConversationEmptyState,
@@ -12,24 +14,19 @@ import {
 import { Message, MessageContent, MessageParts } from '../components/Message';
 import { PromptInput, PromptInputSubmit } from '../components/PromptInput';
 import { useAiSessionContext } from '../context';
+import {
+  cycleMentionIndex,
+  insertMentionToken,
+  mentionKindLabel,
+  mentionOptionId,
+  readMentionQuery,
+  resourceLinksInText,
+  upsertResourceLink,
+} from '../mention';
 import styles from '../style.module.less';
 import type { ComposerInputRef } from '../types';
 
-type MentionItem = AiEntityLinkVo;
-
-function readMentionQuery(text: string, cursor: number): { start: number; query: string } | null {
-  const before = text.slice(0, cursor);
-  const match = before.match(/@([^\s@]*)$/);
-  if (!match || match.index === undefined) return null;
-  return { start: match.index, query: match[1] || '' };
-}
-
-function resolveTextArea(ref: ComposerInputRef | null): HTMLTextAreaElement | null {
-  if (!ref) return null;
-  if (ref.nativeElement instanceof HTMLTextAreaElement) return ref.nativeElement;
-  const nested = ref.resizableTextArea?.textArea;
-  return nested instanceof HTMLTextAreaElement ? nested : null;
-}
+const MENTION_DEBOUNCE_MS = 120;
 
 export function ConversationPane({ 'data-product-ref': productRefAttr }: ProductSurfaceHostProps) {
   const {
@@ -43,6 +40,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
     streaming,
     streamingAssistantId,
     openWorkspace,
+    openResource,
     codingAgents,
     selectedAgentId,
     selectedAgent,
@@ -51,34 +49,53 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
     threadWillReset,
     composerInputRef,
   } = useAiSessionContext();
+  const t = useLocale();
   const [cursor, setCursor] = useState(0);
   const [mentionOpen, setMentionOpen] = useState(false);
   const [mentionIndex, setMentionIndex] = useState(0);
+  const [mentionItems, setMentionItems] = useState<AiResourceMentionVo[]>([]);
+  const mentionRequestRef = useRef(0);
 
   const mention = mentionOpen ? readMentionQuery(draft.text, cursor) : null;
-  const mentionItems = useMemo(() => [] as MentionItem[], []);
+  const mentionQuery = mention ? mention.query : null;
+
+  useEffect(() => {
+    if (mentionQuery === null) {
+      mentionRequestRef.current += 1;
+      setMentionItems([]);
+      return;
+    }
+    const requestId = mentionRequestRef.current + 1;
+    mentionRequestRef.current = requestId;
+    const timer = window.setTimeout(() => {
+      void AiService.searchResourceMentions(mentionQuery).then((result) => {
+        if (requestId !== mentionRequestRef.current) return;
+        setMentionItems(result.ok ? result.data : []);
+      });
+    }, MENTION_DEBOUNCE_MS);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [mentionQuery]);
 
   useEffect(() => {
     setMentionIndex(0);
   }, [mention?.query, mentionItems.length]);
 
-  const insertMention = (item: MentionItem) => {
-    const current = readMentionQuery(draft.text, cursor);
-    if (!current) return;
-    const before = draft.text.slice(0, current.start);
-    const after = draft.text.slice(cursor);
-    const nextText = `${before}@${item.label} ${after}`;
-    const nextCursor = `${before}@${item.label} `.length;
-    const links = draft.links.some((link) => link.type === item.type && link.id === item.id)
-      ? draft.links
-      : [...draft.links, item];
-    setDraft({ text: nextText, links });
+  const insertMention = (item: AiResourceMentionVo) => {
+    const applied = insertMentionToken(draft.text, cursor, item.label);
+    if (!applied) return;
+    setDraft({
+      text: applied.text,
+      links: resourceLinksInText(applied.text, upsertResourceLink(draft.links, { uri: item.uri, label: item.label })),
+    });
     setMentionOpen(false);
-    setCursor(nextCursor);
+    setMentionItems([]);
+    setCursor(applied.cursor);
     composerInputRef.current?.focus();
     requestAnimationFrame(() => {
       const textarea = resolveTextArea(composerInputRef.current);
-      textarea?.setSelectionRange(nextCursor, nextCursor);
+      textarea?.setSelectionRange(applied.cursor, applied.cursor);
     });
   };
 
@@ -92,12 +109,12 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
     if (mentionOpen && mentionItems.length > 0) {
       if (event.key === 'ArrowDown') {
         event.preventDefault();
-        setMentionIndex((index) => (index + 1) % mentionItems.length);
+        setMentionIndex((index) => cycleMentionIndex(index, 1, mentionItems.length));
         return;
       }
       if (event.key === 'ArrowUp') {
         event.preventDefault();
-        setMentionIndex((index) => (index - 1 + mentionItems.length) % mentionItems.length);
+        setMentionIndex((index) => cycleMentionIndex(index, -1, mentionItems.length));
         return;
       }
       if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
@@ -154,8 +171,8 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
       <div className={styles.mentionPanel} role="listbox">
         {mentionItems.map((item, index) => (
           <button
-            key={`${item.type}-${item.id}`}
-            id={`mention-${item.type}-${item.id}`}
+            key={item.uri}
+            id={mentionOptionId(item.uri)}
             type="button"
             role="option"
             aria-selected={index === mentionIndex}
@@ -166,9 +183,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
               insertMention(item);
             }}
           >
-            <span className={styles.mentionKind}>
-            <span className={styles.mentionKind}>{item.type}</span>
-            </span>
+            <span className={styles.mentionKind}>{mentionKindLabel(item, t as Record<string, string>)}</span>
             <span>{item.label}</span>
           </button>
         ))}
@@ -181,7 +196,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
       ? {
           role: 'combobox' as const,
           'aria-expanded': true,
-          'aria-activedescendant': `mention-${mentionActiveItem.type}-${mentionActiveItem.id}`,
+          'aria-activedescendant': mentionOptionId(mentionActiveItem.uri),
         }
       : undefined;
 
@@ -198,6 +213,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
                   message={message}
                   streaming={streaming && message.id === streamingAssistantId}
                   onOpenWorkspace={openWorkspace}
+                  onOpenResource={openResource}
                 />
               </MessageContent>
             </Message>
@@ -240,7 +256,7 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
             const nextCursor = event.target.selectionStart ?? nextText.length;
             setDraft({
               text: nextText,
-              links: draft.links.filter((link) => nextText.includes(`@${link.label}`)),
+              links: resourceLinksInText(nextText, draft.links),
             });
             setCursor(nextCursor);
             setMentionOpen(Boolean(readMentionQuery(nextText, nextCursor)));
@@ -256,4 +272,11 @@ export function ConversationPane({ 'data-product-ref': productRefAttr }: Product
       </PromptInput>
     </Conversation>
   );
+}
+
+function resolveTextArea(ref: ComposerInputRef | null): HTMLTextAreaElement | null {
+  if (!ref) return null;
+  if (ref.nativeElement instanceof HTMLTextAreaElement) return ref.nativeElement;
+  const nested = ref.resizableTextArea?.textArea;
+  return nested instanceof HTMLTextAreaElement ? nested : null;
 }

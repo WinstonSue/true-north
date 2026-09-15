@@ -12,7 +12,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import type { ProductSurfaceHostProps } from '@ylib/product-surface-react';
 import type { ConversationVo } from '@true-north/vo';
-import ContextMenu, { type ContextMenuItem } from '@/components/ContextMenu';
+import { ContextMenu, type ContextMenuItem } from '@true-north/plugin-ui';
 import { useAiSessionContext } from '../context';
 import styles from '../style.module.less';
 

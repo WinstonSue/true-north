@@ -1,5 +1,5 @@
 import { Drawer, message, Modal } from '@sue/design-web-react';
-import { drawerBodyStyles } from '@true-north/plugin-ui';
+import { drawerShellStyles } from '../../ui';
 import { GoalService } from '../../../client';
 import GoalCreator from '../components/goal-detail/GoalCreator';
 import GoalEditor from '../components/goal-detail/GoalEditor';
@@ -9,7 +9,7 @@ export const handleAddChild = (nodeId: string) => {
     const instance = Drawer.open({
       title: '新增子目标',
       size: 800,
-      styles: drawerBodyStyles,
+      styles: drawerShellStyles,
       content: (
         <GoalCreator
           initialFormData={{
@@ -37,7 +37,7 @@ export const handleAddSibling = async (nodeId: string) => {
       const instance = Drawer.open({
         title: '新增同级目标',
         size: 800,
-        styles: drawerBodyStyles,
+        styles: drawerShellStyles,
         content: (
           <GoalCreator
             initialFormData={{
@@ -69,7 +69,7 @@ export const handleCopyNode = async (nodeId: string) => {
       const instance = Drawer.open({
         title: '复制目标',
         size: 800,
-        styles: drawerBodyStyles,
+        styles: drawerShellStyles,
         content: (
           <GoalCreator
             initialFormData={{
@@ -116,7 +116,7 @@ export const handleEditNode = (nodeId: string) => {
     const instance = Drawer.open({
       title: '编辑目标',
       size: 800,
-      styles: drawerBodyStyles,
+      styles: drawerShellStyles,
       content: (
         <GoalEditor
           goalId={nodeId}

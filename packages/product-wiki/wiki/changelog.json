@@ -4,6 +4,184 @@
       "version": "v0.3.0",
       "date": "2026-09-15",
       "event": "changed",
+      "summary": "网页为宿主浮层让出画面时，舞台保持原来的亮度，不另外压暗。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:overlay-above-stage",
+        "scope": "rule",
+        "name": "宿主浮层优先于网页舞台",
+        "reference": "workbench.rule.overlay-above-stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "浏览舞台在网页让位给宿主浮层时仍保持原来的画面亮度。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:stage",
+        "scope": "view",
+        "name": "浏览舞台",
+        "reference": "workbench.view.stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "进入插件后的栏目由该插件自己切换，不再由工作台功能列表生成顶栏；工作台仍可单独打开同一类功能。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "plugins:view:hub-nav",
+        "scope": "view",
+        "name": "领域导航",
+        "reference": "plugins.view.hub-nav",
+        "wikiId": "plugins",
+        "wikiTitle": "插件"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "账单、预算与总览是记账页内自己的栏目；同一类能力也可从工作台加号作为功能标签打开，两者不是同一套顶栏。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "expense:module",
+        "scope": "module",
+        "name": "记账",
+        "wikiId": "expense",
+        "wikiTitle": "记账"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "成长页内导航由成长自己切换；同一类能力也可从工作台加号作为功能标签打开，两者不是同一套顶栏。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth:module",
+        "scope": "module",
+        "name": "个人成长系统",
+        "wikiId": "growth",
+        "wikiTitle": "个人成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "与浏览舞台重叠的宿主浮层出现时，网页让出画面，不能盖住对话框、抽屉或下拉。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:overlay-above-stage",
+        "scope": "rule",
+        "name": "宿主浮层优先于网页舞台",
+        "reference": "workbench.rule.overlay-above-stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "浏览舞台在宿主浮层与网页重叠时让出画面，浮层关闭后仍保留原来的网页。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:stage",
+        "scope": "view",
+        "name": "浏览舞台",
+        "reference": "workbench.view.stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "工作台面板打开时，重叠的宿主浮层优先于网页舞台显示。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:shell",
+        "scope": "view",
+        "name": "工作台面板",
+        "reference": "workbench.view.shell",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "输入框输入 @ 可搜索并引用插件资源，选中后只写入当前这条消息。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:resource-mention",
+        "scope": "rule",
+        "name": "引用插件资源",
+        "reference": "ai.session.rule.resource-mention",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "会话对话恢复输入框引用插件资源；选中后以资源名称出现在当前消息中，点选可打开详情。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:view:conversation",
+        "scope": "view",
+        "name": "会话对话",
+        "reference": "ai.session.view.conversation",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "从目标发起仍附带该条资源打开或复用会话；主对话输入也可引用插件资源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:goal-bound-start",
+        "scope": "rule",
+        "name": "目标资源发起",
+        "reference": "ai.session.rule.goal-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "从任务发起仍附带该条资源打开或复用会话；主对话输入也可引用插件资源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:task-bound-start",
+        "scope": "rule",
+        "name": "任务资源发起",
+        "reference": "ai.session.rule.task-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
       "summary": "从目标发起时附带该条资源打开或复用会话，不再绑定目标实体。",
       "productStatus": "roadmap",
       "feature": {

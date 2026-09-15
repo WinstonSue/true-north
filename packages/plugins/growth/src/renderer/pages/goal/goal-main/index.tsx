@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Empty, Spin, Tabs, Flex } from '@sue/design-web-react';
+import { Flex } from '@sue/design-web-react';
 import { useGoalContext } from '../context';
 import { GoalDetailProvider, GoalForeign } from '../../components/goal-detail';
 import GoalMainHeader from './GoalMainHeader';
 import GoalOverview from './GoalOverview';
+import { DetailTabs, EmptyState, LoadingState } from '../../../ui';
 import styles from './style.module.less';
 
 const GoalDetail: React.FC = () => {
@@ -23,19 +24,11 @@ const GoalDetail: React.FC = () => {
   }, [selectedGoalId]);
 
   if (!selectedGoalId) {
-    return (
-      <Flex container="fill" align="center" justify="center">
-        <Empty description="请从左侧选择一个目标查看详情" />
-      </Flex>
-    );
+    return <EmptyState description="请从左侧选择一个目标查看详情" />;
   }
 
   if (!selectedGoal) {
-    return (
-      <Flex container="fill" align="center" justify="center">
-        <Spin size="large" />
-      </Flex>
-    );
+    return <LoadingState />;
   }
 
   return (
@@ -48,20 +41,9 @@ const GoalDetail: React.FC = () => {
       <Flex vertical container="full" className={styles.detail}>
         <GoalMainHeader />
         <Flex vertical container="fill" className={styles.body}>
-          <Tabs
-            tabBarStyle={{ padding: '0 12px' }}
-            styles={{
-              body: {
-                padding: '8px 12px',
-                height: '100%',
-                minHeight: 0,
-                overflow: 'auto',
-              },
-            }}
-            size='small'
+          <DetailTabs
             activeKey={activeTab}
             onChange={setActiveTab}
-            className={styles.tabs}
             items={[
               {
                 key: 'overview',

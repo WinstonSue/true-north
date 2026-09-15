@@ -1,4 +1,4 @@
-import type { AiChatStreamEventVo, AiTextPartVo, MessageVo } from '@true-north/vo';
+import type { AiChatStreamEventVo, AiResourceLinkVo, AiTextPartVo, MessageVo } from '@true-north/vo';
 
 export type ActiveStream = {
   streamId: string;
@@ -88,7 +88,7 @@ function concatTextParts(parts: MessageVo['parts']): string {
     .join('');
 }
 
-function collectLinks(parts: MessageVo['parts']): NonNullable<AiTextPartVo['entityLinks']> {
+function collectEntityLinks(parts: MessageVo['parts']): NonNullable<AiTextPartVo['entityLinks']> {
   const links: NonNullable<AiTextPartVo['entityLinks']> = [];
   for (const part of parts) {
     if (part.type === 'text') links.push(...(part.entityLinks || []));
@@ -96,39 +96,60 @@ function collectLinks(parts: MessageVo['parts']): NonNullable<AiTextPartVo['enti
   return links;
 }
 
+function collectResourceLinks(parts: MessageVo['parts']): AiResourceLinkVo[] {
+  const links: AiResourceLinkVo[] = [];
+  for (const part of parts) {
+    if (part.type === 'text') links.push(...(part.resourceLinks || []));
+  }
+  return links;
+}
+
+function textPartWithLinks(
+  text: string,
+  resourceLinks: AiResourceLinkVo[],
+  entityLinks: NonNullable<AiTextPartVo['entityLinks']>,
+): AiTextPartVo {
+  const part: AiTextPartVo = { type: 'text', text };
+  if (resourceLinks.length) part.resourceLinks = resourceLinks;
+  if (entityLinks.length) part.entityLinks = entityLinks;
+  return part;
+}
+
 export function mergeAssistantMessage(local: MessageVo, incoming: MessageVo): MessageVo {
   const localParts = local.parts || [];
   const incomingParts = incoming.parts || [];
   const localText = concatTextParts(localParts);
   const incomingText = concatTextParts(incomingParts);
-  const localLinks = collectLinks(localParts);
-  const incomingLinks = collectLinks(incomingParts);
+  const localResourceLinks = collectResourceLinks(localParts);
+  const incomingResourceLinks = collectResourceLinks(incomingParts);
+  const localEntityLinks = collectEntityLinks(localParts);
+  const incomingEntityLinks = collectEntityLinks(incomingParts);
 
   let text = incomingText;
-  let entityLinks = incomingLinks;
+  let resourceLinks = incomingResourceLinks;
+  let entityLinks = incomingEntityLinks;
   if (localText.startsWith(incomingText) || incomingText.startsWith(localText)) {
     if (localText.length >= incomingText.length) {
       text = localText;
-      entityLinks = localLinks;
+      resourceLinks = localResourceLinks;
+      entityLinks = localEntityLinks;
     }
   }
 
-  const textPart: AiTextPartVo = entityLinks.length
-    ? { type: 'text', text, entityLinks }
-    : { type: 'text', text };
+  const mergedText = textPartWithLinks(text, resourceLinks, entityLinks);
   const parts: MessageVo['parts'] = [];
   let insertedText = false;
   for (const part of incomingParts) {
     if (part.type === 'text') {
       if (!insertedText) {
-        parts.push(textPart);
+        parts.push(mergedText);
         insertedText = true;
       }
     } else {
       parts.push(part);
     }
   }
-  if (!insertedText && text) parts.unshift(textPart);
+  if (!insertedText && text) parts.unshift(mergedText);
 
   return { ...incoming, parts };
 }

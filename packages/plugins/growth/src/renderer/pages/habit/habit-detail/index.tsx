@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Card,
   Button,
   Drawer,
   Flex,
@@ -8,31 +7,35 @@ import {
   Tag,
   Progress,
   Descriptions,
-  Tabs,
-  Spin,
   message,
   Modal,
   Badge,
-  Row,
-  Col,
 } from '@sue/design-web-react';
-import { Check, ChevronLeft, Pause, Pencil, Play, Trash2, X } from 'lucide-react';
+import { Check, Pause, Pencil, Play, Trash2, X } from 'lucide-react';
 import { HabitService, TodoController, GoalController } from '../../../../client';
 import { HabitVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from '../constants';
 import { useHabitContext } from '../context';
 import { HabitStatus, TodoRelatedType } from '@true-north/enum';
 import { DIFFICULTY_MAP } from '../../constants';
-import { drawerBodyStyles } from '@true-north/plugin-ui';
 import { CreateHabit } from '../components/CreateHabit';
 import { emitHabitChanged } from '../../events';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import styles from '../style.module.less';
+import {
+  DetailTabs,
+  EmptyState,
+  LoadingState,
+  PageHeader,
+  Surface,
+  drawerShellStyles,
+} from '../../../ui';
+import styles from './style.module.less';
 
 export const HabitDetailPage: React.FC<{ id?: string }> = ({ id }) => {
   const { refreshHabits, openList } = useHabitContext();
 
+  const [activeTab, setActiveTab] = useState('info');
   const [habit, setHabit] = useState<HabitVo | null>(null);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -129,7 +132,7 @@ export const HabitDetailPage: React.FC<{ id?: string }> = ({ id }) => {
       const instance = Drawer.open({
         title: '编辑习惯',
         size: 800,
-        styles: drawerBodyStyles,
+        styles: drawerShellStyles,
         content: (
           <CreateHabit
             habit={habit}
@@ -166,326 +169,200 @@ export const HabitDetailPage: React.FC<{ id?: string }> = ({ id }) => {
   0;
 
   if (loading) {
-    return (
-      <Flex align="center" justify="center" className={styles.loading}>
-        <Spin size="large" />
-      </Flex>
-    );
+    return <LoadingState />;
   }
 
   if (!habit) {
-    return (
-      <Flex align="center" justify="center" className={styles.emptyState}>
-        <span>习惯不存在或已被删除</span>
-      </Flex>
-    );
+    return <EmptyState description="习惯不存在或已被删除" />;
   }
 
   return (
     <ProductSurface id={productRef('growth.habit.view.detail')}>
-    <div className={styles.legacyPage}>
-      {/* 页面头部 */}
-      <Card className="mb-4">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center space-x-4">
-            <Button
-              icon={<ChevronLeft size={16} />}
-              onClick={() => openList()}>
-
-              返回
-            </Button>
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <h4 className="text-title-1 font-medium mb-0">
-                  {habit.name}
-                </h4>
-                <Badge
-                  status={statusConfig?.color as any}
-                  text={statusConfig?.label} />
-
-              </div>
-              {habit.description &&
-              <span className="text-text-3">{habit.description}</span>
-              }
-            </div>
-          </div>
-
-          <Space>
-            {/* 状态操作按钮 */}
-            {habit.status === HabitStatus.ACTIVE &&
-            <>
+      <Flex vertical container="full" className={styles.page}>
+        <PageHeader
+          title={
+            <Flex align="center" gap={8}>
+              <span>{habit.name}</span>
+              <Badge status={statusConfig?.color as any} text={statusConfig?.label} />
+            </Flex>
+          }
+          onBack={() => openList()}
+          extra={
+            <Space>
+              {habit.status === HabitStatus.ACTIVE && (
+                <>
+                  <Button
+                    type="primary"
+                    icon={<Check size={16} />}
+                    loading={actionLoading}
+                    onClick={() => handleHabitAction('complete')}
+                  >
+                    完成
+                  </Button>
+                  <Button
+                    icon={<Pause size={16} />}
+                    loading={actionLoading}
+                    onClick={() => handleHabitAction('pause')}
+                  >
+                    暂停
+                  </Button>
+                </>
+              )}
+              {(habit.status === HabitStatus.ABANDONED || habit.status === HabitStatus.PAUSED) && (
                 <Button
-                type="primary"
-                icon={<Check size={16} />}
-                loading={actionLoading}
-                onClick={() => handleHabitAction('complete')}>
-
-                  完成
+                  type="primary"
+                  icon={<Play size={16} />}
+                  loading={actionLoading}
+                  onClick={() => handleHabitAction('resume')}
+                >
+                  恢复
                 </Button>
+              )}
+              {(habit.status === HabitStatus.ACTIVE || habit.status === HabitStatus.PAUSED) && (
                 <Button
-                icon={<Pause size={16} />}
-                loading={actionLoading}
-                onClick={() => handleHabitAction('pause')}>
-
-                  暂停
+                  icon={<X size={16} />}
+                  loading={actionLoading}
+                  onClick={() => handleHabitAction('abandon')}
+                >
+                  放弃
                 </Button>
-              </>
-            }
-
-            {(habit.status === HabitStatus.ABANDONED || habit.status === HabitStatus.PAUSED) &&
-            <Button
-              type="primary"
-              icon={<Play size={16} />}
-              loading={actionLoading}
-              onClick={() => handleHabitAction('resume')}>
-
-                恢复
+              )}
+              <Button icon={<Pencil size={16} />} onClick={handleEdit}>
+                编辑
               </Button>
-            }
-
-            {(habit.status === HabitStatus.ACTIVE ||
-            habit.status === HabitStatus.PAUSED) &&
-            <Button
-              icon={<X size={16} />}
-              loading={actionLoading}
-              onClick={() => handleHabitAction('abandon')}>
-
-                放弃
+              <Button type="primary" danger icon={<Trash2 size={16} />} onClick={handleDelete}>
+                删除
               </Button>
-            }
-
-            <Button icon={<Pencil size={16} />} onClick={handleEdit}>编辑</Button>
-            <Button
-              type="primary"
-              danger
-              icon={<Trash2 size={16} />}
-              onClick={handleDelete}>
-
-              删除
-            </Button>
-          </Space>
-        </div>
-      </Card>
-
-      {/* 主要内容 */}
-      <Row gutter={16}>
-        {/* 左侧：基本信息和统计 */}
-        <Col span={16}>
-          <Tabs
-            defaultActiveKey="info"
+            </Space>
+          }
+        />
+        <Flex container="fill" className={styles.body}>
+          <DetailTabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
             items={[
-            {
-              key: 'info',
-              label: '基本信息',
-              children:
-              <Card>
-                    <Descriptions
-                  column={2}
-                  items={[
-                  {
-                    key: 'name',
-                    label: '习惯名称',
-                    children: habit.name
-                  },
-                  {
-                    key: 'status',
-                    label: '状态',
-                    children:
-                    <Badge
-                      status={statusConfig?.color as any}
-                      text={statusConfig?.label} />
-
-                  },
-                  {
-                    key: 'importance',
-                    label: '重要程度',
-                    children: habit.importance ?
-                    `${habit.importance}/5` :
-                    '-'
-                  },
-                  {
-                    key: 'difficulty',
-                    label: '难度等级',
-                    children: difficultyConfig ?
-                    <Tag color={difficultyConfig.color}>
-                              {difficultyConfig.label}
-                            </Tag> :
-
-                    '-'
-
-                  },
-                  {
-                    key: 'repeatStartDate',
-                    label: '开始时间',
-                    children: habit.repeatStartDate ?
-                    new Date(habit.repeatStartDate).toLocaleDateString() :
-                    '-'
-                  },
-                  {
-                    key: 'repeatEndDate',
-                    label: '目标时间',
-                    children: habit.repeatEndDate ?
-                    new Date(habit.repeatEndDate).toLocaleDateString() :
-                    '长期习惯'
-                  },
-                  {
-                    key: 'createdAt',
-                    label: '创建时间',
-                    children: new Date(habit.createdAt).toLocaleString()
-                  },
-                  {
-                    key: 'updatedAt',
-                    label: '更新时间',
-                    children: new Date(habit.updatedAt).toLocaleString()
-                  }]
-                  } />
-
-                    {habit.description &&
-                <div className="mt-4">
-                        <span className="font-medium">描述：</span>
-                        <p className="mt-2">
-                          {habit.description}
-                        </p>
+              {
+                key: 'info',
+                label: '基本信息',
+                children: (
+                  <Flex gap={24} className={styles.detail}>
+                    <div className={styles.main}>
+                      <Descriptions
+                        column={2}
+                        items={[
+                          { key: 'name', label: '习惯名称', children: habit.name },
+                          {
+                            key: 'status',
+                            label: '状态',
+                            children: (
+                              <Badge status={statusConfig?.color as any} text={statusConfig?.label} />
+                            ),
+                          },
+                          {
+                            key: 'importance',
+                            label: '重要程度',
+                            children: habit.importance ? `${habit.importance}/5` : '-',
+                          },
+                          {
+                            key: 'difficulty',
+                            label: '难度等级',
+                            children: difficultyConfig ? (
+                              <Tag color={difficultyConfig.color}>{difficultyConfig.label}</Tag>
+                            ) : (
+                              '-'
+                            ),
+                          },
+                          {
+                            key: 'repeatStartDate',
+                            label: '开始时间',
+                            children: habit.repeatStartDate
+                              ? new Date(habit.repeatStartDate).toLocaleDateString()
+                              : '-',
+                          },
+                          {
+                            key: 'repeatEndDate',
+                            label: '目标时间',
+                            children: habit.repeatEndDate
+                              ? new Date(habit.repeatEndDate).toLocaleDateString()
+                              : '长期习惯',
+                          },
+                          {
+                            key: 'createdAt',
+                            label: '创建时间',
+                            children: new Date(habit.createdAt).toLocaleString(),
+                          },
+                          {
+                            key: 'updatedAt',
+                            label: '更新时间',
+                            children: new Date(habit.updatedAt).toLocaleString(),
+                          },
+                        ]}
+                      />
+                      {habit.description ? <p className={styles.description}>{habit.description}</p> : null}
+                      {habit.tags?.length ? (
+                        <Flex gap={8} wrap className={styles.tags}>
+                          {habit.tags.map((tag) => (
+                            <Tag key={tag}>{tag}</Tag>
+                          ))}
+                        </Flex>
+                      ) : null}
+                    </div>
+                    <Surface className={styles.stats}>
+                      <div className={styles.statHead}>
+                        <span>完成率</span>
+                        <strong>{completionRate}%</strong>
                       </div>
-                }
-
-                    {habit.tags && habit.tags.length > 0 &&
-                <div className="mt-4">
-                        <span className="font-medium">标签：</span>
-                        <div className="mt-2">
-                          {habit.tags.map((tag, index) =>
-                    <Tag key={index} className="mr-2 mb-2">
-                              {tag}
-                            </Tag>
-                    )}
+                      <Progress percent={completionRate} />
+                      <div className={styles.metrics}>
+                        <div>
+                          <strong>{habit.currentStreak || 0}</strong>
+                          <span>当前连续天数</span>
+                        </div>
+                        <div>
+                          <strong>{habit.longestStreak || 0}</strong>
+                          <span>最长连续天数</span>
+                        </div>
+                        <div>
+                          <strong>{habit.completedCount || 0}</strong>
+                          <span>总完成次数</span>
+                        </div>
+                        <div>
+                          <strong>{habit.goals?.length || 0}</strong>
+                          <span>关联目标数</span>
                         </div>
                       </div>
-                }
-                  </Card>
-
-            },
-            {
-              key: 'goals',
-              label: '关联目标',
-              children:
-              <Card>
-                    {habit.goals && habit.goals.length > 0 ?
-                <div className="space-y-4">
-                        {habit.goals.map((goal) =>
-                  <Card key={goal.id} size="small" hoverable>
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <span className="font-medium">{goal.name}</span>
-                                {goal.description &&
-                        <span className="text-text-3 block mt-1">
-                                    {goal.description}
-                                  </span>
-                        }
-                              </div>
-                              <div className="ml-4 text-right">
-                                <span className="text-sm text-gray-500">
-                                  进度
-                                </span>
-                                <div className="mt-1">
-                                  <Progress
-                            percent={(goal as any).progress || 0}
-                            size="small"
-                            style={{ width: 100 }} />
-
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                  )}
-                      </div> :
-
-                <div className="text-center py-8 text-gray-500">
-                        <span>暂无关联目标</span>
-                      </div>
-                }
-                  </Card>
-
-            }]
-            } />
-
-        </Col>
-
-        {/* 右侧：统计信息 */}
-        <Col span={8}>
-          <Card title="统计信息">
-            {/* 完成率 */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span>完成率</span>
-                <span className="font-medium">{completionRate}%</span>
-              </div>
-              <Progress percent={completionRate} />
-            </div>
-
-            {/* 关键指标 */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="text-center bg-blue-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-blue-600">
-                  {habit.currentStreak || 0}
-                </div>
-                <div className="text-sm text-gray-600">当前连续天数</div>
-              </div>
-              <div className="text-center bg-green-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-green-600">
-                  {habit.longestStreak || 0}
-                </div>
-                <div className="text-sm text-gray-600">最长连续天数</div>
-              </div>
-              <div className="text-center bg-purple-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-purple-600">
-                  {habit.completedCount || 0}
-                </div>
-                <div className="text-sm text-gray-600">总完成次数</div>
-              </div>
-              <div className="text-center bg-orange-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-orange-600">
-                  {habit.goals?.length || 0}
-                </div>
-                <div className="text-sm text-gray-600">关联目标数</div>
-              </div>
-            </div>
-
-            {/* 时间信息 */}
-            <div className="space-y-2 text-sm">
-              {habit.repeatStartDate &&
-              <div className="flex justify-between">
-                  <span className="text-text-3">开始时间:</span>
-                  <span>{new Date(habit.repeatStartDate).toLocaleDateString()}</span>
-                </div>
-              }
-              {habit.repeatEndDate &&
-              <div className="flex justify-between">
-                  <span className="text-text-3">目标时间:</span>
-                  <span>{new Date(habit.repeatEndDate).toLocaleDateString()}</span>
-                </div>
-              }
-              {habit.doneAt &&
-              <div className="flex justify-between">
-                  <span className="text-text-3">完成时间:</span>
-                  <span>{new Date(habit.doneAt).toLocaleDateString()}</span>
-                </div>
-              }
-              {habit.abandonedAt &&
-              <div className="flex justify-between">
-                  <span className="text-text-3">放弃时间:</span>
-                  <span>
-                    {new Date(habit.abandonedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              }
-            </div>
-          </Card>
-        </Col>
-      </Row>
-    </div>
+                    </Surface>
+                  </Flex>
+                ),
+              },
+              {
+                key: 'goals',
+                label: '关联目标',
+                children:
+                  habit.goals && habit.goals.length > 0 ? (
+                    <Flex vertical gap={12}>
+                      {habit.goals.map((goal) => (
+                        <Surface key={goal.id} padded className={styles.goalRow}>
+                          <div>
+                            <div className={styles.goalName}>{goal.name}</div>
+                            {goal.description ? (
+                              <p className={styles.goalDescription}>{goal.description}</p>
+                            ) : null}
+                          </div>
+                          <Progress percent={(goal as any).progress || 0} size="small" style={{ width: 100 }} />
+                        </Surface>
+                      ))}
+                    </Flex>
+                  ) : (
+                    <EmptyState description="暂无关联目标" />
+                  ),
+              },
+            ]}
+          />
+        </Flex>
+      </Flex>
     </ProductSurface>
-    );
-
+  );
 };
 
 export default HabitDetailPage;

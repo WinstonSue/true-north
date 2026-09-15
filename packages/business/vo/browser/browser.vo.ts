@@ -33,6 +33,17 @@ export type BrowserVisibleRequestVo = {
   visible: boolean;
 };
 
+export type BrowserOccludedRequestVo = {
+  occluded: boolean;
+};
+
+export type BrowserScreenshotVo = {
+  tabId: string;
+  url: string;
+  mimeType: 'image/png';
+  dataUrl: string | null;
+};
+
 export type BrowserActivateTabRequestVo = {
   tabId: string;
 };

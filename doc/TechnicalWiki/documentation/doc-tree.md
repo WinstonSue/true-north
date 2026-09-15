@@ -53,7 +53,7 @@ doc/
 | 技术 SSOT | [TechnicalWiki/TechnicalWiki.md](../TechnicalWiki.md) | 工程架构、代码规范 |
 | 版本交付 | `doc/{version}/`（示例 [v0.1.0 TDD](../../v0.1.0/TDD.md)、[v0.2.0 TDD](../../v0.2.0/TDD.md)） | 本版本 TDD（可扩展） |
 
-域级产品蓝图（如 Growth）见 [packages/product-wiki/wiki/growth](../../../packages/product-wiki/wiki/growth/spec.json)，**不**使用 `doc/growth/` 等独立需求/TDD 目录。
+域级产品蓝图（如 Growth）见 [packages/product-wiki/wiki/growth](../../../packages/plugins/growth/wiki/growth/spec.json)，**不**使用 `doc/growth/` 等独立需求/TDD 目录。
 
 ## 写作规范
 

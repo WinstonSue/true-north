@@ -46,6 +46,9 @@ export function createRenderer() {
           habit: { load: () => import('./features/habit') },
           goal: { load: () => import('./features/goal') },
         },
+        page: {
+          load: () => import('./layout/GrowthPageShell'),
+        },
         workbench: {
           workspaces: {
             goalDecompose: goalDecomposeTool,
@@ -63,16 +66,16 @@ export function createRenderer() {
           const parsed = parsePluginResourceUri(uri);
           if (!parsed || parsed.pluginId !== 'growth' || !parsed.id) return null;
           if (parsed.collection === 'goals') {
-            return { viewId: growthIds.views.goal, params: { tab: 'tree', id: parsed.id } };
+            return { viewId: growthIds.views.goal, params: { view: 'goal', tab: 'tree', id: parsed.id } };
           }
           if (parsed.collection === 'tasks') {
-            return { viewId: growthIds.views.task, params: { id: parsed.id } };
+            return { viewId: growthIds.views.task, params: { view: 'task', id: parsed.id } };
           }
           if (parsed.collection === 'habits') {
-            return { viewId: growthIds.views.habit, params: { tab: 'detail', id: parsed.id } };
+            return { viewId: growthIds.views.habit, params: { view: 'habit', tab: 'detail', id: parsed.id } };
           }
           if (parsed.collection === 'todos') {
-            return { viewId: growthIds.views.todo, params: {} };
+            return { viewId: growthIds.views.todo, params: { view: 'todo' } };
           }
           return null;
         },

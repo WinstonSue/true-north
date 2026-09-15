@@ -1,15 +1,30 @@
-import { attachAgentToolRegistry, type AgentToolRegistry } from './agent/tools';
-import { addAgentInstructions } from './runtime/agent-instructions';
-import { attachPluginAiRegistry, type PluginAiRegistry } from './plugin-ai.registry';
+import { extensionPoints, type AgentTool, type ExtensionRegistration } from '@true-north/plugin-sdk';
+import { attachMainExtensions } from '../../plugin/extensions';
+import type { ExtensionRegistry } from '@true-north/plugin-sdk';
 
-export function attachAiRegistries(registries: {
-  agentTools: AgentToolRegistry;
-  pluginAi: PluginAiRegistry;
-}) {
-  attachAgentToolRegistry(registries.agentTools);
-  attachPluginAiRegistry(registries.pluginAi);
+export function attachAiRegistries(registry: ExtensionRegistry) {
+  attachMainExtensions(registry);
 }
 
-export function registerHostAiInstructions(text?: string) {
-  if (text?.trim()) addAgentInstructions(text.trim());
+export function hostAiRegistrations(input: {
+  tools?: AgentTool[];
+  agentInstructions?: string;
+}): ExtensionRegistration[] {
+  const registrations: ExtensionRegistration[] = [];
+  for (const tool of input.tools || []) {
+    if (!tool.name) continue;
+    registrations.push({
+      point: extensionPoints.mcpTool,
+      key: tool.name,
+      value: tool,
+    });
+  }
+  if (input.agentInstructions?.trim()) {
+    registrations.push({
+      point: extensionPoints.agentInstruction,
+      key: 'activity',
+      value: input.agentInstructions.trim(),
+    });
+  }
+  return registrations;
 }

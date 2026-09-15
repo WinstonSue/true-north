@@ -1,12 +1,13 @@
 import type { EntityManager } from 'typeorm';
+import { ActivityDomain, ActivitySource } from '@true-north/enum';
 import {
+  extensionPoints,
   mergeTodaySections,
   normalizeCaptureSuggestion,
   type ActivityEntityRef,
-  type CaptureAdopter,
   type TodaySectionSnapshot,
 } from '@true-north/plugin-sdk';
-import { ActivityDomain, ActivitySource } from '@true-north/enum';
+import { getMainExtensionsOptional } from '../../plugin/extensions';
 import type {
   ActivityFilterVo,
   ActivityLinkVo,
@@ -104,22 +105,16 @@ function resolveLinkInput(
 }
 
 export class ActivityService {
-  private captureAdopters = new Map<string, CaptureAdopter>();
-  private todayCollectors: Array<{ collect: () => Promise<TodaySectionSnapshot> }> = [];
   private workspaceWriter: {
     patch(messageId: string, payload: Record<string, unknown>, manager?: EntityManager): Promise<void>;
   } | null = null;
 
-  configureCaptureAdopters(adopters: CaptureAdopter[]) {
-    this.captureAdopters = new Map(adopters.map((adopter) => [adopter.type, adopter]));
-  }
-
-  configureToday(collectors: Array<{ collect: () => Promise<TodaySectionSnapshot> }>) {
-    this.todayCollectors = collectors;
-  }
-
   configureWorkspaceWriter(writer: NonNullable<ActivityService['workspaceWriter']>) {
     this.workspaceWriter = writer;
+  }
+
+  private captureAdopter(type: string) {
+    return getMainExtensionsOptional()?.get(extensionPoints.capture, type);
   }
 
   private activities(manager?: EntityManager) {
@@ -218,7 +213,7 @@ export class ActivityService {
   }
 
   async adoptCapture(body: AdoptCaptureRequestVo): Promise<ActivityVo> {
-    if (!this.workspaceWriter || this.captureAdopters.size === 0) {
+    if (!this.workspaceWriter) {
       throw new Error('收集采纳尚未配置');
     }
     const selected = (body.suggestions || [])
@@ -230,7 +225,7 @@ export class ActivityService {
     const accepted = new Map<string, ReturnType<typeof normalizeCaptureSuggestion>>();
 
     for (const suggestion of selected) {
-      const adopter = this.captureAdopters.get(suggestion.type);
+      const adopter = this.captureAdopter(suggestion.type);
       if (!adopter) throw new Error(`不支持的建议类型：${suggestion.type}`);
       const created = await adopter.adopt(suggestion);
       links.push({
@@ -289,7 +284,7 @@ export class ActivityService {
 
   async homeToday(): Promise<HomeTodayVo> {
     const parts: TodaySectionSnapshot[][] = await Promise.all(
-      this.todayCollectors.map(async (collector) => [await collector.collect()]),
+      (getMainExtensionsOptional()?.list(extensionPoints.today) || []).map(async (collector) => [await collector.collect()]),
     );
     return { sections: mergeTodaySections(parts) as HomeTodayVo['sections'] };
   }

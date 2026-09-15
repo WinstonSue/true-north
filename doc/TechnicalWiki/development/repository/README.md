@@ -2,7 +2,7 @@
 
 ## 概述
 
-Repository 负责 TypeORM 数据访问，位于 `apps/desktop/src/service/growth/{module}/{module}.repository.ts`。通常继承 `service/db/base.repository.impl` 中的基类，并实现模块特有查询。
+Repository 负责 TypeORM 数据访问，位于 `packages/plugins/growth/src/main/service/{module}/{module}.repository.ts`。通常继承 `@true-north/plugin-sdk/main BaseRepositoryImpl` 中的基类，并实现模块特有查询。
 
 ## 架构
 
@@ -13,7 +13,7 @@ RouteController → Service → Repository → SQLite（TypeORM）
 ## 文件位置
 
 ```
-apps/desktop/src/service/growth/{module}/
+packages/plugins/growth/src/main/service/{module}/
 ├── {module}.repository.ts      # 实现类 + 可选 interface
 ├── {module}.entity.ts
 └── dto/

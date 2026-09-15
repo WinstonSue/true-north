@@ -2,63 +2,67 @@
 
 import { GoalProvider } from './context';
 import React from 'react';
-import { Flex, Tabs } from '@sue/design-web-react';
+import { Flex } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import { usePluginViewState } from '@true-north/plugin-sdk/renderer';
+import { usePluginViewRuntime, usePluginViewState } from '@true-north/plugin-sdk/renderer';
 import { goalViewCodec } from '../../../contract/view-state';
 import GoalMain from './goal-main';
 import GoalAside from './goal-aside';
 import GoalMindMap from '../mind-map';
+import { CompactViewNav, GrowthPage, SplitPane } from '../../ui';
+import { growthIds } from '../../../contract';
+import { growthNavigation, usesCompactNav } from '../../layout/nav';
 import styles from './style.module.less';
 
 const GoalTreeView: React.FC = () => {
   return (
-    <Flex container="full" className={styles.treeLayout}>
-      <ProductSurface id={productRef('growth.goal.view.tree')}>
-        <Flex container="fixed" className={styles.sider}>
+    <SplitPane
+      asideLabel="目标树"
+      aside={
+        <ProductSurface id={productRef('growth.goal.view.tree')}>
           <GoalAside />
-        </Flex>
-      </ProductSurface>
-
+        </ProductSurface>
+      }
+    >
       <ProductSurface id={productRef('growth.goal.view.detail')}>
-        <Flex container="fill" className={styles.content}>
+        <Flex container="full" className={styles.content}>
           <GoalMain />
         </Flex>
       </ProductSurface>
-    </Flex>
+    </SplitPane>
   );
 };
 
 export default function Goal() {
+  const { mode } = usePluginViewRuntime();
   const [state, setState] = usePluginViewState(goalViewCodec);
+  const children = growthNavigation.find((group) => group.view === 'goal')?.children || [];
 
   return (
     <GoalProvider>
-      <Flex vertical container="full" className={styles.page}>
-        <Tabs
-          activeKey={state.tab}
-          onChange={(tab) => setState((prev) => ({ ...prev, tab: tab as typeof prev.tab }))}
-          className={styles.tabs}
-          tabBarStyle={{ padding: '0 16px' }}
-          items={[
-            {
-              key: 'tree',
-              label: '目标树',
-              children: <GoalTreeView />,
-            },
-            {
-              key: 'mindmap',
-              label: '目标脑图',
-              children: (
-                <ProductSurface id={productRef('growth.goal.view.mindmap')}>
-                  <GoalMindMap />
-                </ProductSurface>
-              ),
-            },
-          ]}
-        />
-      </Flex>
+      <GrowthPage
+        compactNav={
+          mode === 'workbench' && usesCompactNav(mode) ? (
+            <CompactViewNav
+              viewId={growthIds.views.goal}
+              children={children}
+              activeTab={state.tab}
+              onSelect={(tab) => setState((prev) => ({ ...prev, tab: (tab as typeof prev.tab) || 'tree' }))}
+            />
+          ) : null
+        }
+      >
+        <Flex vertical container="full" className={styles.page}>
+          {state.tab === 'mindmap' ? (
+            <ProductSurface id={productRef('growth.goal.view.mindmap')}>
+              <GoalMindMap />
+            </ProductSurface>
+          ) : (
+            <GoalTreeView />
+          )}
+        </Flex>
+      </GrowthPage>
     </GoalProvider>
   );
 }

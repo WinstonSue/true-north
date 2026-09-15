@@ -5,17 +5,20 @@
 ```
 true-north/
 ├── apps/
-│   └── desktop/              # Electron 应用（唯一产品表面）
+│   └── desktop/              # Electron 宿主
 ├── packages/
-│   ├── business/             # vo、enum、web-service（含 request / electron-types）
-│   ├── common/               # 通用工具
+│   ├── business/             # vo、enum、web-service
 │   ├── common-web/           # Web 通用能力
-│   ├── components/           # 可复用组件
-│   ├── dev-lab/              # DEV Lab：采集器、协议、页面入口、dock 与面板 UI
-│   └── product-wiki/         # 产品 SSOT 数据
+│   ├── components/           # mind / repeat
+│   ├── plugin-contract/      # 插件契约
+│   ├── plugin-sdk/           # 插件运行时
+│   ├── plugin-ui/            # 共享 UI
+│   ├── plugins/              # growth / expense / purchase / library
+│   ├── dev-lab/              # DEV Lab
+│   └── product-wiki/         # 宿主 ProductWiki
 ├── doc/
 │   ├── TechnicalWiki/        # 技术 Wiki
-│   └── {version}/            # 版本 TDD 等技术文件（如 v0.1.0/；不放 PRD）
+│   └── {version}/            # 版本 TDD
 ├── package.json
 ├── pnpm-workspace.yaml
 └── turbo.json
@@ -27,31 +30,14 @@ true-north/
 apps/desktop/src/
 ├── main/           # Electron 主进程
 ├── preload/        # preload 脚本
-├── render/         # React 渲染进程（pages、router、components）
-├── dev/            # DEV 宿主（DevDockAttach 挂 product-dock；Lab 页面在 @true-north/dev-lab）
-├── service/        # 本地业务与数据库
-│   ├── db/         # TypeORM 数据源、BaseRepository
-│   ├── growth/     # 个人成长域模块
-│   ├── users/
-│   └── common/
+├── plugin/         # 插件宿主、一等插件清单与加载器
+├── render/         # React 渲染进程（AI、Workbench、设置、插件壳）
+├── dev/            # DEV 宿主
+├── service/        # 宿主域（AI、Activity、browser、users）
 └── config/
 ```
 
-Growth 模块目录（每个模块一套垂直切片）：
-
-```
-service/growth/{module}/
-├── {module}.entity.ts
-├── dto/
-├── {module}.repository.ts
-├── {module}.service.ts
-├── {module}.route-controller.ts   # VO 边界 + IPC REST（唯一 Controller）
-└── index.ts
-```
-
-模块：`goal`、`task`、`todo`、`habit`、`track-time` 等。不再维护 IPC 透传 `*.controller.ts`。
-
-渲染层对应：`render/pages/growth/{module}/` 及 `render/pages/growth/components/`。
+Growth / Expense / Purchase / Library 实现在 `packages/plugins/{id}`。
 
 ## packages/business
 
@@ -59,9 +45,9 @@ service/growth/{module}/
 | --- | --- |
 | `vo` | 前后端/IPC 边界类型（`@true-north/vo`） |
 | `enum` | 业务枚举（`@true-north/enum`） |
-| `web-service` | 渲染层调用封装（Service / Mapping / toast）+ HTTP Controller（路径对齐 route-controller） |
+| `web-service` | 渲染层 AI / Activity / Browser 调用封装 |
 
-主进程装饰器在 `apps/desktop/src/service/decorators`（`@business/decorators`），桥接 `electron-ipc-restful`。
+主进程装饰器在 `packages/plugin-sdk/src/host/decorators.ts`（`@true-north/plugin-sdk/main`），桥接 `electron-ipc-restful`。
 
 ## 包管理
 

@@ -1,6 +1,7 @@
 .aside {
   min-height: 0;
   min-width: 0;
+  overflow: hidden;
 }
 
 .brand {
@@ -48,10 +49,8 @@
 }
 
 .nav {
-  flex-shrink: 1;
-  max-height: 42%;
-  min-height: 0;
-  overflow: auto;
+  flex-shrink: 0;
+  overflow: visible;
 
   :global(.sue-menu-item-inner > a::after),
   :global(.sue-menu-item > a::after) {
@@ -73,6 +72,7 @@
 
 .sessions {
   min-height: 0;
+  overflow: hidden;
 
   :global([data-product-ref]) {
     display: flex;

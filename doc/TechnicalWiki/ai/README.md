@@ -34,7 +34,8 @@ document_meta:
 ```
 packages/business/enum/ai/                 # 会话 purpose、错误码、消息角色
 packages/business/vo/ai/                   # 通用 Conversation / Message / workspace 协议
-apps/desktop/src/service/ai/               # 会话、运行时、聚合 MCP、PluginAiRegistry
+apps/desktop/src/service/ai/               # 会话、运行时、聚合 MCP、main ExtensionRegistry 查询
+apps/desktop/src/render/features/ai/       # 会话壳、composer mention、workspace host
 apps/desktop/src/render/features/ai/       # 会话壳、workspace host
 apps/desktop/src/render/features/workbench/# 通用标签宿主；不 import 业务实现
 packages/plugins/growth/src/main/service/ai/  # 拆解 service、MCP tools/resources、Skills

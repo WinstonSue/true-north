@@ -43,9 +43,16 @@ export type PluginResourceContent = {
   blob?: string;
 };
 
+export type PluginResourceListItem = {
+  uri: string;
+  name?: string;
+  mimeType?: string;
+};
+
 export type PluginResourceProvider = {
-  list(): Promise<Array<{ uri: string; name?: string; mimeType?: string }>>;
+  list(): Promise<PluginResourceListItem[]>;
   read(uri: string): Promise<PluginResourceContent | null>;
+  search?(query: string): Promise<PluginResourceListItem[]>;
 };
 
 export type PluginPromptProvider = {
@@ -212,15 +219,25 @@ export type WorkbenchViewContribution = {
   pluginId: string;
   nameKey: string;
   order?: number;
-  default?: boolean;
   load: () => Promise<{ default: ComponentType }>;
 };
+
+export type PluginPageProps = {
+  location: Record<string, string>;
+  navigate: (next: Record<string, string>) => void;
+};
+
+/** @deprecated use {@link PluginPageProps} */
+export type PluginPageShellProps = PluginPageProps;
 
 export type PluginRendererHandles = {
   icon?: PluginIcon;
   locales?: LocaleContribution[];
   scope?: ComponentType<{ children?: ReactNode }>;
   views?: Record<string, { load: () => Promise<{ default: ComponentType }> }>;
+  page?: {
+    load: () => Promise<{ default: ComponentType<PluginPageProps> }>;
+  };
   workbench?: {
     workspaces?: Record<string, WorkbenchToolDefinition>;
     actions?: Record<string, { run: (input: Record<string, unknown>) => Promise<void> }>;

@@ -1,11 +1,11 @@
 # Task 技术实现
 
-产品说明见 [任务管理 ProductWiki](../../../packages/product-wiki/wiki/growth/task/spec.json)。
+产品说明见 [任务管理 ProductWiki](../../../packages/plugins/growth/wiki/growth/task/spec.json)。
 
 ## 当前代码边界
 
-- 控制器：[task.route-controller.ts](../../../apps/desktop/src/service/growth/task/task.route-controller.ts)，前缀 `/task`。
-- 服务、实体关联处理和仓储实现在 `apps/desktop/src/service/growth/task/`；Entity 使用 TypeORM closure table 保存父子任务。
+- 控制器：[task.route-controller.ts](../../../packages/plugins/growth/src/main/service/task/task.route-controller.ts)，前缀 `/task`。
+- 服务、实体关联处理和仓储实现在 `packages/plugins/growth/src/main/service/task/`；Entity 使用 TypeORM closure table 保存父子任务。
 - DTO 位于该目录的 `dto/`，VO 来自 `@true-north/vo` 的 `Task` 命名空间。
 
 ## 当前 IPC 路由

@@ -57,7 +57,7 @@ export function PluginRuntimeFrame({ pluginId, children }: { pluginId: string; c
   );
 }
 
-export function PluginViewFrame({
+export function PluginViewContent({
   pluginId,
   snapshot,
   revision,
@@ -74,7 +74,7 @@ export function PluginViewFrame({
 }) {
   const platform = useRendererPlatform();
   const View = useMemo(() => lazyload(load), [load]);
-  const Scope = platform.state.scopes[pluginId] || Fragment;
+  const Scope = platform.scopes[pluginId] || Fragment;
   const setParams = useCallback(
     (params: Record<string, string>) => {
       onParamsChange(params);
@@ -83,19 +83,46 @@ export function PluginViewFrame({
   );
 
   return (
+    <Scope>
+      <PluginViewRuntimeProvider
+        value={{
+          snapshot,
+          revision,
+          mode,
+          setParams,
+        }}
+      >
+        <View />
+      </PluginViewRuntimeProvider>
+    </Scope>
+  );
+}
+
+export function PluginViewFrame({
+  pluginId,
+  snapshot,
+  revision,
+  mode,
+  load,
+  onParamsChange,
+}: {
+  pluginId: string;
+  snapshot: PluginViewSnapshot;
+  revision: number;
+  mode: PluginViewMode;
+  load: () => Promise<{ default: ComponentType }>;
+  onParamsChange: (params: Record<string, string>) => void;
+}) {
+  return (
     <PluginRuntimeFrame pluginId={pluginId}>
-      <Scope>
-        <PluginViewRuntimeProvider
-          value={{
-            snapshot,
-            revision,
-            mode,
-            setParams,
-          }}
-        >
-          <View />
-        </PluginViewRuntimeProvider>
-      </Scope>
+      <PluginViewContent
+        pluginId={pluginId}
+        snapshot={snapshot}
+        revision={revision}
+        mode={mode}
+        load={load}
+        onParamsChange={onParamsChange}
+      />
     </PluginRuntimeFrame>
   );
 }

@@ -4,11 +4,6 @@ import { app } from 'electron';
 
 let isClosing = false;
 
-export async function initDB(): Promise<void> {
-  if (getPluginHostOptional()?.dataSource?.isInitialized) return;
-  throw new Error('Call bootPluginPlatform before using the database');
-}
-
 export async function closeDB(): Promise<void> {
   if (isClosing) return;
   isClosing = true;

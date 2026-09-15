@@ -13,7 +13,6 @@ export {
   definePluginManifest,
   parsePluginManifest,
   derivedContributionId,
-  hostStorageCapabilitySchema,
   captureSuggestionSchema,
   capturePayloadSchema,
   adoptCaptureRequestSchema,
@@ -35,7 +34,6 @@ export type {
   PluginApiVersion,
   ShellSlotId,
   PluginManifest,
-  HostStorageCapability,
   PluginSpace,
   CaptureSuggestion,
   CapturePayload,
@@ -62,9 +60,39 @@ export { assemblePluginCatalog, materializeMain, materializeRenderer, reconcileM
 export type { PluginCatalog, AssembledPlugin, AssembleCatalogOptions } from './catalog.ts';
 export type { MaterializedMain, MaterializedRenderer } from './materialize.ts';
 export {
+  defineExtensionPoint,
+  ExtensionRegistry,
+  valuesOf,
+} from './extension-registry.ts';
+export type {
+  ExtensionPoint,
+  ExtensionRegistration,
+  ExtensionRecord,
+} from './extension-registry.ts';
+export {
+  extensionPoints,
+  createHostActionPort,
+  openRegisteredResource,
+  pluginCatalogEntry,
+} from './extension-points.ts';
+export type {
+  IpcExtension,
+  TodayExtension,
+  McpResourceExtension,
+  McpPromptExtension,
+  SkillExtension,
+  MentionExtension,
+  WorkbenchActionExtension,
+  PluginScopeExtension,
+  ResourceOpenerExtension,
+  PluginPageShellExtension,
+  HostActionHandler,
+} from './extension-points.ts';
+export {
   localViewId,
-  snapshotFromSearchParams,
-  searchParamsFromSnapshot,
+  locationFromSearchParams,
+  searchParamsFromLocation,
+  hrefFromLocation,
   hrefFromSnapshot,
 } from './view-adapter.ts';
 
@@ -78,6 +106,7 @@ export type {
   AgentToolSpec,
   AgentTool,
   PluginResourceContent,
+  PluginResourceListItem,
   PluginResourceProvider,
   PluginPromptProvider,
   WorkbenchHostActions,
@@ -100,6 +129,8 @@ export type {
   ShellSlotContribution,
   PluginRuntimeEntry,
   WorkbenchViewContribution,
+  PluginPageProps,
+  PluginPageShellProps,
   PluginRendererHandles,
   PluginRendererModule,
   PluginDescriptor,

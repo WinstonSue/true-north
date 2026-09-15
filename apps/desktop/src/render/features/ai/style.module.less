@@ -315,8 +315,17 @@
   min-height: 48px;
   padding: 0;
   box-shadow: none;
+  outline: none;
   resize: none;
   background: transparent;
+}
+
+.composerCard :global(.sue-input-borderless):focus-visible,
+.composerCard :global(.sue-input-borderless):has(textarea:focus-visible),
+.composerCard :global(.sue-input-outlined):focus-visible,
+.composerCard :global(.sue-input-outlined):has(textarea:focus-visible) {
+  outline: none;
+  box-shadow: none;
 }
 
 .composerField {

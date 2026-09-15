@@ -151,6 +151,30 @@ test('replays delta, done, and error that arrived before beginStream', () => {
   assert.equal(findStreamByConversation(startedB.registry, 'b')?.streamId, 's-b');
 });
 
+test('merge keeps resource links on the surviving text part', () => {
+  const local: MessageVo = {
+    id: 'user-a',
+    conversationId: 'a',
+    role: 'user',
+    createdAt: '2026-09-15T00:00:00.000Z',
+    parts: [
+      {
+        type: 'text',
+        text: '帮我看看 @完成产品化',
+        resourceLinks: [{ uri: 'tn://growth/goals/g1', label: '完成产品化' }],
+      },
+    ],
+  };
+  const incoming: MessageVo = {
+    ...local,
+    parts: [{ type: 'text', text: '帮我看看 @完成产品化' }],
+  };
+  const merged = applyMessageToList([local], incoming);
+  assert.deepEqual((merged[0].parts[0] as { resourceLinks?: unknown }).resourceLinks, [
+    { uri: 'tn://growth/goals/g1', label: '完成产品化' },
+  ]);
+});
+
 test('late listMessages snapshot does not wipe streaming text', () => {
   const local = [message('asst-a', 'a', '草稿已出')];
   const stale = [message('asst-a', 'a', '')];

@@ -5,6 +5,7 @@ import type {
   CreateConversationRequestVo,
   EnsureResourceConversationRequestVo,
   EnsureResourceConversationResponseVo,
+  AiResourceMentionVo,
   MessageVo,
   PatchConversationRuntimeRequestVo,
   PatchWorkspaceRequestVo,
@@ -102,6 +103,10 @@ export default class AiService {
 
   static async listConversations(): Promise<AiResult<ConversationVo[]>> {
     return wrap(() => AiController.listConversations());
+  }
+
+  static async searchResourceMentions(query = ''): Promise<AiResult<AiResourceMentionVo[]>> {
+    return wrap(() => AiController.searchResourceMentions(query));
   }
 
   static async createConversation(body?: CreateConversationRequestVo): Promise<AiResult<ConversationVo>> {

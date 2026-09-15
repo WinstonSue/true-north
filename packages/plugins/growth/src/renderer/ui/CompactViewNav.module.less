@@ -1,0 +1,25 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.item {
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--sue-border-radius-sm);
+  background: transparent;
+  color: var(--sue-color-text-secondary);
+  cursor: pointer;
+}
+
+.item:hover {
+  background: var(--sue-color-fill-tertiary);
+  color: var(--sue-color-text);
+}
+
+.itemActive {
+  background: var(--sue-color-primary-bg);
+  color: var(--sue-color-primary);
+}

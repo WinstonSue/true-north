@@ -6,6 +6,8 @@ import {
   assemblePluginCatalog,
   disposeOrder,
   materializeMain,
+  ExtensionRegistry,
+  extensionPoints,
   type MaterializedMain,
   type PluginCatalog,
   type PluginMainContext,
@@ -30,10 +32,9 @@ import { aiMigrations } from '../service/ai/migrations';
 import { activityEntities } from '../service/activity/entities';
 import { ActivityController, activityAiContribution, activityService } from '../service/activity';
 import { emitTodayInvalidate } from '../service/activity/today-bus';
-import { AgentToolRegistry } from '../service/ai/agent/tools';
 import { cacheService, fingerprintPromptContext } from '../service/ai/cache/ai-suggestion-cache.service';
-import { attachAiRegistries, registerHostAiInstructions } from '../service/ai/contribution';
-import { PluginAiRegistry } from '../service/ai/plugin-ai.registry';
+import { attachAiRegistries, hostAiRegistrations } from '../service/ai/contribution';
+import { attachMainExtensions } from './extensions';
 import { runtimeService } from '../service/ai/runtime';
 import { AiController, conversationService, startMcpServer, stopMcpServer } from '../service/ai';
 import { firstPartyMainDescriptors } from './main-loaders';
@@ -48,8 +49,7 @@ type ActivatedPlugin = {
 
 export class DesktopPluginHost {
   readonly storage = new StorageRegistry();
-  readonly agentTools = new AgentToolRegistry();
-  readonly pluginAi = new PluginAiRegistry();
+  readonly extensions = new ExtensionRegistry();
 
   catalog: PluginCatalog | null = null;
   dataSource: DataSource | null = null;
@@ -129,17 +129,8 @@ export class DesktopPluginHost {
     };
   }
 
-  private backupDatabaseOnce(databasePath: string) {
-    if (!fs.existsSync(databasePath)) return;
-    const backupPath = `${databasePath}.pre-plugin-platform.bak`;
-    if (fs.existsSync(backupPath)) return;
-    fs.copyFileSync(databasePath, backupPath);
-    console.log('已备份数据库', backupPath);
-  }
-
   async openHostDatabase() {
     const databasePath = this.getHostDatabasePath();
-    this.backupDatabaseOnce(databasePath);
     const isDev = process.env.NODE_ENV === 'development';
     const dataSource = new DataSource({
       type: 'sqlite',
@@ -195,8 +186,25 @@ export class DesktopPluginHost {
         const handles = await plugin.main.activate(this.createPluginMainContext(plugin.manifest.pluginId));
         const materialized = materializeMain(plugin.manifest, handles);
         this.throwIfIssues(materialized.issues);
-        const skillRoots = this.resolveFirstPartySkillRoots(plugin.manifest.pluginId) || materialized.skillRoots;
-        materialized.skillRoots = skillRoots;
+        const resolvedRoots = this.resolveFirstPartySkillRoots(plugin.manifest.pluginId);
+        if (resolvedRoots) {
+          materialized.registrations = [
+            ...materialized.registrations.filter((entry) => entry.point.id !== extensionPoints.skill.id),
+            ...Object.entries(resolvedRoots).map(([localId, root]) => ({
+              point: extensionPoints.skill,
+              key: `${plugin.manifest.pluginId}.${localId}`,
+              value: { pluginId: plugin.manifest.pluginId, localId, root },
+            })),
+          ];
+        }
+        const skillRoots = Object.fromEntries(
+          materialized.registrations
+            .filter((entry) => entry.point.id === extensionPoints.skill.id)
+            .map((entry) => {
+              const skill = entry.value as { localId: string; root: string };
+              return [skill.localId, skill.root];
+            }),
+        );
         this.throwIfIssues(validateSkillRoots(plugin.manifest.pluginId, skillRoots));
         pending.push({ pluginId: plugin.manifest.pluginId, module: plugin.main, materialized });
       }
@@ -215,20 +223,12 @@ export class DesktopPluginHost {
   }
 
   private publish() {
-    attachAiRegistries({
-      agentTools: this.agentTools,
-      pluginAi: this.pluginAi,
-    });
-    if (activityAiContribution.tools?.length) {
-      this.agentTools.register(activityAiContribution.tools);
-    }
-    registerHostAiInstructions(activityAiContribution.agentInstructions);
+    attachMainExtensions(this.extensions);
+    attachAiRegistries(this.extensions);
+    this.extensions.registerBatch('host', hostAiRegistrations(activityAiContribution));
     for (const item of this.activated) {
-      this.pluginAi.register(item.pluginId, item.materialized);
-      if (item.materialized.tools.length) this.agentTools.register(item.materialized.tools);
+      this.extensions.registerBatch(item.pluginId, item.materialized.registrations);
     }
-    activityService.configureCaptureAdopters(this.activated.flatMap((item) => item.materialized.captureAdopters));
-    activityService.configureToday(this.activated.flatMap((item) => item.materialized.todaySections));
     activityService.configureWorkspaceWriter({
       patch: async (messageId, payload, manager) => {
         await conversationService.patchWorkspacePayload(messageId, { payload }, manager);
@@ -244,7 +244,7 @@ export class DesktopPluginHost {
     return [
       { id: 'ai', routePrefix: '/ai', controller: new AiController(conversationService, runtimeService) },
       { id: 'activity', routePrefix: '/activity', controller: new ActivityController() },
-      ...this.activated.flatMap((item) => item.materialized.ipc),
+      ...this.extensions.list(extensionPoints.ipc),
     ];
   }
 
@@ -252,9 +252,10 @@ export class DesktopPluginHost {
     const order = this.catalog ? disposeOrder(this.catalog.plugins.map((plugin) => plugin.manifest)) : [];
     for (const pluginId of order) {
       const item = this.activated.find((entry) => entry.pluginId === pluginId);
-      this.agentTools.unregister(this.pluginAi.unregister(pluginId));
+      this.extensions.unregisterOwner(pluginId);
       await item?.module.dispose?.();
     }
+    this.extensions.unregisterOwner('host');
     this.activated = [];
     this.published = false;
     await this.stopMcp();
@@ -297,6 +298,7 @@ export async function disposePluginPlatform() {
   if (!host) return;
   setActiveHost(null);
   await host.dispose();
+  attachMainExtensions(null);
 }
 
 export function collectIpcControllers() {
@@ -305,14 +307,4 @@ export function collectIpcControllers() {
 
 export async function startHostMcp() {
   return getPluginHost().startMcp();
-}
-
-export async function stopHostMcp() {
-  return getPluginHost().stopMcp();
-}
-
-export function getMainPluginCatalog(): PluginCatalog {
-  const catalog = getPluginHost().catalog;
-  if (!catalog) throw new Error('Plugin catalog is not assembled');
-  return catalog;
 }

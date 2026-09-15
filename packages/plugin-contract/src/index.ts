@@ -1,3 +1,7 @@
+/**
+ * `@true-north/plugin-contract` 是插件清单的可序列化契约（API 0）。
+ * 字段含义写在各 schema / 类型的注释里；实现与 React 组件属于 `@true-north/plugin-sdk`。
+ */
 export {
   PLUGIN_API_VERSION,
   PLUGIN_HUB_PATH,
@@ -19,10 +23,21 @@ export {
   pluginContributionsSchema,
   derivedContributionId,
 } from './manifest.ts';
-export type { PluginManifest } from './manifest.ts';
+export type {
+  PluginManifest,
+  PluginManifestInput,
+  PluginContributions,
+  PluginCatalogMeta,
+  DeclaredContribution,
+  ViewContribution,
+  ShellSlotContribution,
+  SkillContribution,
+  McpToolContribution,
+  McpResourceContribution,
+  McpResourceMention,
+} from './manifest.ts';
 
-export { hostStorageCapabilitySchema } from './storage.ts';
-export type { HostStorageCapability, PluginSpace } from './storage.ts';
+export type { PluginSpace } from './storage.ts';
 
 export {
   captureSuggestionSchema,

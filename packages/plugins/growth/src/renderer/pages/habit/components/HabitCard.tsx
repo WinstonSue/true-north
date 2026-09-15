@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Card,
   Button,
   Flex,
   Progress,
@@ -12,6 +11,7 @@ import { Check, Ellipsis, Pencil, Trash2 } from 'lucide-react';
 import { HabitWithoutRelationsVo } from '@true-north/vo';
 import { HABIT_STATUS_OPTIONS } from '../constants';
 import { formatRepeatLabel } from '../repeatLabel';
+import { Surface } from '../../../ui';
 import styles from './HabitCard.module.less';
 
 interface HabitCardProps {
@@ -96,25 +96,17 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   };
 
   return (
-    <Card
-      className={styles.card}
-      hoverable
-      actions={[
-        <Dropdown key="more" popupRender={() => renderActionMenu()} placement="bottomRight">
-          <Button type="text" icon={<Ellipsis size={16} />} />
-        </Dropdown>,
-      ]}
-    >
-      <Flex
-        align="flex-start"
-        justify="space-between"
-        gap={12}
-        className={styles.header}
-      >
+    <Surface className={styles.card}>
+      <Flex align="flex-start" justify="space-between" gap={12} className={styles.header}>
         <div className={styles.titleBlock}>
           <span className={styles.title}>{habit.name}</span>
         </div>
-        <Badge status={statusConfig?.color as any} text={statusConfig?.label} className={styles.status} />
+        <Flex align="center" gap={4}>
+          <Badge status={statusConfig?.color as any} text={statusConfig?.label} className={styles.status} />
+          <Dropdown popupRender={() => renderActionMenu()} placement="bottomRight">
+            <Button type="text" icon={<Ellipsis size={16} />} />
+          </Dropdown>
+        </Flex>
       </Flex>
 
       <Flex vertical gap={10}>
@@ -161,7 +153,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           </Button>
         </div>
       )}
-    </Card>
+    </Surface>
   );
 };
 

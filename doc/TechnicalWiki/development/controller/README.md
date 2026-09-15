@@ -16,9 +16,9 @@ render
 
 ## 位置与命名
 
-- 路径：`apps/desktop/src/service/growth/{module}/{module}.route-controller.ts`
-- 装饰器：`@Controller`、`@Get`、`@Post` 等（`packages/business/web-service/controller`）
-- 参考：`apps/desktop/src/service/growth/todo/todo.route-controller.ts`
+- 路径：`packages/plugins/growth/src/main/service/{module}/{module}.route-controller.ts`
+- 装饰器：`@Controller`、`@Get`、`@Post` 等（`@true-north/plugin-sdk/main`）
+- 参考：`packages/plugins/growth/src/main/service/todo/todo.route-controller.ts`
 
 ## 职责
 
@@ -33,7 +33,7 @@ RouteController **不**承载复杂业务规则；校验与领域逻辑放在 Se
 ## 文件结构
 
 ```
-apps/desktop/src/service/growth/{module}/
+packages/plugins/growth/src/main/service/{module}/
 ├── {module}.route-controller.ts
 ├── {module}.service.ts
 ├── {module}.repository.ts

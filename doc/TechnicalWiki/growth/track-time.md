@@ -1,11 +1,11 @@
 # Track-Time 技术实现
 
-产品说明见 [专注与时间追踪 ProductWiki](../../../packages/product-wiki/wiki/growth/track-time/spec.json)。
+产品说明见 [专注与时间追踪 ProductWiki](../../../packages/plugins/growth/wiki/growth/track-time/spec.json)。
 
 ## 当前代码边界
 
-- 控制器：[track-time.route-controller.ts](../../../apps/desktop/src/service/growth/track-time/track-time.route-controller.ts)，前缀 `/trackTime`。
-- 服务、DTO 和相关持久化实现在 `apps/desktop/src/service/growth/track-time/`。
+- 控制器：[track-time.route-controller.ts](../../../packages/plugins/growth/src/main/service/track-time/track-time.route-controller.ts)，前缀 `/trackTime`。
+- 服务、DTO 和相关持久化实现在 `packages/plugins/growth/src/main/service/track-time/`。
 - DTO 位于 `dto/`，VO 来自 `@true-north/vo` 的 `TrackTime` 命名空间；关联类型来自 `@true-north/enum`。当前模型使用通用 `relatedType / relatedId`，任务与待办均为可选关联对象。
 
 ## 当前 IPC 路由

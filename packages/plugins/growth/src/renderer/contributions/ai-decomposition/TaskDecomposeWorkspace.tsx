@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   Alert,
   Button,
-  Card,
   Checkbox,
   DatePicker,
   Drawer,
@@ -18,7 +17,7 @@ import {
 import dayjs from 'dayjs';
 import type { AiDecomposePayloadVo, AiWorkspacePayloadVo, AiWorkspaceSuggestionVo } from '@true-north/vo';
 import { TaskController, TaskService } from '../../../client';
-import { drawerBodyStyles } from '@true-north/plugin-ui';
+import { drawerShellStyles, Surface } from '../../ui';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import type { WorkbenchToolProps } from '@true-north/plugin-sdk';
@@ -177,7 +176,7 @@ export function TaskDecomposeWorkspace({
             const isAccepted = Boolean(suggestion.accepted);
             const label = suggestion.kind === 'todo' ? KIND_LABEL.todo : KIND_LABEL.task;
             return (
-              <Card size="small" key={suggestion.id} className={isAccepted ? styles.accepted : undefined}>
+              <Surface padded key={suggestion.id} className={`${styles.suggestion}${isAccepted ? ` ${styles.accepted}` : ''}`}>
                 <Flex justify="space-between" align="start" gap={12}>
                   <Space align="start">
                     <Checkbox
@@ -224,7 +223,7 @@ export function TaskDecomposeWorkspace({
                     </Button>
                   </Space>
                 </Flex>
-              </Card>
+              </Surface>
             );
           })}
         </Flex>
@@ -270,7 +269,7 @@ export function TaskDecomposeWorkspace({
           }}
           size="large"
           destroyOnHidden
-          styles={drawerBodyStyles}
+          styles={drawerShellStyles}
           extra={
             <Button type="primary" onClick={() => void saveEdit()}>
               保存

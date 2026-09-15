@@ -115,14 +115,16 @@ test('migrated domain copies are not kept in the desktop host', () => {
 });
 
 test('host database no longer registers plugin entities', () => {
-  const broker = readFileSync(join(repoRoot, 'apps/desktop/src/plugin/storage-broker.ts'), 'utf8');
-  const registry = readFileSync(join(repoRoot, 'apps/desktop/src/plugin/registry.ts'), 'utf8');
   const host = readFileSync(join(repoRoot, 'apps/desktop/src/plugin/host.ts'), 'utf8');
-  assert.match(broker, /getPluginHost/);
   assert.match(host, /resolvePluginSpace/);
-  assert.doesNotMatch(broker, /pluginEntities/);
-  assert.doesNotMatch(registry, /bindSharedPluginStorage/);
-  assert.doesNotMatch(registry, /runPluginMigrations/);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/plugin/storage-broker.ts')), false);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/plugin/registry.ts')), false);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/plugin/catalog.ts')), false);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/common')), false);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/decorators')), false);
+  assert.doesNotMatch(host, /pluginEntities/);
+  assert.doesNotMatch(host, /bindSharedPluginStorage/);
+  assert.doesNotMatch(host, /runPluginMigrations/);
 });
 
 test('host services do not import plugin entity modules', () => {

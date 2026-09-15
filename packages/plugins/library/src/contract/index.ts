@@ -1,10 +1,7 @@
-import { contributionKey, pluginPath, pluginResourceUri } from '@true-north/plugin-contract';
+import { contributionKey } from '@true-north/plugin-contract';
 import { libraryManifest } from '../manifest';
 
-export const LIBRARY_PLUGIN_ID = libraryManifest.pluginId;
-export const libraryPaths = {
-  root: pluginPath(LIBRARY_PLUGIN_ID),
-} as const;
+const LIBRARY_PLUGIN_ID = libraryManifest.pluginId;
 
 export const libraryIds = {
   views: {
@@ -17,10 +14,3 @@ export const libraryIds = {
     bookmark: contributionKey(LIBRARY_PLUGIN_ID, 'bookmark'),
   },
 } as const;
-
-export const LIBRARY_EXTRACT_ACTION = libraryIds.actions.extract;
-export const LIBRARY_VIEW_SEARCH = libraryIds.views.search;
-
-export function libraryBookmarkUri(id: string) {
-  return pluginResourceUri(LIBRARY_PLUGIN_ID, 'bookmarks', id);
-}

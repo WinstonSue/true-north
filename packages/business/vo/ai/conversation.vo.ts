@@ -6,6 +6,16 @@ export type AiEntityLinkVo = {
   label: string;
 };
 
+export type AiResourceLinkVo = {
+  uri: string;
+  label: string;
+};
+
+export type AiResourceMentionVo = AiResourceLinkVo & {
+  sourceId: string;
+  labelKey: string;
+};
+
 export type PluginResourceAttachmentVo = {
   uri: string;
   label?: string;
@@ -15,6 +25,7 @@ export type PluginResourceAttachmentVo = {
 export type AiTextPartVo = {
   type: 'text';
   text: string;
+  resourceLinks?: AiResourceLinkVo[];
   entityLinks?: AiEntityLinkVo[];
 };
 
@@ -88,6 +99,7 @@ export type PinConversationRequestVo = {
 
 export type StartMessageStreamRequestVo = {
   text: string;
+  resourceLinks?: AiResourceLinkVo[];
   attachments?: PluginResourceAttachmentVo[];
 };
 

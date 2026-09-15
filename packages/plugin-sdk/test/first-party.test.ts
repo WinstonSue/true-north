@@ -99,6 +99,7 @@ test('first-party renderer binds local-key maps instead of repeating catalog met
     assert.match(src, /defineRendererImplementation/);
     assert.match(src, /icon:/);
     assert.match(src, /views:/);
+    assert.match(src, /page:/);
     assert.doesNotMatch(src, /workbenchViews:/);
     assert.doesNotMatch(src, /entitySources:/);
     assert.doesNotMatch(src, /entityPresenters:/);
@@ -138,6 +139,7 @@ test('first-party workbench views stay independently loadable', () => {
     const src = manifestSource(pluginId);
     const renderer = rendererSource(pluginId);
     assert.match(src, /views:\s*\{/);
+    assert.match(src, /page:\s*\{\s*\}/);
     for (const id of expected[pluginId]) {
       const localId = id.slice(pluginId.length + 1);
       assert.match(src, new RegExp(`${localId}: \\{ nameKey:`));

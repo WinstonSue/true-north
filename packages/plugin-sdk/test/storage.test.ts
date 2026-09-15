@@ -22,7 +22,7 @@ test('transaction rebind only affects stores on the same DataSource', async () =
   const pluginDb = stubDataSource('plugin');
   const registry = new StorageRegistry();
   const hostRuntime = createHostStorageRuntime(hostDb, undefined, { registry });
-  const pluginRuntime = createHostStorageRuntime(pluginDb, undefined, { registry, capability: 'self-managed' });
+  const pluginRuntime = createHostStorageRuntime(pluginDb, undefined, { registry });
   registry.bind('host:ai', hostRuntime);
   registry.bind('host:activity', hostRuntime);
   registry.bind('growth', pluginRuntime);

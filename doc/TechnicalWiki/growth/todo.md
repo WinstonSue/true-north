@@ -1,10 +1,10 @@
 # Todo 技术实现
 
-产品说明见 [待办管理 ProductWiki](../../../packages/product-wiki/wiki/growth/todo/spec.json)。重复调度与 `repeat_todo` 见 [重复规则](./repeat.md)。
+产品说明见 [待办管理 ProductWiki](../../../packages/plugins/growth/wiki/growth/todo/spec.json)。重复调度与 `repeat_todo` 见 [重复规则](./repeat.md)。
 
 ## 代码边界
 
-- 控制器：[todo.route-controller.ts](../../../apps/desktop/src/service/growth/todo/todo.route-controller.ts)，前缀 `/todo`。
+- 控制器：[todo.route-controller.ts](../../../packages/plugins/growth/src/main/service/todo/todo.route-controller.ts)，前缀 `/todo`。
 - **实例**由 `TodoService` 处理；**独立重复定义**由 `TodoRepeatService`（表 `repeat_todo`）处理；**游标推进**由 `RepeatService` 处理。
 - 控制器按 `TodoRelatedType` 分派：`is-repeat` 针对投影/定义，其余针对已落库 `todo`。
 - DTO 位于 `dto/`，VO 来自 `@true-north/vo` 的 `Todo` 命名空间。

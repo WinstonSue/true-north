@@ -1,15 +1,13 @@
 import React from 'react';
-import { DefaultPage } from '@true-north/plugin-ui';
-import HabitListFilter from './HabitListFilter';
-import { HabitListProvider, useHabitListContext } from './context';
-import HabitListTable from './HabitListTable';
 import { Button, Drawer, Flex } from '@sue/design-web-react';
 import { Plus } from 'lucide-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-
-import { drawerBodyStyles } from '@true-north/plugin-ui';
+import { drawerShellStyles, FilterBar, GrowthPage, PageHeader } from '../../../ui';
 import { CreateHabit } from '../components/CreateHabit';
+import HabitListFilter from './HabitListFilter';
+import { HabitListProvider, useHabitListContext } from './context';
+import HabitListTable from './HabitListTable';
 import styles from './style.module.less';
 
 export const HabitListPage: React.FC = () => {
@@ -18,7 +16,7 @@ export const HabitListPage: React.FC = () => {
     const instance = Drawer.open({
       title: '新增习惯',
       size: 800,
-      styles: drawerBodyStyles,
+      styles: drawerShellStyles,
       content: (
         <CreateHabit
           goals={goals}
@@ -35,29 +33,25 @@ export const HabitListPage: React.FC = () => {
   };
 
   return (
-    <DefaultPage title="习惯管理">
+    <GrowthPage>
       <ProductSurface id={productRef('growth.habit.view.list')}>
-      <Flex vertical container="full" className={styles.page}>
-        <Flex container="fixed" className={styles.filters}>
-          <HabitListFilter />
+        <Flex vertical container="full" className={styles.page}>
+          <PageHeader
+            extra={
+              <Button type="primary" icon={<Plus size={16} />} onClick={openCreateModal}>
+                新增习惯
+              </Button>
+            }
+          />
+          <FilterBar>
+            <HabitListFilter />
+          </FilterBar>
+          <Flex container="fill" className={styles.list}>
+            <HabitListTable />
+          </Flex>
         </Flex>
-        <Flex container="fixed" className={styles.actions} gap={8}>
-          <Button
-            type="primary"
-            icon={<Plus size={16} />}
-            onClick={() => {
-              openCreateModal();
-            }}
-          >
-            新增习惯
-          </Button>
-        </Flex>
-        <Flex container="fill" className={styles.list}>
-          <HabitListTable />
-        </Flex>
-      </Flex>
       </ProductSurface>
-    </DefaultPage>
+    </GrowthPage>
   );
 };
 

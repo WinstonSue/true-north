@@ -3,7 +3,7 @@ import { Avatar, Empty, Flex } from '@sue/design-web-react';
 import { Loader2 } from 'lucide-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import DefaultPage from '@/components/Layout/DefaultPage';
+import { DefaultPage } from '@true-north/plugin-ui';
 import { GlobalState } from '@/store';
 import useLocale from '@/utils/useLocale';
 import locale from './locale';

@@ -3,6 +3,7 @@ import type { EntityManager } from 'typeorm';
 import { AiMessageRole } from '@true-north/enum';
 import type {
   AiMessagePartVo,
+  AiResourceLinkVo,
   AiTextPartVo,
   AiWorkspacePartVo,
   ConversationVo,
@@ -13,7 +14,6 @@ import type {
   PluginResourceAttachmentVo,
   StartMessageStreamResponseVo,
 } from '@true-north/vo';
-import { workspaceEntityRef } from '@true-north/vo';
 import { bindStreamToCurrentTrace } from '@true-north/dev-lab/collector';
 import { AiPlatformError } from '../ai-error';
 import { agentDef } from '../runtime/registry';
@@ -30,14 +30,17 @@ import {
 } from './conversation-runtime';
 import { claimConversationStream } from './conversation-stream';
 import {
+  buildRuntimePrompt,
+  formatAttachments,
+  textFromParts,
+} from './conversation-prompt';
+import {
   cancelStream,
   emitStream,
   finishStream,
   registerStreamAbort,
 } from './stream-bus';
 
-const HISTORY_TURN_CAP = 20;
-const HISTORY_CHAR_CAP = 12_000;
 const DEFAULT_TITLE = '新会话';
 
 function toIso(value: Date | string | undefined): string {
@@ -68,53 +71,6 @@ function toMessageVo(entity: AiMessage): MessageVo {
     parts: entity.parts || [],
     createdAt: toIso(entity.createdAt),
   };
-}
-
-function formatAttachments(attachments: PluginResourceAttachmentVo[] | null | undefined): string {
-  if (!attachments?.length) return '';
-  return attachments
-    .map((item) => `- ${item.label || item.uri} (${item.uri})${item.skill ? ` skill=${item.skill}` : ''}`)
-    .join('\n');
-}
-
-function textFromParts(parts: AiMessagePartVo[]): string {
-  const texts: string[] = [];
-  for (const part of parts) {
-    if (part.type === 'text') {
-      const body = part.text || '';
-      texts.push(body);
-    } else if (part.type === 'workspace') {
-      const ref = workspaceEntityRef(part.payload);
-      const refLabel = ref ? ` ${ref.type}:${ref.id} ${ref.label}` : '';
-      const summary = typeof part.payload.analysisSummary === 'string' ? part.payload.analysisSummary : '';
-      texts.push(`[工作台:${part.workspaceKey}${refLabel}] ${summary}`.trim());
-    } else if (part.type === 'tool') {
-      texts.push(`[工具:${part.toolName} ${part.status}] ${part.resultSummary || part.argsSummary || ''}`.trim());
-    }
-  }
-  return texts.filter(Boolean).join('\n');
-}
-
-function buildHistoryExcerpt(history: AiMessage[]): string {
-  const recent = history.slice(-HISTORY_TURN_CAP);
-  const lines: string[] = [];
-  let chars = 0;
-  for (const item of recent) {
-    const content = textFromParts(item.parts || []);
-    if (!content.trim()) continue;
-    const role = item.role === AiMessageRole.ASSISTANT ? 'Assistant' : 'User';
-    const line = `${role}: ${content}`;
-    if (chars + line.length > HISTORY_CHAR_CAP && lines.length > 0) break;
-    lines.push(line);
-    chars += line.length;
-  }
-  return lines.join('\n');
-}
-
-function buildRuntimePrompt(history: AiMessage[], resume: boolean, latestUserText: string): string {
-  if (resume) return latestUserText;
-  const excerpt = buildHistoryExcerpt(history);
-  return excerpt || latestUserText;
 }
 
 export class ConversationService {
@@ -212,6 +168,7 @@ export class ConversationService {
   async startMessageStream(
     conversationId: string,
     text: string,
+    resourceLinks?: AiResourceLinkVo[],
   ): Promise<StartMessageStreamResponseVo> {
     const trimmed = text?.trim();
     if (!trimmed) {
@@ -232,6 +189,7 @@ export class ConversationService {
       user.conversationId = conversationId;
       user.role = AiMessageRole.USER;
       const userPart: AiTextPartVo = { type: 'text', text: trimmed };
+      if (resourceLinks?.length) userPart.resourceLinks = resourceLinks;
       user.parts = [userPart];
       const savedUser = await this.messageRepository.create(user);
 

@@ -1,3 +1,5 @@
+export { sharedReactContext } from './shared-context.ts';
+
 export {
   RendererPlatform,
   RendererPlatformProvider,
@@ -29,8 +31,9 @@ export type { PluginViewRuntimeValue, PluginViewMode, WorkbenchViewRuntimeValue 
 export { HostActionRegistry, HOST_AI_START } from '../runtime.ts';
 export {
   localViewId,
-  snapshotFromSearchParams,
-  searchParamsFromSnapshot,
+  locationFromSearchParams,
+  searchParamsFromLocation,
+  hrefFromLocation,
   hrefFromSnapshot,
 } from '../view-adapter.ts';
 export type {
@@ -43,6 +46,8 @@ export type {
   WorkbenchViewContribution,
   PluginViewSnapshot,
   PluginViewOpenRequest,
+  PluginPageProps,
+  PluginPageShellProps,
   ViewStateCodec,
   ShellSlotContribution,
   LocaleContribution,

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Entity, Column } from 'typeorm';
-import { BaseEntity } from '@business/common/base.entity';
+import { BaseEntity } from '@true-north/plugin-sdk/main';
 
 @Entity('user')
 export class User extends BaseEntity {

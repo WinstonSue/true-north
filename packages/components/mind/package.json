@@ -2,7 +2,6 @@
   "name": "@true-north/components-mind",
   "version": "0.2.0",
   "private": true,
-  "module": "src/index.js",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
@@ -13,16 +12,21 @@
   },
   "dependencies": {
     "lucide-react": "^0.460.0",
-    "@antv/data-set": "^0.11.8",
     "@antv/hierarchy": "^0.6.14",
     "@antv/x6": "^2.18.1",
+    "@antv/x6-plugin-clipboard": "^2.1.6",
+    "@antv/x6-plugin-export": "^2.1.6",
+    "@antv/x6-plugin-history": "^2.2.4",
     "@antv/x6-plugin-keyboard": "^2.2.3",
+    "@antv/x6-plugin-minimap": "^2.0.7",
+    "@antv/x6-plugin-scroller": "^2.0.10",
     "@antv/x6-plugin-selection": "^2.2.2",
-    "@antv/x6-react-components": "^2.0.9",
+    "@antv/x6-plugin-snapline": "^2.1.7",
+    "@antv/x6-plugin-transform": "^2.1.8",
     "@antv/x6-react-shape": "^2.2.3",
-    "@antv/xflow": "^2.1.13",
     "@sue/design-web-react": "0.0.3-beta.1",
     "@true-north/common-web-utils": "workspace:*",
+    "mitt": "^3.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -30,26 +34,10 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "eslint-plugin-react": "^7.37.4",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "mitt": "^3.0.1"
+    "eslint-plugin-react-hooks": "^4.6.2"
   },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

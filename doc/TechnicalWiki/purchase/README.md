@@ -7,10 +7,10 @@
 ```
 packages/business/enum/purchase/
 packages/business/vo/purchase/
-packages/business/web-service/controller/purchase.ts
-apps/desktop/src/service/purchase/
-apps/desktop/src/render/features/purchase/
-apps/desktop/src/render/router/routes/purchase.routes.ts
+packages/plugins/purchase/src/client/purchase.ts
+packages/plugins/purchase/src/main/service/
+packages/plugins/purchase/src/renderer/
+packages/plugins/purchase/src/renderer/features/list.tsx
 ```
 
-第一版只做清单与购买记录，不扩展供应商、库存或进销存。页面入口为 `/activity/purchase`，不再注册 `/erp/page`。
+第一版只做清单与购买记录，不扩展供应商、库存或进销存。页面入口为 `/plugins/purchase`。

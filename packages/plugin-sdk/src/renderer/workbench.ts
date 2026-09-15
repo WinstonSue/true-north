@@ -1,5 +1,6 @@
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 import type { PluginViewOpenRequest } from '../runtime.ts';
+import { sharedReactContext } from './shared-context.ts';
 
 export type WorkbenchToolRegistry = {
   find(key: string): {
@@ -25,7 +26,10 @@ export type WorkbenchRuntimeValue = {
   [key: string]: unknown;
 };
 
-export const WorkbenchRuntimeContext = createContext<WorkbenchRuntimeValue | null>(null);
+export const WorkbenchRuntimeContext = sharedReactContext<WorkbenchRuntimeValue | null>(
+  '__true_north_workbench_runtime_context__',
+  null,
+);
 
 export function useWorkbench<T extends WorkbenchRuntimeValue = WorkbenchRuntimeValue>(): T {
   const context = useContext(WorkbenchRuntimeContext);

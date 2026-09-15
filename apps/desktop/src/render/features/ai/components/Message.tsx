@@ -7,6 +7,7 @@ import type {
   MessageVo,
 } from '@true-north/vo';
 import { useWorkbench } from '../../workbench';
+import { splitTextByMentions } from '../mention';
 import { Tool } from './Tool';
 import styles from '../style.module.less';
 
@@ -18,7 +19,7 @@ type MessageProps = {
 type MessagePartsProps = {
   message: MessageVo;
   streaming?: boolean;
-  onOpenEntity?: (type: string, id: string) => void;
+  onOpenResource?: (uri: string) => void;
   onOpenWorkspace?: (messageId: string) => void;
 };
 
@@ -42,33 +43,60 @@ export function MessageContent({ role, children }: { role?: MessageVo['role']; c
 export function MessageTextPart({
   part,
   showCursor,
-  onOpenEntity,
+  onOpenResource,
 }: {
   part: AiTextPartVo;
   showCursor?: boolean;
-  onOpenEntity?: (type: string, id: string) => void;
+  onOpenResource?: (uri: string) => void;
 }) {
-  const links = part.entityLinks || [];
-  if (!part.text && !links.length && !showCursor) return null;
+  const resourceLinks = part.resourceLinks || [];
+  const entityLinks = part.entityLinks || [];
+  if (!part.text && !resourceLinks.length && !entityLinks.length && !showCursor) return null;
+  const split = splitTextByMentions(part.text || '', resourceLinks, entityLinks);
+  const nodes: ReactNode[] = split.segments.map((segment, index) => {
+    if (segment.type === 'text') return <span key={`text-${index}`}>{segment.value}</span>;
+    if (segment.type === 'resource') {
+      return (
+        <button
+          key={`resource-${segment.uri}-${index}`}
+          type="button"
+          className={styles.entityLink}
+          onClick={() => onOpenResource?.(segment.uri)}
+        >
+          @{segment.label}
+        </button>
+      );
+    }
+    return (
+      <span key={`entity-${segment.key}-${index}`} className={styles.entityLink}>
+        @{segment.label}
+      </span>
+    );
+  });
   return (
     <>
       {part.text || showCursor ? (
         <p className={styles.bubbleText}>
-          {part.text}
+          {nodes}
           {showCursor ? <span className={styles.streamCursor} /> : null}
         </p>
       ) : null}
-      {links.length ? (
+      {split.unmatchedResources.length || split.unmatchedEntities.length ? (
         <Flex gap={8} wrap="wrap">
-          {links.map((link) => (
+          {split.unmatchedResources.map((link) => (
             <button
-              key={`${link.type}-${link.id}`}
+              key={link.uri}
               type="button"
               className={styles.entityLink}
-              onClick={() => onOpenEntity?.(link.type, link.id)}
+              onClick={() => onOpenResource?.(link.uri)}
             >
               @{link.label}
             </button>
+          ))}
+          {split.unmatchedEntities.map((link) => (
+            <span key={`${link.type}-${link.id}`} className={styles.entityLink}>
+              @{link.label}
+            </span>
           ))}
         </Flex>
       ) : null}
@@ -108,7 +136,7 @@ export function MessageWorkspacePart({
 export function MessageParts({
   message,
   streaming,
-  onOpenEntity,
+  onOpenResource,
   onOpenWorkspace,
 }: MessagePartsProps) {
   const parts = message.parts || [];
@@ -124,7 +152,7 @@ export function MessageParts({
               key={key}
               part={part}
               showCursor={Boolean(streaming && index === lastTextIndex)}
-              onOpenEntity={onOpenEntity}
+              onOpenResource={onOpenResource}
             />
           );
         }

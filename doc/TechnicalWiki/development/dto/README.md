@@ -11,7 +11,7 @@ DTO (Data Transfer Object) 是用于数据传输的对象，主要用于控制�
 ### 基础结构
 
 ```
-apps/desktop/src/service/growth/{domain}/{module}/dto/
+packages/plugins/growth/src/main/service/{domain}/{module}/dto/
 ├── {module}-model.dto.ts      # 基础模型DTO
 ├── {module}-form.dto.ts       # 表单操作DTO
 ├── {module}-filter.dto.ts     # 过滤查询DTO
@@ -21,7 +21,7 @@ apps/desktop/src/service/growth/{domain}/{module}/dto/
 ### 实际项目结构示例
 
 ```
-apps/desktop/src/service/growth/growth/{module}/dto/
+packages/plugins/growth/src/main/service/growth/{module}/dto/
 ├── {module}-model.dto.ts      # 基础模型DTO
 ├── {module}-form.dto.ts       # 表单操作DTO
 ├── {module}-filter.dto.ts     # 过滤查询DTO

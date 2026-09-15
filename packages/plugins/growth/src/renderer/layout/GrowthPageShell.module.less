@@ -1,0 +1,76 @@
+.shell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: var(--sue-color-bg-container);
+}
+
+.nav {
+  height: 100%;
+  min-height: 0;
+}
+
+.main {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--sue-color-bg-container);
+}
+
+.menuButton,
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .nav :global(nav) {
+    width: var(--growth-nav-width-md);
+  }
+}
+
+@media (max-width: 800px) {
+  .menuButton {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 3;
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--growth-divider);
+    border-radius: var(--sue-border-radius-sm);
+    background: var(--sue-color-bg-container);
+    color: var(--sue-color-text-secondary);
+    cursor: pointer;
+  }
+
+  .nav {
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: none;
+    box-shadow: 8px 0 24px rgb(0 0 0 / 12%);
+  }
+
+  .navOpen {
+    display: block;
+  }
+
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: block;
+    border: 0;
+    background: rgb(0 0 0 / 28%);
+    cursor: pointer;
+  }
+
+  .main {
+    padding-top: 48px;
+  }
+}

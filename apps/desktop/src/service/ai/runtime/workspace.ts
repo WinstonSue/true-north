@@ -4,15 +4,14 @@ import os from 'os';
 import path from 'path';
 import { app } from 'electron';
 import { listAgentTools } from '../agent/tools';
-import { getAgentInstructions } from './agent-instructions';
-import { getPluginAiRegistryOptional } from '../plugin-ai.registry';
+import { allSkillRoots, getAgentInstructions } from '../extension-queries';
 import { buildCodexSessionConfig } from './codex-config';
 
 export function buildAgentsMd(): string {
   const tools = listAgentTools();
   const names = tools.map((tool) => tool.name).join('、');
   const domain = getAgentInstructions();
-  const skills = getPluginAiRegistryOptional()?.allSkillRoots() || [];
+  const skills = allSkillRoots();
   const skillIndex = skills
     .flatMap(({ pluginId, roots }) =>
       Object.keys(roots).map((localId) => `- ${pluginId}/${localId} → skills/${pluginId}/${localId}/SKILL.md`),
@@ -48,7 +47,7 @@ export function writeSharedWorkspace(workspaceDir: string) {
   ensureDir(workspaceDir);
   const body = buildAgentsMd();
   fs.writeFileSync(path.join(workspaceDir, 'AGENTS.md'), body, 'utf8');
-  const skills = getPluginAiRegistryOptional()?.allSkillRoots() || [];
+  const skills = allSkillRoots();
   for (const { pluginId, roots } of skills) {
     for (const [localId, root] of Object.entries(roots)) {
       const dest = path.join(workspaceDir, 'skills', pluginId, localId);

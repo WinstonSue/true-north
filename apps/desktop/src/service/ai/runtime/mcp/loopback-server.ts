@@ -3,7 +3,13 @@ import type { IncomingMessage, ServerResponse } from 'http';
 import { randomUUID } from 'crypto';
 import type { AiMessagePartVo, AiToolPartVo, AiWorkspacePartVo } from '@true-north/vo';
 import { executeAgentTool, listAgentTools, summarizeToolArgs } from '../../agent/tools.ts';
-import { getPluginAiRegistryOptional } from '../../plugin-ai.registry.ts';
+import {
+  getMcpPrompt,
+  listMcpPrompts,
+  listMcpResources,
+  listResourceTemplates,
+  readMcpResource,
+} from '../../extension-queries.ts';
 import { traceExternal } from '@true-north/dev-lab/collector';
 import { getStreamSession } from '../stream-session.ts';
 
@@ -196,20 +202,17 @@ async function handleRpc(message: JsonRpcRequest, streamId?: string): Promise<un
   }
 
   if (method === 'resources/list') {
-    const registry = getPluginAiRegistryOptional();
-    const resources = registry ? await registry.listResources() : [];
+    const resources = await listMcpResources();
     return { resources: resources.map((item) => ({ uri: item.uri, name: item.name, mimeType: item.mimeType })) };
   }
 
   if (method === 'resources/templates/list') {
-    const registry = getPluginAiRegistryOptional();
-    return { resourceTemplates: registry?.listResourceTemplates() || [] };
+    return { resourceTemplates: listResourceTemplates() };
   }
 
   if (method === 'resources/read') {
     const uri = typeof params.uri === 'string' ? params.uri : '';
-    const registry = getPluginAiRegistryOptional();
-    const content = uri && registry ? await registry.readResource(uri) : null;
+    const content = uri ? await readMcpResource(uri) : null;
     if (!content) {
       throw Object.assign(new Error(`Unknown resource: ${uri}`), { code: -32602 });
     }
@@ -226,8 +229,7 @@ async function handleRpc(message: JsonRpcRequest, streamId?: string): Promise<un
   }
 
   if (method === 'prompts/list') {
-    const registry = getPluginAiRegistryOptional();
-    return { prompts: registry?.listPrompts() || [] };
+    return { prompts: listMcpPrompts() };
   }
 
   if (method === 'prompts/get') {
@@ -236,8 +238,7 @@ async function handleRpc(message: JsonRpcRequest, streamId?: string): Promise<un
       params.arguments && typeof params.arguments === 'object' && !Array.isArray(params.arguments)
         ? (params.arguments as Record<string, string>)
         : {};
-    const registry = getPluginAiRegistryOptional();
-    const prompt = name && registry ? await registry.getPrompt(name, args) : null;
+    const prompt = name ? await getMcpPrompt(name, args) : null;
     if (!prompt) {
       throw Object.assign(new Error(`Unknown prompt: ${name}`), { code: -32602 });
     }

@@ -314,28 +314,28 @@ ai_instructions:
     backend:
       - task: "生成Entity实体类"
         template: "entity_template"
-        output_path: "apps/desktop/src/service/growth/{module}/{module}.entity.ts"
+        output_path: "packages/plugins/growth/src/main/service/{module}/{module}.entity.ts"
         dependencies: ["TypeORM", "class-validator"]
         
       - task: "生成DTO传输对象"
         template: "dto_template"
-        output_path: "apps/desktop/src/service/growth/{module}/dto/"
+        output_path: "packages/plugins/growth/src/main/service/{module}/dto/"
         dependencies: ["class-validator", "class-transformer"]
         
       - task: "生成Controller控制器"
         template: "controller_template"
-        output_path: "apps/desktop/src/service/growth/{module}/{module}.route-controller.ts"
+        output_path: "packages/plugins/growth/src/main/service/{module}/{module}.route-controller.ts"
         dependencies: ["@nestjs/common", "swagger"]
         
       - task: "生成Service服务类"
         template: "service_template"
-        output_path: "apps/desktop/src/service/growth/{module}/{module}.service.ts"
+        output_path: "packages/plugins/growth/src/main/service/{module}/{module}.service.ts"
         dependencies: ["TypeORM", "Repository"]
         
     frontend:
       - task: "生成页面组件"
         template: "page_template"
-        output_path: "apps/desktop/src/render/pages/growth/{module}/"
+        output_path: "packages/plugins/growth/src/renderer/pages/{module}/"
         dependencies: ["React", "@sue/design-web-react"]
         
       - task: "生成API接口"
@@ -380,15 +380,15 @@ ai_instructions:
   # 文件路径约定
   file_paths:
     backend:
-      entity: "apps/desktop/src/service/growth/{module}/{module}.entity.ts"
-      dto: "apps/desktop/src/service/growth/{module}/dto/"
-      controller: "apps/desktop/src/service/growth/{module}/{module}.route-controller.ts"
-      service: "apps/desktop/src/service/growth/{module}/{module}.service.ts"
-      mapper: "apps/desktop/src/service/growth/{module}/dto/"
-      module: "apps/desktop/src/service/growth/{module}/index.ts"
+      entity: "packages/plugins/growth/src/main/service/{module}/{module}.entity.ts"
+      dto: "packages/plugins/growth/src/main/service/{module}/dto/"
+      controller: "packages/plugins/growth/src/main/service/{module}/{module}.route-controller.ts"
+      service: "packages/plugins/growth/src/main/service/{module}/{module}.service.ts"
+      mapper: "packages/plugins/growth/src/main/service/{module}/dto/"
+      module: "packages/plugins/growth/src/main/service/{module}/index.ts"
     frontend:
-      page: "apps/desktop/src/render/pages/growth/{module}/"
-      component: "apps/desktop/src/render/pages/growth/components/"
+      page: "packages/plugins/growth/src/renderer/pages/{module}/"
+      component: "packages/plugins/growth/src/renderer/pages/components/"
     shared:
       vo: "packages/vo/src/{module}/{entity}.vo.ts"
       api: "packages/api/src/controller/{module}/{entity}.api.ts"
@@ -431,8 +431,8 @@ development_workflow:
       constants: "UPPER_SNAKE_CASE (API_BASE_URL)"
       
     file_structure:
-      backend: "apps/desktop/src/service/growth/{module}/"
-      frontend: "apps/desktop/src/render/pages/growth/{module}/"
+      backend: "packages/plugins/growth/src/main/service/{module}/"
+      frontend: "packages/plugins/growth/src/renderer/pages/{module}/"
       shared: "packages/{package_name}/src/"
       
     import_order:

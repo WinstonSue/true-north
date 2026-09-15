@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import { Input, type GetRef } from '@sue/design-web-react';
 import type {
+  AiResourceLinkVo,
   ConversationVo,
   MessageVo,
   RuntimeAgentVo,
@@ -10,7 +11,7 @@ export type ComposerInputRef = GetRef<typeof Input.TextArea>;
 
 export type AiDraft = {
   text: string;
-  links: Array<{ type: string; id: string; label: string }>;
+  links: AiResourceLinkVo[];
 };
 
 export type SessionValue = {

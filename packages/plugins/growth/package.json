@@ -23,11 +23,6 @@
       "types": "./src/renderer/index.tsx",
       "import": "./src/renderer/index.tsx",
       "default": "./src/renderer/index.tsx"
-    },
-    "./wiki": {
-      "types": "./wiki/index.ts",
-      "import": "./wiki/index.ts",
-      "default": "./wiki/index.ts"
     }
   },
   "dependencies": {
@@ -41,6 +36,7 @@
     "@ylib/product-surface-react": "0.0.2",
     "@ylib/product-server": "0.0.7",
     "dayjs": "^1.11.13",
+    "date-fns": "^3.6.0",
     "class-validator": "^0.14.0",
     "class-transformer": "^0.5.1",
     "francis-mapped-types": "0.0.1",
@@ -56,6 +52,6 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --experimental-strip-types --test src/main/service/ai/__tests__/*.test.ts"
+    "test": "node --experimental-strip-types --test src/main/service/ai/__tests__/*.test.ts src/renderer/layout/__tests__/*.test.ts"
   }
 }

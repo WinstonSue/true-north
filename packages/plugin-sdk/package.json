@@ -16,20 +16,10 @@
       "import": "./src/main/index.ts",
       "default": "./src/main/index.ts"
     },
-    "./host": {
-      "types": "./src/main/index.ts",
-      "import": "./src/main/index.ts",
-      "default": "./src/main/index.ts"
-    },
     "./renderer": {
       "types": "./src/renderer/index.ts",
       "import": "./src/renderer/index.ts",
       "default": "./src/renderer/index.ts"
-    },
-    "./sqlite": {
-      "types": "./src/sqlite/index.ts",
-      "import": "./src/sqlite/index.ts",
-      "default": "./src/sqlite/index.ts"
     }
   },
   "scripts": {
@@ -43,7 +33,6 @@
     "class-validator": "^0.14.0",
     "dayjs": "^1.11.13",
     "electron-ipc-restful": "0.0.1",
-    "zod": "^3.24.1",
     "typeorm-naming-strategies": "^4.1.0"
   },
   "peerDependencies": {

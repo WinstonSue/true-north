@@ -6,7 +6,7 @@ document_meta:
   last_updated: '2026-09-15'
 ```
 
-产品语义参见 ProductWiki · [目标管理 · AI 拆解](../../../packages/product-wiki/wiki/growth/goal/spec.json)。平台抽象参见 [platform.md](./platform.md)。
+产品语义参见 ProductWiki · [目标管理 · AI 拆解](../../../packages/plugins/growth/wiki/growth/goal/spec.json)。平台抽象参见 [platform.md](./platform.md)。
 
 Growth 拆解逻辑是插件内部 service，由 namespaced MCP tools `growth.decomposeGoal` / `growth.decomposeTask` 调用。宿主不再提供 Capability HTTP/IPC。
 

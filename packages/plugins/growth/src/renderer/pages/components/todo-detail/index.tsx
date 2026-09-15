@@ -3,7 +3,7 @@
 import { Drawer } from '@sue/design-web-react';
 import type { TodoFormData } from '../../../../client';
 import type { TodoVo } from '@true-north/vo';
-import { drawerBodyStyles } from '@true-north/plugin-ui';
+import { drawerShellStyles } from '../../../ui';
 import { TodoDetailProvider } from './context';
 import TodoForm from './TodoForm';
 
@@ -58,7 +58,7 @@ export function useTodoDetail() {
       ...rest,
       title: '编辑待办',
       size: 800,
-      styles: drawerBodyStyles,
+      styles: drawerShellStyles,
       content: (
         <TodoEditor
           {...contentProps}
@@ -80,7 +80,7 @@ export function useTodoDetail() {
       ...rest,
       title: '新建待办',
       size: 800,
-      styles: drawerBodyStyles,
+      styles: drawerShellStyles,
       content: (
         <TodoCreator
           {...contentProps}

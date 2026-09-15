@@ -1,5 +1,6 @@
 import type {
   AiMessagePartVo,
+  AiResourceLinkVo,
   AiTextPartVo,
   MessageVo,
   PutRuntimeSettingsRequestVo,
@@ -38,7 +39,7 @@ function concatTextParts(parts: AiMessagePartVo[]): string {
     .join('');
 }
 
-function collectLinks(parts: AiMessagePartVo[]): NonNullable<AiTextPartVo['entityLinks']> {
+function collectEntityLinks(parts: AiMessagePartVo[]): NonNullable<AiTextPartVo['entityLinks']> {
   const links: NonNullable<AiTextPartVo['entityLinks']> = [];
   for (const part of parts) {
     if (part.type === 'text') {
@@ -46,6 +47,27 @@ function collectLinks(parts: AiMessagePartVo[]): NonNullable<AiTextPartVo['entit
     }
   }
   return links;
+}
+
+function collectResourceLinks(parts: AiMessagePartVo[]): AiResourceLinkVo[] {
+  const links: AiResourceLinkVo[] = [];
+  for (const part of parts) {
+    if (part.type === 'text') {
+      links.push(...(part.resourceLinks || []));
+    }
+  }
+  return links;
+}
+
+function textPartWithLinks(
+  text: string,
+  resourceLinks: AiResourceLinkVo[],
+  entityLinks: NonNullable<AiTextPartVo['entityLinks']>,
+): AiTextPartVo {
+  const part: AiTextPartVo = { type: 'text', text };
+  if (resourceLinks.length) part.resourceLinks = resourceLinks;
+  if (entityLinks.length) part.entityLinks = entityLinks;
+  return part;
 }
 
 function pickGrownText(current: string, incoming: string): string {
@@ -60,10 +82,8 @@ function mergeParts(current: AiMessagePartVo[], incoming: AiMessagePartVo[]): Ai
   const incomingText = concatTextParts(incoming);
   const grown = pickGrownText(currentText, incomingText);
   const useCurrentLinks = grown === currentText && grown !== incomingText;
-  const entityLinks = useCurrentLinks ? collectLinks(current) : collectLinks(incoming);
-  const textPart: AiTextPartVo = entityLinks.length
-    ? { type: 'text', text: grown, entityLinks }
-    : { type: 'text', text: grown };
+  const source = useCurrentLinks ? current : incoming;
+  const textPart = textPartWithLinks(grown, collectResourceLinks(source), collectEntityLinks(source));
 
   const next: AiMessagePartVo[] = [];
   let insertedText = false;

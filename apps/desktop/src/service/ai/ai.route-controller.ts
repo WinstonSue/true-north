@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@true-north/plugin-sdk/main';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@true-north/plugin-sdk/main';
 import type {
+  AiResourceMentionVo,
   CancelStreamResponseVo,
   ConversationVo,
   CreateConversationRequestVo,
@@ -21,6 +22,7 @@ import type {
 import { AiPlatformError, toIpcError } from './ai-error';
 import { conversationService } from './conversation/conversation.service';
 import { runtimeService } from './runtime';
+import { searchResourceMentions } from './extension-queries';
 
 @Controller('/ai')
 export class AiController {
@@ -70,6 +72,16 @@ export class AiController {
     try {
       if (!body?.runtimeId?.trim()) throw AiPlatformError.internal('缺少 runtimeId');
       return this.runtime.putSelection(body.runtimeId.trim());
+    } catch (error) {
+      throw toIpcError(error);
+    }
+  }
+
+  @Get('/resources/mentions', { description: '聊天框可引用的插件资源候选' })
+  async searchResourceMentions(@Query() params?: { query?: string } | string): Promise<AiResourceMentionVo[]> {
+    try {
+      const query = typeof params === 'string' ? params : params?.query || '';
+      return await searchResourceMentions(query);
     } catch (error) {
       throw toIpcError(error);
     }
@@ -185,7 +197,7 @@ export class AiController {
   ): Promise<StartMessageStreamResponseVo> {
     try {
       if (!id?.trim()) throw AiPlatformError.internal('缺少 conversationId');
-      return await this.conversations.startMessageStream(id.trim(), body?.text || '');
+      return await this.conversations.startMessageStream(id.trim(), body?.text || '', body?.resourceLinks);
     } catch (error) {
       throw toIpcError(error);
     }

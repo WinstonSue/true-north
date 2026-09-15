@@ -297,6 +297,7 @@ function createWindow() {
 
   embeddedBrowserHost.attach({
     window: mainWindow,
+    hostContents: appContents(),
     send: (channel, payload) => {
       const contents = appContents();
       if (contents && !contents.isDestroyed()) contents.send(channel, payload);

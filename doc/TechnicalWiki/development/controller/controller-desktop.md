@@ -17,12 +17,12 @@ Desktop 主进程的 **RouteController**（`*.route-controller.ts`）是 Growth 
 | VO → DTO.import\*Vo / DTO.exportVo → VO | 直接操作 Repository / Entity |
 | 默认注入模块 service 单例 | 维护第二份透传方法列表 |
 
-装饰器来自 `@business/decorators`：桥接 `electron-ipc-restful`，并保留 `description` 等静态元数据。
+装饰器来自 `@true-north/plugin-sdk/main`：桥接 `electron-ipc-restful`，并保留 `description` 等静态元数据。
 
 ## 文件位置
 
 ```
-apps/desktop/src/service/growth/{module}/
+packages/plugins/growth/src/main/service/{module}/
 ├── {module}.route-controller.ts   # IPC + VO 边界（唯一 Controller）
 ├── {module}.service.ts
 ├── dto/
@@ -34,7 +34,7 @@ apps/desktop/src/service/growth/{module}/
 ## 标准模板
 
 ```typescript
-import { Controller, Post, Get, Put, Delete, Body, Param, Query } from '@business/decorators';
+import { Controller, Post, Get, Put, Delete, Body, Param, Query } from '@true-north/plugin-sdk/main';
 import type { Goal as GoalVO, ResponseListVo, ResponsePageVo } from '@true-north/vo';
 import { CreateGoalDto, UpdateGoalDto, GoalFilterDto, GoalPageFilterDto, GoalDto } from './dto';
 import { GoalService, goalService as defaultGoalService } from './goal.service';

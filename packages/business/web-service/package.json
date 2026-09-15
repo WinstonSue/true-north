@@ -15,18 +15,7 @@
       "import": "./types/index.ts",
       "require": "./types/index.ts",
       "default": "./types/index.ts"
-    },
-    "./request": {
-      "types": "./request/index.ts",
-      "import": "./request/index.ts",
-      "require": "./request/index.ts",
-      "default": "./request/index.ts"
     }
-  },
-  "scripts": {
-    "eslint": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix --cache",
-    "stylelint": "stylelint 'src/**/*.less' 'src/**/*.css' --fix --cache",
-    "lint": "npm run eslint && npm run stylelint"
   },
   "dependencies": {
     "@sue/design-web-react": "0.0.3-beta.1",
@@ -34,13 +23,5 @@
     "@true-north/vo": "workspace:*",
     "axios": "^0.24.0",
     "lodash-es": "^4.17.21"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --cache"
-    ],
-    "*.{css, less}": [
-      "stylelint --fix"
-    ]
   }
 }

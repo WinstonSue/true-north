@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { FilterBar } from '../../../ui';
 import { TodoFilters } from './TodoFilters';
 import { Button, Flex, message } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
@@ -56,9 +57,15 @@ function TodoAll() {
   return (
     <ProductSurface id={productRef('growth.todo.view.all')}>
     <Flex vertical container="full" className={styles.page}>
-      <Flex container="fixed" className={styles.filters}>
+      <FilterBar extra={
+        selectedRowKeys.length > 0 ? (
+          <Button type="primary" loading={batchLoading} onClick={handleBatchDone}>
+            批量完成 ({selectedRowKeys.length})
+          </Button>
+        ) : null
+      }>
         <TodoFilters />
-      </Flex>
+      </FilterBar>
 
       <Flex container="fill" className={styles.table}>
         <TodoTable
@@ -66,13 +73,6 @@ function TodoAll() {
           onSelectionChange={setSelectedRowKeys}
         />
       </Flex>
-      {selectedRowKeys.length > 0 && (
-        <Flex container="fixed" className={styles.batchBar} justify="flex-end" align="center">
-          <Button type="primary" loading={batchLoading} onClick={handleBatchDone}>
-            批量完成 ({selectedRowKeys.length})
-          </Button>
-        </Flex>
-      )}
     </Flex>
     </ProductSurface>
   );

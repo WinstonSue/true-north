@@ -22,12 +22,11 @@ test('round-trips a serializable manifest and defaults apiVersion to 0', () => {
     catalog: { nameKey: 'menu.expense' },
     contributions: {
       ipc: { expense: {} },
-      views: { transaction: { nameKey: 'menu.expense.transaction', order: 10, default: true } },
+      views: { transaction: { nameKey: 'menu.expense.transaction', order: 10 } },
       activity: {
         captureTypes: { transaction: {} },
         today: { spent: { kind: 'metric', titleKey: 'plugins.hub.spent' } },
       },
-      storage: { capability: 'self-managed' },
     },
   });
   const json = JSON.parse(JSON.stringify(manifest));
@@ -122,4 +121,41 @@ test('resource URIs stay opaque and round-trip local ids', () => {
     id: 'g1',
   });
   assert.equal(parsePluginResourceUri('/plugins/growth?view=goal'), null);
+});
+
+test('mcp resource mention metadata is optional and parsed', () => {
+  const parsed = parsePluginManifest(
+    definePluginManifest({
+      pluginId: 'growth',
+      version: '1',
+      catalog: { nameKey: 'growth' },
+      contributions: {
+        ai: {
+          mcp: {
+            resources: {
+              goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } },
+              archive: { uriTemplate: 'tn://growth/archives/{id}' },
+            },
+          },
+        },
+      },
+    }),
+  );
+  assert.deepEqual(parsed.contributions.ai?.mcp?.resources?.goal?.mention, {
+    labelKey: 'menu.goal',
+    order: 10,
+  });
+  assert.equal(parsed.contributions.ai?.mcp?.resources?.archive?.mention, undefined);
+});
+
+test('optional empty page capability is accepted without layout fields', () => {
+  const parsed = parsePluginManifest(
+    definePluginManifest({
+      pluginId: 'growth',
+      version: '1',
+      catalog: { nameKey: 'growth' },
+      contributions: { page: {} },
+    }),
+  );
+  assert.deepEqual(parsed.contributions.page, {});
 });

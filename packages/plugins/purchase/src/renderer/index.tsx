@@ -15,10 +15,16 @@ export function createRenderer() {
         views: {
           list: { load: () => import('./features/list') },
         },
+        page: {
+          load: () => import('./layout/PurchasePage'),
+        },
         openResource(uri) {
           const parsed = parsePluginResourceUri(uri);
           if (!parsed || parsed.pluginId !== 'purchase') return null;
-          return { viewId: purchaseIds.views.list, params: parsed.id ? { id: parsed.id } : {} };
+          return {
+            viewId: purchaseIds.views.list,
+            params: parsed.id ? { view: 'list', id: parsed.id } : { view: 'list' },
+          };
         },
       };
     },

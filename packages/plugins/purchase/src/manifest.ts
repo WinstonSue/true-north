@@ -14,8 +14,9 @@ export const purchaseManifest = definePluginManifest({
   contributions: {
     ipc: { purchase: {} },
     views: {
-      list: { nameKey: 'menu.purchase', order: 10, default: true },
+      list: { nameKey: 'menu.purchase', order: 10 },
     },
+    page: {},
     activity: {
       captureTypes: { item: {} },
       today: {
@@ -23,7 +24,6 @@ export const purchaseManifest = definePluginManifest({
         purchases: { kind: 'list', titleKey: 'menu.purchase', order: 40 },
       },
     },
-    storage: { capability: 'self-managed' },
   },
 });
 

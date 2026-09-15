@@ -5,6 +5,7 @@ import type {
   CreateConversationRequestVo,
   EnsureResourceConversationRequestVo,
   EnsureResourceConversationResponseVo,
+  AiResourceMentionVo,
   MessageVo,
   PatchConversationRuntimeRequestVo,
   PatchWorkspaceRequestVo,
@@ -22,6 +23,10 @@ import type {
 export default class AiController {
   static async listConversations() {
     return request<ConversationVo[]>({ method: 'get' })(`/ai/conversations`);
+  }
+
+  static async searchResourceMentions(query = '') {
+    return request<AiResourceMentionVo[]>({ method: 'get' })(`/ai/resources/mentions`, { query });
   }
 
   static async createConversation(body: CreateConversationRequestVo) {

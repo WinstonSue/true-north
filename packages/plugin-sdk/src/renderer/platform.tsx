@@ -1,4 +1,7 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { useContext, type ComponentType, type ReactNode } from 'react';
+import { createHostActionPort, extensionPoints, openRegisteredResource } from '../extension-points.ts';
+import { sharedReactContext } from './shared-context.ts';
+import { type ExtensionRegistry } from '../extension-registry.ts';
 import type {
   HostActionPort,
   LocaleContribution,
@@ -15,66 +18,74 @@ import type {
 export type RendererPlatformState = {
   lang: string;
   hostMessages?: Record<string, Record<string, string>>;
-  plugins: PluginRuntimeEntry[];
-  shellSlots: ShellSlotContribution[];
-  workbenchTools: WorkbenchToolDefinition[];
-  workbenchActions: Array<{ id: string; run: (input: Record<string, unknown>) => Promise<void> }>;
-  workbenchViews: WorkbenchViewContribution[];
-  locales: LocaleContribution[];
+  registry: ExtensionRegistry;
   ipc: PluginIpcPort;
-  hostActions: HostActionPort;
   workspaceHost?: WorkbenchWorkspaceHost;
-  scopes: Record<string, React.ComponentType<{ children?: ReactNode }>>;
-  openResource: (uri: string) => PluginViewOpenRequest | null;
   error?: string;
 };
 
 export class RendererPlatform {
-  constructor(public readonly state: RendererPlatformState) {}
+  readonly hostActions: HostActionPort;
 
-  get plugins() {
-    return this.state.plugins;
+  constructor(public readonly state: RendererPlatformState) {
+    this.hostActions = createHostActionPort(state.registry, 'host');
   }
 
-  get shellSlots() {
-    return this.state.shellSlots;
+  get plugins(): PluginRuntimeEntry[] {
+    return this.state.registry.list(extensionPoints.plugin);
   }
 
-  get workbenchTools() {
-    return this.state.workbenchTools;
+  get shellSlots(): ShellSlotContribution[] {
+    return this.state.registry.list(extensionPoints.shellSlot);
+  }
+
+  get workbenchTools(): WorkbenchToolDefinition[] {
+    return this.state.registry.list(extensionPoints.workspace);
   }
 
   get workbenchActions() {
-    return this.state.workbenchActions;
+    return this.state.registry.list(extensionPoints.workbenchAction);
   }
 
-  get workbenchViews() {
-    return this.state.workbenchViews;
+  get workbenchViews(): WorkbenchViewContribution[] {
+    return this.state.registry.list(extensionPoints.view);
   }
 
-  get locales() {
-    return this.state.locales;
+  get pageShells() {
+    return this.state.registry.list(extensionPoints.pageShell);
+  }
+
+  get locales(): LocaleContribution[] {
+    return this.state.registry.list(extensionPoints.locale);
   }
 
   get ipc() {
     return this.state.ipc;
   }
 
-  get hostActions() {
-    return this.state.hostActions;
-  }
-
   get error() {
     return this.state.error;
   }
 
+  get scopes(): Record<string, ComponentType<{ children?: ReactNode }>> {
+    return Object.fromEntries(
+      this.state.registry.list(extensionPoints.scope).map((item) => [item.pluginId, item.Component]),
+    );
+  }
+
   openResource(uri: string) {
-    return this.state.openResource(uri);
+    return openRegisteredResource(this.state.registry, uri);
   }
 }
 
-const RendererPlatformContext = createContext<RendererPlatform | null>(null);
-const PluginRuntimeContext = createContext<PluginRendererContext | null>(null);
+const RendererPlatformContext = sharedReactContext<RendererPlatform | null>(
+  '__true_north_renderer_platform_context__',
+  null,
+);
+const PluginRuntimeContext = sharedReactContext<PluginRendererContext | null>(
+  '__true_north_plugin_runtime_context__',
+  null,
+);
 
 export function RendererPlatformProvider({
   platform,

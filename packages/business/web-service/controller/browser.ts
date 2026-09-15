@@ -3,6 +3,8 @@ import type {
   BrowserBoundsVo,
   BrowserExtractResultVo,
   BrowserNavigateRequestVo,
+  BrowserOccludedRequestVo,
+  BrowserScreenshotVo,
   BrowserStateVo,
   BrowserVisibleRequestVo,
 } from '@true-north/vo';
@@ -18,6 +20,10 @@ export default class BrowserController {
 
   static async setBounds(body: BrowserBoundsVo) {
     return request<BrowserStateVo>({ method: 'put' })('/browser/bounds', body);
+  }
+
+  static async setOccluded(body: BrowserOccludedRequestVo) {
+    return request<BrowserStateVo>({ method: 'put' })('/browser/occluded', body);
   }
 
   static async createTab(url?: string) {
@@ -50,5 +56,9 @@ export default class BrowserController {
 
   static async extractTab(id: string) {
     return request<BrowserExtractResultVo>({ method: 'post' })(`/browser/tabs/${id}/extract`);
+  }
+
+  static async captureScreenshot(id: string) {
+    return request<BrowserScreenshotVo>({ method: 'post' })(`/browser/tabs/${id}/screenshot`);
   }
 }

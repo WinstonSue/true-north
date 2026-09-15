@@ -5,6 +5,4 @@ export { HOST_ACTIVITY_STORE_ID } from './storage';
 export { activityAiContribution } from './ai';
 export {
   getActivityPort,
-  bindCaptureAdopters,
-  bindTodayContributions,
 } from './ports';

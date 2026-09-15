@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Flex } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
+import { AgendaPage } from '../../../ui';
 import { TaskService } from '../../../../client';
 import { TaskWithoutRelationsVo } from '@true-north/vo';
 import { TaskStatus } from '@true-north/enum';
@@ -12,7 +12,6 @@ import DayAgendaCalendar, {
 import { useAgendaDate } from '../../components/day-agenda/context';
 import { openTaskDrawer } from '../detail/TaskDrawer';
 import TaskAgendaSections from '../components/TaskAgendaSections';
-import styles from './style.module.less';
 import { onTaskChanged } from '../../events';
 
 type TaskGroups = {
@@ -156,9 +155,9 @@ export default function TaskToday() {
 
   return (
     <ProductSurface id={productRef('growth.task.view.today')}>
-    <Flex vertical container="full" className={styles.page}>
-      <div className={styles.layout}>
-        <aside className={styles.sidebar}>
+      <AgendaPage
+        title={formatAgendaTitle(selectedDate)}
+        calendar={
           <DayAgendaCalendar
             value={selectedDate}
             onChange={setSelectedDate}
@@ -166,47 +165,38 @@ export default function TaskToday() {
             onVisibleMonthChange={setVisibleMonth}
             itemCounts={calendarCounts}
           />
-        </aside>
-        <Flex vertical container="fill" className={styles.main}>
-          <Flex container="fixed" align="center" className={styles.toolbar}>
-            <h1 className={styles.title}>
-              {formatAgendaTitle(selectedDate)}
-            </h1>
-          </Flex>
-          <Flex container="fill" className={styles.content}>
-            <TaskAgendaSections
-              groups={[
-                ...(isSelectedToday
-                  ? [
-                      {
-                        key: 'expired',
-                        label: '已过期',
-                        taskList: groups.expired,
-                      },
-                    ]
-                  : []),
-                {
-                  key: 'scheduled',
-                  label: '未完成',
-                  taskList: groups.scheduled,
-                },
-                { key: 'done', label: '已完成', taskList: groups.done },
-                {
-                  key: 'abandoned',
-                  label: '已放弃',
-                  taskList: groups.abandoned,
-                },
-              ]}
-              emptyLabel="当天没有任务"
-              onClickTask={async (id) => {
-                openTaskDrawer({ taskId: id, onRefresh: refreshData });
-              }}
-              refreshTaskList={refreshData}
-            />
-          </Flex>
-        </Flex>
-      </div>
-    </Flex>
+        }
+      >
+        <TaskAgendaSections
+          groups={[
+            ...(isSelectedToday
+              ? [
+                  {
+                    key: 'expired',
+                    label: '已过期',
+                    taskList: groups.expired,
+                  },
+                ]
+              : []),
+            {
+              key: 'scheduled',
+              label: '未完成',
+              taskList: groups.scheduled,
+            },
+            { key: 'done', label: '已完成', taskList: groups.done },
+            {
+              key: 'abandoned',
+              label: '已放弃',
+              taskList: groups.abandoned,
+            },
+          ]}
+          emptyLabel="当天没有任务"
+          onClickTask={async (id) => {
+            openTaskDrawer({ taskId: id, onRefresh: refreshData });
+          }}
+          refreshTaskList={refreshData}
+        />
+      </AgendaPage>
     </ProductSurface>
   );
 }

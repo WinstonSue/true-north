@@ -16,6 +16,9 @@ export function createRenderer() {
         views: {
           search: { load: () => import('./features/search') },
         },
+        page: {
+          load: () => import('./layout/LibraryPage'),
+        },
         workbench: {
           actions: {
             extract: {
@@ -28,7 +31,7 @@ export function createRenderer() {
         openResource(uri) {
           const parsed = parsePluginResourceUri(uri);
           if (!parsed || parsed.pluginId !== 'library') return null;
-          return { viewId: libraryIds.views.search, params: parsed.id ? { id: parsed.id } : {} };
+          return { viewId: libraryIds.views.search, params: parsed.id ? { view: 'search', id: parsed.id } : { view: 'search' } };
         },
       };
     },

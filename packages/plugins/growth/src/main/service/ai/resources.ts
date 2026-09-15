@@ -9,15 +9,33 @@ function parseId(uri: string, collection: string) {
   return uri.startsWith(prefix) ? uri.slice(prefix.length) : null;
 }
 
+function matchesQuery(name: string, query: string) {
+  const keyword = query.trim().toLowerCase();
+  if (!keyword) return true;
+  return name.toLowerCase().includes(keyword);
+}
+
+async function listGoals() {
+  const rows = await store().getRepository(Goal).find();
+  return rows.map((row) => ({
+    uri: pluginResourceUri('growth', 'goals', row.id),
+    name: row.name,
+    mimeType: 'application/json',
+  }));
+}
+
+async function listTasks() {
+  const rows = await store().getRepository(Task).find();
+  return rows.map((row) => ({
+    uri: pluginResourceUri('growth', 'tasks', row.id),
+    name: row.name,
+    mimeType: 'application/json',
+  }));
+}
+
 export const growthGoalResource: PluginResourceProvider = {
-  async list() {
-    const rows = await store().getRepository(Goal).find();
-    return rows.map((row) => ({
-      uri: pluginResourceUri('growth', 'goals', row.id),
-      name: row.name,
-      mimeType: 'application/json',
-    }));
-  },
+  list: listGoals,
+  search: async (query) => (await listGoals()).filter((row) => matchesQuery(row.name || '', query)),
   async read(uri) {
     const id = parseId(uri, 'goals');
     if (!id) return null;
@@ -32,14 +50,8 @@ export const growthGoalResource: PluginResourceProvider = {
 };
 
 export const growthTaskResource: PluginResourceProvider = {
-  async list() {
-    const rows = await store().getRepository(Task).find();
-    return rows.map((row) => ({
-      uri: pluginResourceUri('growth', 'tasks', row.id),
-      name: row.name,
-      mimeType: 'application/json',
-    }));
-  },
+  list: listTasks,
+  search: async (query) => (await listTasks()).filter((row) => matchesQuery(row.name || '', query)),
   async read(uri) {
     const id = parseId(uri, 'tasks');
     if (!id) return null;

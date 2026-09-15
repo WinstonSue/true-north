@@ -1,9 +1,7 @@
 import {
-  createContext,
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -12,16 +10,14 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { message } from '@sue/design-web-react';
 import type {
   AiChatStreamEventVo,
-  AiEntityLinkVo,
   AiWorkspacePartVo,
   ConversationVo,
   MessageVo,
   RuntimeAgentVo,
 } from '@true-north/vo';
-import { workspaceEntityRef } from '@true-north/vo';
 import { AiService } from '@true-north/web-service';
 import { useWorkbench } from '../workbench';
-import { useRendererPlatform } from '@true-north/plugin-sdk/renderer';
+import { sharedReactContext, useRendererPlatform } from '@true-north/plugin-sdk/renderer';
 import type { WorkbenchToolRegistry } from '../workbench/types';
 import { resolveAgentId } from './agent-selection';
 import {
@@ -39,6 +35,7 @@ import {
   type PendingStreamBuffers,
   type StreamRegistry,
 } from './stream-state';
+import { resourceLinksInText } from './mention';
 import type { AiDraft, SessionValue, ComposerInputRef } from './types';
 
 const EMPTY_DRAFT: AiDraft = { text: '', links: [] };
@@ -47,29 +44,10 @@ function isAiPath(pathname: string) {
   return pathname === '/ai' || pathname.startsWith('/ai/');
 }
 
-const AiSessionContext = createContext<SessionValue | null>(null);
-
-function collectEntityRefs(messages: MessageVo[]): AiEntityLinkVo[] {
-  const map = new Map<string, AiEntityLinkVo>();
-  for (const item of messages) {
-    for (const part of item.parts || []) {
-      if (part.type === 'text') {
-        for (const link of part.entityLinks || []) {
-          map.set(`${link.type}:${link.id}`, link);
-        }
-      }
-      if (part.type === 'workspace') {
-        const ref = workspaceEntityRef(part.payload);
-        if (ref) map.set(`${ref.type}:${ref.id}`, ref);
-      }
-    }
-  }
-  return [...map.values()];
-}
-
-function linksInText(text: string, links: AiEntityLinkVo[]): AiEntityLinkVo[] {
-  return links.filter((link) => text.includes(`@${link.label}`));
-}
+const AiSessionContext = sharedReactContext<SessionValue | null>(
+  '__true_north_ai_session_context__',
+  null,
+);
 
 function toolTabTitle(part: AiWorkspacePartVo, tools: WorkbenchToolRegistry): string {
   const definition = tools.find(part.workspaceKey);
@@ -361,10 +339,6 @@ export function AiSessionProvider({
     setSelectedAgentId(resolveAgentId(codingAgents, defaultAgentId));
   }, [activeConversationId, codingAgents, defaultAgentId]);
 
-  const attemptedEntityKeysRef = useRef(new Set<string>());
-  void attemptedEntityKeysRef;
-  void collectEntityRefs;
-
   useEffect(() => {
     if (!onAiPage) return;
     const conversationId = searchParams.get('conversationId');
@@ -590,7 +564,7 @@ export function AiSessionProvider({
     const text = draft.text.trim();
     if (!text || !canSend) return;
     if (findStreamByConversation(streamRegistryRef.current, activeConversationId)) return;
-    const entityLinks = linksInText(text, draft.links);
+    const resourceLinks = resourceLinksInText(text, draft.links);
 
     setDraftState(EMPTY_DRAFT);
     setStreamError(null);
@@ -604,7 +578,7 @@ export function AiSessionProvider({
       });
       if (created.ok === false) {
         creatingConversationRef.current = false;
-        setDraftState({ text, links: entityLinks });
+        setDraftState({ text, links: resourceLinks });
         message.error(created.message);
         return;
       }
@@ -614,9 +588,9 @@ export function AiSessionProvider({
       setSearchParams(conversationSearch(conversationId), { replace: true });
     }
 
-    const result = await AiService.startMessageStream(conversationId, { text });
+    const result = await AiService.startMessageStream(conversationId, { text, resourceLinks });
     if (result.ok === false) {
-      setDraftState({ text, links: entityLinks });
+      setDraftState({ text, links: resourceLinks });
       message.error(result.message);
       return;
     }
@@ -633,7 +607,7 @@ export function AiSessionProvider({
     beginStream,
     canSend,
     draft,
-    setSearchParams,
+    selectedAgentId,
     setSearchParams,
   ]);
 

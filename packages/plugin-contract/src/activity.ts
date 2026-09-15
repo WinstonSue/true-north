@@ -5,6 +5,7 @@ export const activityEntityRefSchema = z.object({
   pluginId: z.string().min(1),
   entityType: z.string().min(1),
   entityId: z.string().min(1),
+  /** 可选的 `tn://` 资源 URI，打开记录时用。 */
   uri: z.string().min(1).optional(),
 });
 
@@ -23,11 +24,13 @@ export type CreateActivityInput = {
   occurredAt?: string;
   title: string;
   summary?: string;
+  /** 来源标识，如捕获通道名。 */
   source: string;
   captureMessageId?: string;
   links: Array<ActivityEntityRef & { role?: string; label?: string }>;
 };
 
+/** 插件写活动时间线、解除链接、刷新今日页的端口。 */
 export type ActivityPort = {
   record(input: CreateActivityInput): Promise<void>;
   unlink(ref: ActivityEntityRef): Promise<void>;
