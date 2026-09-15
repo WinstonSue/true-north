@@ -10,10 +10,10 @@ import {
   PLUGIN_API_VERSION,
   WORKBENCH_EXTRACT_ACTION,
 } from '../src/index.ts';
-import { growthPaths, GoalDecomposeKey, TaskDecomposeKey } from '../../plugins/growth/src/contract/index.ts';
-import { expensePaths } from '../../plugins/expense/src/contract/index.ts';
-import { purchasePaths } from '../../plugins/purchase/src/contract/index.ts';
-import { libraryPaths, LIBRARY_EXTRACT_ACTION } from '../../plugins/library/src/contract/index.ts';
+import { growthPaths, GoalDecomposeKey, TaskDecomposeKey, GROWTH_VIEW_TODO, GROWTH_VIEW_TASK, GROWTH_VIEW_HABIT, GROWTH_VIEW_GOAL } from '../../plugins/growth/src/contract/index.ts';
+import { expensePaths, EXPENSE_VIEW_TRANSACTION, EXPENSE_VIEW_BUDGET, EXPENSE_VIEW_OVERVIEW } from '../../plugins/expense/src/contract/index.ts';
+import { purchasePaths, PURCHASE_VIEW_LIST } from '../../plugins/purchase/src/contract/index.ts';
+import { libraryPaths, LIBRARY_EXTRACT_ACTION, LIBRARY_VIEW_SEARCH } from '../../plugins/library/src/contract/index.ts';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const FIRST_PARTY_PLUGIN_IDS = ['growth', 'expense', 'purchase', 'library'] as const;
@@ -24,6 +24,10 @@ function pluginSource(pluginId: string) {
 
 function rendererSource(pluginId: string) {
   return readFileSync(join(repoRoot, `packages/plugins/${pluginId}/src/renderer/index.tsx`), 'utf8');
+}
+
+function viewSource(pluginId: string) {
+  return readFileSync(join(repoRoot, `packages/plugins/${pluginId}/src/renderer/views.ts`), 'utf8');
 }
 
 test('first-party packages keep unscoped plugin ids and current API version', () => {
@@ -97,9 +101,10 @@ test('first-party renderer binds implementations instead of repeating catalog me
     assert.match(src, /defineRendererImplementation/);
     assert.match(src, /icon:/);
     assert.match(src, /load:/);
-    assert.doesNotMatch(src, /nameKey:/);
+    assert.match(src, /workbenchViews:/);
     assert.doesNotMatch(src, /pages:/);
     assert.doesNotMatch(src, /hub:/);
+    assert.equal(existsSync(join(repoRoot, `packages/plugins/${pluginId}/src/renderer/views.ts`)), true);
   }
 });
 
@@ -117,9 +122,42 @@ test('persisted capability, tool, workspace, and page ids stay stable', () => {
   assert.equal(purchasePaths.root, '/plugins/purchase');
   assert.equal(libraryPaths.root, '/plugins/library');
   assert.equal(WORKBENCH_EXTRACT_ACTION, 'workbench.extract');
+  assert.equal(GROWTH_VIEW_TODO, 'growth.todo');
+  assert.equal(GROWTH_VIEW_TASK, 'growth.task');
+  assert.equal(GROWTH_VIEW_HABIT, 'growth.habit');
+  assert.equal(GROWTH_VIEW_GOAL, 'growth.goal');
+  assert.equal(EXPENSE_VIEW_TRANSACTION, 'expense.transaction');
+  assert.equal(EXPENSE_VIEW_BUDGET, 'expense.budget');
+  assert.equal(EXPENSE_VIEW_OVERVIEW, 'expense.overview');
+  assert.equal(PURCHASE_VIEW_LIST, 'purchase.list');
+  assert.equal(LIBRARY_VIEW_SEARCH, 'library.search');
   assert.match(pluginSource('growth'), /GoalDecomposeKey/);
   assert.match(pluginSource('growth'), /TaskDecomposeKey/);
+  assert.match(pluginSource('growth'), /rules:/);
+  assert.match(pluginSource('growth'), /growth\.goal\.priority-inheritance/);
   assert.match(pluginSource('library'), /LIBRARY_EXTRACT_ACTION/);
+});
+
+test('first-party workbench views match manifests and stay independently loadable', () => {
+  const expected = {
+    growth: [GROWTH_VIEW_TODO, GROWTH_VIEW_TASK, GROWTH_VIEW_HABIT, GROWTH_VIEW_GOAL],
+    expense: [EXPENSE_VIEW_TRANSACTION, EXPENSE_VIEW_BUDGET, EXPENSE_VIEW_OVERVIEW],
+    purchase: [PURCHASE_VIEW_LIST],
+    library: [LIBRARY_VIEW_SEARCH],
+  } as const;
+
+  for (const pluginId of FIRST_PARTY_PLUGIN_IDS) {
+    const src = pluginSource(pluginId);
+    const viewsSrc = viewSource(pluginId);
+    assert.match(src, /views:\s*\{/);
+    for (const id of expected[pluginId]) {
+      const localId = id.slice(pluginId.length + 1);
+      assert.match(src, new RegExp(`${localId}: \\{ nameKey:`));
+      assert.match(viewsSrc, new RegExp(`pluginId: '${pluginId}'`));
+      assert.match(viewsSrc, new RegExp(`import\\('\\./features/${localId}'\\)`));
+      assert.equal(existsSync(join(repoRoot, `packages/plugins/${pluginId}/src/renderer/features/${localId}.tsx`)), true);
+    }
+  }
 });
 
 test('growth can register AI and workbench contributions without ai/workbench plugins', async () => {

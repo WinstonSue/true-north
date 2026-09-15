@@ -31,6 +31,7 @@ export function HostProviders({ children }: { children: ReactNode }) {
   return (
     <WorkbenchProvider
       tools={(platform.workbenchTools || []) as never}
+      views={platform.workbenchViews || []}
       workspaceHost={platform.state.workspaceHost || createAiWorkspaceHost()}
       extractHandler={
         extract
@@ -40,7 +41,7 @@ export function HostProviders({ children }: { children: ReactNode }) {
           : undefined
       }
     >
-      <AiSessionProvider entitySources={platform.state.createEntitySources || (() => [])}>{tree}</AiSessionProvider>
+      <AiSessionProvider entitySources={platform.state.entitySources || []}>{tree}</AiSessionProvider>
     </WorkbenchProvider>
   );
 }

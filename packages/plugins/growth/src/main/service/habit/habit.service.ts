@@ -3,6 +3,7 @@ import { TodoRepository } from '../todo/todo.repository';
 import { CreateHabitDto, UpdateHabitDto, HabitFilterDto, HabitPageFilterDto, HabitDto } from './dto';
 import { Habit } from './habit.entity';
 import { GoalStatus, HabitStatus, TodoRelatedType, TodoStatus } from '@true-north/enum';
+import { assertHabitHasActiveGoal } from '../../../shared/entity-bounds';
 import { GoalRepository } from '../goal/goal.repository';
 import { Todo } from '../todo/todo.entity';
 import { RepeatService, repeatService as defaultRepeatService } from '../repeat/repeat.service';
@@ -35,6 +36,8 @@ export class HabitService {
     const habit = await this.habitRepository.create(entity);
     const withRelations = await this.habitRepository.findWithRelations(habit.id);
     await this.createCycleTodo(withRelations);
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
     return HabitDto.importEntity(await this.habitRepository.findWithRelations(habit.id));
   }
 
@@ -48,6 +51,8 @@ export class HabitService {
         // ignore orphan cleanup failure
       }
     }
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
   }
 
   async update(updateHabitDto: UpdateHabitDto): Promise<HabitDto> {
@@ -121,6 +126,8 @@ export class HabitService {
   //  ====== 业务逻辑编排 ======
   async pause(id: string): Promise<void> {
     await this.transition(id, HabitStatus.ACTIVE, HabitStatus.PAUSED);
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
   }
 
   async activate(id: string): Promise<void> {
@@ -131,6 +138,8 @@ export class HabitService {
     habit.status = HabitStatus.ACTIVE;
     await this.habitRepository.update(habit);
     await this.createCycleTodo(habit);
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
   }
 
   async abandon(id: string): Promise<void> {
@@ -150,6 +159,8 @@ export class HabitService {
       habit.cycleTodoId = undefined;
     }
     await this.habitRepository.update(habit);
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
   }
 
   private async transition(id: string, from: HabitStatus, to: HabitStatus): Promise<void> {
@@ -160,10 +171,10 @@ export class HabitService {
   }
 
   private async resolveActiveGoals(goalIds?: string[]) {
-    if (!goalIds?.length) throw new Error('习惯至少需要关联一个活跃目标');
-    const goals = await Promise.all(goalIds.map((id) => this.goalRepository.find(id)));
+    assertHabitHasActiveGoal(goalIds);
+    const goals = await Promise.all(goalIds!.map((id) => this.goalRepository.find(id)));
     const inactive = goals.find((goal) => goal.status !== GoalStatus.TODO && goal.status !== GoalStatus.DOING);
-    if (inactive) throw new Error(`目标“${inactive.name}”不是活跃目标`);
+    if (inactive) assertHabitHasActiveGoal(goalIds, inactive.status, inactive.name);
     return goals;
   }
 

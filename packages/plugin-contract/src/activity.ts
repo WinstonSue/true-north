@@ -29,7 +29,9 @@ export type CreateActivityInput = {
 export type ActivityPort = {
   record(input: CreateActivityInput): Promise<void>;
   unlink(ref: ActivityEntityRef): Promise<void>;
+  invalidateToday(): void;
 };
 
 export const ACTIVITY_RECORD_EVENT = 'activity.record';
 export const ACTIVITY_UNLINK_EVENT = 'activity.unlink';
+export const ACTIVITY_TODAY_INVALIDATE_EVENT = 'activity.today.invalidate';

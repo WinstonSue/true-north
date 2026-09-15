@@ -1,5 +1,4 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import type { NavigateFunction } from 'react-router-dom';
 import type {
   AiEntitySource,
   EntityPresenter,
@@ -11,6 +10,7 @@ import type {
   ShellSlotContribution,
   WorkbenchActionContribution,
   WorkbenchToolDefinition,
+  WorkbenchViewContribution,
   WorkbenchWorkspaceHost,
 } from '../runtime.ts';
 
@@ -21,9 +21,10 @@ export type RendererPlatformState = {
   shellSlots: ShellSlotContribution[];
   workbenchTools: WorkbenchToolDefinition[];
   workbenchActions: WorkbenchActionContribution[];
+  workbenchViews: WorkbenchViewContribution[];
   locales: LocaleContribution[];
   entityPresenters: EntityPresenter[];
-  createEntitySources: (navigate: NavigateFunction) => AiEntitySource[];
+  entitySources: AiEntitySource[];
   ipc: PluginIpcPort;
   hostActions: HostActionPort;
   workspaceHost?: WorkbenchWorkspaceHost;
@@ -49,12 +50,20 @@ export class RendererPlatform {
     return this.state.workbenchActions;
   }
 
+  get workbenchViews() {
+    return this.state.workbenchViews;
+  }
+
   get locales() {
     return this.state.locales;
   }
 
   get entityPresenters() {
     return this.state.entityPresenters;
+  }
+
+  get entitySources() {
+    return this.state.entitySources;
   }
 
   get ipc() {

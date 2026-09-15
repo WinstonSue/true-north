@@ -10,7 +10,7 @@
     "dev:product": "TN_DEV_PROFILE=product electron-vite dev",
     "build": "NODE_ENV=production electron-vite build --mode production",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --experimental-strip-types --test src/service/ai/runtime/__tests__/*.test.ts src/service/ai/conversation/__tests__/*.test.ts src/render/features/ai/__tests__/*.test.ts ../../packages/dev-lab/src/__tests__/*.test.ts",
+    "test": "node --experimental-strip-types --test src/service/ai/runtime/__tests__/*.test.ts src/service/ai/conversation/__tests__/*.test.ts src/render/features/ai/__tests__/*.test.ts src/render/features/workbench/__tests__/*.test.ts ../../packages/dev-lab/src/__tests__/*.test.ts",
     "pack-win": "node scripts/pack-with-polyfills.cjs win",
     "pack-mac": "node scripts/pack-with-polyfills.cjs mac",
     "pack-linux": "node scripts/pack-with-polyfills.cjs linux",

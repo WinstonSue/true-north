@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { Flex, Input } from '@sue/design-web-react';
-import { ChevronLeft, ChevronRight, Compass, Download, Loader2, Plus, RefreshCw, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Compass, Download, Loader2, RefreshCw, X } from 'lucide-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import type { ProductSurfaceHostProps } from '@ylib/product-surface-react';
 import { useWorkbench } from './context';
 import { ToolStage } from './ToolStage';
+import { PluginViewStage } from './PluginViewStage';
+import { NewTabPicker } from './NewTabPicker';
 import styles from './style.module.less';
 
 const EMPTY_BOUNDS = { x: 0, y: 0, width: 0, height: 0 };
 
 function TabBar({ 'data-product-ref': productRefAttr }: ProductSurfaceHostProps) {
-  const { tabs, activeTabId, createTab, closeTab, activateTab, close } = useWorkbench();
+  const { tabs, activeTabId, closeTab, activateTab, close } = useWorkbench();
 
   return (
     <Flex className={`${styles.tabBar} w-full`} align="center" gap={4} data-product-ref={productRefAttr}>
@@ -46,9 +48,9 @@ function TabBar({ 'data-product-ref': productRefAttr }: ProductSurfaceHostProps)
           </button>
         ))}
       </Flex>
-      <button type="button" className={styles.iconBtn} aria-label="新标签页" onClick={() => void createTab()}>
-        <Plus size={16} />
-      </button>
+      <ProductSurface id={productRef('workbench.view.new-tab')}>
+        <NewTabPicker />
+      </ProductSurface>
       <button type="button" className={styles.iconBtn} aria-label="关闭工作台" onClick={close}>
         <X size={16} />
       </button>
@@ -163,7 +165,7 @@ export function WorkbenchPanel() {
   const { open, width, setWidth, reportBounds, activeTab } = useWorkbench();
   const [dragging, setDragging] = useState(false);
   const holeRef = useRef<HTMLDivElement>(null);
-  const showingWeb = activeTab?.kind !== 'tool';
+  const showingWeb = activeTab?.kind === 'web';
 
   useEffect(() => {
     if (!open) return undefined;
@@ -236,6 +238,10 @@ export function WorkbenchPanel() {
           {activeTab?.kind === 'tool' ? (
             <ProductSurface id={productRef('workbench.view.tool-stage')}>
               <ToolStage tab={activeTab} />
+            </ProductSurface>
+          ) : activeTab?.kind === 'plugin-view' ? (
+            <ProductSurface id={productRef('workbench.view.plugin-stage')}>
+              <PluginViewStage tab={activeTab} />
             </ProductSurface>
           ) : (
             <ProductSurface id={productRef('workbench.view.stage')}>

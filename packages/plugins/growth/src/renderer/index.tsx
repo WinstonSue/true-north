@@ -7,11 +7,12 @@ import { useEffect } from 'react';
 import { growthManifest } from '../plugin';
 import { growthHref } from '../contract';
 import { growthLocales } from './locales';
-import { growthWorkbenchTools } from './pages/workbench/ai-decomposition/tools';
-import { createGrowthEntitySources } from './pages/ai/entity-sources';
+import { growthWorkbenchTools } from './contributions/ai-decomposition/tools';
+import { growthEntitySources } from './pages/ai/entity-sources';
 import { FocusTimerProvider, useFocusTimer } from './pages/focus-timer';
 import { TaskDrawerHost } from './pages/task/detail/TaskDrawer';
 import { bindPluginIpc } from '../client';
+import { growthWorkbenchViews } from './views';
 
 function FocusTimerSlot({ children }: { children?: ReactNode }) {
   return <FocusTimerProvider>{children}</FocusTimerProvider>;
@@ -42,8 +43,9 @@ export function createRenderer() {
         icon: Sprout,
         load: () => import('./pages/index'),
         workbenchTools: growthWorkbenchTools,
+        workbenchViews: growthWorkbenchViews,
         locales: [growthLocales],
-        entitySources: createGrowthEntitySources,
+        entitySources: growthEntitySources,
         shellSlots: [
           { slot: 'app-providers', pluginId: 'growth', id: 'focus-timer', order: 30, render: FocusTimerSlot },
           { slot: 'page-overlay', pluginId: 'growth', id: 'task-drawer', order: 10, render: TaskDrawerSlot },

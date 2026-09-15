@@ -12,9 +12,16 @@ export const expenseManifest = definePluginManifest({
     keywords: ['expense', 'budget', 'transaction', '记账', '预算', '账单'],
     order: 20,
   },
-  hostCapabilities: ['activity', 'storage', 'ipc'],
+  hostCapabilities: ['activity', 'storage', 'workbench', 'ipc'],
   contributions: {
     ipc: { expense: { routePrefix: '/expense' } },
+    workbench: {
+      views: {
+        transaction: { nameKey: 'menu.expense.transaction', order: 10 },
+        budget: { nameKey: 'menu.expense.budget', order: 20 },
+        overview: { nameKey: 'menu.expense.overview', order: 30 },
+      },
+    },
     activity: {
       captureTypes: { transaction: { type: 'expense.transaction' } },
       entityTypes: ['transaction'],

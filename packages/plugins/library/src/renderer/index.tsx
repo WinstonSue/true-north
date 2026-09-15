@@ -2,9 +2,10 @@ import { Bookmark } from 'lucide-react';
 import { defineRendererImplementation } from '@true-north/plugin-sdk';
 import { libraryManifest } from '../plugin';
 import { LIBRARY_EXTRACT_ACTION, libraryPaths } from '../contract';
-import { libraryExtractHandler } from './pages/workbench/extract';
+import { libraryExtractHandler } from './contributions/extract';
 import { libraryLocales } from './locales';
 import { bindPluginIpc } from '../client';
+import { libraryWorkbenchViews } from './views';
 
 export function createRenderer() {
   return defineRendererImplementation(libraryManifest, {
@@ -13,6 +14,7 @@ export function createRenderer() {
       return {
         icon: Bookmark,
         load: () => import('./pages/index'),
+        workbenchViews: libraryWorkbenchViews,
         workbenchActions: [
           {
             id: LIBRARY_EXTRACT_ACTION,

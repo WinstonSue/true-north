@@ -49,4 +49,8 @@ export default class GoalController {
   static async markDone(id: string) {
     return pluginIpc().put<boolean>(`/goal/done/${id}`);
   }
+
+  static async adoptDecompose(id: string, suggestion: unknown) {
+    return pluginIpc().post<{ ok: true }>(`/goal/adopt-decompose/${id}`, { suggestion });
+  }
 }

@@ -51,3 +51,11 @@ export async function unlinkGrowthEntity(entityType: string, entityId: string) {
     // activity card is supplementary
   }
 }
+
+export function invalidateGrowthToday() {
+  try {
+    activityPort?.invalidateToday();
+  } catch {
+    // today badge is supplementary
+  }
+}

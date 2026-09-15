@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { HabitStatus, TodoStatus } from '@true-north/enum';
 import { defineMainImplementation, namespacedId, type PluginMainContext } from '@true-north/plugin-sdk';
 import { growthManifest } from '../plugin';
 import { GoalController } from './service/goal/goal.route-controller';
@@ -17,6 +16,7 @@ import { TrackTime } from './service/track-time/entity';
 import { bindGrowthContext } from './context';
 import { activateStorage, disposeStorage, store } from './storage';
 import { createGrowthQuery } from './query';
+import { isStandaloneTodayTodo, isTodayHabit, todayDate } from './today-filter';
 
 function createTodaySections() {
   return [
@@ -63,14 +63,9 @@ function createTodaySections() {
     {
       id: namespacedId('growth', 'todos'),
       async collect() {
-        const todayDate = dayjs().format('YYYY-MM-DD');
+        const today = todayDate();
         const todos = await new TodoRepository().findByFilter(new TodoFilterDto());
-        const dueTodos = todos.filter(
-          (todo) =>
-            todo.status !== TodoStatus.DONE &&
-            todo.status !== TodoStatus.ABANDONED &&
-            dayjs(todo.planDate).format('YYYY-MM-DD') <= todayDate,
-        );
+        const dueTodos = todos.filter((todo) => isStandaloneTodayTodo(todo, today));
         return {
           id: namespacedId('growth', 'todos'),
           kind: 'list' as const,
@@ -79,7 +74,7 @@ function createTodaySections() {
           items: dueTodos.map((todo) => ({
             id: todo.id,
             label: todo.name,
-            overdue: dayjs(todo.planDate).format('YYYY-MM-DD') < todayDate,
+            overdue: dayjs(todo.planDate).format('YYYY-MM-DD') < today,
             pluginId: 'growth',
             entityType: 'todo',
             actions: [
@@ -96,29 +91,41 @@ function createTodaySections() {
     {
       id: namespacedId('growth', 'habits'),
       async collect() {
+        const today = todayDate();
         const habits = await new HabitRepository().findByFilter(new HabitFilterDto());
-        const todayHabits = habits.filter((habit) => habit.status === HabitStatus.ACTIVE && habit.cycleTodoId);
+        const cycleIds = habits.map((habit) => habit.cycleTodoId).filter((id): id is string => Boolean(id));
+        const cycleFilter = new TodoFilterDto();
+        cycleFilter.includeIds = cycleIds;
+        const cycleTodos = cycleIds.length ? await new TodoRepository().findByFilter(cycleFilter) : [];
+        const cycleById = new Map(cycleTodos.map((todo) => [todo.id, todo]));
+        const todayHabits = habits.filter((habit) =>
+          isTodayHabit(habit, habit.cycleTodoId ? cycleById.get(habit.cycleTodoId) : undefined, today),
+        );
         return {
           id: namespacedId('growth', 'habits'),
           kind: 'list' as const,
           titleKey: 'menu.habit',
           order: 30,
-          items: todayHabits.map((habit) => ({
-            id: habit.id,
-            label: habit.name,
-            pluginId: 'growth',
-            entityType: 'habit',
-            actions: [
-              {
-                id: 'checkin',
-                labelKey: 'today.checkin',
-                disabled: !habit.cycleTodoId,
-                command: habit.cycleTodoId
-                  ? { method: 'PUT' as const, path: `/todo/done/habit/${habit.cycleTodoId}` }
-                  : undefined,
-              },
-            ],
-          })),
+          items: todayHabits.map((habit) => {
+            const cycleTodo = habit.cycleTodoId ? cycleById.get(habit.cycleTodoId) : undefined;
+            return {
+              id: habit.id,
+              label: habit.name,
+              overdue: cycleTodo ? dayjs(cycleTodo.planDate).format('YYYY-MM-DD') < today : false,
+              pluginId: 'growth',
+              entityType: 'habit',
+              actions: [
+                {
+                  id: 'checkin',
+                  labelKey: 'today.checkin',
+                  disabled: !habit.cycleTodoId,
+                  command: habit.cycleTodoId
+                    ? { method: 'PUT' as const, path: `/todo/done/habit/${habit.cycleTodoId}` }
+                    : undefined,
+                },
+              ],
+            };
+          }),
         };
       },
     },

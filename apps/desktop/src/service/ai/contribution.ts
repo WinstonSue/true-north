@@ -1,6 +1,7 @@
 import { attachAgentToolRegistry, type AgentTool } from './agent/tools';
 import { attachEntityResolverRegistry, type EntityResolver } from './entity/entity-resolver.registry';
 import { addAgentInstructions } from './runtime/agent-instructions';
+import { addAgentRules } from './runtime/agent-rules';
 import type { AiCapability } from './capability/capability.registry';
 import type { CapabilityRegistry } from './capability/capability.registry';
 import type { AgentToolRegistry } from './agent/tools';
@@ -11,6 +12,7 @@ export type AiDomainContribution = {
   tools?: AgentTool[];
   entityResolvers?: EntityResolver[];
   agentInstructions?: string;
+  rules?: Array<{ id: string; description: string; tools?: string[] }>;
 };
 
 export function registerAiContribution(
@@ -20,6 +22,7 @@ export function registerAiContribution(
     entityResolvers: EntityResolverRegistry;
   },
   contribution: AiDomainContribution,
+  pluginId = 'host',
 ) {
   for (const capability of contribution.capabilities || []) {
     registries.capabilities.register(capability);
@@ -32,6 +35,9 @@ export function registerAiContribution(
   }
   if (contribution.agentInstructions?.trim()) {
     addAgentInstructions(contribution.agentInstructions.trim());
+  }
+  if (contribution.rules?.length) {
+    addAgentRules(pluginId, contribution.rules);
   }
 }
 

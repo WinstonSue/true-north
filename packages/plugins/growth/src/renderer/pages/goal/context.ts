@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GoalVo } from '@true-north/vo';
 import { GoalService, TaskService } from '../../../client';
 import { message } from '@sue/design-web-react';
 import { GoalStatus, GoalType, Importance, Difficulty } from '@true-north/enum';
 import { createInjectState } from '@true-north/common-web-utils';
+import { useWorkbenchViewRuntimeOptional } from '@true-north/plugin-sdk/renderer';
 
 interface GoalFilters {
   status?: GoalStatus[];
@@ -49,6 +50,13 @@ export const [GoalProvider, useGoalContext] = createInjectState<{
   const [selectedGoal, setSelectedGoal] = useState<GoalVo | null>(null);
 
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const viewRuntime = useWorkbenchViewRuntimeOptional();
+
+  useEffect(() => {
+    const target = viewRuntime?.target;
+    if (!target || target.type !== 'goal') return;
+    setSelectedGoalId(target.id);
+  }, [viewRuntime?.generation, viewRuntime?.target]);
 
   // 获取目标树数据 - 只获取根节点
   const fetchGoalTree = useCallback(async () => {

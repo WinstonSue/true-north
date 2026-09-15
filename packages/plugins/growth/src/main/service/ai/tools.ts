@@ -60,9 +60,9 @@ const suggestionItemProperties = {
   title: { type: 'string', description: '建议标题，简洁可执行' },
   reason: { type: 'string', description: '推荐理由' },
   impact: { type: 'string', description: '预期影响' },
-  planned: { type: 'string', description: '计划日期 YYYY-MM-DD' },
-  importance: { type: 'number', description: '重要度 1-5' },
-  difficulty: { type: 'number', description: '难度 1-5' },
+  planned: { type: 'string', description: '计划日期 YYYY-MM-DD，必须位于 get_* 返回的 bounds.startAt/endAt 内；省略则选范围内的默认日期' },
+  importance: { type: 'number', description: '重要度 1-5，不得超过 bounds.maxImportance；省略则继承上级' },
+  difficulty: { type: 'number', description: '难度 1-5，不得超过 bounds.maxDifficulty；省略则继承上级' },
 };
 
 function jsonResult(value: unknown): string {
@@ -129,7 +129,7 @@ const searchTasks: AgentTool = {
 
 const getGoal: AgentTool = {
   name: 'get_goal',
-  description: '读取目标详情及子目标、相关任务/待办/习惯摘要。拆解前应先读取。',
+  description: '读取目标详情、约束边界及子目标、相关任务/待办/习惯摘要。拆解前应先读取，并让 suggestions 遵守返回的 bounds。',
   readOnly: true,
   parameters: {
     type: 'object',
@@ -146,6 +146,7 @@ const getGoal: AgentTool = {
     return jsonResult({
       goalId: context.goalId,
       goalName: context.goalName,
+      bounds: context.bounds,
       context: context.promptContext,
     });
   },
@@ -153,7 +154,7 @@ const getGoal: AgentTool = {
 
 const getTask: AgentTool = {
   name: 'get_task',
-  description: '读取任务详情及子任务、相关待办摘要。拆解前应先读取。',
+  description: '读取任务详情、约束边界及子任务、相关待办摘要。拆解前应先读取，并让 suggestions 遵守返回的 bounds。',
   readOnly: true,
   parameters: {
     type: 'object',
@@ -170,6 +171,7 @@ const getTask: AgentTool = {
     return jsonResult({
       taskId: context.taskId,
       taskName: context.taskName,
+      bounds: context.bounds,
       context: context.promptContext,
     });
   },
@@ -178,7 +180,7 @@ const getTask: AgentTool = {
 const decomposeGoal: AgentTool = {
   name: 'decompose_goal',
   description:
-    '把你生成的目标拆解建议写入本条助手消息的工作台。必须先 get_goal 读上下文，再自行生成 suggestions 并传入（总量最多 8、每类最多 2；kind 为 goal/task/todo/habit）。不要只输出文本列表。创建实体由用户在工作台采纳。',
+    '把你生成的目标拆解建议写入本条助手消息的工作台。必须先 get_goal 读上下文与 bounds，再自行生成 suggestions 并传入（总量最多 8、每类最多 2；kind 为 goal/task/todo/habit）。importance/difficulty/planned 不得超过 bounds。不要只输出文本列表。创建实体由用户在工作台采纳。',
   parameters: {
     type: 'object',
     properties: {
@@ -238,7 +240,7 @@ const decomposeGoal: AgentTool = {
 const decomposeTask: AgentTool = {
   name: 'decompose_task',
   description:
-    '把你生成的任务拆解建议写入本条助手消息的工作台。必须先 get_task 读上下文，再自行生成 suggestions 并传入（仅 kind=task|todo；总量最多 8、每类最多 2）。不要只输出文本列表。创建实体由用户在工作台采纳。',
+    '把你生成的任务拆解建议写入本条助手消息的工作台。必须先 get_task 读上下文与 bounds，再自行生成 suggestions 并传入（仅 kind=task|todo；总量最多 8、每类最多 2）。importance/difficulty/planned 不得超过 bounds。不要只输出文本列表。创建实体由用户在工作台采纳。',
   parameters: {
     type: 'object',
     properties: {

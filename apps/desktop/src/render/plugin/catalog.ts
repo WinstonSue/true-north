@@ -101,12 +101,22 @@ export async function bootRendererPlugins(lang = 'zh-CN'): Promise<RendererPlatf
     workbenchActions: catalog.plugins.flatMap(
       (plugin) => handlesById.get(plugin.manifest.pluginId)?.workbenchActions || [],
     ),
+    workbenchViews: catalog.plugins.flatMap((plugin) =>
+      (handlesById.get(plugin.manifest.pluginId)?.workbenchViews || []).map((view) => ({
+        ...view,
+        pluginId: plugin.manifest.pluginId,
+        nameKey: view.nameKey,
+        order: view.order,
+        load: view.load,
+      })),
+    ),
     locales: catalog.plugins.flatMap((plugin) => handlesById.get(plugin.manifest.pluginId)?.locales || []),
     entityPresenters: catalog.plugins.flatMap(
       (plugin) => handlesById.get(plugin.manifest.pluginId)?.entityPresenters || [],
     ),
-    createEntitySources: (navigate) =>
-      catalog.plugins.flatMap((plugin) => handlesById.get(plugin.manifest.pluginId)?.entitySources?.(navigate) || []),
+    entitySources: catalog.plugins.flatMap(
+      (plugin) => handlesById.get(plugin.manifest.pluginId)?.entitySources || [],
+    ),
     ipc,
     hostActions,
     workspaceHost: createAiWorkspaceHost(),

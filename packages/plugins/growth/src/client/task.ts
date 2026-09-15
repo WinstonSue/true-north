@@ -53,4 +53,8 @@ export default class TaskController {
   static async pause(id: string) {
     return pluginIpc().put<boolean>(`/task/pause/${id}`);
   }
+
+  static async adoptDecompose(id: string, suggestion: unknown) {
+    return pluginIpc().post<{ ok: true }>(`/task/adopt-decompose/${id}`, { suggestion });
+  }
 }

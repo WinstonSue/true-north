@@ -5,18 +5,21 @@ import path from 'path';
 import { app } from 'electron';
 import { listAgentTools } from '../agent/tools';
 import { getAgentInstructions } from './agent-instructions';
+import { formatAgentRulesSection } from './agent-rules';
 import { buildCodexSessionConfig } from './codex-config';
 
 export function buildAgentsMd(): string {
   const tools = listAgentTools();
   const names = tools.map((tool) => tool.name).join('、');
   const domain = getAgentInstructions();
+  const rules = formatAgentRulesSection();
   return `你是 True North 个人规划助手。${names ? `通过 MCP 工具完成领域读写：${names}。` : ''}
 
-${domain}
+${[domain, rules].filter(Boolean).join('\n\n')}
 
 约束：
 - 不要创建目标、任务、待办、习惯、支出、采购或收藏；创建由用户在工作台采纳完成。
+- 生成建议时必须遵守插件规则与 get_* 返回的当前边界；越界时先按规则修正再调用 decompose_*。
 - 用简洁中文回复，不要在对话里输出建议 JSON 列表。
 `;
 }

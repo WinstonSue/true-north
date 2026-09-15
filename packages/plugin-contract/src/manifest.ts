@@ -27,6 +27,12 @@ export const shellSlotContributionSchema = z.object({
   order: z.number().optional(),
 });
 
+export const workbenchViewContributionSchema = z.object({
+  id: z.string().min(1).optional(),
+  nameKey: z.string().min(1).optional(),
+  order: z.number().optional(),
+});
+
 export const pluginContributionsSchema = z.object({
   ipc: z.record(z.string().min(1), ipcContributionSchema).optional(),
   ai: z
@@ -34,12 +40,14 @@ export const pluginContributionsSchema = z.object({
       capabilities: z.record(z.string().min(1), keyedContributionSchema).optional(),
       tools: z.record(z.string().min(1), namedContributionSchema).optional(),
       entityTypes: z.array(z.string().min(1)).optional(),
+      rules: z.record(z.string().min(1), idContributionSchema).optional(),
     })
     .optional(),
   workbench: z
     .object({
       workspaces: z.record(z.string().min(1), keyedContributionSchema).optional(),
       actions: z.record(z.string().min(1), idContributionSchema).optional(),
+      views: z.record(z.string().min(1), workbenchViewContributionSchema).optional(),
     })
     .optional(),
   activity: z

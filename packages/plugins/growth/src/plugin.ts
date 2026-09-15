@@ -36,11 +36,26 @@ export const growthManifest = definePluginManifest({
         decompose_task: { name: 'decompose_task' },
       },
       entityTypes: ['goal', 'task'],
+      rules: {
+        'goal-priority-inheritance': { id: 'growth.goal.priority-inheritance' },
+        'goal-time-inheritance': { id: 'growth.goal.time-inheritance' },
+        'goal-type-inheritance': { id: 'growth.goal.type-inheritance' },
+        'task-time-inheritance': { id: 'growth.task.time-inheritance' },
+        'task-single-parent': { id: 'growth.task.single-parent' },
+        'todo-related-inheritance': { id: 'growth.todo.related-inheritance' },
+        'habit-goal-required': { id: 'growth.habit.goal-required' },
+      },
     },
     workbench: {
       workspaces: {
         'goal-decompose': { key: GoalDecomposeKey },
         'task-decompose': { key: TaskDecomposeKey },
+      },
+      views: {
+        todo: { nameKey: 'menu.todo', order: 10 },
+        task: { nameKey: 'menu.task', order: 20 },
+        habit: { nameKey: 'menu.habit', order: 30 },
+        goal: { nameKey: 'menu.goal', order: 40 },
       },
     },
     activity: {

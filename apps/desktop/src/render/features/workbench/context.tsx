@@ -13,7 +13,13 @@ import { useNavigate } from 'react-router-dom';
 import { message } from '@sue/design-web-react';
 import { BrowserService } from '@true-north/web-service';
 import { HOST_BROWSER_OPEN, HOST_WORKBENCH_OPEN } from '@true-north/plugin-sdk';
-import { useHostActions, WorkbenchRuntimeContext } from '@true-north/plugin-sdk/renderer';
+import type { WorkbenchViewOpenInput, WorkbenchViewTarget } from '@true-north/plugin-sdk';
+import {
+  useHostActions,
+  useLocale,
+  useRendererPlatform,
+  WorkbenchRuntimeContext,
+} from '@true-north/plugin-sdk/renderer';
 import type {
   AiWorkspacePayloadVo,
   BrowserBoundsVo,
@@ -29,6 +35,17 @@ import type {
   WorkbenchWorkspaceHost,
 } from './types';
 import { createWorkbenchToolRegistry } from './types';
+import type { WorkbenchViewContribution } from '@true-north/plugin-sdk';
+import {
+  appendTabOrder,
+  clearPluginViewTargetState,
+  isWebTabId,
+  needsFallbackWebTab,
+  neighborId,
+  pluginViewTabId,
+  upsertPluginViewTab,
+  withPluginViewTarget,
+} from './tab-state';
 
 const DEFAULT_WIDTH = 480;
 const MIN_WIDTH = 360;
@@ -61,7 +78,19 @@ export type WorkbenchWebTab = {
   loading: boolean;
 };
 
-export type WorkbenchTab = WorkbenchWebTab | WorkbenchToolTab;
+export type WorkbenchPluginViewTab = {
+  kind: 'plugin-view';
+  id: string;
+  viewId: string;
+  pluginId: string;
+  title: string;
+  target?: WorkbenchViewTarget;
+  targetGeneration?: number;
+};
+
+export type WorkbenchTab = WorkbenchWebTab | WorkbenchToolTab | WorkbenchPluginViewTab;
+
+export type PluginViewInput = WorkbenchViewOpenInput;
 
 export type TabInput = {
   conversationId: string;
@@ -94,6 +123,8 @@ type WorkbenchContextValue = {
   closeTab: (id: string) => Promise<void>;
   activateTab: (id: string) => Promise<void>;
   openToolTab: (input: TabInput) => Promise<void>;
+  openPluginView: (input: PluginViewInput) => Promise<void>;
+  clearPluginViewTarget: (viewId: string) => void;
   requestFollowUp: (conversationId: string, text: string) => void;
   clearFollowUp: () => void;
   navigate: (url: string) => Promise<void>;
@@ -122,12 +153,6 @@ const MIN_CONVERSATION_WIDTH = 360;
 function maxPanelWidth(leftReserve: number) {
   if (typeof window === 'undefined') return DEFAULT_WIDTH;
   return Math.max(MIN_WIDTH, window.innerWidth - leftReserve - MIN_CONVERSATION_WIDTH);
-}
-
-function neighborId(order: string[], closedId: string): string | null {
-  const index = order.indexOf(closedId);
-  if (index < 0) return order[order.length - 1] ?? null;
-  return order[index + 1] ?? order[index - 1] ?? null;
 }
 
 export function useWorkbench() {
@@ -160,16 +185,20 @@ export function WorkbenchProvider({
 }: {
   children: ReactNode;
   tools: WorkbenchToolDefinition[];
+  views?: WorkbenchViewContribution[];
   workspaceHost: WorkbenchWorkspaceHost;
   extractHandler?: WorkbenchExtractHandler;
 }) {
   const tools = useMemo(() => createWorkbenchToolRegistry(toolDefinitions), [toolDefinitions]);
+  const platform = useRendererPlatform();
+  const t = useLocale();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [width, setWidthState] = useState(readStoredWidth);
   const [leftReserve, setLeftReserveState] = useState(DEFAULT_LEFT_RESERVE);
   const [state, setState] = useState<BrowserStateVo>(EMPTY_STATE);
   const [toolTabs, setToolTabs] = useState<WorkbenchToolTab[]>([]);
+  const [pluginViewTabs, setPluginViewTabs] = useState<WorkbenchPluginViewTab[]>([]);
   const [tabOrder, setTabOrder] = useState<string[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pendingFollowUp, setPendingFollowUp] = useState<WorkbenchFollowUp | null>(null);
@@ -177,10 +206,19 @@ export function WorkbenchProvider({
   const boundsRaf = useRef<number | null>(null);
   const pendingBounds = useRef<BrowserBoundsVo | null>(null);
   const toolTabsRef = useRef<WorkbenchToolTab[]>([]);
+  const pluginViewTabsRef = useRef<WorkbenchPluginViewTab[]>([]);
   const tabOrderRef = useRef<string[]>([]);
   const prevWebIdsRef = useRef<Set<string>>(new Set());
   toolTabsRef.current = toolTabs;
+  pluginViewTabsRef.current = pluginViewTabs;
   tabOrderRef.current = tabOrder;
+
+  const nonWebIds = useCallback(() => {
+    return {
+      toolIds: new Set(toolTabsRef.current.map((tab) => tab.id)),
+      pluginViewIds: new Set(pluginViewTabsRef.current.map((tab) => tab.id)),
+    };
+  }, []);
 
   const applyState = useCallback((next: BrowserStateVo) => {
     setState(next);
@@ -188,8 +226,8 @@ export function WorkbenchProvider({
     const incomingWebIds = next.tabs.map((tab) => tab.id);
     const incomingSet = new Set(incomingWebIds);
     setTabOrder((prev) => {
-      const toolIds = new Set(toolTabsRef.current.map((tab) => tab.id));
-      const kept = prev.filter((id) => toolIds.has(id) || incomingSet.has(id));
+      const { toolIds, pluginViewIds } = nonWebIds();
+      const kept = prev.filter((id) => toolIds.has(id) || pluginViewIds.has(id) || incomingSet.has(id));
       const added = incomingWebIds.filter((id) => !kept.includes(id));
       return [...kept, ...added];
     });
@@ -198,7 +236,7 @@ export function WorkbenchProvider({
     if (newIds.length && next.activeTabId && newIds.includes(next.activeTabId)) {
       setActiveId(next.activeTabId);
     }
-  }, []);
+  }, [nonWebIds]);
 
   useEffect(() => {
     if (!window.electronAPI?.isElectron) return undefined;
@@ -240,7 +278,11 @@ export function WorkbenchProvider({
     }
     void (async () => {
       await withState(() => BrowserService.setVisible(true), applyState);
-      if (toolTabsRef.current.length === 0 && prevWebIdsRef.current.size === 0) {
+      if (
+        toolTabsRef.current.length === 0 &&
+        pluginViewTabsRef.current.length === 0 &&
+        prevWebIdsRef.current.size === 0
+      ) {
         await withState(() => BrowserService.createTab(), applyState);
       }
     })();
@@ -249,50 +291,64 @@ export function WorkbenchProvider({
   const activateTab = useCallback(
     async (id: string) => {
       setActiveId(id);
-      const isTool = toolTabsRef.current.some((tab) => tab.id === id);
-      if (!isTool) {
+      const { toolIds, pluginViewIds } = nonWebIds();
+      if (isWebTabId(id, toolIds, pluginViewIds)) {
         await withState(() => BrowserService.activateTab(id), applyState);
       }
     },
-    [applyState],
+    [applyState, nonWebIds],
   );
 
   const closeTab = useCallback(
     async (id: string) => {
       const order = tabOrderRef.current;
       const nextId = neighborId(order, id);
-      const isTool = toolTabsRef.current.some((tab) => tab.id === id);
-      if (isTool) {
-        const nextTools = toolTabsRef.current.filter((tab) => tab.id !== id);
-        setToolTabs(nextTools);
-        setTabOrder((prev) => prev.filter((item) => item !== id));
-        if (nextId) {
-          setActiveId(nextId);
-          if (!nextTools.some((tab) => tab.id === nextId)) {
-            await withState(() => BrowserService.activateTab(nextId), applyState);
-          }
-        } else {
+      const { toolIds, pluginViewIds } = nonWebIds();
+      const isTool = toolIds.has(id);
+      const isPluginView = pluginViewIds.has(id);
+
+      const activateNeighbor = async () => {
+        if (!nextId) {
           setActiveId(null);
+          return;
         }
-        if (nextTools.length === 0 && prevWebIdsRef.current.size === 0) {
+        setActiveId(nextId);
+        const remainingTools = isTool ? toolTabsRef.current.filter((tab) => tab.id !== id) : toolTabsRef.current;
+        const remainingViews = isPluginView
+          ? pluginViewTabsRef.current.filter((tab) => tab.id !== id)
+          : pluginViewTabsRef.current;
+        const remainingToolIds = new Set(remainingTools.map((tab) => tab.id));
+        const remainingViewIds = new Set(remainingViews.map((tab) => tab.id));
+        if (isWebTabId(nextId, remainingToolIds, remainingViewIds)) {
+          await withState(() => BrowserService.activateTab(nextId), applyState);
+        }
+      };
+
+      const maybeFallbackWeb = async (nextTools: number, nextViews: number) => {
+        if (needsFallbackWebTab(nextTools, nextViews, prevWebIdsRef.current.size)) {
           await ensureOpen();
           await withState(() => BrowserService.createTab(), applyState);
         }
+      };
+
+      if (isTool || isPluginView) {
+        const nextTools = isTool ? toolTabsRef.current.filter((tab) => tab.id !== id) : toolTabsRef.current;
+        const nextViews = isPluginView
+          ? pluginViewTabsRef.current.filter((tab) => tab.id !== id)
+          : pluginViewTabsRef.current;
+        if (isTool) setToolTabs(nextTools);
+        if (isPluginView) setPluginViewTabs(nextViews);
+        setTabOrder((prev) => prev.filter((item) => item !== id));
+        await activateNeighbor();
+        await maybeFallbackWeb(nextTools.length, nextViews.length);
         return;
       }
-      if (nextId) {
-        setActiveId(nextId);
-        if (!toolTabsRef.current.some((tab) => tab.id === nextId)) {
-          await withState(() => BrowserService.activateTab(nextId), applyState);
-        }
-      }
+
+      await activateNeighbor();
       await withState(() => BrowserService.closeTab(id), applyState);
-      if (toolTabsRef.current.length === 0 && prevWebIdsRef.current.size === 0) {
-        await ensureOpen();
-        await withState(() => BrowserService.createTab(), applyState);
-      }
+      await maybeFallbackWeb(toolTabsRef.current.length, pluginViewTabsRef.current.length);
     },
-    [applyState, ensureOpen],
+    [applyState, ensureOpen, nonWebIds],
   );
 
   const openToolTab = useCallback(
@@ -320,12 +376,47 @@ export function WorkbenchProvider({
           },
         ];
       });
-      setTabOrder((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      setTabOrder((prev) => appendTabOrder(prev, id));
       setActiveId(id);
       await ensureOpen();
     },
     [ensureOpen],
   );
+
+  const openPluginView = useCallback(
+    async (input: PluginViewInput) => {
+      const view = (platform.workbenchViews || []).find((item) => item.id === input.viewId);
+      if (!view) {
+        message.warning(`未知插件功能：${input.viewId}`);
+        return;
+      }
+      const id = pluginViewTabId(view.id);
+      const existing = pluginViewTabsRef.current.find((tab) => tab.id === id);
+      const nextTab = withPluginViewTarget(
+        existing,
+        {
+          kind: 'plugin-view' as const,
+          id,
+          viewId: view.id,
+          pluginId: view.pluginId,
+          title: t[view.nameKey] || view.nameKey,
+        },
+        input.target,
+      );
+      setPluginViewTabs((prev) => upsertPluginViewTab(prev, nextTab));
+      setTabOrder((prev) => appendTabOrder(prev, id));
+      setActiveId(id);
+      await ensureOpen();
+    },
+    [ensureOpen, platform.workbenchViews, t],
+  );
+
+  const clearPluginViewTarget = useCallback((viewId: string) => {
+    const id = pluginViewTabId(viewId);
+    setPluginViewTabs((prev) =>
+      prev.map((tab) => (tab.id === id ? clearPluginViewTargetState(tab) : tab)),
+    );
+  }, []);
 
   const requestFollowUp = useCallback(
     (conversationId: string, text: string) => {
@@ -341,7 +432,8 @@ export function WorkbenchProvider({
 
   const navigateUrl = useCallback(
     async (url: string) => {
-      const tabId = activeId && !toolTabsRef.current.some((tab) => tab.id === activeId) ? activeId : null;
+      const { toolIds, pluginViewIds } = nonWebIds();
+      const tabId = activeId && isWebTabId(activeId, toolIds, pluginViewIds) ? activeId : null;
       if (!tabId) return;
       if (!normalizeBrowserUrl(url)) {
         message.warning('不是有效网址');
@@ -349,29 +441,33 @@ export function WorkbenchProvider({
       }
       await withState(() => BrowserService.navigate(tabId, url), applyState);
     },
-    [activeId, applyState],
+    [activeId, applyState, nonWebIds],
   );
 
   const goBack = useCallback(async () => {
-    const tabId = activeId && !toolTabsRef.current.some((tab) => tab.id === activeId) ? activeId : null;
+    const { toolIds, pluginViewIds } = nonWebIds();
+    const tabId = activeId && isWebTabId(activeId, toolIds, pluginViewIds) ? activeId : null;
     if (!tabId) return;
     await withState(() => BrowserService.goBack(tabId), applyState);
-  }, [activeId, applyState]);
+  }, [activeId, applyState, nonWebIds]);
 
   const goForward = useCallback(async () => {
-    const tabId = activeId && !toolTabsRef.current.some((tab) => tab.id === activeId) ? activeId : null;
+    const { toolIds, pluginViewIds } = nonWebIds();
+    const tabId = activeId && isWebTabId(activeId, toolIds, pluginViewIds) ? activeId : null;
     if (!tabId) return;
     await withState(() => BrowserService.goForward(tabId), applyState);
-  }, [activeId, applyState]);
+  }, [activeId, applyState, nonWebIds]);
 
   const reload = useCallback(async () => {
-    const tabId = activeId && !toolTabsRef.current.some((tab) => tab.id === activeId) ? activeId : null;
+    const { toolIds, pluginViewIds } = nonWebIds();
+    const tabId = activeId && isWebTabId(activeId, toolIds, pluginViewIds) ? activeId : null;
     if (!tabId) return;
     await withState(() => BrowserService.reload(tabId), applyState);
-  }, [activeId, applyState]);
+  }, [activeId, applyState, nonWebIds]);
 
   const extractActiveTab = useCallback(async () => {
-    const tabId = activeId && !toolTabsRef.current.some((tab) => tab.id === activeId) ? activeId : null;
+    const { toolIds, pluginViewIds } = nonWebIds();
+    const tabId = activeId && isWebTabId(activeId, toolIds, pluginViewIds) ? activeId : null;
     if (!tabId) return undefined;
     try {
       const result = await BrowserService.extractTab(tabId);
@@ -392,7 +488,7 @@ export function WorkbenchProvider({
       message.error(error instanceof Error ? error.message : '拉取失败');
       return undefined;
     }
-  }, [activeId, extractHandler, state.tabs]);
+  }, [activeId, extractHandler, nonWebIds, state.tabs]);
 
   const reportBounds = useCallback((bounds: BrowserBoundsVo) => {
     pendingBounds.current = bounds;
@@ -418,8 +514,8 @@ export function WorkbenchProvider({
         event.preventDefault();
         if (activeId) void closeTab(activeId);
       } else if (key === 'l') {
-        const isTool = toolTabsRef.current.some((tab) => tab.id === activeId);
-        if (isTool) return;
+        const { toolIds, pluginViewIds } = nonWebIds();
+        if (!isWebTabId(activeId || '', toolIds, pluginViewIds)) return;
         event.preventDefault();
         const handle = addressInputRef.current;
         const input = handle?.input ?? handle?.nativeElement ?? handle;
@@ -429,7 +525,7 @@ export function WorkbenchProvider({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [activeId, closeTab, createTab, open]);
+  }, [activeId, closeTab, createTab, nonWebIds, open]);
 
   useEffect(
     () => () => {
@@ -448,13 +544,18 @@ export function WorkbenchProvider({
         next.push(tool);
         continue;
       }
+      const pluginView = pluginViewTabs.find((tab) => tab.id === id);
+      if (pluginView) {
+        next.push(pluginView);
+        continue;
+      }
       const web = state.tabs.find((tab) => tab.id === id);
       if (web) {
         next.push({ kind: 'web', id: web.id, title: web.title, loading: web.loading });
       }
     }
     return next;
-  }, [state.tabs, tabOrder, toolTabs]);
+  }, [pluginViewTabs, state.tabs, tabOrder, toolTabs]);
 
   const activeTab = tabs.find((tab) => tab.id === activeId);
   const activeWebTab =
@@ -479,6 +580,8 @@ export function WorkbenchProvider({
       closeTab,
       activateTab,
       openToolTab,
+      openPluginView,
+      clearPluginViewTarget,
       requestFollowUp,
       clearFollowUp,
       navigate: navigateUrl,
@@ -499,11 +602,13 @@ export function WorkbenchProvider({
       close,
       closeTab,
       createTab,
+      clearPluginViewTarget,
       extractActiveTab,
       goBack,
       goForward,
       navigateUrl,
       open,
+      openPluginView,
       openToolTab,
       pendingFollowUp,
       reload,

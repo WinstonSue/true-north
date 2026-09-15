@@ -5,6 +5,7 @@ import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import type { HomeTodayVo } from '@true-north/vo';
 import type { TodayCommand, TodayListItemAction, TodaySectionSnapshot } from '@true-north/plugin-sdk';
+import { ACTIVITY_TODAY_INVALIDATE_EVENT } from '@true-north/plugin-sdk';
 import { ActivityController } from '@true-north/web-service';
 import { useHostActions, usePluginIpc, useRendererPlatform } from '@true-north/plugin-sdk/renderer';
 import useLocale from '../../utils/useLocale';
@@ -142,6 +143,13 @@ function MessageBox({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void load();
+    const api = typeof window !== 'undefined' ? window.electronAPI : undefined;
+    if (!api?.on) return;
+    const handler = () => {
+      void load();
+    };
+    api.on(ACTIVITY_TODAY_INVALIDATE_EVENT, handler);
+    return () => api.removeListener?.(ACTIVITY_TODAY_INVALIDATE_EVENT, handler);
   }, [load]);
 
   const runAction = async (action: TodayListItemAction) => {

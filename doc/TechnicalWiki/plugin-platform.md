@@ -3,7 +3,7 @@
 ```yaml
 document_meta:
   status: 'active'
-  last_updated: '2026-09-11'
+  last_updated: '2026-09-15'
 ```
 
 The plugin kernel is a serializable v2 contract plus instance-owned hosts. Built-in plugins load in-process today; a future isolated loader can return RPC/iframe proxies against the same contract. Manifests never contain functions.
@@ -20,7 +20,8 @@ The plugin kernel is a serializable v2 contract plus instance-owned hosts. Built
 
 - `@true-north/plugin-sdk` re-exports the contract plus `defineMainImplementation` / `defineRendererImplementation`.
 - Author surfaces: `./main`, `./renderer`, optional `./sqlite`. The root barrel has no bind helpers, React hooks, TypeORM handles, or first-party plugin ids.
-- Runtime modules bind implementations to manifest keys. `reconcileMain` / `reconcileRenderer` fail boot on missing, extra, or drifted keys (including controller `routePrefix`, e.g. `/trackTime` vs `/track-time`).
+- Runtime modules bind implementations to manifest keys. `reconcileMain` / `reconcileRenderer` fail boot on missing, extra, or drifted keys (including controller `routePrefix`, e.g. `/trackTime` vs `/track-time`, workbench view ids, and `ai.rules`).
+- AI plugins declare executable agent rules in `contributions.ai.rules`. The host injects those rules into `AGENTS.md`. ProductWiki rules stay product narrative and are not the runtime source. Generation reads current bounds from tools; adopt re-validates; domain services remain the last gate.
 
 ## Host
 
@@ -44,7 +45,11 @@ Each plugin receives an exclusive directory (`plugin-data/{pluginId}` in DEV, `{
 
 User entry is `/plugins`. Sidebar is AI + Plugins. Today/Activity aggregation is a host section on the plugin center. Compatibility redirects remain for `/plugins/activity`, `/activity/*`, and former domain paths.
 
+Each first-party plugin exposes one aggregate `load` page at `/plugins/{id}` and one or more reusable `workbench.views` (stable ids such as `growth.todo`). The aggregate page only composes those views. Workbench opens the same views as `plugin-view` tabs via the new-tab picker or session entity links (`AiEntitySource.workbenchViewId` plus a tab target); AI workspaces remain `workbench.workspaces`.
+
 Host commands include `host.workbench.open` and `host.browser.open`. Growth registers `growth.open-focus` as a renderer host action.
+
+Today sections are registered collectors (`activity.today` in the manifest, `todaySections` at activate). Plugins push `activity.invalidateToday()` when their data changes so the host re-collects and the sidebar bell refreshes without waiting for the popover to reopen.
 
 ## Deferred
 

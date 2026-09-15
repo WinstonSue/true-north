@@ -14,9 +14,11 @@ export type CatalogIssue = {
     | 'duplicate-entity-type'
     | 'duplicate-capability'
     | 'duplicate-action'
+    | 'duplicate-view'
     | 'duplicate-capture'
     | 'duplicate-today'
     | 'duplicate-slot'
+    | 'duplicate-rule'
     | 'reconcile';
   message: string;
   pluginId?: string;
@@ -100,9 +102,11 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
   const entityTypes = new Map<string, string>();
   const capabilities = new Map<string, string>();
   const actions = new Map<string, string>();
+  const views = new Map<string, string>();
   const captures = new Map<string, string>();
   const today = new Map<string, string>();
   const slots = new Map<string, string>();
+  const rules = new Map<string, string>();
 
   function claim(
     map: Map<string, string>,
@@ -143,6 +147,15 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
         'capability',
       );
     }
+    for (const [id, rule] of Object.entries(contrib.ai?.rules || {})) {
+      claim(
+        rules,
+        contributionKey(manifest.pluginId, id, rule.id),
+        manifest.pluginId,
+        'duplicate-rule',
+        'ai rule',
+      );
+    }
     for (const [id, workspace] of Object.entries(contrib.workbench?.workspaces || {})) {
       claim(
         workspaces,
@@ -159,6 +172,15 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
         manifest.pluginId,
         'duplicate-action',
         'workbench action',
+      );
+    }
+    for (const [id, view] of Object.entries(contrib.workbench?.views || {})) {
+      claim(
+        views,
+        contributionKey(manifest.pluginId, id, view.id),
+        manifest.pluginId,
+        'duplicate-view',
+        'workbench view',
       );
     }
     for (const entityType of contrib.storage?.entityTypes || []) {

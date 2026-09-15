@@ -8,6 +8,12 @@ import { TodoRepeatRepository } from '../todo/todo-repeat.repository';
 import { TrackTimeRepository } from '../track-time/track-time.repository';
 import { TrackTimeDto } from '../track-time/dto/track-time-model.dto';
 import { TaskStatus, TodoRelatedType, TrackTimeRelatedType } from '@true-north/enum';
+import {
+  GROWTH_RULE,
+  assertChildDatesWithinParent,
+  assertPriorityWithinParent,
+  assertSingleTaskParent,
+} from '../../../shared/entity-bounds';
 
 export class TaskService {
   protected taskRepository: TaskRepository;
@@ -213,9 +219,7 @@ export class TaskService {
 
   private async validateTaskCandidate(candidate: Partial<Task> & { id?: string }): Promise<void> {
     const { id, parentId, goalId, startAt, endAt, importance, difficulty } = candidate;
-    if (Boolean(parentId) === Boolean(goalId)) {
-      throw new Error('任务必须且只能关联一个直接归属（目标或父任务）');
-    }
+    assertSingleTaskParent(parentId, goalId);
     if (startAt && endAt && startAt > endAt) throw new Error('任务结束日期不能早于开始日期');
 
     if (parentId) {
@@ -251,18 +255,16 @@ export class TaskService {
     parent: Pick<Task, 'startAt' | 'endAt' | 'importance' | 'difficulty'>,
     sourceLabel: string
   ): void {
-    if (parent.startAt && task.startAt && task.startAt < parent.startAt) {
-      throw new Error(`任务开始日期不能早于${sourceLabel}`);
-    }
-    if (parent.endAt && task.endAt && task.endAt > parent.endAt) {
-      throw new Error(`任务结束日期不能晚于${sourceLabel}`);
-    }
-    if (parent.importance !== undefined && task.importance !== undefined && task.importance > parent.importance) {
-      throw new Error(`任务重要度不能高于${sourceLabel}`);
-    }
-    if (parent.difficulty !== undefined && task.difficulty !== undefined && task.difficulty > parent.difficulty) {
-      throw new Error(`任务难度不能高于${sourceLabel}`);
-    }
+    assertChildDatesWithinParent(task, parent, {
+      ruleId: GROWTH_RULE.taskBounds,
+      startMessage: `任务开始日期不能早于${sourceLabel}`,
+      endMessage: `任务结束日期不能晚于${sourceLabel}`,
+    });
+    assertPriorityWithinParent(task, parent, {
+      ruleId: GROWTH_RULE.taskBounds,
+      importanceMessage: `任务重要度不能高于${sourceLabel}`,
+      difficultyMessage: `任务难度不能高于${sourceLabel}`,
+    });
   }
 
   private assertValidEstimateTime(estimateTime?: number): void {

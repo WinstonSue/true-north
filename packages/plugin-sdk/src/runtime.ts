@@ -46,11 +46,18 @@ export type EntityResolver = {
   resolve(id: string): Promise<{ type: string; id: string; name: string; label?: string } | null>;
 };
 
+export type AgentRule = {
+  id: string;
+  description: string;
+  tools?: string[];
+};
+
 export type AiContribution = {
   capabilities?: AiCapability[];
   tools?: AgentTool[];
   entityResolvers?: EntityResolver[];
   agentInstructions?: string;
+  rules?: AgentRule[];
 };
 
 export type WorkbenchHostActions = {
@@ -79,6 +86,14 @@ export type WorkbenchActionContribution = {
   run: (input: Record<string, unknown>) => Promise<void>;
 };
 
+export type WorkbenchViewContribution = {
+  id: string;
+  pluginId: string;
+  nameKey: string;
+  order?: number;
+  load: () => Promise<{ default: ComponentType }>;
+};
+
 export const WORKBENCH_EXTRACT_ACTION = 'workbench.extract';
 
 export type WorkbenchExtractHandler = (input: {
@@ -101,14 +116,24 @@ export type AiEntityRecord = {
   label: string;
 };
 
+export type WorkbenchViewTarget = {
+  type: string;
+  id: string;
+};
+
+export type WorkbenchViewOpenInput = {
+  viewId: string;
+  target?: WorkbenchViewTarget;
+};
+
 export type AiEntitySource = {
   type: string;
   kindLabel: string;
   boundKindLabel: string;
   searchParam: string;
+  workbenchViewId: string;
   list(): Promise<AiEntityRecord[]>;
   find(id: string): Promise<AiEntityRecord | null>;
-  open(id: string): void;
 };
 
 export type PluginIcon = ComponentType<{
@@ -223,7 +248,8 @@ export type PluginRendererHandles = {
   load: () => Promise<{ default: ComponentType }>;
   workbenchTools?: WorkbenchToolDefinition[];
   workbenchActions?: WorkbenchActionContribution[];
-  entitySources?: (navigate: NavigateFunction) => AiEntitySource[];
+  workbenchViews?: WorkbenchViewContribution[];
+  entitySources?: AiEntitySource[];
   entityPresenters?: EntityPresenter[];
   shellSlots?: ShellSlotContribution[];
   locales?: LocaleContribution[];

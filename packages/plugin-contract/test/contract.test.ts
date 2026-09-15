@@ -8,6 +8,7 @@ import {
   mergeTodaySections,
   namespacedId,
   pluginPath,
+  ACTIVITY_TODAY_INVALIDATE_EVENT,
 } from '../src/index.ts';
 
 test('round-trips a serializable v2 manifest', () => {
@@ -16,9 +17,12 @@ test('round-trips a serializable v2 manifest', () => {
     apiVersion: PLUGIN_API_VERSION,
     version: '0.1.0',
     catalog: { nameKey: 'menu.expense' },
-    hostCapabilities: ['activity', 'storage', 'ipc'],
+    hostCapabilities: ['activity', 'storage', 'workbench', 'ipc'],
     contributions: {
       ipc: { expense: { routePrefix: '/expense' } },
+      workbench: {
+        views: { transaction: { nameKey: 'menu.expense.transaction', order: 10 } },
+      },
       activity: {
         captureTypes: { transaction: { type: 'expense.transaction' } },
         entityTypes: ['transaction'],
@@ -28,9 +32,35 @@ test('round-trips a serializable v2 manifest', () => {
     },
   });
   const json = JSON.parse(JSON.stringify(manifest));
-  assert.deepEqual(parsePluginManifest(json).pluginId, 'expense');
+  const parsed = parsePluginManifest(json);
+  assert.deepEqual(parsed.pluginId, 'expense');
   assert.equal(pluginPath('expense'), '/plugins/expense');
   assert.equal(namespacedId('expense', 'transaction'), 'expense.transaction');
+  assert.equal(parsed.contributions.workbench?.views?.transaction?.nameKey, 'menu.expense.transaction');
+});
+
+test('rejects duplicate workbench views across plugins', () => {
+  const issues = validateManifests([
+    definePluginManifest({
+      pluginId: 'a',
+      apiVersion: PLUGIN_API_VERSION,
+      version: '1',
+      catalog: { nameKey: 'a' },
+      contributions: {
+        workbench: { views: { shared: { id: 'shared.view' } } },
+      },
+    }),
+    definePluginManifest({
+      pluginId: 'b',
+      apiVersion: PLUGIN_API_VERSION,
+      version: '1',
+      catalog: { nameKey: 'b' },
+      contributions: {
+        workbench: { views: { other: { id: 'shared.view' } } },
+      },
+    }),
+  ]);
+  assert.equal(issues.some((issue) => issue.code === 'duplicate-view'), true);
 });
 
 test('rejects duplicate routes, tools, and namespaced entity types', () => {
@@ -86,4 +116,32 @@ test('merges today sections by order', () => {
   ]);
   assert.equal(merged[0]?.id, 'expense.spent');
   assert.equal(merged[1]?.value, 10);
+});
+
+test('rejects duplicate AI rule ids across plugins', () => {
+  const issues = validateManifests([
+    definePluginManifest({
+      pluginId: 'a',
+      apiVersion: PLUGIN_API_VERSION,
+      version: '1',
+      catalog: { nameKey: 'a' },
+      contributions: {
+        ai: { rules: { one: { id: 'shared.rule' } } },
+      },
+    }),
+    definePluginManifest({
+      pluginId: 'b',
+      apiVersion: PLUGIN_API_VERSION,
+      version: '1',
+      catalog: { nameKey: 'b' },
+      contributions: {
+        ai: { rules: { two: { id: 'shared.rule' } } },
+      },
+    }),
+  ]);
+  assert.equal(issues.some((issue) => issue.code === 'duplicate-rule'), true);
+});
+
+test('today invalidate event is a stable activity channel', () => {
+  assert.equal(ACTIVITY_TODAY_INVALIDATE_EVENT, 'activity.today.invalidate');
 });

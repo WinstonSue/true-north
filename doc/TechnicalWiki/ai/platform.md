@@ -3,21 +3,28 @@
 ```yaml
 document_meta:
   status: 'active'
-  last_updated: '2026-09-14'
+  last_updated: '2026-09-15'
 ```
 
 参见 [AI 域总览](./README.md)。通用 Desktop 分层不在此复述。
 
-AI 会话与 Workbench 是宿主平台，不是插件。业务通过 `AiContribution` 注入 Capability、MCP 工具、实体解析器和 Agent 指令；渲染层通过 `WorkbenchToolDefinition` 与 `AiEntitySource` 注入展示与跳转。工具必须走 capability registry，不能直接 import capability 单例。协议细节见 [Plugin Platform](../plugin-platform.md)。
+AI 会话与 Workbench 是宿主平台，不是插件。业务通过 `AiContribution` 注入 Capability、MCP 工具、实体解析器、Agent 指令和插件规则；渲染层通过 `WorkbenchToolDefinition` 与 `AiEntitySource` 注入展示与跳转。工具必须走 capability registry，不能直接 import capability 单例。协议细节见 [Plugin Platform](../plugin-platform.md)。
 
 ## 1. 贡献与注册表
 
 ```ts
+type AgentRule = {
+  id: string;
+  description: string;
+  tools?: string[];
+};
+
 type AiDomainContribution = {
   capabilities?: AiCapability[];
   tools?: AgentTool[];
   entityResolvers?: EntityResolver[];
   agentInstructions?: string;
+  rules?: AgentRule[];
 };
 
 type AiCapability<I, O> = {
@@ -27,8 +34,12 @@ type AiCapability<I, O> = {
 ```
 
 - `CapabilityRegistry` / `AgentToolRegistry` / `entityResolverRegistry`：重复 key 抛错；读取未知 key 抛错。
+- 插件规则由 manifest `contributions.ai.rules` 声明，运行时 `AiContribution.rules` 实现；`reconcileMain` 校验 id 集合一致。ProductWiki `rules[]` 仍是产品叙述，不是可执行运行时源。
+- 主进程按 `pluginId + ruleId` 注册规则，重复 id 抛错。`AGENTS.md` 由已注册工具名 + 业务 `agentInstructions` + 稳定排序的「插件规则」段落生成。
+- `agentInstructions` 只描述工具流程；可执行业务约束写在 `rules`，当前边界由 `get_*` 的 `bounds` / Constraints 返回。
+- 生成（Capability）按当前边界校验或拒绝；采纳走插件主进程命令，重新读取父实体后再调领域服务。领域服务仍是最终校验。
 - 主进程在 `initIpcRouter` / MCP 启动前调用 `composeAiPlatform()`。
-- MCP `tools/list` 与 `tools/call` 只枚举/执行已注册工具；`AGENTS.md` 由已注册工具名 + 业务 `agentInstructions` 生成。
+- MCP `tools/list` 与 `tools/call` 只枚举/执行已注册工具。
 - 会话绑定通过 entity resolver 校验并命名，不直接 import Goal/Task repository。
 
 兼容入口（调用方切完后可删）：`POST /ai/capabilities/goal/decompose`、`/task/decompose`，以及 `/ai/conversations/bound/goal|task`。规范入口是 `POST /ai/capabilities/:key` 与 `POST /ai/conversations/bound`。
@@ -89,7 +100,7 @@ type AiCapability<I, O> = {
 
 ### 渲染桥
 
-- `AiSessionProvider` 注入 `entitySources`：mention、绑定启动、消息实体跳转、会话列表绑定标签均走该列表。
+- `AiSessionProvider` 注入 `entitySources`：mention、绑定启动、消息实体跳转、会话列表绑定标签均走该列表。消息实体点击按 `workbenchViewId` 打开全局工作台插件功能标签，并在同一标签上更新实体目标。
 - 渲染层按 `conversationId` 缓存消息，按 `streamId` 注册活动流。启动响应返回前到达的 `delta` / `message` / `done` / `error` 会暂存，拿到 `streamId` 后按会话补放。`streaming`、停止按钮从当前正在查看的会话派生。同一会话最多一条流，不同会话可并行。
 - 主进程 `conversation-stream` 认领 `conversationId ↔ streamId`：同一会话拒绝第二条活动流，流结束或启动失败后释放。
 - `createAiWorkspaceHost` 实现 Workbench 的 load/subscribe/patch，内部只调 AI 会话 API。

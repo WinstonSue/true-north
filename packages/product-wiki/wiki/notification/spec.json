@@ -21,6 +21,14 @@
       "views": ["today"],
       "reference": "notification.rule.action-list",
       "productStatus": "roadmap"
+    },
+    {
+      "id": "domain-register",
+      "name": "各领域登记今天",
+      "description": "今天的条目由各领域登记。领域里新增、完成或打卡后，清单即时更新，不必重开铃铛。",
+      "views": ["today"],
+      "reference": "notification.rule.domain-register",
+      "productStatus": "roadmap"
     }
   ],
   "references": [
@@ -32,12 +40,17 @@
     {
       "id": "notification.view.today",
       "title": "今天",
-      "body": "打开品牌右侧的铃铛后，固定展示「今天」分组：已过期与今日待办、今天可打卡的习惯、待采购或今天计划购买的物品，以及正在运行的专注。每项可就地完成或进入对应领域。没有待处理项时说明今天没有需要处理的事项。"
+      "body": "打开品牌右侧的铃铛后，固定展示「今天」分组：已过期与今日待办、今天可打卡的习惯、待采购或今天计划购买的物品，以及正在运行的专注。每项可就地完成或进入对应领域。领域里新增或处理完事项后，清单即时更新。没有待处理项时说明今天没有需要处理的事项。"
     },
     {
       "id": "notification.rule.action-list",
       "title": "今天是行动清单",
       "body": "清单只回答「现在还该做什么」。完成待办、打卡习惯或买完物品后，该项不再出现。不使用全部已读、清空或未读红点来表示这些事项。"
+    },
+    {
+      "id": "notification.rule.domain-register",
+      "title": "各领域登记今天",
+      "body": "待办、习惯、待购和专注由各自领域登记到今天。用户在领域里新增、完成或打卡后，铃铛角标与清单立刻跟上，不必先关掉再打开。"
     }
   ]
 }

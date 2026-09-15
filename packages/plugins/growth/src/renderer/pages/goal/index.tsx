@@ -1,20 +1,17 @@
 'use client';
 
 import { GoalProvider } from './context';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Flex, Tabs } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
+import { useWorkbenchViewRuntimeOptional } from '@true-north/plugin-sdk/renderer';
 import GoalMain from './goal-main';
 import GoalAside from './goal-aside';
 import GoalMindMap from '../mind-map';
 import styles from './style.module.less';
 
-interface GoalTreeViewProps {
-  className?: string;
-}
-
-const GoalTreeView: React.FC<GoalTreeViewProps> = () => {
+const GoalTreeView: React.FC = () => {
   return (
     <Flex container="full" className={styles.treeLayout}>
       <ProductSurface id={productRef('growth.goal.view.tree')}>
@@ -33,36 +30,39 @@ const GoalTreeView: React.FC<GoalTreeViewProps> = () => {
 };
 
 export default function Goal() {
+  const viewRuntime = useWorkbenchViewRuntimeOptional();
   const [activeTab, setActiveTab] = useState('tree');
 
+  useEffect(() => {
+    if (viewRuntime?.target?.type === 'goal') setActiveTab('tree');
+  }, [viewRuntime?.generation, viewRuntime?.target]);
+
   return (
-    <Flex vertical container="full" className={styles.page}>
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        className={styles.tabs}
-        tabBarStyle={{ padding: '0 16px' }}
-        items={[
-          {
-            key: 'tree',
-            label: '目标树',
-            children: (
-              <GoalProvider>
-                <GoalTreeView />
-              </GoalProvider>
-            ),
-          },
-          {
-            key: 'mindmap',
-            label: '目标脑图',
-            children: (
-              <ProductSurface id={productRef('growth.goal.view.mindmap')}>
-                <GoalMindMap />
-              </ProductSurface>
-            ),
-          },
-        ]}
-      />
-    </Flex>
+    <GoalProvider>
+      <Flex vertical container="full" className={styles.page}>
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          className={styles.tabs}
+          tabBarStyle={{ padding: '0 16px' }}
+          items={[
+            {
+              key: 'tree',
+              label: '目标树',
+              children: <GoalTreeView />,
+            },
+            {
+              key: 'mindmap',
+              label: '目标脑图',
+              children: (
+                <ProductSurface id={productRef('growth.goal.view.mindmap')}>
+                  <GoalMindMap />
+                </ProductSurface>
+              ),
+            },
+          ]}
+        />
+      </Flex>
+    </GoalProvider>
   );
 }

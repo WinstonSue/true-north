@@ -5,6 +5,7 @@ import { HabitRepository } from '../habit/habit.repository';
 import { TaskService, taskService as defaultTaskService } from '../task/task.service';
 import { Todo } from '../todo/todo.entity';
 import { AiPlatformError } from '@true-north/plugin-sdk';
+import { boundsFromParent, formatBoundsForPrompt, type DecomposeBounds } from '../../../shared/entity-bounds';
 
 const CONTEXT_CAP = 20;
 
@@ -12,6 +13,7 @@ export type GoalDecomposeContext = {
   goalId: string;
   goalName: string;
   childGoalTitles: string[];
+  bounds: DecomposeBounds;
   promptContext: string;
 };
 
@@ -68,6 +70,7 @@ export class GoalContextBuilder {
     const habits = await this.habitRepository.findByFilter({ goalId } as any);
     const habitLines = habits.slice(0, CONTEXT_CAP).map((habit) => `- ${habit.name} [${habit.status}]`);
 
+    const bounds = boundsFromParent(goal, 'goal');
     const lines = [
       `Goal:`,
       `- id: ${goal.id}`,
@@ -79,6 +82,8 @@ export class GoalContextBuilder {
       `- difficulty: ${goal.difficulty ?? ''}`,
       `- startAt: ${formatDate(goal.startAt)}`,
       `- endAt: ${formatDate(goal.endAt)}`,
+      '',
+      formatBoundsForPrompt(bounds),
       '',
       `Direct child goals (${childTitles.length}):`,
       ...markTruncated(
@@ -101,6 +106,7 @@ export class GoalContextBuilder {
       goalId: goal.id,
       goalName: goal.name,
       childGoalTitles,
+      bounds,
       promptContext: lines.join('\n'),
     };
   }

@@ -50,7 +50,7 @@ function SettingLayout() {
           </Flex>
         </ProductSurface>
       </Flex>
-      <Flex container="fill" className={styles.main}>
+      <Flex vertical container="fill" className={styles.main}>
         <Outlet />
       </Flex>
     </Flex>

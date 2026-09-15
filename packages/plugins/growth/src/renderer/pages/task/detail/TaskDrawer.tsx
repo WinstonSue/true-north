@@ -1,5 +1,6 @@
-import { Drawer, Empty, Flex, Spin } from '@sue/design-web-react';
+import { Button, Drawer, Empty, Flex, Spin } from '@sue/design-web-react';
 import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { TaskDetailProvider, useTaskDetailContext } from './context';
 import TaskAside from './TaskAside';
 import TaskMain from './TaskMain';
@@ -50,15 +51,31 @@ export function openTaskDrawer({ taskId, onRefresh }: OpenTaskDrawerOptions) {
     title: '任务详情',
     size: 1100,
     content: (
-      <TaskDetailProvider taskId={taskId} onRefresh={async () => onRefresh?.()}>
-        <DrawerContent onClose={() => instance.destroy()} />
-      </TaskDetailProvider>
+      <TaskDetailPane taskId={taskId} onClose={() => instance.destroy()} onRefresh={onRefresh} />
     ),
   });
   return instance;
 }
 
-function DrawerContent({ onClose }: { onClose: () => void }) {
+export function TaskDetailPane({
+  taskId,
+  onClose,
+  onRefresh,
+  compact,
+}: {
+  taskId: string;
+  onClose?: () => void;
+  onRefresh?: () => Promise<void> | void;
+  compact?: boolean;
+}) {
+  return (
+    <TaskDetailProvider taskId={taskId} onRefresh={async () => onRefresh?.()}>
+      <TaskDetailBody onClose={onClose} compact={compact} />
+    </TaskDetailProvider>
+  );
+}
+
+function TaskDetailBody({ onClose, compact }: { onClose?: () => void; compact?: boolean }) {
   const { currentTask, loading, refreshData } = useTaskDetailContext();
   const [editing, setEditing] = useState(false);
 
@@ -70,32 +87,54 @@ function DrawerContent({ onClose }: { onClose: () => void }) {
     return <Flex container="full" justify="center" align="center"><Spin /></Flex>;
   }
   if (!currentTask) {
-    return <Flex container="full" justify="center" align="center"><Empty description="任务不存在或已被删除" /></Flex>;
+    return (
+      <Flex vertical container="full">
+        {compact && onClose ? <CompactBackBar onClose={onClose} /> : null}
+        <Flex container="fill" justify="center" align="center">
+          <Empty description="任务不存在或已被删除" />
+        </Flex>
+      </Flex>
+    );
   }
 
   return (
-    <Flex container="full" className={styles.drawerBody}>
-      <Flex container="fixed" className={styles.aside}>
-        <TaskAside currentTaskId={currentTask.id} />
-      </Flex>
+    <Flex vertical container="full" className={compact ? styles.compactBody : styles.drawerBody}>
+      {compact && onClose ? <CompactBackBar onClose={onClose} /> : null}
       <Flex container="fill">
-        {editing ? (
-          <TaskEditor
-            task={currentTask}
-            afterSubmit={async () => {
-              await refreshData();
-              setEditing(false);
-            }}
-            onClose={() => setEditing(false)}
-          />
-        ) : (
-          <TaskMain
-            task={currentTask}
-            onDeleted={onClose}
-            onEdit={() => setEditing(true)}
-          />
+        {compact ? null : (
+          <Flex container="fixed" className={styles.aside}>
+            <TaskAside currentTaskId={currentTask.id} />
+          </Flex>
         )}
+        <Flex container="fill">
+          {editing ? (
+            <TaskEditor
+              task={currentTask}
+              afterSubmit={async () => {
+                await refreshData();
+                setEditing(false);
+              }}
+              onClose={() => setEditing(false)}
+            />
+          ) : (
+            <TaskMain
+              task={currentTask}
+              onDeleted={onClose}
+              onEdit={() => setEditing(true)}
+            />
+          )}
+        </Flex>
       </Flex>
+    </Flex>
+  );
+}
+
+function CompactBackBar({ onClose }: { onClose: () => void }) {
+  return (
+    <Flex container="fixed" align="center" className={styles.compactToolbar}>
+      <Button type="text" icon={<ArrowLeft size={16} />} onClick={onClose}>
+        返回任务
+      </Button>
     </Flex>
   );
 }

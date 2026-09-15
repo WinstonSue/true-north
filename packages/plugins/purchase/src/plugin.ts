@@ -12,9 +12,14 @@ export const purchaseManifest = definePluginManifest({
     keywords: ['purchase', 'buy', '采购', '待购'],
     order: 30,
   },
-  hostCapabilities: ['activity', 'storage', 'ipc'],
+  hostCapabilities: ['activity', 'storage', 'workbench', 'ipc'],
   contributions: {
     ipc: { purchase: { routePrefix: '/purchase' } },
+    workbench: {
+      views: {
+        list: { nameKey: 'menu.purchase', order: 10 },
+      },
+    },
     activity: {
       captureTypes: { item: { type: 'purchase.item' } },
       entityTypes: ['purchase'],

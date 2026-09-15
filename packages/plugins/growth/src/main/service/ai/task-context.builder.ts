@@ -4,6 +4,7 @@ import { TaskRepository } from '../task/task.repository';
 import { taskService as defaultTaskService, TaskService } from '../task/task.service';
 import { Todo } from '../todo/todo.entity';
 import { AiPlatformError } from '@true-north/plugin-sdk';
+import { boundsFromParent, formatBoundsForPrompt, type DecomposeBounds } from '../../../shared/entity-bounds';
 
 const CONTEXT_CAP = 20;
 
@@ -11,6 +12,7 @@ export type TaskDecomposeContext = {
   taskId: string;
   taskName: string;
   childTaskTitles: string[];
+  bounds: DecomposeBounds;
   promptContext: string;
 };
 
@@ -77,6 +79,7 @@ export class TaskContextBuilder {
         .map((item) => `- ${item.name} [${item.status}]`);
     }
 
+    const bounds = boundsFromParent(task, 'task');
     const lines = [
       `Task:`,
       `- id: ${task.id}`,
@@ -90,6 +93,8 @@ export class TaskContextBuilder {
       `- parentId: ${task.parentId || ''}`,
       `- startAt: ${formatDate(task.startAt)}`,
       `- endAt: ${formatDate(task.endAt)}`,
+      '',
+      formatBoundsForPrompt(bounds),
       '',
       `Direct child tasks (${childTitles.length}):`,
       ...markTruncated(
@@ -109,6 +114,7 @@ export class TaskContextBuilder {
       taskId: task.id,
       taskName: task.name,
       childTaskTitles,
+      bounds,
       promptContext: lines.join('\n'),
     };
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   Card,
   Button,
@@ -27,16 +27,14 @@ import { DIFFICULTY_MAP } from '../../constants';
 import { drawerBodyStyles } from '@true-north/plugin-ui';
 import { CreateHabit } from '../components/CreateHabit';
 import { emitHabitChanged } from '../../events';
-import { growthHref } from '@true-north/plugin-growth/contract';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import styles from '../style.module.less';
 
-export const HabitDetailPage: React.FC = () => {
+export const HabitDetailPage: React.FC<{ id?: string }> = ({ id: idProp }) => {
   const [params] = useSearchParams();
-  const id = params.get('id') || undefined;
-  const navigate = useNavigate();
-  const { refreshHabits } = useHabitContext();
+  const id = idProp || params.get('id') || undefined;
+  const { refreshHabits, openList } = useHabitContext();
 
   const [habit, setHabit] = useState<HabitVo | null>(null);
   const [loading, setLoading] = useState(false);
@@ -116,7 +114,7 @@ export const HabitDetailPage: React.FC = () => {
         try {
           await HabitService.delete(habit.id);
           message.success('习惯已删除');
-          navigate(growthHref({ area: 'habit', tab: 'list' }));
+          openList();
           refreshHabits();
           emitHabitChanged();
         } catch (error) {
@@ -125,7 +123,7 @@ export const HabitDetailPage: React.FC = () => {
         }
       }
     });
-  }, [habit, navigate, refreshHabits]);
+  }, [habit, openList, refreshHabits]);
 
   const handleEdit = useCallback(async () => {
     if (!habit) return;
@@ -195,7 +193,7 @@ export const HabitDetailPage: React.FC = () => {
           <div className="flex items-center space-x-4">
             <Button
               icon={<ChevronLeft size={16} />}
-              onClick={() => navigate(growthHref({ area: 'habit', tab: 'list' }))}>
+              onClick={() => openList()}>
 
               返回
             </Button>

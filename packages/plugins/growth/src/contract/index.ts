@@ -8,6 +8,18 @@ export const growthPaths = {
   root: pluginPath(GROWTH_PLUGIN_ID),
 } as const;
 
+export const GROWTH_VIEW_TODO = 'growth.todo';
+export const GROWTH_VIEW_TASK = 'growth.task';
+export const GROWTH_VIEW_HABIT = 'growth.habit';
+export const GROWTH_VIEW_GOAL = 'growth.goal';
+
+export const growthViewIds = {
+  todo: GROWTH_VIEW_TODO,
+  task: GROWTH_VIEW_TASK,
+  habit: GROWTH_VIEW_HABIT,
+  goal: GROWTH_VIEW_GOAL,
+} as const;
+
 export type GrowthArea = 'todo' | 'task' | 'habit' | 'goal';
 export type GrowthTab = 'today' | 'calendar' | 'all' | 'list' | 'detail';
 

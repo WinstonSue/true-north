@@ -1,10 +1,11 @@
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { AiSuggestionKind, TaskDecomposeKey } from '@true-north/enum';
-import type { AiSuggestionVo, TaskDecomposeRequestVo, TaskDecomposeResponseVo } from '@true-north/vo';
+import type { TaskDecomposeRequestVo, TaskDecomposeResponseVo } from '@true-north/vo';
 import { AiPlatformError } from '@true-north/plugin-sdk';
 import { growthAi } from '../../context';
 import { taskContextBuilder } from './task-context.builder';
+import { normalizeDecomposeSuggestions, refreshDecomposeConflicts } from './decompose-normalize';
 
 const TOTAL_CAP = 8;
 const PER_KIND_CAP = 2;
@@ -20,73 +21,6 @@ const suggestionDraftSchema = z.object({
   importance: z.coerce.number().optional(),
   difficulty: z.coerce.number().optional(),
 });
-
-function normalizeTitle(title: string): string {
-  return title.trim().toLowerCase().replace(/\s+/g, ' ');
-}
-
-function detectConflict(title: string, childTitles: string[]): string | undefined {
-  const normalized = normalizeTitle(title);
-  if (!normalized) return undefined;
-  for (const child of childTitles) {
-    const childNorm = normalizeTitle(child);
-    if (!childNorm) continue;
-    if (normalized === childNorm || normalized.includes(childNorm) || childNorm.includes(normalized)) {
-      return '已存在相近子任务';
-    }
-  }
-  return undefined;
-}
-
-function clampNumber(value: unknown, fallback: number): number {
-  const num = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(num)) return fallback;
-  return Math.min(5, Math.max(1, Math.round(num)));
-}
-
-function refreshConflicts(suggestions: AiSuggestionVo[], childTaskTitles: string[]): AiSuggestionVo[] {
-  return suggestions.map((item) => {
-    const conflict =
-      item.kind === AiSuggestionKind.TASK ? detectConflict(item.title, childTaskTitles) : undefined;
-    return { ...item, conflict };
-  });
-}
-
-function normalizeSuggestions(
-  drafts: Array<z.infer<typeof suggestionDraftSchema>>,
-  runId: string,
-  childTaskTitles: string[]
-): AiSuggestionVo[] {
-  const kindCounts: Record<string, number> = {};
-  const suggestions: AiSuggestionVo[] = [];
-
-  for (const item of drafts) {
-    const title = item.title?.trim();
-    if (!title) continue;
-    if (!ALLOWED_KINDS.has(item.kind)) continue;
-
-    const kind = item.kind as AiSuggestionKind;
-    const count = kindCounts[kind] || 0;
-    if (count >= PER_KIND_CAP) continue;
-    if (suggestions.length >= TOTAL_CAP) break;
-
-    kindCounts[kind] = count + 1;
-    const conflict = kind === AiSuggestionKind.TASK ? detectConflict(title, childTaskTitles) : undefined;
-    suggestions.push({
-      id: `${runId}-${suggestions.length}`,
-      kind,
-      title,
-      reason: item.reason?.trim() || '基于当前任务上下文生成。',
-      impact: item.impact?.trim() || '有助于推进任务落地。',
-      planned: item.planned?.trim() || new Date(Date.now() + 86400000).toISOString().slice(0, 10),
-      importance: clampNumber(item.importance, 3),
-      difficulty: clampNumber(item.difficulty, 2),
-      conflict,
-    });
-  }
-
-  return suggestions;
-}
 
 export class TaskDecomposeCapability {
   readonly key = TaskDecomposeKey;
@@ -107,11 +41,11 @@ export class TaskDecomposeCapability {
         return {
           runId: cached.runId,
           analysisSummary: cached.analysisSummary,
-          suggestions: refreshConflicts(cached.suggestions, context.childTaskTitles),
+          suggestions: refreshDecomposeConflicts(cached.suggestions, context.bounds, context.childTaskTitles, 'task'),
         };
       }
       throw AiPlatformError.invalidModelOutput(
-        '必须传入 suggestions。请先调用 get_task 读取上下文，再按 schema 生成子任务/待办建议后重试。'
+        '必须传入 suggestions。请先调用 get_task 读取上下文，再按 schema 与 Constraints 生成子任务/待办建议后重试。'
       );
     }
 
@@ -123,10 +57,21 @@ export class TaskDecomposeCapability {
     }
 
     const runId = randomUUID();
-    const suggestions = normalizeSuggestions(parsedDrafts.data, runId, context.childTaskTitles);
+    const suggestions = normalizeDecomposeSuggestions({
+      drafts: parsedDrafts.data,
+      runId,
+      bounds: context.bounds,
+      childTitles: context.childTaskTitles,
+      scope: 'task',
+      allowedKinds: ALLOWED_KINDS,
+      totalCap: TOTAL_CAP,
+      perKindCap: PER_KIND_CAP,
+      defaultReason: '基于当前任务上下文生成。',
+      defaultImpact: '有助于推进任务落地。',
+    });
     if (!suggestions.length) {
       throw AiPlatformError.invalidModelOutput(
-        '没有合法建议。请传入至少一条含 kind（task|todo）与非空 title 的建议。'
+        '没有合法建议。请传入至少一条含 kind（task|todo）与非空 title 的建议，并遵守当前任务边界。'
       );
     }
 

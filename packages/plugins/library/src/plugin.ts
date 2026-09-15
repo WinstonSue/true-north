@@ -18,6 +18,9 @@ export const libraryManifest = definePluginManifest({
     ipc: { library: { routePrefix: '/library' } },
     workbench: {
       actions: { extract: { id: LIBRARY_EXTRACT_ACTION } },
+      views: {
+        search: { nameKey: 'menu.library', order: 10 },
+      },
     },
     activity: {
       captureTypes: { bookmark: { type: 'library.bookmark' } },

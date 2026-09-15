@@ -6,6 +6,16 @@ export const expensePaths = {
   root: pluginPath(EXPENSE_PLUGIN_ID),
 } as const;
 
+export const EXPENSE_VIEW_TRANSACTION = 'expense.transaction';
+export const EXPENSE_VIEW_BUDGET = 'expense.budget';
+export const EXPENSE_VIEW_OVERVIEW = 'expense.overview';
+
+export const expenseViewIds = {
+  transaction: EXPENSE_VIEW_TRANSACTION,
+  budget: EXPENSE_VIEW_BUDGET,
+  overview: EXPENSE_VIEW_OVERVIEW,
+} as const;
+
 export type ExpenseView = 'transaction' | 'budget' | 'overview';
 
 export function expenseHref(view?: ExpenseView): string {

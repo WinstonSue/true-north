@@ -1,14 +1,13 @@
 import { Button, Col, Empty, Flex, Row, Spin } from '@sue/design-web-react';
-import { useNavigate } from 'react-router-dom';
 import { HabitStatus } from '@true-north/enum';
 import { HabitVo } from '@true-north/vo';
 import HabitCard from '../components/HabitCard';
-import { growthHref } from '@true-north/plugin-growth/contract';
+import { useHabitContext } from '../context';
 import { useHabitListContext } from './context';
 import styles from './HabitListTable.module.less';
 
 export default function HabitListTable() {
-  const navigate = useNavigate();
+  const { openDetail } = useHabitContext();
   const {
     habits,
     loading,
@@ -57,7 +56,7 @@ export default function HabitListTable() {
                   : undefined
               }
               onDelete={() => handleHabitDelete(habit.id)}
-              onEdit={() => navigate(growthHref({ area: 'habit', tab: 'detail', id: habit.id }))}
+              onEdit={() => openDetail(habit.id)}
             />
           </Col>
         ))}

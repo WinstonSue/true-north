@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import type { GrowthArea } from '@true-north/plugin-growth/contract';
 import { growthHref } from '@true-north/plugin-growth/contract';
 import { useLocale } from '@true-north/plugin-sdk/renderer';
-import TodoPage from './todo';
-import TaskPage from './task';
-import HabitPage from './habit';
-import GoalPage from './goal';
+import TodoFeature from '../features/todo';
+import TaskFeature from '../features/task';
+import HabitFeature from '../features/habit';
+import GoalFeature from '../features/goal';
 import { useGrowthView } from './view';
 import styles from './GrowthApp.module.less';
 
@@ -42,11 +42,21 @@ export default function GrowthApp() {
           );
         })}
       </Flex>
-      <Flex container="fill" className={styles.stage}>
-        {area === 'todo' ? <TodoPage tab={tab} /> : null}
-        {area === 'task' ? <TaskPage tab={tab} /> : null}
-        {area === 'habit' ? <HabitPage tab={tab} id={id} /> : null}
-        {area === 'goal' ? <GoalPage /> : null}
+      <Flex vertical container="fill" className={styles.stage}>
+        {area === 'todo' ? (
+          <TodoFeature tab={tab} onTabChange={(next) => navigate(growthHref({ area: 'todo', tab: next }))} />
+        ) : null}
+        {area === 'task' ? (
+          <TaskFeature tab={tab} onTabChange={(next) => navigate(growthHref({ area: 'task', tab: next }))} />
+        ) : null}
+        {area === 'habit' ? (
+          <HabitFeature
+            tab={tab}
+            id={id}
+            onViewChange={(next) => navigate(growthHref({ area: 'habit', tab: next.tab, id: next.id }))}
+          />
+        ) : null}
+        {area === 'goal' ? <GoalFeature /> : null}
       </Flex>
     </Flex>
   );

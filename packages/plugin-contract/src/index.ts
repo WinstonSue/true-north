@@ -32,6 +32,7 @@ export {
   activityEntityRefSchema,
   ACTIVITY_RECORD_EVENT,
   ACTIVITY_UNLINK_EVENT,
+  ACTIVITY_TODAY_INVALIDATE_EVENT,
 } from './activity.ts';
 export type { ActivityEntityRef, ActivityLinkRef, CreateActivityInput, ActivityPort } from './activity.ts';
 

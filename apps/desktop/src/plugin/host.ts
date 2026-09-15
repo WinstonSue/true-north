@@ -27,11 +27,13 @@ import { aiMigrations } from '../service/ai/migrations';
 import { activityEntities } from '../service/activity/entities';
 import { ActivityLink } from '../service/activity/activity-link.entity';
 import { ActivityController, activityAiContribution, activityService } from '../service/activity';
+import { emitTodayInvalidate } from '../service/activity/today-bus';
 import { CapabilityRegistry } from '../service/ai/capability/capability.registry';
 import { AgentToolRegistry } from '../service/ai/agent/tools';
 import { EntityResolverRegistry } from '../service/ai/entity/entity-resolver.registry';
 import { cacheService, fingerprintPromptContext } from '../service/ai/cache/ai-suggestion-cache.service';
 import { addAgentInstructions } from '../service/ai/runtime/agent-instructions';
+import { addAgentRules } from '../service/ai/runtime/agent-rules';
 import { attachAiRegistries } from '../service/ai/contribution';
 import { runtimeService } from '../service/ai/runtime';
 import { AiController, conversationService, startMcpServer, stopMcpServer } from '../service/ai';
@@ -126,6 +128,9 @@ export class DesktopPluginHost {
         },
         unlink: async (ref) => {
           await activityService.unlinkRef(ref);
+        },
+        invalidateToday: () => {
+          emitTodayInvalidate();
         },
       },
       ai: {
@@ -229,9 +234,9 @@ export class DesktopPluginHost {
       agentTools: this.agentTools,
       entityResolvers: this.entityResolvers,
     });
-    this.registerAiContribution(activityAiContribution as never);
+    this.registerAiContribution(activityAiContribution as never, 'activity');
     for (const item of this.activated) {
-      if (item.handles.ai) this.registerAiContribution(item.handles.ai as never);
+      if (item.handles.ai) this.registerAiContribution(item.handles.ai as never, item.pluginId);
       const query = item.handles.query;
       if (!query) continue;
       const plugin = this.catalog?.plugins.find((entry) => entry.manifest.pluginId === item.pluginId);
@@ -258,12 +263,16 @@ export class DesktopPluginHost {
     this.published = true;
   }
 
-  registerAiContribution(contribution: {
-    capabilities?: Array<{ key: string; execute(input: never): Promise<unknown> }>;
-    tools?: Parameters<AgentToolRegistry['register']>[0];
-    entityResolvers?: Array<{ type: string; resolve(id: string): Promise<{ type: string; id: string; name: string }> }>;
-    agentInstructions?: string;
-  }) {
+  registerAiContribution(
+    contribution: {
+      capabilities?: Array<{ key: string; execute(input: never): Promise<unknown> }>;
+      tools?: Parameters<AgentToolRegistry['register']>[0];
+      entityResolvers?: Array<{ type: string; resolve(id: string): Promise<{ type: string; id: string; name: string }> }>;
+      agentInstructions?: string;
+      rules?: Array<{ id: string; description: string; tools?: string[] }>;
+    },
+    pluginId = 'host',
+  ) {
     for (const capability of contribution.capabilities || []) {
       this.capabilities.register(capability);
     }
@@ -273,6 +282,9 @@ export class DesktopPluginHost {
     }
     if (contribution.agentInstructions?.trim()) {
       addAgentInstructions(contribution.agentInstructions.trim());
+    }
+    if (contribution.rules?.length) {
+      addAgentRules(pluginId, contribution.rules);
     }
   }
 

@@ -1,6 +1,7 @@
 import type { ActivityPort, CreateActivityInput, TodaySectionContribution, CaptureAdopter } from '@true-north/plugin-sdk';
 import type { ActivityEntityRef } from '@true-north/plugin-sdk';
 import { activityService } from './activity.service';
+import { emitTodayInvalidate } from './today-bus';
 
 const activityPort: ActivityPort = {
   record: async (input: CreateActivityInput) => {
@@ -21,6 +22,9 @@ const activityPort: ActivityPort = {
   },
   unlink: async (ref) => {
     await activityService.unlinkRef(ref);
+  },
+  invalidateToday: () => {
+    emitTodayInvalidate();
   },
 };
 

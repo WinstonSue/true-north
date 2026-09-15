@@ -1,4 +1,4 @@
-import { Component, type ReactNode, useMemo } from 'react';
+import { Component, type ComponentType, type ReactNode, useMemo } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   PluginRuntimeProvider,
@@ -30,25 +30,16 @@ class PluginErrorBoundary extends Component<{ pluginId: string; children: ReactN
   }
 }
 
-export function PluginStage() {
-  const { pluginKey } = useParams();
+export function PluginRuntimeFrame({ pluginId, children }: { pluginId: string; children: ReactNode }) {
   const navigate = useNavigate();
   const platform = useRendererPlatform();
-  const plugin = platform.plugins.find((entry) => entry.pluginId === pluginKey);
-  const load = plugin?.load;
-  const Component = useMemo(() => (load ? lazyload(load) : null), [load]);
-
-  if (!plugin || !Component) {
-    return <NotFoundPage />;
-  }
-
   const ctx: PluginRendererContext = {
-    pluginId: plugin.pluginId,
+    pluginId,
     locale: {
       lang: platform.state.lang,
       t: (key) => {
         const messages = platform.locales
-          .filter((item) => item.pluginId === plugin.pluginId)
+          .filter((item) => item.pluginId === pluginId)
           .map((item) => item.messages[platform.state.lang] || {});
         return Object.assign({}, ...messages)[key] || key;
       },
@@ -59,12 +50,37 @@ export function PluginStage() {
   };
 
   return (
-    <PluginErrorBoundary key={plugin.pluginId} pluginId={plugin.pluginId}>
-      <PluginRuntimeProvider value={ctx}>
-        <Component />
-      </PluginRuntimeProvider>
+    <PluginErrorBoundary key={pluginId} pluginId={pluginId}>
+      <PluginRuntimeProvider value={ctx}>{children}</PluginRuntimeProvider>
     </PluginErrorBoundary>
   );
+}
+
+export function PluginLazyStage({
+  pluginId,
+  load,
+}: {
+  pluginId: string;
+  load: () => Promise<{ default: ComponentType }>;
+}) {
+  const Component = useMemo(() => lazyload(load), [load]);
+  return (
+    <PluginRuntimeFrame pluginId={pluginId}>
+      <Component />
+    </PluginRuntimeFrame>
+  );
+}
+
+export function PluginStage() {
+  const { pluginKey } = useParams();
+  const plugin = useRendererPlatform().plugins.find((entry) => entry.pluginId === pluginKey);
+  const load = plugin?.load;
+
+  if (!plugin || !load) {
+    return <NotFoundPage />;
+  }
+
+  return <PluginLazyStage pluginId={plugin.pluginId} load={load} />;
 }
 
 export function LegacyPluginPathRedirect() {

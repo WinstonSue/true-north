@@ -16,30 +16,44 @@ import {
   message,
 } from '@sue/design-web-react';
 import dayjs from 'dayjs';
-import { Difficulty, Importance, TodoRelatedType, TodoStatus } from '@true-north/enum';
 import type { AiDecomposePayloadVo, AiWorkspacePayloadVo, AiWorkspaceSuggestionVo } from '@true-north/vo';
-import { TaskService, TodoService } from '../../../../client';
+import { GoalController, GoalService } from '../../../client';
 import { drawerBodyStyles } from '@true-north/plugin-ui';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import type { WorkbenchToolProps } from '@true-north/plugin-sdk';
+import { boundsFromParent } from '../../../shared/entity-bounds';
 import styles from './style.module.less';
 
-const KIND_LABEL = { task: '子任务', todo: '待办' } as const;
+type SuggestionKind = 'goal' | 'task' | 'todo' | 'habit';
+
+const KIND_LABEL: Record<SuggestionKind, string> = {
+  goal: '子目标',
+  task: '任务',
+  todo: '待办',
+  habit: '习惯',
+};
+
+const KIND_COLOR: Record<SuggestionKind, string> = {
+  goal: 'purple',
+  task: 'blue',
+  todo: 'gold',
+  habit: 'green',
+};
 
 function normalizeTitle(title: string): string {
   return title.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
 function recalculateConflict(suggestion: AiWorkspaceSuggestionVo, childTitles: string[]): string | undefined {
-  if (suggestion.kind !== 'task') return undefined;
+  if (suggestion.kind !== 'goal') return undefined;
   const normalized = normalizeTitle(suggestion.title);
   if (!normalized) return undefined;
   for (const child of childTitles) {
     const childNorm = normalizeTitle(child);
     if (!childNorm) continue;
     if (normalized === childNorm || normalized.includes(childNorm) || childNorm.includes(normalized)) {
-      return '已存在相近子任务';
+      return '已存在相近子目标';
     }
   }
   return undefined;
@@ -47,11 +61,11 @@ function recalculateConflict(suggestion: AiWorkspaceSuggestionVo, childTitles: s
 
 type Props = WorkbenchToolProps<AiDecomposePayloadVo>;
 
-export function TaskDecomposeWorkspace({
+export function GoalDecomposeWorkspace({
   payload,
   actions,
 }: Props) {
-  const [task, setTask] = useState<any>();
+  const [goal, setGoal] = useState<any>();
   const [suggestions, setSuggestions] = useState<AiWorkspaceSuggestionVo[]>(payload.suggestions);
   const [selected, setSelected] = useState<string[]>([]);
   const [batchOpen, setBatchOpen] = useState(false);
@@ -69,25 +83,27 @@ export function TaskDecomposeWorkspace({
   useEffect(() => {
     const ref = payload.ref;
     if (!ref?.id) {
-      setTask(undefined);
+      setGoal(undefined);
       return;
     }
     let cancelled = false;
-    void TaskService.find(ref.id)
+    void GoalService.find(ref.id)
       .then((found) => {
-        if (!cancelled) setTask(found?.id ? found : undefined);
+        if (!cancelled) setGoal(found?.id ? found : undefined);
       })
       .catch(() => {
-        if (!cancelled) setTask(undefined);
+        if (!cancelled) setGoal(undefined);
       });
     return () => {
       cancelled = true;
     };
   }, [payload]);
 
-  if (!task) {
-    return <Alert type="warning" showIcon title="未找到任务，无法审阅拆解建议。" />;
+  if (!goal) {
+    return <Alert type="warning" showIcon title="未找到目标，无法审阅拆解建议。" />;
   }
+
+  const bounds = boundsFromParent(goal, 'goal');
 
   const persist = async (next: AiWorkspaceSuggestionVo[]) => {
     setSuggestions(next);
@@ -129,51 +145,7 @@ export function TaskDecomposeWorkspace({
       return;
     }
 
-    const importance = (suggestion.importance || task.importance || Importance.Core) as Importance;
-    const difficulty = (suggestion.difficulty || task.difficulty || Difficulty.Challenger) as Difficulty;
-    const planned = suggestion.planned || dayjs().add(1, 'day').format('YYYY-MM-DD');
-    const silent = { silent: true as const };
-
-    let created: unknown;
-    if (suggestion.kind === 'task') {
-      created = await TaskService.create(
-        {
-          name: title,
-          description: '由任务 AI 拆解创建。',
-          tags: [],
-          importance,
-          difficulty,
-          urgency: task.urgency ?? 3,
-          parentId: task.id,
-          goalId: undefined,
-          startAt: task.startAt,
-          endAt: task.endAt,
-          estimateTime: 3600,
-        },
-        silent
-      );
-    } else if (suggestion.kind === 'todo') {
-      created = await TodoService.create(
-        {
-          name: title,
-          description: '由任务 AI 拆解创建。',
-          status: TodoStatus.TODO,
-          planDate: planned,
-          importance,
-          urgency: 3,
-          relatedType: TodoRelatedType.TASK,
-          relatedId: task.id,
-        },
-        silent
-      );
-    } else {
-      message.warning('任务拆解仅支持子任务与待办');
-      return;
-    }
-
-    if (!created) {
-      throw new Error(`采纳「${title}」失败`);
-    }
+    await GoalController.adoptDecompose(goal.id, suggestion);
 
     const next = suggestions.map((item) =>
       item.id === suggestion.id ? { ...item, accepted: true } : item
@@ -190,20 +162,20 @@ export function TaskDecomposeWorkspace({
       message.warning('请先勾选可追问的建议');
       return;
     }
-    const lines = picked.map((item) => {
-      const label = item.kind === 'todo' ? KIND_LABEL.todo : KIND_LABEL.task;
-      return `- [${label}] ${item.title}（计划 ${item.planned}，重要 ${item.importance}）`;
-    });
+    const lines = picked.map(
+      (item) =>
+        `- [${KIND_LABEL[item.kind as SuggestionKind]}] ${item.title}（计划 ${item.planned}，重要 ${item.importance}）`
+    );
     actions.requestFollowUp(`请针对以下建议进一步说明或优化：\n${lines.join('\n')}\n`);
     message.success('已预填到对话输入框，确认后发送');
   };
 
   return (
-    <ProductSurface id={productRef('growth.task.view.ai-decomposition')}>
+    <ProductSurface id={productRef('growth.goal.view.ai-decomposition')}>
     <div>
       <Flex vertical gap={16}>
         <Flex className={styles.aiControls} justify="space-between" align="center" wrap="wrap" gap={12}>
-          <Tag color="blue">当前任务：{task.name}</Tag>
+          <Tag color="blue">当前目标：{goal.name}</Tag>
           <Space wrap>
             <Button disabled={!selected.length} onClick={askSelected}>
               对已选追问 {selected.length || ''}
@@ -217,7 +189,6 @@ export function TaskDecomposeWorkspace({
         <Flex vertical className={styles.aiSuggestions} gap={12}>
           {suggestions.map((suggestion) => {
             const isAccepted = Boolean(suggestion.accepted);
-            const label = suggestion.kind === 'todo' ? KIND_LABEL.todo : KIND_LABEL.task;
             return (
               <Card size="small" key={suggestion.id} className={isAccepted ? styles.accepted : undefined}>
                 <Flex justify="space-between" align="start" gap={12}>
@@ -234,7 +205,9 @@ export function TaskDecomposeWorkspace({
                       }
                     />
                     <div className={isAccepted ? styles.acceptedPreview : undefined}>
-                      <Tag color={suggestion.kind === 'todo' ? 'gold' : 'blue'}>{label}</Tag>
+                      <Tag color={KIND_COLOR[suggestion.kind as SuggestionKind]}>
+                        {KIND_LABEL[suggestion.kind as SuggestionKind]}
+                      </Tag>
                       <h3>{suggestion.title}</h3>
                       <p>{suggestion.reason}</p>
                       <small>
@@ -298,14 +271,14 @@ export function TaskDecomposeWorkspace({
           cancelText="取消"
           confirmLoading={saving}
         >
-          <p>将按各条当前预览逐条校验并创建子任务或待办。存在冲突的建议无法被勾选。</p>
+          <p>将按各条当前预览逐条校验并创建。存在冲突或已采纳的建议不会被创建。</p>
         </Modal>
       </Flex>
 
       {editing && editDraft ? (
         <Drawer
           open
-          title={`编辑${editDraft.kind === 'todo' ? KIND_LABEL.todo : KIND_LABEL.task}建议`}
+          title={`编辑${KIND_LABEL[editDraft.kind as SuggestionKind]}建议`}
           onClose={() => {
             setEditing(null);
             setEditDraft(null);
@@ -344,6 +317,12 @@ export function TaskDecomposeWorkspace({
               <DatePicker
                 style={{ width: '100%' }}
                 value={editDraft.planned ? dayjs(editDraft.planned) : null}
+                disabledDate={(current) => {
+                  if (!current) return false;
+                  if (bounds.startAt && current.isBefore(dayjs(bounds.startAt), 'day')) return true;
+                  if (bounds.endAt && current.isAfter(dayjs(bounds.endAt), 'day')) return true;
+                  return false;
+                }}
                 onChange={(value) =>
                   setEditDraft({
                     ...editDraft,
@@ -355,7 +334,7 @@ export function TaskDecomposeWorkspace({
             <Form.Item label="重要度">
               <InputNumber
                 min={1}
-                max={5}
+                max={bounds.maxImportance ?? 5}
                 style={{ width: '100%' }}
                 value={editDraft.importance}
                 onChange={(value) => setEditDraft({ ...editDraft, importance: Number(value) || 1 })}
@@ -364,7 +343,7 @@ export function TaskDecomposeWorkspace({
             <Form.Item label="难度">
               <InputNumber
                 min={1}
-                max={5}
+                max={bounds.maxDifficulty ?? 5}
                 style={{ width: '100%' }}
                 value={editDraft.difficulty}
                 onChange={(value) => setEditDraft({ ...editDraft, difficulty: Number(value) || 1 })}

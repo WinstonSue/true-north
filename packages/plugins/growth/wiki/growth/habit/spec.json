@@ -45,6 +45,16 @@
       ],
       "reference": "growth.habit.rule.goal-required",
       "productStatus": "roadmap"
+    },
+    {
+      "id": "today-checkin",
+      "name": "今天可打卡进侧栏",
+      "description": "当天到期且尚未打卡的习惯出现在侧栏今天；打卡后从清单消失。",
+      "views": [
+        "list"
+      ],
+      "reference": "growth.habit.rule.today-checkin",
+      "productStatus": "roadmap"
     }
   ],
   "references": [
@@ -61,7 +71,7 @@
     {
       "id": "growth.habit.view.list",
       "title": "习惯列表",
-      "body": "习惯列表以卡片网格展示连续天数、执行规则与目标归属。主路径为列表就地打卡（完成 / 未完成），不必先进入详情。工作台习惯区同样支持就地打卡。"
+      "body": "习惯列表以卡片网格展示连续天数、执行规则与目标归属。主路径为列表就地打卡（完成 / 未完成），不必先进入详情。工作台习惯区同样支持就地打卡。当天到期且未打卡的习惯同时出现在侧栏今天，可就地打卡。"
     },
     {
       "id": "growth.habit.view.detail",
@@ -92,6 +102,11 @@
       "id": "growth.habit.rule.goal-required",
       "title": "目标必填",
       "body": "每个习惯至少关联一个有效目标，确保重复行为可以在复盘时解释其价值。"
+    },
+    {
+      "id": "growth.habit.rule.today-checkin",
+      "title": "今天可打卡进侧栏",
+      "body": "活跃习惯的当前周期若已到期且尚未确认，会出现在侧栏今天。用户打卡后该项从清单消失，下一周期未到当天前不再出现。"
     },
     {
       "id": "growth.habit.metrics",

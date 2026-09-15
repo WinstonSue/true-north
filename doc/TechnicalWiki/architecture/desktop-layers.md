@@ -27,7 +27,8 @@ sequenceDiagram
 
 ## render 层约定
 
-- 页面：`render/pages/{domain}/`，Growth 在 `render/pages/growth/`
+- 宿主页面：`render/features/`（AI 会话、工作台面板）与 `render/plugin/`（插件中心、PluginStage）
+- 插件业务 UI 在 `packages/plugins/{id}/src/renderer`：`features/` 是可独立挂载的功能组件，`pages/index.tsx` 只组合它们给 `/plugins/{id}`，`views.ts` 把同一套功能注册给 Workbench
 - 路由：`render/router/`
 - 模块状态：使用 `createInjectState`（`render/utils/createInjectState.tsx`），每功能块独立 Provider + hook
 - 样式：CSS Modules（`*.module.less`）+ Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合。按单元素视觉声明条数分流：≤3 优先 Tailwind；3–5 有定制或较长用 Modules，否则 Tailwind；>5 用 Modules。计数不含 `Flex` / `Row` / `Col` 布局 props。页面壳层优先使用 `Flex`（`container="full|fixed|fill"`）。`fixed` 不自动撑满交叉轴：列父加 `w-full`，行父加 `h-full`（对齐已移除的 `FlexibleContainer.Fixed`）。UI 落地细则见项目 skill「框架规范 · React UI规范」
@@ -56,23 +57,15 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
 - **单个模块 IPC/VO 入口**：`*.route-controller.ts`（不再另设 `*.controller.ts` 透传层）
 - 注册：`src/main/ipc-handlers.ts` 将各模块 RouteController **Class** 交给 `registerIpcHandlers`（构造器默认注入模块 service 单例）
 
-## 前端页面模块（Growth）
+## 插件页面模块
 
-```
-render/pages/
-├── growth/
-│   ├── goal/
-│   ├── task/
-│   ├── todo/
-│   ├── habit/
-│   └── components/     # 跨模块详情、列表等
-├── expense/
-├── dashboard/
-├── timer/
-└── ...
-```
+一等插件包 `packages/plugins/{growth,expense,purchase,library}` 各自提供：
 
-业务规则与模块产品说明见 [ProductWiki · Growth](../../../packages/product-wiki/wiki/growth/spec.json)。
+- 聚合页：`/plugins/{id}`，只负责导航与组合
+- 可复用功能视图：Workbench 新标签选择器按 id 打开（如 `growth.todo`、`expense.transaction`）
+- 会话工具：仍由 `workbench.workspaces` 贡献（如目标/任务拆解）
+
+业务规则与模块产品说明见 [ProductWiki · Growth](../../../packages/plugins/growth/wiki/growth/spec.json)。
 
 ## DEV 主窗口分栏
 

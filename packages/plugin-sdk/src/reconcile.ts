@@ -74,6 +74,12 @@ export function reconcileMain(manifest: PluginManifest, handles: PluginMainHandl
   const actualTools = (handles.ai?.tools || []).map((item) => item.name);
   issues.push(...equalSets(asSet(declaredTools), asSet(actualTools), manifest.pluginId, 'tool'));
 
+  const declaredRules = Object.entries(manifest.contributions.ai?.rules || {}).map(([id, spec]) =>
+    contributionKey(manifest.pluginId, id, spec.id),
+  );
+  const actualRules = (handles.ai?.rules || []).map((item) => item.id);
+  issues.push(...equalSets(asSet(declaredRules), asSet(actualRules), manifest.pluginId, 'ai rule'));
+
   const declaredCaptures = Object.entries(manifest.contributions.activity?.captureTypes || {}).map(([id, spec]) =>
     contributionKey(manifest.pluginId, id, spec.type),
   );
@@ -105,6 +111,31 @@ export function reconcileRenderer(manifest: PluginManifest, handles: PluginRende
   );
   const actualActions = (handles.workbenchActions || []).map((item) => item.id);
   issues.push(...equalSets(asSet(declaredActions), asSet(actualActions), manifest.pluginId, 'workbench action'));
+
+  const declaredViews = Object.entries(manifest.contributions.workbench?.views || {}).map(([id, spec]) =>
+    contributionKey(manifest.pluginId, id, spec.id),
+  );
+  const actualViews = (handles.workbenchViews || []).map((item) => item.id);
+  issues.push(...equalSets(asSet(declaredViews), asSet(actualViews), manifest.pluginId, 'workbench view'));
+
+  const implementedViews = asSet(actualViews);
+  for (const source of handles.entitySources || []) {
+    if (!source.workbenchViewId) {
+      issues.push({
+        code: 'reconcile',
+        pluginId: manifest.pluginId,
+        message: `Plugin ${manifest.pluginId} entity source "${source.type}" has no workbench view`,
+      });
+      continue;
+    }
+    if (!implementedViews.has(source.workbenchViewId)) {
+      issues.push({
+        code: 'reconcile',
+        pluginId: manifest.pluginId,
+        message: `Plugin ${manifest.pluginId} entity source "${source.type}" maps to unknown workbench view "${source.workbenchViewId}"`,
+      });
+    }
+  }
 
   const declaredSlots = Object.keys(manifest.contributions.shell?.slots || {});
   const actualSlots = (handles.shellSlots || []).map((item) => item.id);

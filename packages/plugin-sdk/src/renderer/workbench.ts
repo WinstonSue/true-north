@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import type { WorkbenchViewOpenInput } from '../runtime.ts';
 
 export type WorkbenchToolRegistry = {
   find(key: string): {
@@ -17,6 +18,8 @@ export type WorkbenchRuntimeValue = {
   setLeftReserve?: (width: number) => void;
   toggle: () => void;
   openToolTab: (input: unknown) => Promise<void> | void;
+  openPluginView: (input: WorkbenchViewOpenInput) => Promise<void> | void;
+  clearPluginViewTarget: (viewId: string) => void;
   pendingFollowUp: { conversationId: string; text: string } | null;
   clearFollowUp: () => void;
   tools: WorkbenchToolRegistry;

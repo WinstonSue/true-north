@@ -1,7 +1,7 @@
 'use client';
 
 import { ExpensesProvider } from './context';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { ExpenseView } from '@true-north/plugin-expense/contract';
 import { expenseHref } from '@true-north/plugin-expense/contract';
 import { TabsPage } from '@true-north/plugin-ui';
@@ -18,6 +18,7 @@ function parseExpenseView(value: string | null): ExpenseView {
 
 function ExpensesViews() {
   const t = useLocale();
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const view = parseExpenseView(params.get('view'));
 
@@ -26,20 +27,24 @@ function ExpensesViews() {
       tabs={[
         {
           name: t['menu.expense.transaction'] || '账单',
+          key: 'transaction',
           href: expenseHref('transaction'),
           active: view === 'transaction',
         },
         {
           name: t['menu.expense.budget'] || '预算',
+          key: 'budget',
           href: expenseHref('budget'),
           active: view === 'budget',
         },
         {
           name: t['menu.expense.overview'] || '总览',
+          key: 'overview',
           href: expenseHref('overview'),
           active: view === 'overview',
         },
       ]}
+      onSelect={(tab) => navigate(tab.href || expenseHref(parseExpenseView(tab.key || null)))}
     >
       {view === 'budget' ? <Budgets /> : null}
       {view === 'overview' ? <Overview /> : null}

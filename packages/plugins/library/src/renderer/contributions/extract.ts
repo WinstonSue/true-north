@@ -1,6 +1,6 @@
 import { message } from '@sue/design-web-react';
 import { Modal } from '@sue/design-web-react';
-import { LibraryController } from '../../../client';
+import { LibraryController } from '../../client';
 import type { WorkbenchExtractHandler } from '@true-north/plugin-sdk';
 
 export const libraryExtractHandler: WorkbenchExtractHandler = async ({ result, url }) => {

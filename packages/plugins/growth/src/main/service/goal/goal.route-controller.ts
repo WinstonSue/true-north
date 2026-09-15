@@ -1,7 +1,8 @@
 import { Controller, Post, Put, Get, Delete, Body, Param, Query } from '@true-north/plugin-sdk/main';
-import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo } from '@true-north/vo';
+import type { Goal as GoalVO, ResponsePageVo, ResponseListVo, ResponseTreeVo, AiWorkspaceSuggestionVo } from '@true-north/vo';
 import { GoalFilterDto, GoalPageFilterDto, CreateGoalDto, UpdateGoalDto, GoalDto } from './dto';
 import { GoalService, goalService as defaultGoalService } from './goal.service';
+import { adoptGoalSuggestion } from '../ai/decompose-adopt';
 
 @Controller('/goal')
 export class GoalController {
@@ -14,6 +15,16 @@ export class GoalController {
     createDto.importCreateVo(body);
     const dto = await this.goalService.create(createDto);
     return dto.exportVo();
+  }
+
+  @Post('/adopt-decompose/:id', { description: '采纳目标拆解建议' })
+  async adoptDecompose(
+    @Param('id') id: string,
+    @Body() body: { suggestion: AiWorkspaceSuggestionVo },
+  ): Promise<{ ok: true }> {
+    if (!body?.suggestion) throw new Error('缺少拆解建议');
+    await adoptGoalSuggestion(id, body.suggestion);
+    return { ok: true };
   }
 
   @Delete('/delete/:id', { description: '删除目标' })

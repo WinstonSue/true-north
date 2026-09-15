@@ -9,7 +9,6 @@ import {
   type ReactNode,
 } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import type { NavigateFunction } from 'react-router-dom';
 import { message } from '@sue/design-web-react';
 import type {
   AiChatStreamEventVo,
@@ -24,6 +23,7 @@ import { AiService } from '@true-north/web-service';
 import { useWorkbench } from '../workbench';
 import type { WorkbenchToolRegistry } from '../workbench/types';
 import type { AiEntityRecord, AiEntitySource } from './entity-source';
+import { pluginViewInputFromEntity } from './entity-source';
 import { resolveAgentId } from './agent-selection';
 import {
   applyDeltaToMessages,
@@ -116,16 +116,15 @@ function titleFromFirstMessage(text: string): string {
 
 export function AiSessionProvider({
   children,
-  entitySources: createSources,
+  entitySources,
 }: {
   children: ReactNode;
-  entitySources: (navigate: NavigateFunction) => AiEntitySource[];
+  entitySources: AiEntitySource[];
 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const onAiPage = isAiPath(location.pathname);
-  const { openToolTab, pendingFollowUp, clearFollowUp, tools } = useWorkbench();
-  const entitySources = useMemo(() => createSources(navigate), [createSources, navigate]);
+  const { openToolTab, openPluginView, pendingFollowUp, clearFollowUp, tools } = useWorkbench();
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<ConversationVo[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -767,9 +766,14 @@ export function AiSessionProvider({
 
   const openEntity = useCallback(
     (type: string, id: string) => {
-      entitySources.find((source) => source.type === type)?.open(id);
+      const input = pluginViewInputFromEntity(entitySources, type, id);
+      if (!input) {
+        message.warning('无法打开该引用');
+        return;
+      }
+      void openPluginView(input);
     },
-    [entitySources]
+    [entitySources, openPluginView]
   );
 
   const boundLabel = useCallback(

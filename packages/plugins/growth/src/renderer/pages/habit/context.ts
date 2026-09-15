@@ -5,12 +5,16 @@ export interface HabitContextType {
   selectedHabit: HabitVo | null;
   setSelectedHabit: (habit: HabitVo | null) => void;
   refreshHabits: () => void;
+  openDetail: (habitId: string) => void;
+  openList: () => void;
 }
 
 export const HabitContext = createContext<HabitContextType>({
   selectedHabit: null,
   setSelectedHabit: () => {},
   refreshHabits: () => {},
+  openDetail: () => {},
+  openList: () => {},
 });
 
 export const useHabitContext = () => {

@@ -3,6 +3,12 @@ import { GoalRepository } from './goal.repository';
 import { GoalTreeRepository } from './goal-tree.repository';
 import { Goal } from './goal.entity';
 import { GoalStatus, GoalType, TodoRelatedType } from '@true-north/enum';
+import {
+  GROWTH_RULE,
+  assertChildDatesWithinParent,
+  assertGoalTypeInheritance,
+  assertPriorityWithinParent,
+} from '../../../shared/entity-bounds';
 import { TaskRepository } from '../task/task.repository';
 import { TodoRepository } from '../todo/todo.repository';
 import { HabitRepository } from '../habit/habit.repository';
@@ -381,41 +387,56 @@ export class GoalService {
         throw new Error('不能将目标移动到自己的子目标下');
       }
     }
-    if (parent.type === GoalType.RESULT && type !== GoalType.RESULT) {
-      throw new Error('指标目标只能包含指标子目标');
-    }
-    if (parent.startAt && startAt && startAt < parent.startAt) {
-      throw new Error('子目标开始日期不能早于父目标');
-    }
-    if (parent.endAt && endAt && endAt > parent.endAt) {
-      throw new Error('子目标结束日期不能晚于父目标');
-    }
-    if (parent.importance !== undefined && importance !== undefined && importance > parent.importance) {
-      throw new Error('子目标重要度不能高于父目标');
-    }
-    if (parent.difficulty !== undefined && difficulty !== undefined && difficulty > parent.difficulty) {
-      throw new Error('子目标难度不能高于父目标');
-    }
+    assertGoalTypeInheritance(parent.type, type);
+    assertChildDatesWithinParent(
+      { startAt, endAt },
+      parent,
+      {
+        ruleId: GROWTH_RULE.goalTime,
+        startMessage: '子目标开始日期不能早于父目标',
+        endMessage: '子目标结束日期不能晚于父目标',
+      },
+    );
+    assertPriorityWithinParent(
+      { importance, difficulty },
+      parent,
+      {
+        ruleId: GROWTH_RULE.goalPriority,
+        importanceMessage: '子目标重要度不能高于父目标',
+        difficultyMessage: '子目标难度不能高于父目标',
+      },
+    );
   }
 
   private async validateGoalChildren(candidate: Partial<Goal> & { id?: string }): Promise<void> {
     if (!candidate.id) return;
     const children = await this.goalRepository.findByFilter({ parentId: candidate.id } as GoalFilterDto);
     for (const child of children) {
-      if (candidate.type === GoalType.RESULT && child.type !== GoalType.RESULT) {
-        throw new Error(`子目标“${child.name}”不是指标类型，请先调整子目标`);
-      }
-      if (candidate.startAt && child.startAt && child.startAt < candidate.startAt) {
-        throw new Error(`子目标“${child.name}”的开始日期超出父目标范围`);
-      }
-      if (candidate.endAt && child.endAt && child.endAt > candidate.endAt) {
-        throw new Error(`子目标“${child.name}”的结束日期超出父目标范围`);
-      }
-      if (candidate.importance !== undefined && child.importance > candidate.importance) {
-        throw new Error(`子目标“${child.name}”的重要度高于父目标`);
-      }
-      if (candidate.difficulty !== undefined && child.difficulty !== undefined && child.difficulty > candidate.difficulty) {
-        throw new Error(`子目标“${child.name}”的难度高于父目标`);
+      try {
+        assertGoalTypeInheritance(candidate.type, child.type);
+        assertChildDatesWithinParent(
+          child,
+          candidate,
+          {
+            ruleId: GROWTH_RULE.goalTime,
+            startMessage: `子目标“${child.name}”的开始日期超出父目标范围`,
+            endMessage: `子目标“${child.name}”的结束日期超出父目标范围`,
+          },
+        );
+        assertPriorityWithinParent(
+          child,
+          candidate,
+          {
+            ruleId: GROWTH_RULE.goalPriority,
+            importanceMessage: `子目标“${child.name}”的重要度高于父目标`,
+            difficultyMessage: `子目标“${child.name}”的难度高于父目标`,
+          },
+        );
+      } catch (error) {
+        if (error instanceof Error && error.message === '指标目标只能包含指标子目标') {
+          throw new Error(`子目标“${child.name}”不是指标类型，请先调整子目标`);
+        }
+        throw error;
       }
     }
   }

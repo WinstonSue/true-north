@@ -1,7 +1,8 @@
-import type { Task as TaskVO, ResponsePageVo, ResponseListVo } from '@true-north/vo';
+import type { Task as TaskVO, ResponsePageVo, ResponseListVo, AiWorkspaceSuggestionVo } from '@true-north/vo';
 import { TaskService, taskService as defaultTaskService } from './task.service';
 import { Post, Get, Put, Delete, Controller, Body, Param, Query } from '@true-north/plugin-sdk/main';
 import { TaskFilterDto, TaskPageFilterDto, UpdateTaskDto, CreateTaskDto, TaskDto } from './dto';
+import { adoptTaskSuggestion } from '../ai/decompose-adopt';
 
 @Controller('/task')
 export class TaskController {
@@ -14,6 +15,16 @@ export class TaskController {
     createDto.importCreateVo(createTaskVo);
     const dto = await this.taskService.create(createDto);
     return dto.exportVo();
+  }
+
+  @Post('/adopt-decompose/:id', { description: '采纳任务拆解建议' })
+  async adoptDecompose(
+    @Param('id') id: string,
+    @Body() body: { suggestion: AiWorkspaceSuggestionVo },
+  ): Promise<{ ok: true }> {
+    if (!body?.suggestion) throw new Error('缺少拆解建议');
+    await adoptTaskSuggestion(id, body.suggestion);
+    return { ok: true };
   }
 
   @Delete('/delete/:id', { description: '删除任务' })

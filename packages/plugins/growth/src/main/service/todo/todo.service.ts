@@ -34,14 +34,17 @@ export class TodoService {
   }
 
   // ====== 基础 CRUD ======
-  async create(createTodoDto: CreateTodoDto, options?: { skipActivity?: boolean; manager?: EntityManager }): Promise<TodoDto> {
+  async create(
+    createTodoDto: CreateTodoDto,
+    options?: { skipActivity?: boolean; manager?: EntityManager; system?: boolean },
+  ): Promise<TodoDto> {
     const related = narrowTodoRelated({
       relatedType: createTodoDto.relatedType,
       relatedId: createTodoDto.relatedId ?? createTodoDto.taskId ?? createTodoDto.habitId,
     });
     if (
-      related.relatedType === TodoRelatedType.HABIT ||
-      related.relatedType === TodoRelatedType.TASK
+      !options?.system &&
+      (related.relatedType === TodoRelatedType.HABIT || related.relatedType === TodoRelatedType.TASK)
     ) {
       throw new Error('手动创建的待办不能指定系统来源');
     }
@@ -65,6 +68,8 @@ export class TodoService {
         // activity card is supplementary
       }
     }
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
     return todoDto;
   }
 
@@ -76,6 +81,8 @@ export class TodoService {
         throw new Error('习惯周期待办不能单独删除，请通过习惯操作结束周期');
       }
       await this.todoRepository.delete(id);
+      const { invalidateGrowthToday } = await import('../../context');
+      invalidateGrowthToday();
       return true;
     } catch (error) {
       throw error;
@@ -193,6 +200,8 @@ export class TodoService {
     updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, true);
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
     return result;
   }
 
@@ -241,6 +250,8 @@ export class TodoService {
     updateTodoDto.abandonedAt = new Date();
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, false);
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
     return result;
   }
 
@@ -283,6 +294,8 @@ export class TodoService {
       );
     }
 
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
     return result;
   }
 
@@ -297,7 +310,10 @@ export class TodoService {
     updateTodoDto.status = TodoStatus.TODO;
     updateTodoDto.doneAt = undefined;
     updateTodoDto.abandonedAt = undefined;
-    return await this.update(updateTodoDto, true);
+    const result = await this.update(updateTodoDto, true);
+    const { invalidateGrowthToday } = await import('../../context');
+    invalidateGrowthToday();
+    return result;
   }
 
   private async advanceHabitCycle(todo: Todo, wasCompleted: boolean): Promise<void> {

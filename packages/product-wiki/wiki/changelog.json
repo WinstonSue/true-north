@@ -33,6 +33,21 @@
       "version": "v0.3.0",
       "date": "2026-09-14",
       "event": "changed",
+      "summary": "消息中的目标或任务名称可点，在工作台打开对应功能并定位到该条详情。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:view:conversation",
+        "scope": "view",
+        "name": "会话对话",
+        "reference": "ai.session.view.conversation",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
       "summary": "对话区选择器只改当前会话，不再与本机默认 Agent 同步。",
       "productStatus": "roadmap",
       "feature": {
@@ -94,6 +109,36 @@
       "date": "2026-09-14",
       "event": "changed",
       "summary": "已有绑定会话沿用该会话 Agent；新建绑定会话使用本机默认 Agent。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:task-bound-start",
+        "scope": "rule",
+        "name": "任务绑定发起",
+        "reference": "ai.session.rule.task-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "会话中可点击的目标名称改为在工作台打开目标功能并定位到该目标。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:goal-bound-start",
+        "scope": "rule",
+        "name": "目标绑定发起",
+        "reference": "ai.session.rule.goal-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "会话中可点击的任务名称改为在工作台打开任务功能并定位到该任务。",
       "productStatus": "roadmap",
       "feature": {
         "key": "ai.session:rule:task-bound-start",
@@ -4586,6 +4631,228 @@
         "name": "最近活动",
         "wikiId": "activity",
         "wikiTitle": "最近活动"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "工作台除网页与会话工具外，还可打开已启用插件的功能标签，而不离开当前页。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench",
+        "scope": "module",
+        "name": "工作台",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "标签栏加号改为选择器：可开新网页，或按插件分组打开功能。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:new-tab",
+        "scope": "view",
+        "name": "新标签选择器",
+        "reference": "workbench.view.new-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "从选择器打开的插件功能以工作台标签呈现，与插件页共用同一套能力。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:plugin-stage",
+        "scope": "view",
+        "name": "插件功能舞台",
+        "reference": "workbench.view.plugin-stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "同一插件功能再次选择只回到已有标签；功能标签不显示地址栏，也不能收藏到本地。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:plugin-view-tab",
+        "scope": "rule",
+        "name": "工作台打开插件功能",
+        "reference": "workbench.rule.plugin-view-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "插件页仍作目录与聚合入口；页内栏目与工作台打开的功能是同一套能力。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "plugins:view:hub-nav",
+        "scope": "view",
+        "name": "领域导航",
+        "reference": "plugins.view.hub-nav",
+        "wikiId": "plugins",
+        "wikiTitle": "插件"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "待办、任务、习惯与目标既可在成长页内切换，也可作为工作台功能标签单独打开。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth",
+        "scope": "module",
+        "name": "个人成长系统",
+        "wikiId": "growth",
+        "wikiTitle": "个人成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "账单、预算与总览既可在记账页内切换，也可作为工作台功能标签单独打开。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "expense",
+        "scope": "module",
+        "name": "记账",
+        "wikiId": "expense",
+        "wikiTitle": "记账"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "采购清单可在插件页打开，也可作为工作台功能标签单独打开。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "purchase",
+        "scope": "module",
+        "name": "家庭采购",
+        "wikiId": "purchase",
+        "wikiTitle": "家庭采购"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "收藏检索可在插件页打开，也可作为工作台功能标签单独打开。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "library",
+        "scope": "module",
+        "name": "收藏",
+        "wikiId": "library",
+        "wikiTitle": "收藏"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "从会话打开的插件功能出现在工作台标签里，并定位到对应详情。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:plugin-stage",
+        "scope": "view",
+        "name": "插件功能舞台",
+        "reference": "workbench.view.plugin-stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "会话中的目标或任务名称也打开同一套功能标签，并定位到对应详情。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:plugin-view-tab",
+        "scope": "rule",
+        "name": "工作台打开插件功能",
+        "reference": "workbench.rule.plugin-view-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "今天的条目由各领域登记；领域变化后清单即时更新。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:domain-register",
+        "scope": "rule",
+        "name": "各领域登记今天",
+        "reference": "notification.rule.domain-register",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "领域里新增或处理完事项后，今天清单即时更新，不必重开铃铛。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:view:today",
+        "scope": "view",
+        "name": "今天",
+        "reference": "notification.view.today",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "introduced",
+      "summary": "当天到期且尚未打卡的习惯出现在侧栏今天；打卡后从清单消失。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.habit:rule:today-checkin",
+        "scope": "rule",
+        "name": "今天可打卡进侧栏",
+        "parentName": "个人成长系统",
+        "reference": "growth.habit.rule.today-checkin",
+        "wikiId": "growth.habit",
+        "wikiTitle": "习惯管理"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-14",
+      "event": "changed",
+      "summary": "当天未打卡的习惯同时出现在侧栏今天，可就地打卡。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.habit:view:list",
+        "scope": "view",
+        "name": "习惯列表",
+        "parentName": "个人成长系统",
+        "reference": "growth.habit.view.list",
+        "wikiId": "growth.habit",
+        "wikiTitle": "习惯管理"
       }
     }
   ]

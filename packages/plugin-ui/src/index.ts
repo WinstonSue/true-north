@@ -1,4 +1,5 @@
 export { default as TabsPage } from './TabsPage';
+export type { TabsPageItem } from './TabsPage';
 export { default as DefaultPage } from './DefaultPage';
 export { TableFilter } from './TableFilter';
 export { CreateButton } from './CreateButton';

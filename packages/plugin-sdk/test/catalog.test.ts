@@ -101,6 +101,89 @@ test('reconcile fails on missing renderer workspace', () => {
   assert.equal(issues.some((issue) => issue.message.includes('goal.decompose')), true);
 });
 
+test('reconcile fails on missing or extra workbench views', () => {
+  const manifest = definePluginManifest({
+    pluginId: 'growth',
+    apiVersion: PLUGIN_API_VERSION,
+    version: '1',
+    catalog: { nameKey: 'growth' },
+    contributions: {
+      workbench: { views: { todo: {} } },
+    },
+  });
+  const missing = reconcileRenderer(manifest, { load: async () => ({ default: () => null }) });
+  assert.equal(missing.some((issue) => issue.message.includes('growth.todo')), true);
+
+  const extra = reconcileRenderer(manifest, {
+    load: async () => ({ default: () => null }),
+    workbenchViews: [
+      { id: 'growth.todo', pluginId: 'growth', nameKey: 'menu.todo', load: async () => ({ default: () => null }) },
+      { id: 'growth.task', pluginId: 'growth', nameKey: 'menu.task', load: async () => ({ default: () => null }) },
+    ],
+  });
+  assert.equal(extra.some((issue) => issue.message.includes('growth.task')), true);
+
+  const matched = reconcileRenderer(manifest, {
+    load: async () => ({ default: () => null }),
+    workbenchViews: [
+      { id: 'growth.todo', pluginId: 'growth', nameKey: 'menu.todo', load: async () => ({ default: () => null }) },
+    ],
+  });
+  assert.deepEqual(matched, []);
+});
+
+function entitySource(type: string, workbenchViewId: string) {
+  return {
+    type,
+    kindLabel: type,
+    boundKindLabel: type,
+    searchParam: `${type}Id`,
+    workbenchViewId,
+    list: async () => [],
+    find: async () => null,
+  };
+}
+
+test('reconcile fails when entity source maps to unknown workbench view', () => {
+  const manifest = definePluginManifest({
+    pluginId: 'growth',
+    apiVersion: PLUGIN_API_VERSION,
+    version: '1',
+    catalog: { nameKey: 'growth' },
+    contributions: {
+      workbench: { views: { goal: {} } },
+    },
+  });
+  const issues = reconcileRenderer(manifest, {
+    load: async () => ({ default: () => null }),
+    workbenchViews: [
+      { id: 'growth.goal', pluginId: 'growth', nameKey: 'menu.goal', load: async () => ({ default: () => null }) },
+    ],
+    entitySources: [entitySource('task', 'growth.task')],
+  });
+  assert.equal(issues.some((issue) => issue.message.includes('growth.task')), true);
+});
+
+test('reconcile passes when entity source maps to an implemented workbench view', () => {
+  const manifest = definePluginManifest({
+    pluginId: 'growth',
+    apiVersion: PLUGIN_API_VERSION,
+    version: '1',
+    catalog: { nameKey: 'growth' },
+    contributions: {
+      workbench: { views: { goal: {} } },
+    },
+  });
+  const matched = reconcileRenderer(manifest, {
+    load: async () => ({ default: () => null }),
+    workbenchViews: [
+      { id: 'growth.goal', pluginId: 'growth', nameKey: 'menu.goal', load: async () => ({ default: () => null }) },
+    ],
+    entitySources: [entitySource('goal', 'growth.goal')],
+  });
+  assert.deepEqual(matched, []);
+});
+
 test('host action registry isolates two hosts', async () => {
   const a = new HostActionRegistry();
   const b = new HostActionRegistry();
@@ -174,4 +257,28 @@ test('today sections merge by order', () => {
     [{ id: 'expense.spent', kind: 'metric', titleKey: 'spent', order: 10, value: 5 }],
   ]);
   assert.equal(merged[0]?.id, 'expense.spent');
+});
+
+test('reconcile fails when declared AI rules are missing or extra', () => {
+  const manifest = definePluginManifest({
+    pluginId: 'growth',
+    apiVersion: PLUGIN_API_VERSION,
+    version: '1',
+    catalog: { nameKey: 'growth' },
+    contributions: {
+      ai: { rules: { 'priority-inheritance': { id: 'growth.goal.priority-inheritance' } } },
+    },
+  });
+  const missing = reconcileMain(manifest, { ai: { rules: [] } });
+  assert.equal(missing.some((issue) => issue.message.includes('growth.goal.priority-inheritance')), true);
+
+  const extra = reconcileMain(manifest, {
+    ai: { rules: [{ id: 'growth.goal.priority-inheritance', description: 'ok' }, { id: 'growth.other', description: 'no' }] },
+  });
+  assert.equal(extra.some((issue) => issue.message.includes('growth.other')), true);
+
+  const matched = reconcileMain(manifest, {
+    ai: { rules: [{ id: 'growth.goal.priority-inheritance', description: 'ok' }] },
+  });
+  assert.deepEqual(matched, []);
 });

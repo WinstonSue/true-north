@@ -73,7 +73,7 @@ export class HabitWithoutRelations extends BaseEntity {
 @Entity('habit')
 export class Habit extends HabitWithoutRelations {
   /** 关联的目标 */
-  @ManyToMany(() => Goal, { cascade: true })
+  @ManyToMany(() => Goal)
   @JoinTable({
     name: 'habit_goal',
     joinColumn: { name: 'habit_id', referencedColumnName: 'id' },

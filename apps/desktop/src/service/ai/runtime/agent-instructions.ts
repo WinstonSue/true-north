@@ -7,3 +7,7 @@ export function addAgentInstructions(text: string) {
 export function getAgentInstructions(): string {
   return sections.join('\n\n');
 }
+
+export function resetAgentInstructions() {
+  sections.length = 0;
+}
