@@ -38,6 +38,7 @@
     "typeorm": "^0.3.17"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test src/main/service/__tests__/*.test.ts"
   }
 }

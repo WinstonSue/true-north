@@ -59,24 +59,43 @@ function toolTabTitle(part: AiWorkspacePartVo, tools: WorkbenchToolRegistry): st
   }
 }
 
+function workspaceParts(item: MessageVo): AiWorkspacePartVo[] {
+  return item.parts.filter((part): part is AiWorkspacePartVo => part.type === 'workspace');
+}
+
 function shouldAutoOpenWorkspace(
   item: MessageVo,
   force: boolean,
   tools: WorkbenchToolRegistry
 ): boolean {
-  const workspace = item.parts.find((part): part is AiWorkspacePartVo => part.type === 'workspace');
-  if (!workspace) return false;
-  const definition = tools.find(workspace.workspaceKey);
-  if (!definition?.autoOpen) return force;
-  try {
-    return definition.autoOpen({
-      payload: definition.parsePayload(workspace.payload) as never,
-      message: item,
-      force,
-    });
-  } catch {
-    return force;
-  }
+  return workspaceParts(item).some((workspace) => {
+    const definition = tools.find(workspace.workspaceKey);
+    if (!definition?.autoOpen) return force;
+    try {
+      return definition.autoOpen({
+        payload: definition.parsePayload(workspace.payload) as never,
+        message: item,
+        force,
+      });
+    } catch {
+      return force;
+    }
+  });
+}
+
+function tabInputForPart(
+  item: MessageVo,
+  part: AiWorkspacePartVo,
+  tools: WorkbenchToolRegistry,
+) {
+  return {
+    conversationId: item.conversationId,
+    messageId: item.id,
+    workspaceId: part.workspaceId,
+    workspaceKey: part.workspaceKey,
+    title: toolTabTitle(part, tools),
+    payload: part.payload,
+  };
 }
 
 function conversationSearch(id?: string | null) {
@@ -261,17 +280,9 @@ export function AiSessionProvider({
           return next;
         });
         if (shouldAutoOpenWorkspace(started.terminal.message, input.autoOpenOnDone, toolsRef.current)) {
-          const part = started.terminal.message.parts.find(
-            (entry): entry is AiWorkspacePartVo => entry.type === 'workspace'
-          );
-          if (part) {
-            void openToolTabRef.current({
-              conversationId: started.terminal.message.conversationId,
-              messageId: started.terminal.message.id,
-              workspaceKey: part.workspaceKey,
-              title: toolTabTitle(part, toolsRef.current),
-              payload: part.payload,
-            });
+          const parts = workspaceParts(started.terminal.message);
+          for (const part of parts) {
+            void openToolTabRef.current(tabInputForPart(started.terminal.message, part, toolsRef.current));
           }
         }
         void refreshConversations(conversationIdRef.current);
@@ -405,17 +416,8 @@ export function AiSessionProvider({
           return next;
         });
         if (shouldAutoOpenWorkspace(event.message, stream.autoOpenOnDone, toolsRef.current)) {
-          const part = event.message.parts.find(
-            (entry): entry is AiWorkspacePartVo => entry.type === 'workspace'
-          );
-          if (part) {
-            void openToolTabRef.current({
-              conversationId: event.message.conversationId,
-              messageId: event.message.id,
-              workspaceKey: part.workspaceKey,
-              title: toolTabTitle(part, toolsRef.current),
-              payload: part.payload,
-            });
+          for (const part of workspaceParts(event.message)) {
+            void openToolTabRef.current(tabInputForPart(event.message, part, toolsRef.current));
           }
         }
         void refreshConversations(conversationIdRef.current);
@@ -612,17 +614,19 @@ export function AiSessionProvider({
   ]);
 
   const openWorkspace = useCallback(
-    (messageId: string) => {
+    (messageId: string, workspaceId?: string) => {
       const item = activeMessages.find((entry) => entry.id === messageId);
-      const part = item?.parts.find((entry): entry is AiWorkspacePartVo => entry.type === 'workspace');
-      if (!item || !part) return;
-      void openToolTab({
-        conversationId: item.conversationId || activeConversationId || '',
-        messageId,
-        workspaceKey: part.workspaceKey,
-        title: toolTabTitle(part, tools),
-        payload: part.payload,
-      });
+      if (!item) return;
+      const parts = workspaceParts(item);
+      const focused = workspaceId ? parts.find((part) => part.workspaceId === workspaceId) : parts[0];
+      if (!focused) return;
+      const others = parts.filter((part) => part.workspaceId !== focused.workspaceId);
+      for (const part of [...others, focused]) {
+        void openToolTab({
+          ...tabInputForPart(item, part, tools),
+          conversationId: item.conversationId || activeConversationId || '',
+        });
+      }
     },
     [activeConversationId, activeMessages, openToolTab, tools]
   );

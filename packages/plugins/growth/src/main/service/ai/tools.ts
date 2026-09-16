@@ -10,6 +10,7 @@ import { goalContextBuilder } from './goal-context.builder';
 import { taskContextBuilder } from './task-context.builder';
 import { goalDecomposeCapability } from './goal-decompose.capability';
 import { taskDecomposeCapability } from './task-decompose.capability';
+import { suggestTodoTool } from './suggest-todo.tool';
 
 const SEARCH_CAP = 8;
 
@@ -301,4 +302,5 @@ export const growthMcpTools: Record<string, AgentTool> = {
   getTask,
   decomposeGoal,
   decomposeTask,
+  suggestTodo: suggestTodoTool,
 };

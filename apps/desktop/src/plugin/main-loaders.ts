@@ -4,7 +4,7 @@ import { FIRST_PARTY_PLUGIN_IDS, firstPartyPlugins, type FirstPartyPluginId } fr
 export const firstPartyMainLoaders = {
   growth: () => import('@true-north/plugin-growth/main'),
   expense: () => import('@true-north/plugin-expense/main'),
-  purchase: () => import('@true-north/plugin-purchase/main'),
+  inventory: () => import('@true-north/plugin-inventory/main'),
   library: () => import('@true-north/plugin-library/main'),
 } as const satisfies Record<FirstPartyPluginId, NonNullable<PluginDescriptor['loadMain']>>;
 

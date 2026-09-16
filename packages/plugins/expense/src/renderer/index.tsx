@@ -5,6 +5,7 @@ import { expenseIds } from '../contract';
 import { expenseLocales } from './locales';
 import { bindPluginIpc } from '../client';
 import { ExpensesProvider } from './pages/context';
+import { suggestTransactionTool } from './contributions/suggest';
 
 export function createRenderer() {
   return defineRendererImplementation(expenseManifest, {
@@ -19,8 +20,13 @@ export function createRenderer() {
           budget: { load: () => import('./features/budget') },
           overview: { load: () => import('./features/overview') },
         },
-        page: {
+        hub: {
           load: () => import('./layout/ExpensePage'),
+        },
+        workbench: {
+          workspaces: {
+            suggestTransaction: suggestTransactionTool,
+          },
         },
         openResource(uri) {
           const parsed = parsePluginResourceUri(uri);

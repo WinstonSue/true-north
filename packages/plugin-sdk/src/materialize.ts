@@ -4,9 +4,8 @@ import {
   mcpName,
   type CatalogIssue,
   type PluginManifest,
-  type TodaySectionSnapshot,
 } from '@true-north/plugin-contract';
-import { extensionPoints, pluginCatalogEntry, type TodayExtension } from './extension-points.ts';
+import { extensionPoints, pluginCatalogEntry } from './extension-points.ts';
 import type { ExtensionRegistration } from './extension-registry.ts';
 import type {
   PluginMainHandles,
@@ -50,7 +49,7 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
   const issues: CatalogIssue[] = [];
   if (!handles) {
     const declared =
-      manifest.contributions.ipc || manifest.contributions.ai || manifest.contributions.activity;
+      manifest.contributions.ipc || manifest.contributions.ai || manifest.contributions.workflow;
     return {
       issues: declared
         ? [{ code: 'reconcile', pluginId, message: `Plugin ${pluginId} has no main implementation` }]
@@ -69,18 +68,10 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
   );
   issues.push(
     ...equalSets(
-      asSet(Object.keys(manifest.contributions.activity?.captureTypes || {})),
-      asSet(Object.keys(handles.activity?.capture || {})),
+      asSet(Object.keys(manifest.contributions.workflow?.commands || {})),
+      asSet(Object.keys(handles.workflow?.commands || {})),
       pluginId,
-      'capture type',
-    ),
-  );
-  issues.push(
-    ...equalSets(
-      asSet(Object.keys(manifest.contributions.activity?.today || {})),
-      asSet(Object.keys(handles.activity?.today || {})),
-      pluginId,
-      'today section',
+      'workflow command',
     ),
   );
   issues.push(
@@ -130,43 +121,16 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
     });
   }
 
-  for (const [localId, spec] of Object.entries(handles.activity?.capture || {})) {
+  for (const [localId, spec] of Object.entries(handles.workflow?.commands || {})) {
     registrations.push({
-      point: extensionPoints.capture,
+      point: extensionPoints.workflowCommand,
       key: contributionKey(pluginId, localId),
       value: {
-        type: contributionKey(pluginId, localId),
-        adopt: spec.adopt,
+        pluginId,
+        localId,
+        id: contributionKey(pluginId, localId),
+        execute: spec.execute,
       },
-    });
-  }
-
-  for (const [localId, descriptor] of Object.entries(manifest.contributions.activity?.today || {})) {
-    const collect = handles.activity?.today?.[localId]?.collect;
-    if (!collect) continue;
-    const id = contributionKey(pluginId, localId);
-    const today: TodayExtension = {
-      id,
-      descriptor,
-      collect: async (): Promise<TodaySectionSnapshot> => {
-        const values = await collect();
-        return {
-          id,
-          kind: descriptor.kind,
-          titleKey: descriptor.titleKey,
-          order: descriptor.order,
-          unit: descriptor.unit,
-          value: values.value,
-          items: values.items,
-          timer: values.timer,
-        };
-      },
-    };
-    registrations.push({
-      point: extensionPoints.today,
-      key: id,
-      order: descriptor.order,
-      value: today,
     });
   }
 
@@ -289,18 +253,26 @@ export function materializeRenderer(
       'shell slot',
     ),
   );
-  if (manifest.contributions.page && !handles.page?.load) {
+  issues.push(
+    ...equalSets(
+      asSet(Object.keys(manifest.contributions.workflow?.interactions || {})),
+      asSet(Object.keys(handles.workflow?.interactions || {})),
+      pluginId,
+      'workflow interaction',
+    ),
+  );
+  if (manifest.contributions.hub && !handles.hub?.load) {
     issues.push({
       code: 'reconcile',
       pluginId,
-      message: `Plugin ${pluginId} declared page but did not implement it`,
+      message: `Plugin ${pluginId} declared hub but did not implement it`,
     });
   }
-  if (!manifest.contributions.page && handles.page?.load) {
+  if (!manifest.contributions.hub && handles.hub?.load) {
     issues.push({
       code: 'reconcile',
       pluginId,
-      message: `Plugin ${pluginId} implemented undeclared page`,
+      message: `Plugin ${pluginId} implemented undeclared hub`,
     });
   }
 
@@ -319,13 +291,35 @@ export function materializeRenderer(
     registrations.push({
       point: extensionPoints.view,
       key: contributionKey(pluginId, localId),
-      order: spec.order,
       value: {
         id: contributionKey(pluginId, localId),
         pluginId,
         nameKey: spec.nameKey,
-        order: spec.order,
         load,
+      },
+    });
+  }
+
+  for (const [localId, spec] of Object.entries(manifest.contributions.workbench?.newTabs || {})) {
+    const view = manifest.contributions.views?.[localId];
+    if (!view) {
+      issues.push({
+        code: 'reconcile',
+        pluginId,
+        message: `Plugin ${pluginId} declared newTab "${localId}" but did not declare matching view`,
+      });
+      continue;
+    }
+    registrations.push({
+      point: extensionPoints.newTab,
+      key: contributionKey(pluginId, localId),
+      order: spec.order,
+      value: {
+        id: contributionKey(pluginId, localId),
+        pluginId,
+        viewId: contributionKey(pluginId, localId),
+        nameKey: spec.nameKey || view.nameKey,
+        order: spec.order,
       },
     });
   }
@@ -392,13 +386,28 @@ export function materializeRenderer(
     });
   }
 
-  if (handles.page?.load) {
+  if (handles.hub?.load) {
     registrations.push({
-      point: extensionPoints.pageShell,
+      point: extensionPoints.hub,
       key: pluginId,
       value: {
         pluginId,
-        load: handles.page.load,
+        load: handles.hub.load,
+      },
+    });
+  }
+
+  for (const [localId, spec] of Object.entries(handles.workflow?.interactions || {})) {
+    const declared = manifest.contributions.workflow?.interactions?.[localId];
+    registrations.push({
+      point: extensionPoints.workflowInteraction,
+      key: contributionKey(pluginId, localId),
+      value: {
+        pluginId,
+        localId,
+        id: contributionKey(pluginId, localId),
+        producesCommand: declared?.producesCommand || '',
+        load: spec.load,
       },
     });
   }

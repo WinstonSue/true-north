@@ -9,7 +9,30 @@ import {
   type PluginViewMode,
   type PluginViewSnapshot,
 } from '@true-north/plugin-sdk/renderer';
+import type { CommandResult } from '@true-north/plugin-contract';
 import lazyload from '@/utils/lazyload';
+import { useOpenWorkflowInteraction } from './WorkflowInteractionHost';
+
+type PendingInteraction = {
+  edgeId: string;
+  interactionId: string;
+  draft?: Record<string, unknown>;
+};
+
+async function maybeSubmitPending(
+  ipc: { get: (path: string) => Promise<{ list?: PendingInteraction[] }>; post: (path: string, body: unknown) => Promise<unknown> },
+  openInteraction: (pluginId: string, localId: string, draft?: Record<string, unknown>) => Promise<Record<string, unknown> | null>,
+  beforeIds: Set<string>,
+) {
+  const pending = await ipc.get('/workflow/pending');
+  const next = (pending?.list || []).find((item) => !beforeIds.has(item.edgeId));
+  if (!next?.interactionId) return;
+  const [pluginId, ...rest] = next.interactionId.split('.');
+  const submitted = await openInteraction(pluginId || '', rest.join('.'), next.draft);
+  if (submitted) {
+    await ipc.post(`/workflow/edges/${next.edgeId}/interact`, submitted);
+  }
+}
 
 class PluginErrorBoundary extends Component<{ pluginId: string; children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
@@ -34,6 +57,7 @@ class PluginErrorBoundary extends Component<{ pluginId: string; children: ReactN
 export function PluginRuntimeFrame({ pluginId, children }: { pluginId: string; children: ReactNode }) {
   const navigate = useNavigate();
   const platform = useRendererPlatform();
+  const openInteraction = useOpenWorkflowInteraction();
   const ctx: PluginRendererContext = {
     pluginId,
     locale: {
@@ -48,6 +72,26 @@ export function PluginRuntimeFrame({ pluginId, children }: { pluginId: string; c
     ipc: platform.ipc,
     navigate,
     hostActions: platform.hostActions,
+    workflow: {
+      runCommand: async (localId, input, options) => {
+        const before = ((await platform.ipc.get('/workflow/pending')) as { list?: PendingInteraction[] })?.list || [];
+        const result = (await platform.ipc.post('/workflow/commands/run', {
+          pluginId,
+          localId,
+          input,
+          idempotencyKey: options?.idempotencyKey,
+          planId: options?.planId,
+          nodeId: options?.nodeId,
+        })) as CommandResult;
+        await maybeSubmitPending(
+          platform.ipc,
+          openInteraction,
+          new Set(before.map((item) => item.edgeId)),
+        );
+        return result;
+      },
+      openInteraction: (localId, draft) => openInteraction(pluginId, localId, draft),
+    },
   };
 
   return (

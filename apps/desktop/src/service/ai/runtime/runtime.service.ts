@@ -232,6 +232,8 @@ export class RuntimeService {
     preferredRuntimeId?: string | null;
     signal: AbortSignal;
     persistParts: (parts: AiMessagePartVo[]) => Promise<MessageVo>;
+    conflictMode?: boolean;
+    conflictTicketId?: string;
   }): Promise<{ message: MessageVo; threadId?: string; runtimeId: string }> {
     const selected = await this.resolveForSend(input.preferredRuntimeId);
     const adapter = getAdapter(selected.id);
@@ -248,6 +250,8 @@ export class RuntimeService {
       assistantId: input.assistantId,
       parts,
       persistParts: async (incoming: AiMessagePartVo[]) => input.persistParts(incoming),
+      conflictMode: input.conflictMode,
+      conflictTicketId: input.conflictTicketId,
     };
 
     const persistCanonical = async (next: AiMessagePartVo[]) => {

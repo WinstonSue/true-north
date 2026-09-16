@@ -1,4 +1,4 @@
-import type { PluginPageProps } from '@true-north/plugin-sdk';
+import type { PluginHubProps } from '@true-north/plugin-sdk';
 import { usePluginRuntime } from '@true-north/plugin-sdk/renderer';
 import { TabsPage } from '@true-north/plugin-ui';
 import { ExpensesProvider } from '../pages/context';
@@ -18,7 +18,7 @@ const FEATURES = {
   overview: OverviewFeature,
 };
 
-export default function ExpensePage(props: PluginPageProps) {
+export default function ExpensePage(props: PluginHubProps) {
   const { locale } = usePluginRuntime();
   const view = TABS.some((tab) => tab.key === props.location.view)
     ? (props.location.view as (typeof TABS)[number]['key'])

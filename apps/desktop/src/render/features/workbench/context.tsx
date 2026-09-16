@@ -65,6 +65,7 @@ export type WorkbenchToolTab = {
   id: string;
   conversationId: string;
   messageId: string;
+  workspaceId: string;
   workspaceKey: string;
   title: string;
   payload: AiWorkspacePayloadVo;
@@ -94,6 +95,7 @@ export type PluginViewInput = PluginViewOpenRequest;
 export type TabInput = {
   conversationId: string;
   messageId: string;
+  workspaceId: string;
   workspaceKey: string;
   title: string;
   payload: AiWorkspacePayloadVo;
@@ -352,13 +354,19 @@ export function WorkbenchProvider({
 
   const openToolTab = useCallback(
     async (input: TabInput) => {
-      const id = input.messageId;
+      const id = `${input.messageId}:${input.workspaceId}`;
       setToolTabs((prev) => {
         const existing = prev.find((tab) => tab.id === id);
         if (existing) {
           return prev.map((tab) =>
             tab.id === id
-              ? { ...tab, title: input.title, payload: input.payload, workspaceKey: input.workspaceKey }
+              ? {
+                  ...tab,
+                  title: input.title,
+                  payload: input.payload,
+                  workspaceKey: input.workspaceKey,
+                  workspaceId: input.workspaceId,
+                }
               : tab,
           );
         }
@@ -369,6 +377,7 @@ export function WorkbenchProvider({
             id,
             conversationId: input.conversationId,
             messageId: input.messageId,
+            workspaceId: input.workspaceId,
             workspaceKey: input.workspaceKey,
             title: input.title,
             payload: input.payload,

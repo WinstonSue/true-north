@@ -79,6 +79,12 @@ export class TodoWithoutRelations extends BaseEntity {
   @IsString()
   @IsOptional()
   relatedId?: string;
+
+  @Column('int', { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  revision?: number;
 }
 
 @Entity('todo')

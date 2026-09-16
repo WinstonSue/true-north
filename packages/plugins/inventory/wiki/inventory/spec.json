@@ -1,0 +1,107 @@
+{
+  "id": "inventory",
+  "kind": "page",
+  "title": "物资",
+  "parentId": "plugins",
+  "route": "/plugins/inventory",
+  "productStatus": "roadmap",
+  "views": [
+    {
+      "id": "items",
+      "name": "物资",
+      "scenario": "查看家庭实物总量、低库存和建议补货量，并新增物资",
+      "productStatus": "roadmap",
+      "reference": "inventory.view.items"
+    },
+    {
+      "id": "locations",
+      "name": "位置",
+      "scenario": "管理家庭存放位置，可选上级位置",
+      "productStatus": "roadmap",
+      "reference": "inventory.view.locations"
+    },
+    {
+      "id": "movements",
+      "name": "出入库",
+      "scenario": "回看入库、出库和盘点记录",
+      "productStatus": "roadmap",
+      "reference": "inventory.view.movements"
+    }
+  ],
+  "rules": [
+    {
+      "id": "household-goods",
+      "name": "只记家庭实物",
+      "description": "物资只管理可储存、可计量、可定位的家庭实物及其库存。高铁票、机票、酒店、服务、预约、缴费、订阅和数字权益不进入物资；单纯提醒购买也不进入物资。",
+      "views": ["items", "locations", "movements"],
+      "reference": "inventory.rule.household-goods",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "stock-truth",
+      "name": "库存以变动为准",
+      "description": "当前数量来自各位置库存。入库、出库和盘点同时改库存并留下记录。出库后不能小于零；盘点按目标数量计算差额。",
+      "views": ["items", "movements"],
+      "reference": "inventory.rule.stock-truth",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "restock-from-thresholds",
+      "name": "补货由阈值派生",
+      "description": "低库存和建议补货量由各位置汇总、下限和目标量算出，不建立采购单。",
+      "views": ["items"],
+      "reference": "inventory.rule.restock-from-thresholds",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "independent-expense",
+      "name": "入库与记账分开",
+      "description": "记下数量和记下花了多少钱是两件独立的事。只有同时明确说了数量和金额，才会分别出现物资变动建议和记账建议。",
+      "views": ["items", "movements"],
+      "reference": "inventory.rule.independent-expense",
+      "productStatus": "roadmap"
+    }
+  ],
+  "references": [
+    {
+      "id": "inventory.overview",
+      "title": "目标与价值",
+      "body": "物资从插件页进入，用来管理家里还能用的实物：叫什么、放在哪、现在有多少、低于多少要补。物资、位置和出入库是物资页内自己的栏目；同一类能力也可从工作台加号作为功能标签打开。它替换已经去掉的家庭采购清单，不处理订单、供应商或采购结算。数量以库存和变动记录为真源。"
+    },
+    {
+      "id": "inventory.view.items",
+      "title": "物资",
+      "body": "列表展示名称、总量、单位、下限、目标量、低库存和建议补货量。用户可新增物资，并直接记下入库、出库或盘点。"
+    },
+    {
+      "id": "inventory.view.locations",
+      "title": "位置",
+      "body": "位置是家里的存放点，例如厨房或储物柜，可以有上级位置。仍有库存的位置不能删。"
+    },
+    {
+      "id": "inventory.view.movements",
+      "title": "出入库",
+      "body": "出入库按时间列出入库、出库和盘点，显示变动前后数量、位置和备注。记录不能改，用来核对库存从哪来。"
+    },
+    {
+      "id": "inventory.rule.household-goods",
+      "title": "只记家庭实物",
+      "body": "滤芯、米、纸巾这类能放在家里清点的东西才进物资。提醒买高铁票只记待办。提醒买两盒滤芯也只记待办，除非用户同时要求记下家里还剩多少。"
+    },
+    {
+      "id": "inventory.rule.stock-truth",
+      "title": "库存以变动为准",
+      "body": "改数量必须留下入库、出库或盘点。不能把库存改成负数。同一条建议工作台确认一次后，再点或重开也只对应这一次变动。"
+    },
+    {
+      "id": "inventory.rule.restock-from-thresholds",
+      "title": "补货由阈值派生",
+      "body": "家里滤芯剩 1 个、低于 2 个要补到 4 个，会显示低库存，并建议再补 3 个。这里不出现待购清单。"
+    },
+    {
+      "id": "inventory.rule.independent-expense",
+      "title": "入库与记账分开",
+      "body": "刚入库 2 盒滤芯花了 80 元，会分别出现库存变动建议和记账建议。只说入库不提金额时，不会记一笔账。"
+    }
+  ]
+}

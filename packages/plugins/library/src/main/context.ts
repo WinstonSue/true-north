@@ -1,17 +1,17 @@
-import type { ActivityPort } from '@true-north/plugin-sdk';
+import type { PluginWorkflowPort } from '@true-north/plugin-sdk';
+import { pluginResourceUri } from '@true-north/plugin-contract';
 
-let activityPort: ActivityPort | null = null;
+let workflowPort: PluginWorkflowPort | null = null;
 
-export function bindLibraryContext(activity: ActivityPort) {
-  activityPort = activity;
+export function bindLibraryContext(workflow: PluginWorkflowPort) {
+  workflowPort = workflow;
 }
 
 export async function recordLibraryActivity(input: { title: string; entityId: string; label?: string }) {
   try {
-    await activityPort?.record({
-      title: input.title,
-      source: 'domain',
-      links: [{ pluginId: 'library', entityType: 'bookmark', entityId: input.entityId, role: 'bookmark', label: input.label }],
+    await workflowPort?.emit('bookmarkCreated', { title: input.title, label: input.label }, {
+      uri: pluginResourceUri('library', 'bookmarks', input.entityId),
+      revision: '0',
     });
   } catch {
     // supplementary
@@ -20,7 +20,10 @@ export async function recordLibraryActivity(input: { title: string; entityId: st
 
 export async function unlinkLibraryEntity(entityId: string) {
   try {
-    await activityPort?.unlink({ pluginId: 'library', entityType: 'bookmark', entityId });
+    await workflowPort?.emit('bookmarkDeleted', { entityId }, {
+      uri: pluginResourceUri('library', 'bookmarks', entityId),
+      revision: '0',
+    });
   } catch {
     // supplementary
   }

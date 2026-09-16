@@ -69,7 +69,7 @@ export class BookmarkService {
 
   async create(
     body: CreateBookmarkVo,
-    options?: { skipActivity?: boolean; manager?: EntityManager }
+    options?: { manager?: EntityManager }
   ): Promise<BookmarkVo> {
     const url = body?.url?.trim();
     const title = body?.title?.trim();
@@ -108,7 +108,7 @@ export class BookmarkService {
     });
     const saved = await repo.save(entity);
     const vo = await toVo(saved);
-    if (!options?.skipActivity) {
+    if (!options?.manager) {
       await recordLibraryActivity({
         title: vo.title,
         entityId: vo.id,

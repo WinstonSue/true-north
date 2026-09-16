@@ -5,8 +5,6 @@ import {
   assemblePluginCatalog,
   validateManifests,
   parsePluginManifest,
-  normalizeCaptureSuggestion,
-  mergeTodaySections,
 } from '../src/index.ts';
 import type { PluginManifest } from '../src/index.ts';
 
@@ -26,7 +24,7 @@ test('host catalog can assemble with no plugins', async () => {
   assert.equal(catalog.issues.length, 0);
 });
 
-test('adding growth surfaces ipc, mcp tools, workbench and today', async () => {
+test('adding growth surfaces ipc, mcp tools, workbench and workflow', async () => {
   const catalog = await assemblePluginCatalog(
     [
       {
@@ -36,9 +34,10 @@ test('adding growth surfaces ipc, mcp tools, workbench and today', async () => {
             ipc: { todo: {} },
             ai: { mcp: { tools: { searchGoals: { readOnly: true } } } },
             workbench: { workspaces: { goalDecompose: {} } },
-            activity: {
-              today: { todos: { kind: 'list', titleKey: 'today.todos' } },
+            workflow: {
+              commands: { createTodo: { inputSchema: { type: 'object' } } },
             },
+            hub: {},
           },
         }),
       },
@@ -50,23 +49,9 @@ test('adding growth surfaces ipc, mcp tools, workbench and today', async () => {
   assert.equal(growth.manifest.contributions.ipc?.todo !== undefined, true);
   assert.equal(growth.manifest.contributions.ai?.mcp?.tools?.searchGoals?.readOnly, true);
   assert.equal(growth.manifest.contributions.workbench?.workspaces?.goalDecompose !== undefined, true);
-  assert.equal(growth.manifest.contributions.activity?.today?.todos?.kind, 'list');
+  assert.equal(growth.manifest.contributions.workflow?.commands?.createTodo !== undefined, true);
+  assert.deepEqual(growth.manifest.contributions.hub, {});
   assert.equal(catalog.plugins.some((plugin) => plugin.manifest.pluginId === 'ai'), false);
-});
-
-test('capture suggestion normalizes missing type from kind', () => {
-  const next = normalizeCaptureSuggestion({ id: 's1', kind: 'todo', payload: { title: 'x' } } as never);
-  assert.equal(next.type, 'todo');
-  assert.equal(next.status, 'selected');
-});
-
-test('today sections merge across plugins', () => {
-  const merged = mergeTodaySections([
-    [{ id: 'growth.todos', kind: 'list', titleKey: 'todo', items: [{ id: '1', label: 'a' }] }],
-    [{ id: 'growth.habits', kind: 'list', titleKey: 'habit', items: [{ id: 'h', label: 'b' }] }],
-  ]);
-  assert.equal(merged.length, 2);
-  assert.equal(merged.flatMap((section) => section.items || []).length, 2);
 });
 
 test('duplicate mcp tool names still fail catalog validation', () => {

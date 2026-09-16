@@ -1,9 +1,10 @@
-import type { ActivityPort } from '@true-north/plugin-sdk';
+import type { PluginWorkflowPort } from '@true-north/plugin-sdk';
+import { pluginResourceUri } from '@true-north/plugin-contract';
 
-let activityPort: ActivityPort | null = null;
+let workflowPort: PluginWorkflowPort | null = null;
 
-export function bindExpenseContext(activity: ActivityPort) {
-  activityPort = activity;
+export function bindExpenseContext(workflow: PluginWorkflowPort) {
+  workflowPort = workflow;
 }
 
 export async function recordExpenseActivity(input: {
@@ -12,10 +13,9 @@ export async function recordExpenseActivity(input: {
   label?: string;
 }) {
   try {
-    await activityPort?.record({
-      title: input.title,
-      source: 'domain',
-      links: [{ pluginId: 'expense', entityType: 'transaction', entityId: input.entityId, role: 'expense', label: input.label }],
+    await workflowPort?.emit('transactionBooked', { title: input.title, label: input.label }, {
+      uri: pluginResourceUri('expense', 'transactions', input.entityId),
+      revision: '0',
     });
   } catch {
     // supplementary
@@ -24,7 +24,10 @@ export async function recordExpenseActivity(input: {
 
 export async function unlinkExpenseEntity(entityId: string) {
   try {
-    await activityPort?.unlink({ pluginId: 'expense', entityType: 'transaction', entityId });
+    await workflowPort?.emit('transactionDeleted', { entityId }, {
+      uri: pluginResourceUri('expense', 'transactions', entityId),
+      revision: '0',
+    });
   } catch {
     // supplementary
   }

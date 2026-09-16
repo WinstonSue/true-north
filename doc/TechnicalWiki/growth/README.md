@@ -31,7 +31,7 @@
 
 | 产品能力 | 技术归属 | 当前基线 | 对齐说明 |
 | --- | --- | --- | --- |
-| 今日待处理 | `components/MessageBox` | 今日待办、可打卡习惯、待购与运行中专注出现在侧栏「今天」清单；成长页从 `/activity` 枢纽进入，`/growth/workbench` 不再作为侧栏入口 | 成长域不再单独提供名为「工作台」的聚合页，避免与全局 Workbench 冲突。 |
+| 今日待办 | Growth 待办页 | 成长自己的「当前待办」仍在成长页；侧栏今天清单已移除 | 成长域不再单独提供名为「工作台」的聚合页，避免与全局 Workbench 冲突。 |
 | 目标管理 | `packages/plugins/growth` goal 模块 | 树、CRUD、关联查询、受控状态流转已存在；AI 拆解 Skills/MCP/工作台 UI 由 Growth 插件贡献 | 详情「AI 拆解」发起附带资源会话，审阅在全局 Workbench。见 [AI](../ai/README.md)、[Goal](./goal.md)。 |
 | 任务管理 | `packages/plugins/growth/src/main/service/task` | 当前任务、月历、全部任务和详情抽屉已接入 | 能力维持 Desktop；分组中间项文案为「未完成」。见 [Task](./task.md)。 |
 | 待办管理 | `packages/plugins/growth/src/main/service/todo` | 当前待办、月历、全部待办、批量完成；`repeat_todo` 投影与物化 | 关联收拢为 `relatedType`+`relatedId`；见 [Todo](./todo.md)。 |

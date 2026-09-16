@@ -10,7 +10,7 @@
     "dev:product": "TN_DEV_PROFILE=product electron-vite dev",
     "build": "NODE_ENV=production electron-vite build --mode production",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --experimental-strip-types --test-concurrency=1 --test src/service/ai/runtime/__tests__/*.test.ts src/service/ai/conversation/__tests__/*.test.ts src/service/ai/__tests__/*.test.ts src/service/activity/__tests__/*.test.ts src/service/browser/__tests__/*.test.ts src/render/features/ai/__tests__/*.test.ts src/render/features/workbench/__tests__/*.test.ts ../../packages/dev-lab/src/__tests__/*.test.ts",
+    "test": "node --experimental-strip-types --test-concurrency=1 --test src/service/ai/runtime/__tests__/*.test.ts src/service/ai/conversation/__tests__/*.test.ts src/service/ai/__tests__/*.test.ts src/service/workflow/__tests__/*.test.ts src/service/workflow/ai/__tests__/*.test.ts src/service/browser/__tests__/*.test.ts src/render/features/ai/__tests__/*.test.ts src/render/features/workbench/__tests__/*.test.ts ../../packages/dev-lab/src/__tests__/*.test.ts",
     "pack-win": "node scripts/pack-with-polyfills.cjs win",
     "pack-mac": "node scripts/pack-with-polyfills.cjs mac",
     "pack-linux": "node scripts/pack-with-polyfills.cjs linux",
@@ -29,8 +29,8 @@
     "@true-north/enum": "workspace:*",
     "@true-north/plugin-expense": "workspace:*",
     "@true-north/plugin-growth": "workspace:*",
+    "@true-north/plugin-inventory": "workspace:*",
     "@true-north/plugin-library": "workspace:*",
-    "@true-north/plugin-purchase": "workspace:*",
     "@true-north/plugin-sdk": "workspace:*",
     "@true-north/plugin-ui": "workspace:*",
     "@true-north/web-service": "workspace:*",
@@ -83,7 +83,8 @@
     "productName": "知止",
     "electronVersion": "36.0.0",
     "files": [
-      "dist/**/*"
+      "dist/**/*",
+      "skills/**/*"
     ],
     "extraMetadata": {
       "dependencies": {

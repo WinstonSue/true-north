@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { PluginPageProps } from '@true-north/plugin-sdk';
+import type { PluginHubProps } from '@true-north/plugin-sdk';
 import { PluginViewRuntimeProvider } from '@true-north/plugin-sdk/renderer';
 import { Flex } from '@sue/design-web-react';
 import { PanelLeft } from 'lucide-react';
@@ -23,7 +23,7 @@ function featureFor(view: string) {
   return FEATURES[view as keyof typeof FEATURES] || FEATURES.todo;
 }
 
-export default function GrowthPageShell(props: PluginPageProps) {
+export default function GrowthPageShell(props: PluginHubProps) {
   const [navOpen, setNavOpen] = useState(false);
   const view = props.location.view || 'todo';
   const Feature = featureFor(view);

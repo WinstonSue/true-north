@@ -20,7 +20,7 @@ type MessagePartsProps = {
   message: MessageVo;
   streaming?: boolean;
   onOpenResource?: (uri: string) => void;
-  onOpenWorkspace?: (messageId: string) => void;
+  onOpenWorkspace?: (messageId: string, workspaceId?: string) => void;
 };
 
 export function Message({ role, children }: MessageProps) {
@@ -111,7 +111,7 @@ export function MessageWorkspacePart({
 }: {
   part: AiWorkspacePartVo;
   messageId: string;
-  onOpenWorkspace?: (messageId: string) => void;
+  onOpenWorkspace?: (messageId: string, workspaceId?: string) => void;
 }) {
   const { tools } = useWorkbench();
   if (!onOpenWorkspace) return null;
@@ -126,7 +126,7 @@ export function MessageWorkspacePart({
   }
   return (
       <div className={styles.workspaceChip}>
-        <Button size="small" type="link" onClick={() => onOpenWorkspace(messageId)}>
+        <Button size="small" type="link" onClick={() => onOpenWorkspace(messageId, part.workspaceId)}>
           {label}
         </Button>
       </div>

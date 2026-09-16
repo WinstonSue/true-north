@@ -1,3 +1,5 @@
+import { canonicalizeSkillId, formatSkillDirective, skillRefFromId } from '../skill-route.ts';
+
 type ResourceLink = { uri: string; label: string };
 type Attachment = { uri: string; label?: string; skill?: string };
 type MessagePart =
@@ -26,9 +28,18 @@ function workspaceRef(payload: Record<string, unknown>): { type: string; id: str
 
 export function formatAttachments(attachments: Attachment[] | null | undefined): string {
   if (!attachments?.length) return '';
-  return attachments
-    .map((item) => `- ${item.label || item.uri} (${item.uri})${item.skill ? ` skill=${item.skill}` : ''}`)
-    .join('\n');
+  const lines = attachments.map((item) => `- ${item.label || item.uri} (${item.uri})`);
+  const skillRefs = new Map<string, ReturnType<typeof skillRefFromId>>();
+  for (const item of attachments) {
+    const id = canonicalizeSkillId(item.skill);
+    const ref = id ? skillRefFromId(id) : undefined;
+    if (ref && !skillRefs.has(ref.id)) skillRefs.set(ref.id, ref);
+  }
+  for (const ref of skillRefs.values()) {
+    if (!ref) continue;
+    lines.push('', formatSkillDirective(ref));
+  }
+  return lines.join('\n');
 }
 
 export function formatResourceLinks(links: ResourceLink[] | null | undefined): string {

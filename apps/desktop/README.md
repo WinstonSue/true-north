@@ -35,4 +35,4 @@ src/
   config/      Tailwind 等配置
 ```
 
-一等插件在 `packages/plugins/{growth,expense,purchase,library}`。宿主只从 `src/plugin/desktop-plugins.ts`、`main-loaders.ts` 和 `renderer-loaders.ts` 导入插件包。
+一等插件在 `packages/plugins/{growth,expense,inventory,library}`。宿主只从 `src/plugin/desktop-plugins.ts`、`main-loaders.ts` 和 `renderer-loaders.ts` 导入插件包。

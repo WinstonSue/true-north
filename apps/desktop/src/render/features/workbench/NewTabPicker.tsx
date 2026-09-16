@@ -15,29 +15,29 @@ export function NewTabPicker({ 'data-product-ref': productRefAttr }: { 'data-pro
   const [open, setOpen] = useState(false);
 
   const items = useMemo(() => {
-    const grouped = new Map<string, { pluginId: string; nameKey: string; views: typeof platform.workbenchViews }>();
+    const grouped = new Map<string, { pluginId: string; nameKey: string; tabs: typeof platform.workbenchNewTabs }>();
     for (const plugin of platform.plugins) {
-      grouped.set(plugin.pluginId, { pluginId: plugin.pluginId, nameKey: plugin.nameKey, views: [] });
+      grouped.set(plugin.pluginId, { pluginId: plugin.pluginId, nameKey: plugin.nameKey, tabs: [] });
     }
-    for (const view of [...(platform.workbenchViews || [])].sort((a, b) => (a.order || 0) - (b.order || 0))) {
-      const bucket = grouped.get(view.pluginId) || {
-        pluginId: view.pluginId,
-        nameKey: view.pluginId,
-        views: [],
+    for (const tab of [...(platform.workbenchNewTabs || [])].sort((a, b) => (a.order || 0) - (b.order || 0))) {
+      const bucket = grouped.get(tab.pluginId) || {
+        pluginId: tab.pluginId,
+        nameKey: tab.pluginId,
+        tabs: [],
       };
-      bucket.views = [...(bucket.views || []), view];
-      grouped.set(view.pluginId, bucket);
+      bucket.tabs = [...(bucket.tabs || []), tab];
+      grouped.set(tab.pluginId, bucket);
     }
 
     const groups = [...grouped.values()]
-      .filter((group) => group.views?.length)
+      .filter((group) => group.tabs?.length)
       .map((group) => ({
         type: 'group' as const,
         key: `plugin:${group.pluginId}`,
         label: t[group.nameKey] || group.nameKey,
-        children: (group.views || []).map((view) => ({
-          key: view.id,
-          label: t[view.nameKey] || view.nameKey,
+        children: (group.tabs || []).map((tab) => ({
+          key: tab.viewId,
+          label: t[tab.nameKey] || tab.nameKey,
         })),
       }));
 
@@ -45,7 +45,7 @@ export function NewTabPicker({ 'data-product-ref': productRefAttr }: { 'data-pro
       { key: 'web', label: t['workbench.new-tab.web'] || '新网页' },
       ...(groups.length ? [{ type: 'divider' as const, key: 'divider' }, ...groups] : []),
     ];
-  }, [platform.plugins, platform.workbenchViews, t]);
+  }, [platform.plugins, platform.workbenchNewTabs, t]);
 
   return (
     <span data-product-ref={productRefAttr}>
@@ -61,9 +61,9 @@ export function NewTabPicker({ 'data-product-ref': productRefAttr }: { 'data-pro
               void createTab();
               return;
             }
-            const view = (platform.workbenchViews || []).find((item) => item.id === key);
-            if (!view) return;
-            void openPluginView({ viewId: view.id, params: {} });
+            const tab = (platform.workbenchNewTabs || []).find((item) => item.viewId === key);
+            if (!tab) return;
+            void openPluginView({ viewId: tab.viewId, params: {} });
           },
         }}
       >

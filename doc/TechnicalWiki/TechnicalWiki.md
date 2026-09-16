@@ -33,11 +33,11 @@ Growth 等业务域的产品级约束不在本文重复，参见 [ProductWiki ·
 | [documentation/TDD-guide.md](./documentation/TDD-guide.md) | 技术设计文档写作规范 |
 | `@ylib/product-server` `WIKI.md` | ProductWiki 编写规范 |
 | [growth/README.md](./growth/README.md) | Growth 技术基线；原成长聚合页已并入 Home |
-| [activity/README.md](./activity/README.md) | 活动卡索引与跨领域采纳事务 |
+| [activity/README.md](./activity/README.md) | 宿主 Workflow 协调器（原 Activity 运行时已删除） |
 | [expense/README.md](./expense/README.md) | 记账 SQLite 持久化 |
-| [purchase/README.md](./purchase/README.md) | 家庭采购（替换 ERP 演示） |
+| [inventory/README.md](./inventory/README.md) | 家庭物资库存 |
 | [library/README.md](./library/README.md) | 本地网页 Markdown 收藏索引 |
-| [ai/README.md](./ai/README.md) | AI 平台域：Capability、收集箱、拆解与 capture workspace |
+| [ai/README.md](./ai/README.md) | AI 平台域：Agent、MCP、工作台与冲突排查 |
 
 ### 开发规范
 

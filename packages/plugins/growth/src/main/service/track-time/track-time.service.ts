@@ -15,8 +15,6 @@ export class TrackTimeService {
     createDto.exportCreateEntity(entity);
 
     const saved = await this.trackTimeRepository.create(entity);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return TrackTimeDto.importEntity(saved);
   }
 
@@ -31,15 +29,11 @@ export class TrackTimeService {
     this.assertValidDuration(updateDto.duration, updateDto.startAt, updateDto.endAt);
     const entity = updateDto.exportUpdateEntity();
     const saved = await this.trackTimeRepository.update(entity);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return TrackTimeDto.importEntity(saved);
   }
 
   async delete(id: string): Promise<void> {
     await this.trackTimeRepository.delete(id);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
   }
 
   async findByRelatedId(relatedType: TrackTimeRelatedType, relatedId: string): Promise<TrackTimeDto[]> {

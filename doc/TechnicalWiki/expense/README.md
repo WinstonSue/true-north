@@ -11,4 +11,4 @@ packages/plugins/expense/src/main/service/           # Transaction / Budget Enti
 packages/plugins/expense/src/renderer/   # 页面仍通过 ExpenseController 读写
 ```
 
-创建交易后由活动卡记录服务写一张支出/收入卡。Capture 采纳走同一 `expenseService`，可 `skipActivity` 以免与活动卡事务重复建卡。
+创建交易后发出 `transactionBooked` 领域事件。物资入库与记账是独立事实，不再通过采购结算入账。

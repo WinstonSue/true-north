@@ -13,7 +13,7 @@ true-north/
 │   ├── plugin-contract/      # 插件契约
 │   ├── plugin-sdk/           # 插件运行时
 │   ├── plugin-ui/            # 共享 UI
-│   ├── plugins/              # growth / expense / purchase / library
+│   ├── plugins/              # growth / expense / inventory / library
 │   ├── dev-lab/              # DEV Lab
 │   └── product-wiki/         # 宿主 ProductWiki
 ├── doc/
@@ -33,7 +33,7 @@ apps/desktop/src/
 ├── plugin/         # 插件宿主、一等插件清单与加载器
 ├── render/         # React 渲染进程（AI、Workbench、设置、插件壳）
 ├── dev/            # DEV 宿主
-├── service/        # 宿主域（AI、Activity、browser、users）
+├── service/        # 宿主域（AI、Workflow、browser、users）
 └── config/
 ```
 
@@ -45,7 +45,7 @@ Growth / Expense / Purchase / Library 实现在 `packages/plugins/{id}`。
 | --- | --- |
 | `vo` | 前后端/IPC 边界类型（`@true-north/vo`） |
 | `enum` | 业务枚举（`@true-north/enum`） |
-| `web-service` | 渲染层 AI / Activity / Browser 调用封装 |
+| `web-service` | 渲染层 AI / Workflow / Browser 调用封装 |
 
 主进程装饰器在 `packages/plugin-sdk/src/host/decorators.ts`（`@true-north/plugin-sdk/main`），桥接 `electron-ipc-restful`。
 

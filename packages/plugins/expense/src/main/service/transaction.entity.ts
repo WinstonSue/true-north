@@ -21,4 +21,7 @@ export class ExpenseTransaction extends BaseEntity {
 
   @Column('datetime')
   transactionDateTime!: Date;
+
+  @Column('int', { nullable: true })
+  revision?: number;
 }

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Button, ConfigProvider, Empty, Flex, Tabs, Tag, theme as sueTheme } from '@sue/design-web-react';
-import { X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Button, ConfigProvider, Empty, Flex, Select, Tabs, Tag, theme as sueTheme } from '@sue/design-web-react';
+import { Check, Copy, X } from 'lucide-react';
 import zhCN from '@sue/design-web-react/locale/zh_CN';
 import {
   getLabPanelBridge,
@@ -11,6 +11,14 @@ import {
   type LabTheme,
 } from '../protocol';
 import type { TraceEntry, TraceSpan } from '../types';
+import { copyText, toCopyJson } from './copy';
+import {
+  collectTypeOptions,
+  entryStatus,
+  filterEntries,
+  STATUS_FILTER_OPTIONS,
+  type TraceStatus,
+} from './filters';
 
 type LabToolId = 'request';
 
@@ -42,10 +50,7 @@ function rowTitle(entry: TraceEntry): string {
 }
 
 function statusClass(entry: TraceEntry): string {
-  if (entry.open) return 'is-pending';
-  if (entry.ok === false || entry.error) return 'is-error';
-  if (entry.ok) return 'is-ok';
-  return '';
+  return `is-${entryStatus(entry)}`;
 }
 
 function applyLabDocumentTheme(theme: LabTheme) {
@@ -98,6 +103,8 @@ function LabShell() {
   const [tool, setTool] = useState<LabToolId>('request');
   const [entries, setEntries] = useState<TraceEntry[]>([]);
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<TraceStatus | 'all'>('all');
 
   useEffect(() => {
     const api = getLabPanelBridge();
@@ -107,18 +114,29 @@ function LabShell() {
   }, []);
 
   const ordered = useMemo(() => [...entries].reverse(), [entries]);
+  const typeOptions = useMemo(() => collectTypeOptions(ordered), [ordered]);
+  const filtered = useMemo(
+    () => filterEntries(ordered, { type: typeFilter, status: statusFilter }),
+    [ordered, typeFilter, statusFilter],
+  );
 
   useEffect(() => {
-    if (ordered.length === 0) {
+    if (typeFilter !== 'all' && typeOptions.every((option) => option.value !== typeFilter)) {
+      setTypeFilter('all');
+    }
+  }, [typeFilter, typeOptions]);
+
+  useEffect(() => {
+    if (filtered.length === 0) {
       setSelectedEntryId(null);
       return;
     }
     setSelectedEntryId((current) =>
-      current && ordered.some((entry) => entry.id === current) ? current : ordered[0].id,
+      current && filtered.some((entry) => entry.id === current) ? current : filtered[0].id,
     );
-  }, [ordered]);
+  }, [filtered]);
 
-  const selected = ordered.find((entry) => entry.id === selectedEntryId);
+  const selected = filtered.find((entry) => entry.id === selectedEntryId);
 
   const clearEntries = () => {
     void getLabPanelBridge()?.clear().then((next) => {
@@ -154,7 +172,13 @@ function LabShell() {
       </Flex>
       {tool === 'request' ? (
         <RequestView
-          ordered={ordered}
+          hasEntries={ordered.length > 0}
+          typeFilter={typeFilter}
+          statusFilter={statusFilter}
+          typeOptions={typeOptions}
+          onTypeFilter={(value) => setTypeFilter(value ?? 'all')}
+          onStatusFilter={(value) => setStatusFilter(value ?? 'all')}
+          ordered={filtered}
           selectedEntryId={selectedEntryId}
           selected={selected}
           onSelect={setSelectedEntryId}
@@ -165,41 +189,127 @@ function LabShell() {
 }
 
 function RequestView({
+  hasEntries,
+  typeFilter,
+  statusFilter,
+  typeOptions,
+  onTypeFilter,
+  onStatusFilter,
   ordered,
   selectedEntryId,
   selected,
   onSelect,
 }: {
+  hasEntries: boolean;
+  typeFilter: string;
+  statusFilter: TraceStatus | 'all';
+  typeOptions: { value: string; label: string }[];
+  onTypeFilter: (value?: string) => void;
+  onStatusFilter: (value?: TraceStatus) => void;
   ordered: TraceEntry[];
   selectedEntryId: string | null;
   selected: TraceEntry | undefined;
   onSelect: (id: string) => void;
 }) {
   return (
-    <Flex container="fill" className="labBody">
-      <Flex vertical container="fixed" className="labList">
-        {ordered.length === 0 ? (
-          <Empty description="还没有捕获到请求" />
-        ) : (
-          ordered.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              className={`labRow ${entry.id === selectedEntryId ? 'labRowSelected' : ''}`}
-              onClick={() => onSelect(entry.id)}
-            >
-              <i className={`labStatus ${statusClass(entry)}`} />
-              {entry.kind === 'ipc' ? <span className="labMethod">{entry.method}</span> : null}
-              <span className="labPath">{rowTitle(entry)}</span>
-              <span className="labMeta">{formatDuration(entry.durationMs)}</span>
-            </button>
-          ))
-        )}
+    <Flex vertical container="fill" className="labBody">
+      <Flex container="fixed" className="labFilters" align="center" gap={8} wrap>
+        <Select
+          size="small"
+          allowClear
+          placeholder="请求类型"
+          aria-label="请求类型"
+          className="labFilterSelect"
+          value={typeFilter === 'all' ? undefined : typeFilter}
+          onChange={onTypeFilter}
+          options={typeOptions}
+        />
+        <Select
+          size="small"
+          allowClear
+          placeholder="返回状态"
+          aria-label="返回状态"
+          className="labFilterSelect"
+          value={statusFilter === 'all' ? undefined : statusFilter}
+          onChange={onStatusFilter}
+          options={[...STATUS_FILTER_OPTIONS]}
+        />
       </Flex>
-      <Flex vertical container="fill" className="labDetailPane">
-        {selected ? <EntryDetail entry={selected} /> : <Empty description="选择一条请求查看详情" />}
+      <Flex container="fill" className="labSplit">
+        <Flex vertical container="fixed" className="labList">
+          {ordered.length === 0 ? (
+            <Empty description={hasEntries ? '没有匹配的请求' : '还没有捕获到请求'} />
+          ) : (
+            ordered.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                className={`labRow ${entry.id === selectedEntryId ? 'labRowSelected' : ''}`}
+                onClick={() => onSelect(entry.id)}
+              >
+                <i className={`labStatus ${statusClass(entry)}`} />
+                {entry.kind === 'ipc' ? <span className="labMethod">{entry.method}</span> : (
+                  <span className="labMethod">{entry.kind}</span>
+                )}
+                <span className="labPath">{rowTitle(entry)}</span>
+                <span className="labMeta">{formatDuration(entry.durationMs)}</span>
+              </button>
+            ))
+          )}
+        </Flex>
+        <Flex vertical container="fill" className="labDetailPane">
+          {selected ? <EntryDetail entry={selected} /> : <Empty description="选择一条请求查看详情" />}
+        </Flex>
       </Flex>
     </Flex>
+  );
+}
+
+function CopyButton({ value, label }: { value: unknown; label?: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  const title = state === 'copied' ? '已复制' : state === 'failed' ? '复制失败' : (label ?? '复制');
+
+  return (
+    <Button
+      type="text"
+      size="small"
+      className={label ? 'labCopyAll' : 'labCopy'}
+      title={title}
+      aria-label={title}
+      icon={state === 'copied' ? <Check size={14} /> : <Copy size={14} />}
+      onClick={() => {
+        void copyText(toCopyJson(value))
+          .then(() => setState('copied'))
+          .catch(() => setState('failed'))
+          .finally(() => {
+            if (timer.current) clearTimeout(timer.current);
+            timer.current = setTimeout(() => setState('idle'), 1500);
+          });
+      }}
+    >
+      {label}
+    </Button>
+  );
+}
+
+function DetailBlock({ title, value, children }: { title: string; value: unknown; children: ReactNode }) {
+  return (
+    <dl className="labBlock">
+      <dt>
+        <span>{title}</span>
+        <CopyButton value={value} />
+      </dt>
+      <dd>{children}</dd>
+    </dl>
   );
 }
 
@@ -212,36 +322,33 @@ function EntryDetail({ entry }: { entry: TraceEntry }) {
         <span className="labMeta">
           {formatDuration(entry.durationMs)} · {formatTime(entry.startedAt)}
         </span>
+        <CopyButton value={entry} label="复制全部" />
       </div>
       {entry.streamId ? (
-        <dl className="labBlock">
-          <dt>streamId</dt>
-          <dd className="labPre">{entry.streamId}</dd>
-        </dl>
+        <DetailBlock title="streamId" value={entry.streamId}>
+          <div className="labPre">{entry.streamId}</div>
+        </DetailBlock>
       ) : null}
       {entry.conversationId ? (
-        <dl className="labBlock">
-          <dt>conversationId</dt>
-          <dd className="labPre">{entry.conversationId}</dd>
-        </dl>
+        <DetailBlock title="conversationId" value={entry.conversationId}>
+          <div className="labPre">{entry.conversationId}</div>
+        </DetailBlock>
       ) : null}
       {entry.kind === 'ipc' ? (
         <>
-          <dl className="labBlock">
-            <dt>params</dt>
-            <dd>
-              <pre className="labPre">{pretty(entry.params)}</pre>
-            </dd>
-          </dl>
-          <dl className="labBlock">
-            <dt>response</dt>
-            <dd>
-              <pre className="labPre">{pretty(entry.response)}</pre>
-            </dd>
-          </dl>
+          <DetailBlock title="params" value={entry.params}>
+            <pre className="labPre">{pretty(entry.params)}</pre>
+          </DetailBlock>
+          <DetailBlock title="response" value={entry.response}>
+            <pre className="labPre">{pretty(entry.response)}</pre>
+          </DetailBlock>
         </>
       ) : null}
-      {entry.error ? <p className="labError">{entry.error}</p> : null}
+      {entry.error ? (
+        <DetailBlock title="error" value={entry.error}>
+          <p className="labError">{entry.error}</p>
+        </DetailBlock>
+      ) : null}
       {entry.spans.map((span) => (
         <SpanCard key={span.id} span={span} />
       ))}
@@ -256,6 +363,7 @@ function SpanCard({ span }: { span: TraceSpan }) {
         <span className="labKind">{span.kind}</span>
         <span className="labPath">{span.summary}</span>
         <span className="labMeta">{formatDuration(span.durationMs)}</span>
+        <CopyButton value={span} />
       </div>
       {span.error ? <p className="labError">{span.error}</p> : null}
       {span.detail != null ? <pre className="labPre">{pretty(span.detail)}</pre> : null}

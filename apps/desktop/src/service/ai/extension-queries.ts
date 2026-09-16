@@ -55,10 +55,10 @@ export async function getMcpPrompt(name: string, args: Record<string, string>) {
 
 export function allSkillRoots() {
   const grouped = new Map<string, Record<string, string>>();
-  for (const skill of getMainExtensionsOptional()?.listRecords(extensionPoints.skill) || []) {
-    const roots = grouped.get(skill.owner) || {};
-    roots[skill.value.localId] = skill.value.root;
-    grouped.set(skill.owner, roots);
+  for (const skill of getMainExtensionsOptional()?.list(extensionPoints.skill) || []) {
+    const roots = grouped.get(skill.pluginId) || {};
+    roots[skill.localId] = skill.root;
+    grouped.set(skill.pluginId, roots);
   }
   return [...grouped.entries()].map(([pluginId, roots]) => ({ pluginId, roots }));
 }

@@ -8,6 +8,7 @@ import { growthManifest } from '../manifest';
 import { growthIds } from '../contract';
 import { growthLocales } from './locales';
 import { goalDecomposeTool, taskDecomposeTool } from './contributions/ai-decomposition/tools';
+import { suggestTodoTool } from './contributions/suggest/tool';
 import { FocusTimerProvider, useFocusTimer } from './pages/focus-timer';
 import { TaskDrawerHost } from './pages/task/detail/TaskDrawer';
 import { bindPluginIpc } from '../client';
@@ -46,13 +47,14 @@ export function createRenderer() {
           habit: { load: () => import('./features/habit') },
           goal: { load: () => import('./features/goal') },
         },
-        page: {
+        hub: {
           load: () => import('./layout/GrowthPageShell'),
         },
         workbench: {
           workspaces: {
             goalDecompose: goalDecomposeTool,
             taskDecompose: taskDecomposeTool,
+            suggestTodo: suggestTodoTool,
           },
         },
         shell: {

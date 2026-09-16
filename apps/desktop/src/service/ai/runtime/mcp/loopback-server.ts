@@ -2,7 +2,7 @@ import http from 'http';
 import type { IncomingMessage, ServerResponse } from 'http';
 import { randomUUID } from 'crypto';
 import type { AiMessagePartVo, AiToolPartVo, AiWorkspacePartVo } from '@true-north/vo';
-import { executeAgentTool, listAgentTools, summarizeToolArgs } from '../../agent/tools.ts';
+import { executeAgentTool, findAgentTool, listAgentTools, summarizeToolArgs } from '../../agent/tools.ts';
 import {
   getMcpPrompt,
   listMcpPrompts,
@@ -12,6 +12,7 @@ import {
 } from '../../extension-queries.ts';
 import { traceExternal } from '@true-north/dev-lab/collector';
 import { getStreamSession } from '../stream-session.ts';
+import { isConflictAllowedToolName } from '../../../workflow/ai/conflict-proposal.ts';
 
 const PROTOCOL_VERSIONS = ['2025-03-26', '2024-11-05'];
 const DEFAULT_PROTOCOL = '2025-03-26';
@@ -74,6 +75,10 @@ function cloneParts(parts: AiMessagePartVo[]): AiMessagePartVo[] {
   return parts.map((part) => ({ ...part }));
 }
 
+function isConflictAllowedTool(name: string) {
+  return isConflictAllowedToolName(name, { readOnly: findAgentTool(name)?.readOnly });
+}
+
 function summarizeToolResult(result: string, error?: boolean): string {
   if (error) return result.slice(0, 180);
   try {
@@ -98,6 +103,12 @@ async function callTool(streamId: string | undefined, name: string, args: Record
       content: [{ type: 'text', text: '当前没有绑定的会话流，无法执行领域工具。' }],
     };
   }
+  if (session.conflictMode && !isConflictAllowedTool(name)) {
+    return {
+      isError: true,
+      content: [{ type: 'text', text: '冲突排查会话只能读取资源并调用 workflow.proposeConflictResolution。' }],
+    };
+  }
 
   const running: AiToolPartVo = {
     type: 'tool',
@@ -110,8 +121,11 @@ async function callTool(streamId: string | undefined, name: string, args: Record
 
   const executed = await executeAgentTool(name, args, {
     appendWorkspace: (part: AiWorkspacePartVo) => {
-      session.parts = [...cloneParts(session.parts), part];
+      const workspaceId = part.workspaceId || randomUUID();
+      session.parts = [...cloneParts(session.parts), { ...part, workspaceId }];
+      return workspaceId;
     },
+    conflictTicketId: session.conflictTicketId,
   });
 
   let runningIndex = -1;
@@ -166,8 +180,13 @@ async function handleRpc(message: JsonRpcRequest, streamId?: string): Promise<un
   }
 
   if (method === 'tools/list') {
+    const session = streamId ? getStreamSession(streamId) : undefined;
+    const tools = listAgentTools().filter((tool) => {
+      if (!session?.conflictMode) return true;
+      return isConflictAllowedTool(tool.name);
+    });
     return {
-      tools: listAgentTools().map((tool) => ({
+      tools: tools.map((tool) => ({
         name: tool.name,
         description: tool.description,
         inputSchema: tool.parameters,

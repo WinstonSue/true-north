@@ -34,6 +34,7 @@ export type AiWorkspacePayloadVo = Record<string, unknown>;
 
 export type AiWorkspacePartVo = {
   type: 'workspace';
+  workspaceId: string;
   workspaceKey: string;
   payload: AiWorkspacePayloadVo;
 };
@@ -111,6 +112,7 @@ export type StartMessageStreamResponseVo = {
 
 export type PatchWorkspaceRequestVo = {
   payload: AiWorkspacePayloadVo;
+  workspaceId?: string;
 };
 
 export type CancelStreamResponseVo = {

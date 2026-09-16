@@ -63,7 +63,7 @@ test('plugins do not import desktop aliases, host source, or central domain web-
 test('host only imports first-party plugins from the registry and loader maps', () => {
   const result = rg([
     '-n',
-    "from ['\"]@true-north/plugin-(growth|expense|purchase|library)/",
+    "from ['\"]@true-north/plugin-(growth|expense|inventory|library)/",
     'apps/desktop/src',
   ]);
   const lines = result
@@ -82,7 +82,7 @@ test('host only imports first-party plugins from the registry and loader maps', 
 test('main process plugin host does not import renderer implementations', () => {
   const result = rg([
     '-n',
-    "plugin-(growth|expense|purchase|library)/renderer",
+    "plugin-(growth|expense|inventory|library)/renderer",
     'apps/desktop/src/main',
     'apps/desktop/src/plugin',
     'apps/desktop/src/service',
@@ -101,11 +101,11 @@ test('migrated domain copies are not kept in the desktop host', () => {
   const leftoverRoots = [
     'apps/desktop/src/service/growth',
     'apps/desktop/src/service/expense',
-    'apps/desktop/src/service/purchase',
+    'apps/desktop/src/service/inventory',
     'apps/desktop/src/service/library',
     'apps/desktop/src/render/features/growth',
     'apps/desktop/src/render/features/expense',
-    'apps/desktop/src/render/features/purchase',
+    'apps/desktop/src/render/features/inventory',
     'apps/desktop/src/render/features/library',
     'apps/desktop/src/render/features/mind-map',
     'apps/desktop/src/render/features/timer',
@@ -130,17 +130,17 @@ test('host database no longer registers plugin entities', () => {
 test('host services do not import plugin entity modules', () => {
   const result = rg([
     '-n',
-    "from ['\"]@true-north/plugin-(growth|expense|purchase|library)",
+    "from ['\"]@true-north/plugin-(growth|expense|inventory|library)",
     'apps/desktop/src/service',
   ]);
   assert.equal(result.trim(), '');
 });
 
-test('AI session, Workbench, and Activity live on the host, not as plugins', () => {
+test('AI session, Workbench, and Workflow live on the host, not as plugins', () => {
   assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/ai')), true);
   assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/render/features/ai')), true);
   assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/render/features/workbench')), true);
-  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/activity')), true);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/workflow')), true);
   assert.equal(existsSync(join(repoRoot, 'packages/plugins/ai')), false);
   assert.equal(existsSync(join(repoRoot, 'packages/plugins/workbench')), false);
   assert.equal(existsSync(join(repoRoot, 'packages/plugins/activity')), false);

@@ -1,5 +1,10 @@
 import { useContext, type ComponentType, type ReactNode } from 'react';
-import { createHostActionPort, extensionPoints, openRegisteredResource } from '../extension-points.ts';
+import {
+  createHostActionPort,
+  extensionPoints,
+  openRegisteredResource,
+  type WorkflowInteractionExtension,
+} from '../extension-points.ts';
 import { sharedReactContext } from './shared-context.ts';
 import { type ExtensionRegistry } from '../extension-registry.ts';
 import type {
@@ -12,6 +17,7 @@ import type {
   ShellSlotContribution,
   WorkbenchToolDefinition,
   WorkbenchViewContribution,
+  WorkbenchNewTabContribution,
   WorkbenchWorkspaceHost,
 } from '../runtime.ts';
 
@@ -51,8 +57,16 @@ export class RendererPlatform {
     return this.state.registry.list(extensionPoints.view);
   }
 
-  get pageShells() {
-    return this.state.registry.list(extensionPoints.pageShell);
+  get workbenchNewTabs(): WorkbenchNewTabContribution[] {
+    return this.state.registry.list(extensionPoints.newTab);
+  }
+
+  get hubs() {
+    return this.state.registry.list(extensionPoints.hub);
+  }
+
+  get workflowInteractions(): WorkflowInteractionExtension[] {
+    return this.state.registry.list(extensionPoints.workflowInteraction);
   }
 
   get locales(): LocaleContribution[] {

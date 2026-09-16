@@ -13,7 +13,7 @@ const wikiRoots = [
   { pluginId: 'host', root: wikiRoot },
   { pluginId: 'growth', root: join(repoRoot, 'packages/plugins/growth/wiki') },
   { pluginId: 'expense', root: join(repoRoot, 'packages/plugins/expense/wiki') },
-  { pluginId: 'purchase', root: join(repoRoot, 'packages/plugins/purchase/wiki') },
+  { pluginId: 'inventory', root: join(repoRoot, 'packages/plugins/inventory/wiki') },
   { pluginId: 'library', root: join(repoRoot, 'packages/plugins/library/wiki') },
 ];
 const desktopSurfaceRoots = [

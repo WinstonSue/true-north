@@ -24,13 +24,13 @@ test('transaction rebind only affects stores on the same DataSource', async () =
   const hostRuntime = createHostStorageRuntime(hostDb, undefined, { registry });
   const pluginRuntime = createHostStorageRuntime(pluginDb, undefined, { registry });
   registry.bind('host:ai', hostRuntime);
-  registry.bind('host:activity', hostRuntime);
+  registry.bind('host:workflow', hostRuntime);
   registry.bind('growth', pluginRuntime);
-  assert.deepEqual(registry.idsForDataSource(hostDb).sort(), ['host:activity', 'host:ai']);
+  assert.deepEqual(registry.idsForDataSource(hostDb).sort(), ['host:ai', 'host:workflow']);
   assert.deepEqual(registry.idsForDataSource(pluginDb), ['growth']);
   await hostRuntime.runInTransaction(async (tx) => {
     assert.equal(registry.get('host:ai').manager, tx.manager);
-    assert.equal(registry.get('host:activity').manager, tx.manager);
+    assert.equal(registry.get('host:workflow').manager, tx.manager);
     assert.equal(registry.get('growth').dataSource, pluginDb);
   });
   assert.equal(registry.get('growth').dataSource, pluginDb);

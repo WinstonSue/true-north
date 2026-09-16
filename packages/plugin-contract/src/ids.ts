@@ -3,17 +3,17 @@ export const PLUGIN_API_VERSION = 0 as const;
 
 export type PluginApiVersion = typeof PLUGIN_API_VERSION;
 
-/** 插件页在宿主路由中的根路径。单个插件页为 `/plugins/{pluginId}`。 */
+/** 插件 Hub 在宿主路由中的根路径。单个插件 Hub 为 `/plugins/{pluginId}`。 */
 export const PLUGIN_HUB_PATH = '/plugins';
 
-/** 插件页路径：`/plugins/{pluginId}`。 */
+/** 插件 Hub 路径：`/plugins/{pluginId}`。 */
 export function pluginPath(pluginId: string): string {
   return `${PLUGIN_HUB_PATH}/${pluginId}`;
 }
 
 /**
  * 贡献的全局 id：`{pluginId}.{localId}`。
- * 用于 view、workspace、action、capture、today、skill 等跨插件唯一键。
+ * 用于 view、workspace、action、skill、workflow command 等跨插件唯一键。
  */
 export function contributionKey(pluginId: string, localId: string): string {
   return `${pluginId}.${localId}`;

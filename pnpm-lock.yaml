@@ -89,12 +89,12 @@ importers:
       '@true-north/plugin-growth':
         specifier: workspace:*
         version: link:../../packages/plugins/growth
+      '@true-north/plugin-inventory':
+        specifier: workspace:*
+        version: link:../../packages/plugins/inventory
       '@true-north/plugin-library':
         specifier: workspace:*
         version: link:../../packages/plugins/library
-      '@true-north/plugin-purchase':
-        specifier: workspace:*
-        version: link:../../packages/plugins/purchase
       '@true-north/plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
@@ -573,7 +573,7 @@ importers:
         specifier: ^0.3.17
         version: 0.3.31(mysql2@3.15.0)(sqlite3@5.1.7(bluebird@3.7.2)(supports-color@8.1.1))(supports-color@8.1.1)(ts-node@10.9.2(@swc/core@1.15.47)(@types/node@22.13.0)(typescript@6.0.3))
 
-  packages/plugins/library:
+  packages/plugins/inventory:
     dependencies:
       '@sue/design-web-react':
         specifier: 0.0.3-beta.1
@@ -587,6 +587,9 @@ importers:
       '@true-north/plugin-sdk':
         specifier: workspace:*
         version: link:../../plugin-sdk
+      '@true-north/plugin-ui':
+        specifier: workspace:*
+        version: link:../../plugin-ui
       '@true-north/vo':
         specifier: workspace:*
         version: link:../../business/vo
@@ -614,8 +617,11 @@ importers:
       typeorm:
         specifier: ^0.3.17
         version: 0.3.31(mysql2@3.15.0)(sqlite3@5.1.7(bluebird@3.7.2)(supports-color@8.1.1))(supports-color@8.1.1)(ts-node@10.9.2(@swc/core@1.15.47)(@types/node@22.13.0)(typescript@6.0.3))
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
 
-  packages/plugins/purchase:
+  packages/plugins/library:
     dependencies:
       '@sue/design-web-react':
         specifier: 0.0.3-beta.1

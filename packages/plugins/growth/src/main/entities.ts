@@ -1,3 +1,4 @@
+import { PluginCommandLedger } from '@true-north/plugin-sdk/main';
 import { Goal } from './service/goal/goal.entity';
 import { Task } from './service/task/task.entity';
 import { Todo } from './service/todo/todo.entity';
@@ -6,4 +7,4 @@ import { Repeat } from './service/repeat/repeat.entity';
 import { Habit } from './service/habit/habit.entity';
 import { TrackTime } from './service/track-time/entity';
 
-export const growthEntities = [Goal, Task, Todo, TodoRepeat, Repeat, Habit, TrackTime];
+export const growthEntities = [Goal, Task, Todo, TodoRepeat, Repeat, Habit, TrackTime, PluginCommandLedger];

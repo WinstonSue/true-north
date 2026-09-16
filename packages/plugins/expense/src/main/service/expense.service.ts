@@ -25,6 +25,7 @@ function toTransactionVo(entity: ExpenseTransaction): TransactionVo {
     category: entity.category,
     tags: entity.tags || [],
     transactionDateTime: toIso(entity.transactionDateTime),
+    revision: entity.revision || 1,
     createdAt: toIso(entity.createdAt),
     updatedAt: toIso(entity.updatedAt),
   };
@@ -69,7 +70,7 @@ export class ExpenseService {
 
   async createTransaction(
     body: CreateTransactionVo,
-    options?: { skipActivity?: boolean; manager?: EntityManager }
+    options?: { manager?: EntityManager }
   ): Promise<TransactionVo> {
     if (!body?.amount || body.amount <= 0) throw new Error('金额必须大于 0');
     if (!body.category?.trim()) throw new Error('请选择分类');
@@ -84,9 +85,10 @@ export class ExpenseService {
         ? new Date(body.transactionDateTime)
         : new Date(),
     });
+    entity.revision = 1;
     const saved = await repo.save(entity);
     const vo = toTransactionVo(saved);
-    if (!options?.skipActivity) {
+    if (!options?.manager) {
       await recordExpenseActivity({
         title: vo.description || (vo.type === 'income' ? '收入' : '支出'),
         entityId: vo.id,
@@ -105,6 +107,7 @@ export class ExpenseService {
     if (body.category) current.category = body.category;
     if (body.tags) current.tags = body.tags;
     if (body.transactionDateTime) current.transactionDateTime = new Date(body.transactionDateTime);
+    current.revision = (current.revision || 1) + 1;
     return toTransactionVo(await this.transactions().save(current));
   }
 

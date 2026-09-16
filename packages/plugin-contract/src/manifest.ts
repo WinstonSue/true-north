@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { PLUGIN_API_VERSION, SHELL_SLOT_IDS, contributionKey } from './ids.ts';
-import { todaySectionDescriptorSchema, type TodaySectionDescriptor } from './today.ts';
+import {
+  workflowContributionsSchema,
+  type WorkflowContributions,
+} from './workflow.ts';
 
 /** 只声明贡献存在；行为由 main / renderer 按同名 local id 实现。 */
 export type DeclaredContribution = Record<string, never>;
@@ -22,15 +25,25 @@ export const shellSlotContributionSchema = z.object({
 });
 
 export type ViewContribution = {
-  /** Workbench 标签 / 加号菜单文案 i18n key。 */
+  /** Workbench 标签文案 i18n key。 */
   nameKey: string;
+};
+
+export const viewContributionSchema = z.object({
+  /** Workbench 标签文案 i18n key。 */
+  nameKey: z.string().min(1),
+});
+
+export type NewTabContribution = {
+  /** 加号菜单文案 i18n key；缺省用目标 view 的 nameKey。 */
+  nameKey?: string;
   /** 同插件内加号菜单排序，越小越靠前。 */
   order?: number;
 };
 
-export const viewContributionSchema = z.object({
-  /** Workbench 标签 / 加号菜单文案 i18n key。 */
-  nameKey: z.string().min(1),
+export const newTabContributionSchema = z.object({
+  /** 加号菜单文案 i18n key；缺省用目标 view 的 nameKey。 */
+  nameKey: z.string().min(1).optional(),
   /** 同插件内加号菜单排序，越小越靠前。 */
   order: z.number().optional(),
 });
@@ -109,28 +122,26 @@ export type PluginContributions = {
   ipc?: Record<string, DeclaredContribution>;
   /**
    * Workbench 可打开的功能。全局 id 为 `{pluginId}.{localId}`。
-   * 只给加号菜单与功能标签用；插件页栏目由 `page` 自己导航。
-   * 实现必须提供同名 `handles.views`。
+   * 只给功能标签与 `openPluginView` 用；加号菜单见 `workbench.newTabs`。
+   * 插件 Hub 栏目由 `hub` 自己导航。实现必须提供同名 `handles.views`。
    */
   views?: Record<string, ViewContribution>;
   /**
-   * Workbench：会话内工作区与一次性动作。
+   * Workbench：会话内工作区、一次性动作与加号菜单。
    * - `workspaces`：AI 消息可打开的工具面板（如目标拆解）
    * - `actions`：工作台触发的副作用（如从网页抽取书签）
+   * - `newTabs`：加号菜单条目；key 必须是已声明 view 的 local id，无独立 handle
    */
   workbench?: {
     workspaces?: Record<string, DeclaredContribution>;
     actions?: Record<string, DeclaredContribution>;
+    newTabs?: Record<string, NewTabContribution>;
   };
   /**
-   * Activity 平台扩展。
-   * - `captureTypes`：AI 捕获建议的采纳类型，全局 id `{pluginId}.{localId}`
-   * - `today`：今日页区块，描述符见 `todaySectionDescriptorSchema`
+   * 跨插件协作。插件只声明事件、幂等命令与交互；宿主 runner 调度。
+   * 实现必须提供同名 `handles.workflow.commands` / `handles.workflow.interactions`。
    */
-  activity?: {
-    captureTypes?: Record<string, DeclaredContribution>;
-    today?: Record<string, TodaySectionDescriptor>;
-  };
+  workflow?: WorkflowContributions;
   /**
    * 向宿主壳层插入 React 节点。key 为 slot 实例 local id；
    * `slot` 指定挂载点，实现必须提供同名 `handles.shell.slots`。
@@ -152,10 +163,10 @@ export type PluginContributions = {
     };
   };
   /**
-   * 插件页根。声明 `{}` 即要求实现 `handles.page.load`。
+   * 插件 Hub 根。声明 `{}` 即要求实现 `handles.hub.load`。
    * 宿主只挂这个根，不按 views 拼页内栏目。
    */
-  page?: DeclaredContribution;
+  hub?: DeclaredContribution;
 };
 
 export const pluginContributionsSchema = z.object({
@@ -166,32 +177,27 @@ export const pluginContributionsSchema = z.object({
   ipc: z.record(z.string().min(1), emptyContributionSchema).optional(),
   /**
    * Workbench 可打开的功能。全局 id 为 `{pluginId}.{localId}`。
-   * 只给加号菜单与功能标签用；插件页栏目由 `page` 自己导航。
-   * 实现必须提供同名 `handles.views`。
+   * 只给功能标签与 `openPluginView` 用；加号菜单见 `workbench.newTabs`。
+   * 插件 Hub 栏目由 `hub` 自己导航。实现必须提供同名 `handles.views`。
    */
   views: z.record(z.string().min(1), viewContributionSchema).optional(),
   /**
-   * Workbench：会话内工作区与一次性动作。
+   * Workbench：会话内工作区、一次性动作与加号菜单。
    * - `workspaces`：AI 消息可打开的工具面板
    * - `actions`：工作台触发的副作用
+   * - `newTabs`：加号菜单条目；key 必须是已声明 view 的 local id
    */
   workbench: z
     .object({
       workspaces: z.record(z.string().min(1), emptyContributionSchema).optional(),
       actions: z.record(z.string().min(1), emptyContributionSchema).optional(),
+      newTabs: z.record(z.string().min(1), newTabContributionSchema).optional(),
     })
     .optional(),
   /**
-   * Activity 平台扩展。
-   * - `captureTypes`：AI 捕获建议的采纳类型
-   * - `today`：今日页区块
+   * 跨插件协作。插件只声明事件、幂等命令与交互；宿主 runner 调度。
    */
-  activity: z
-    .object({
-      captureTypes: z.record(z.string().min(1), emptyContributionSchema).optional(),
-      today: z.record(z.string().min(1), todaySectionDescriptorSchema).optional(),
-    })
-    .optional(),
+  workflow: workflowContributionsSchema.optional(),
   /**
    * 向宿主壳层插入 React 节点。key 为 slot 实例 local id；
    * `slot` 指定挂载点，实现必须提供同名 `handles.shell.slots`。
@@ -219,10 +225,10 @@ export const pluginContributionsSchema = z.object({
     })
     .optional(),
   /**
-   * 插件页根。声明 `{}` 即要求实现 `handles.page.load`。
+   * 插件 Hub 根。声明 `{}` 即要求实现 `handles.hub.load`。
    * 宿主只挂这个根，不按 views 拼页内栏目。
    */
-  page: emptyContributionSchema.optional(),
+  hub: emptyContributionSchema.optional(),
 });
 
 export type PluginCatalogMeta = {

@@ -1,10 +1,8 @@
 import { z } from 'zod';
-import { extensionPoints, type AgentTool } from '@true-north/plugin-sdk';
+import { extensionPoints, type AgentTool, type AgentToolContext } from '@true-north/plugin-sdk';
 import { getMainExtensionsOptional } from '../../../plugin/extensions.ts';
 
-export type ToolExecutionContext = {
-  appendWorkspace: (part: unknown) => void;
-};
+export type ToolExecutionContext = AgentToolContext;
 
 export type { AgentTool };
 

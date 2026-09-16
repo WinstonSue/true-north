@@ -13,7 +13,7 @@ export function PluginStage() {
   const [searchParams] = useSearchParams();
   const platform = useRendererPlatform();
   const plugin = platform.plugins.find((entry) => entry.pluginId === pluginKey);
-  const page = plugin ? platform.pageShells.find((entry) => entry.pluginId === plugin.pluginId) : undefined;
+  const page = plugin ? platform.hubs.find((entry) => entry.pluginId === plugin.pluginId) : undefined;
   const Page = useMemo(() => (page ? lazyload(page.load) : null), [page]);
   const location = useMemo(() => locationFromSearchParams(searchParams), [searchParams]);
 

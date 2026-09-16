@@ -13,19 +13,15 @@ export {
   definePluginManifest,
   parsePluginManifest,
   derivedContributionId,
-  captureSuggestionSchema,
-  capturePayloadSchema,
-  adoptCaptureRequestSchema,
-  normalizeCaptureSuggestion,
-  activityEntityRefSchema,
-  ACTIVITY_RECORD_EVENT,
-  ACTIVITY_UNLINK_EVENT,
-  ACTIVITY_TODAY_INVALIDATE_EVENT,
   pluginResourceRefSchema,
-  todaySectionKindSchema,
-  todaySectionDescriptorSchema,
-  todaySectionSnapshotSchema,
-  mergeTodaySections,
+  jsonSchemaObjectSchema,
+  resourceRefSchema,
+  workflowCommandContributionSchema,
+  workflowEventContributionSchema,
+  workflowInteractionContributionSchema,
+  workflowContributionsSchema,
+  commandResultSchema,
+  CONFLICT_ACTIONS,
   validateManifests,
   activationOrder,
   disposeOrder,
@@ -35,24 +31,18 @@ export type {
   ShellSlotId,
   PluginManifest,
   PluginSpace,
-  CaptureSuggestion,
-  CapturePayload,
-  AdoptCaptureRequest,
-  CaptureAdopter,
-  CaptureAdoptedLink,
-  CaptureSuggestionStatus,
-  ActivityEntityRef,
-  ActivityLinkRef,
-  CreateActivityInput,
-  ActivityPort,
   PluginResourceRef,
-  TodaySectionKind,
-  TodaySectionDescriptor,
-  TodaySectionSnapshot,
-  TodaySectionValues,
-  TodayListItem,
-  TodayListItemAction,
-  TodayCommand,
+  JsonSchemaObject,
+  ResourceRef,
+  WorkflowCommandContribution,
+  WorkflowEventContribution,
+  WorkflowInteractionContribution,
+  WorkflowContributions,
+  EmittedEvent,
+  CommandResult,
+  WorkflowCommandContext,
+  DomainEvent,
+  ConflictAction,
   CatalogIssue,
 } from '@true-north/plugin-contract';
 
@@ -77,7 +67,8 @@ export {
 } from './extension-points.ts';
 export type {
   IpcExtension,
-  TodayExtension,
+  WorkflowCommandExtension,
+  WorkflowInteractionExtension,
   McpResourceExtension,
   McpPromptExtension,
   SkillExtension,
@@ -85,7 +76,7 @@ export type {
   WorkbenchActionExtension,
   PluginScopeExtension,
   ResourceOpenerExtension,
-  PluginPageShellExtension,
+  PluginHubExtension,
   HostActionHandler,
 } from './extension-points.ts';
 export {
@@ -99,10 +90,11 @@ export {
 export { defineMainImplementation, defineRendererImplementation } from './define.ts';
 export type { TypedMainHandles } from './define.ts';
 
-export { HostActionRegistry, HOST_AI_START } from './runtime.ts';
+export { HostActionRegistry, HOST_AI_START, HOST_WORKFLOW_OPEN_PENDING } from './runtime.ts';
 export { HOST_WORKBENCH_OPEN, HOST_BROWSER_OPEN } from './host-commands.ts';
 export type {
   AiCachePort,
+  AgentToolContext,
   AgentToolSpec,
   AgentTool,
   PluginResourceContent,
@@ -110,6 +102,7 @@ export type {
   PluginResourceProvider,
   PluginPromptProvider,
   WorkbenchHostActions,
+  WorkbenchAdoptInput,
   WorkbenchToolProps,
   WorkbenchToolDefinition,
   WorkbenchExtractHandler,
@@ -129,12 +122,18 @@ export type {
   ShellSlotContribution,
   PluginRuntimeEntry,
   WorkbenchViewContribution,
-  PluginPageProps,
-  PluginPageShellProps,
+  WorkbenchNewTabContribution,
+  PluginHubProps,
   PluginRendererHandles,
   PluginRendererModule,
   PluginDescriptor,
+  PluginWorkflowPort,
+  PluginRendererWorkflowPort,
+  WorkflowCommandHandler,
+  WorkflowInteractionProps,
 } from './runtime.ts';
 
 export { AiPlatformError, parseAiError, toIpcError } from './ai-error.ts';
 export { prefixPluginIpc } from './ipc-prefix.ts';
+export { nextRevision, revisionOf } from './revision.ts';
+export { workspaceAdoptKey } from './workspace-adopt-key.ts';

@@ -4,25 +4,26 @@ import {
   ipcRoute,
   mcpName,
   pluginPath,
-  type CaptureAdopter,
+  type CommandResult,
   type PluginManifest,
-  type TodaySectionDescriptor,
-  type TodaySectionSnapshot,
+  type WorkflowCommandContext,
 } from '@true-north/plugin-contract';
 import { defineExtensionPoint, type ExtensionRegistry } from './extension-registry.ts';
 import type {
   AgentTool,
   HostActionPort,
   LocaleContribution,
+  PluginHubProps,
   PluginIcon,
   PluginPromptProvider,
   PluginResourceProvider,
   PluginRuntimeEntry,
   PluginViewOpenRequest,
-  PluginPageProps,
   ShellSlotContribution,
   WorkbenchToolDefinition,
   WorkbenchViewContribution,
+  WorkbenchNewTabContribution,
+  WorkflowInteractionProps,
 } from './runtime.ts';
 
 export type IpcExtension = {
@@ -31,10 +32,19 @@ export type IpcExtension = {
   controller: object;
 };
 
-export type TodayExtension = {
+export type WorkflowCommandExtension = {
+  pluginId: string;
+  localId: string;
   id: string;
-  descriptor: TodaySectionDescriptor;
-  collect: () => Promise<TodaySectionSnapshot>;
+  execute: (input: unknown, ctx: WorkflowCommandContext) => Promise<CommandResult>;
+};
+
+export type WorkflowInteractionExtension = {
+  pluginId: string;
+  localId: string;
+  id: string;
+  producesCommand: string;
+  load: () => Promise<{ default: ComponentType<WorkflowInteractionProps> }>;
 };
 
 export type McpResourceExtension = {
@@ -78,17 +88,17 @@ export type ResourceOpenerExtension = {
   open: (uri: string) => PluginViewOpenRequest | null;
 };
 
-export type PluginPageShellExtension = {
+export type PluginHubExtension = {
   pluginId: string;
-  load: () => Promise<{ default: ComponentType<PluginPageProps> }>;
+  load: () => Promise<{ default: ComponentType<PluginHubProps> }>;
 };
 
 export type HostActionHandler = (input?: unknown) => void | Promise<void>;
 
 export const extensionPoints = {
   ipc: defineExtensionPoint<IpcExtension>('ipc'),
-  capture: defineExtensionPoint<CaptureAdopter>('activity.capture'),
-  today: defineExtensionPoint<TodayExtension>('activity.today'),
+  workflowCommand: defineExtensionPoint<WorkflowCommandExtension>('workflow.command'),
+  workflowInteraction: defineExtensionPoint<WorkflowInteractionExtension>('workflow.interaction'),
   mcpTool: defineExtensionPoint<AgentTool>('ai.mcp.tool'),
   mcpResource: defineExtensionPoint<McpResourceExtension>('ai.mcp.resource'),
   mcpPrompt: defineExtensionPoint<McpPromptExtension>('ai.mcp.prompt'),
@@ -97,13 +107,14 @@ export const extensionPoints = {
   mention: defineExtensionPoint<MentionExtension>('ai.composer.mention'),
   plugin: defineExtensionPoint<PluginRuntimeEntry>('renderer.plugin'),
   view: defineExtensionPoint<WorkbenchViewContribution>('renderer.view'),
+  newTab: defineExtensionPoint<WorkbenchNewTabContribution>('renderer.newTab'),
   workspace: defineExtensionPoint<WorkbenchToolDefinition>('renderer.workspace'),
   workbenchAction: defineExtensionPoint<WorkbenchActionExtension>('renderer.action'),
   shellSlot: defineExtensionPoint<ShellSlotContribution>('renderer.shell'),
   locale: defineExtensionPoint<LocaleContribution>('renderer.locale'),
   scope: defineExtensionPoint<PluginScopeExtension>('renderer.scope'),
   resourceOpener: defineExtensionPoint<ResourceOpenerExtension>('renderer.resourceOpener'),
-  pageShell: defineExtensionPoint<PluginPageShellExtension>('renderer.pageShell'),
+  hub: defineExtensionPoint<PluginHubExtension>('renderer.hub'),
   hostAction: defineExtensionPoint<HostActionHandler>('renderer.hostAction'),
 } as const;
 

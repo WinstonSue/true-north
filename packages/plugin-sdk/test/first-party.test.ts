@@ -11,7 +11,7 @@ import {
 } from '../src/index.ts';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
-const FIRST_PARTY_PLUGIN_IDS = ['growth', 'expense', 'purchase', 'library'] as const;
+const FIRST_PARTY_PLUGIN_IDS = ['growth', 'expense', 'inventory', 'library'] as const;
 
 const GoalDecomposeKey = 'growth.goalDecompose';
 const TaskDecomposeKey = 'growth.taskDecompose';
@@ -23,11 +23,13 @@ const GROWTH_VIEW_GOAL = 'growth.goal';
 const EXPENSE_VIEW_TRANSACTION = 'expense.transaction';
 const EXPENSE_VIEW_BUDGET = 'expense.budget';
 const EXPENSE_VIEW_OVERVIEW = 'expense.overview';
-const PURCHASE_VIEW_LIST = 'purchase.list';
+const INVENTORY_VIEW_ITEMS = 'inventory.items';
+const INVENTORY_VIEW_LOCATIONS = 'inventory.locations';
+const INVENTORY_VIEW_MOVEMENTS = 'inventory.movements';
 const LIBRARY_VIEW_SEARCH = 'library.search';
 const growthPaths = { root: '/plugins/growth' };
 const expensePaths = { root: '/plugins/expense' };
-const purchasePaths = { root: '/plugins/purchase' };
+const inventoryPaths = { root: '/plugins/inventory' };
 const libraryPaths = { root: '/plugins/library' };
 
 function manifestSource(pluginId: string) {
@@ -58,9 +60,11 @@ test('first-party packages keep unscoped plugin ids and current API version', ()
   assert.equal((FIRST_PARTY_PLUGIN_IDS as readonly string[]).includes('ai'), false);
 });
 
-test('activity is a host platform, not a catalog plugin', async () => {
+test('workflow is a host platform, not a catalog plugin', async () => {
   assert.equal(existsSync(join(repoRoot, 'packages/plugins/activity')), false);
-  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/activity')), true);
+  assert.equal(existsSync(join(repoRoot, 'packages/plugins/workflow')), false);
+  assert.equal(existsSync(join(repoRoot, 'packages/plugins/purchase')), false);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/workflow')), true);
 
   const catalog = await assemblePluginCatalog(
     [
@@ -78,7 +82,7 @@ test('activity is a host platform, not a catalog plugin', async () => {
     { side: 'manifest' },
   );
   assert.equal(catalog.plugins.some((plugin) => plugin.manifest.pluginId === 'growth'), true);
-  assert.equal(catalog.plugins.some((plugin) => plugin.manifest.pluginId === 'activity'), false);
+  assert.equal(catalog.plugins.some((plugin) => plugin.manifest.pluginId === 'workflow'), false);
 });
 
 test('first-party plugins open their own store and do not expose query ports', () => {
@@ -99,7 +103,7 @@ test('first-party renderer binds local-key maps instead of repeating catalog met
     assert.match(src, /defineRendererImplementation/);
     assert.match(src, /icon:/);
     assert.match(src, /views:/);
-    assert.match(src, /page:/);
+    assert.match(src, /hub:/);
     assert.doesNotMatch(src, /workbenchViews:/);
     assert.doesNotMatch(src, /entitySources:/);
     assert.doesNotMatch(src, /entityPresenters:/);
@@ -114,7 +118,7 @@ test('derived contribution ids stay namespaced', () => {
   assert.equal(pluginPath('growth'), '/plugins/growth');
   assert.equal(growthPaths.root, '/plugins/growth');
   assert.equal(expensePaths.root, '/plugins/expense');
-  assert.equal(purchasePaths.root, '/plugins/purchase');
+  assert.equal(inventoryPaths.root, '/plugins/inventory');
   assert.equal(libraryPaths.root, '/plugins/library');
   assert.equal(GROWTH_VIEW_TODO, 'growth.todo');
   assert.equal(GROWTH_VIEW_TASK, 'growth.task');
@@ -123,7 +127,9 @@ test('derived contribution ids stay namespaced', () => {
   assert.equal(EXPENSE_VIEW_TRANSACTION, 'expense.transaction');
   assert.equal(EXPENSE_VIEW_BUDGET, 'expense.budget');
   assert.equal(EXPENSE_VIEW_OVERVIEW, 'expense.overview');
-  assert.equal(PURCHASE_VIEW_LIST, 'purchase.list');
+  assert.equal(INVENTORY_VIEW_ITEMS, 'inventory.items');
+  assert.equal(INVENTORY_VIEW_LOCATIONS, 'inventory.locations');
+  assert.equal(INVENTORY_VIEW_MOVEMENTS, 'inventory.movements');
   assert.equal(LIBRARY_VIEW_SEARCH, 'library.search');
 });
 
@@ -131,7 +137,7 @@ test('first-party workbench views stay independently loadable', () => {
   const expected = {
     growth: [GROWTH_VIEW_TODO, GROWTH_VIEW_TASK, GROWTH_VIEW_HABIT, GROWTH_VIEW_GOAL],
     expense: [EXPENSE_VIEW_TRANSACTION, EXPENSE_VIEW_BUDGET, EXPENSE_VIEW_OVERVIEW],
-    purchase: [PURCHASE_VIEW_LIST],
+    inventory: [INVENTORY_VIEW_ITEMS, INVENTORY_VIEW_LOCATIONS, INVENTORY_VIEW_MOVEMENTS],
     library: [LIBRARY_VIEW_SEARCH],
   } as const;
 
@@ -139,10 +145,13 @@ test('first-party workbench views stay independently loadable', () => {
     const src = manifestSource(pluginId);
     const renderer = rendererSource(pluginId);
     assert.match(src, /views:\s*\{/);
-    assert.match(src, /page:\s*\{\s*\}/);
+    assert.match(src, /newTabs:\s*\{/);
+    assert.match(src, /hub:\s*\{\s*\}/);
     for (const id of expected[pluginId]) {
       const localId = id.slice(pluginId.length + 1);
       assert.match(src, new RegExp(`${localId}: \\{ nameKey:`));
+      assert.match(src, new RegExp(`${localId}: \\{ order:`));
+      assert.doesNotMatch(src, new RegExp(`${localId}: \\{ nameKey: '[^']+', order:`));
       assert.match(renderer, new RegExp(`import\\('\\./features/${localId}'\\)`));
       assert.equal(existsSync(join(repoRoot, `packages/plugins/${pluginId}/src/renderer/features/${localId}.tsx`)), true);
     }
@@ -184,4 +193,16 @@ test('growth skill directories contain SKILL.md', () => {
       true,
     );
   }
+});
+
+test('host conflict skill lives at the desktop package root and is packaged', () => {
+  const skillFile = join(repoRoot, 'apps/desktop/skills/conflict-assist/SKILL.md');
+  assert.equal(existsSync(skillFile), true);
+  assert.equal(readFileSync(skillFile, 'utf8').trim().length > 0, true);
+  assert.equal(existsSync(join(repoRoot, 'apps/desktop/src/service/workflow/ai/skill/SKILL.md')), false);
+
+  const pkg = JSON.parse(readFileSync(join(repoRoot, 'apps/desktop/package.json'), 'utf8')) as {
+    build?: { files?: string[] };
+  };
+  assert.equal(pkg.build?.files?.includes('skills/**/*'), true);
 });

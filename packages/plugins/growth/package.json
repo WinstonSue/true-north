@@ -52,6 +52,6 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --experimental-strip-types --test src/main/service/ai/__tests__/*.test.ts src/renderer/layout/__tests__/*.test.ts"
+    "test": "node --experimental-strip-types --test src/main/service/ai/__tests__/*.test.ts src/main/service/todo/__tests__/*.test.ts src/renderer/layout/__tests__/*.test.ts"
   }
 }

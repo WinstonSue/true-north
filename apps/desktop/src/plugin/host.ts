@@ -29,16 +29,14 @@ import { createSqlLogger } from '../main/dev-trace';
 import { User } from '../service/users/user.entity';
 import { aiEntities } from '../service/ai/entities';
 import { aiMigrations } from '../service/ai/migrations';
-import { activityEntities } from '../service/activity/entities';
-import { ActivityController, activityAiContribution, activityService } from '../service/activity';
-import { emitTodayInvalidate } from '../service/activity/today-bus';
+import { workflowEntities, WorkflowController, workflowAiContribution, workflowEventService, migrateLegacyActivity, workflowMigrations } from '../service/workflow';
 import { cacheService, fingerprintPromptContext } from '../service/ai/cache/ai-suggestion-cache.service';
 import { attachAiRegistries, hostAiRegistrations } from '../service/ai/contribution';
 import { attachMainExtensions } from './extensions';
 import { runtimeService } from '../service/ai/runtime';
 import { AiController, conversationService, startMcpServer, stopMcpServer } from '../service/ai';
 import { firstPartyMainDescriptors } from './main-loaders';
-import { HOST_ACTIVITY_STORE_ID, HOST_AI_STORE_ID } from './host-ids';
+import { HOST_AI_STORE_ID, HOST_WORKFLOW_STORE_ID } from './host-ids';
 import { getPluginHost, getPluginHostOptional, setActiveHost } from './active-host';
 
 type ActivatedPlugin = {
@@ -96,29 +94,13 @@ export class DesktopPluginHost {
     return {
       pluginId,
       space: this.resolvePluginSpace(pluginId),
-      activity: {
-        record: async (input) => {
-          await activityService.create({
-            title: input.title,
-            summary: input.summary,
-            source: input.source as never,
-            occurredAt: input.occurredAt,
-            captureMessageId: input.captureMessageId,
-            links: input.links.map((link) => ({
-              pluginId: link.pluginId,
-              entityType: link.entityType,
-              entityId: link.entityId,
-              role: link.role,
-              label: link.label,
-              uri: link.uri,
-            })),
-          });
-        },
-        unlink: async (ref) => {
-          await activityService.unlinkRef(ref);
-        },
-        invalidateToday: () => {
-          emitTodayInvalidate();
+      workflow: {
+        emit: async (localId, payload, source) => {
+          const declared = this.catalog?.plugins
+            .find((plugin) => plugin.manifest.pluginId === pluginId)
+            ?.manifest.contributions.workflow?.events?.[localId];
+          if (this.catalog && !declared) return;
+          await workflowEventService.emit({ pluginId, localId, payload, source });
         },
       },
       cache: {
@@ -139,7 +121,7 @@ export class DesktopPluginHost {
       logging: isDev ? ['query', 'error'] : undefined,
       logger: createSqlLogger(),
       maxQueryExecutionTime: isDev ? -1 : undefined,
-      entities: [User, PluginSchemaLedger, ...aiEntities, ...activityEntities],
+      entities: [User, PluginSchemaLedger, ...aiEntities, ...workflowEntities],
       migrations: [],
       subscribers: [],
       namingStrategy: new SnakeNamingStrategy(),
@@ -149,8 +131,10 @@ export class DesktopPluginHost {
     this.dataSource = dataSource;
     this.hostRuntime = createHostStorageRuntime(dataSource, undefined, { registry: this.storage });
     this.storage.bind(HOST_AI_STORE_ID, this.hostRuntime);
-    this.storage.bind(HOST_ACTIVITY_STORE_ID, this.hostRuntime);
+    this.storage.bind(HOST_WORKFLOW_STORE_ID, this.hostRuntime);
     await applyPluginMigrations(this.hostRuntime, HOST_AI_STORE_ID, aiMigrations);
+    await applyPluginMigrations(this.hostRuntime, HOST_WORKFLOW_STORE_ID, workflowMigrations);
+    await migrateLegacyActivity();
   }
 
   private throwIfIssues(issues: Array<{ message: string }>) {
@@ -225,15 +209,31 @@ export class DesktopPluginHost {
   private publish() {
     attachMainExtensions(this.extensions);
     attachAiRegistries(this.extensions);
-    this.extensions.registerBatch('host', hostAiRegistrations(activityAiContribution));
+    this.extensions.registerBatch('host', hostAiRegistrations(workflowAiContribution));
+    this.extensions.register('host', extensionPoints.mcpResource, 'workflow.conflict', {
+      pluginId: 'workflow',
+      localId: 'conflict',
+      uriTemplate: 'tn://workflow/conflicts/{id}',
+      provider: {
+        list: async () => [],
+        read: async (uri: string) => {
+          const { workflowConflictResource } = await import('../service/workflow/ai');
+          return workflowConflictResource.read(uri);
+        },
+      },
+    });
+    const hostSkillRoots = workflowAiContribution.skillRoots || {};
+    this.throwIfIssues(validateSkillRoots('workflow', hostSkillRoots));
+    for (const [localId, root] of Object.entries(hostSkillRoots)) {
+      this.extensions.register('host', extensionPoints.skill, `workflow.${localId}`, {
+        pluginId: 'workflow',
+        localId,
+        root,
+      });
+    }
     for (const item of this.activated) {
       this.extensions.registerBatch(item.pluginId, item.materialized.registrations);
     }
-    activityService.configureWorkspaceWriter({
-      patch: async (messageId, payload, manager) => {
-        await conversationService.patchWorkspacePayload(messageId, { payload }, manager);
-      },
-    });
     this.published = true;
   }
 
@@ -243,7 +243,7 @@ export class DesktopPluginHost {
     }
     return [
       { id: 'ai', routePrefix: '/ai', controller: new AiController(conversationService, runtimeService) },
-      { id: 'activity', routePrefix: '/activity', controller: new ActivityController() },
+      { id: 'workflow', routePrefix: '/workflow', controller: new WorkflowController() },
       ...this.extensions.list(extensionPoints.ipc),
     ];
   }

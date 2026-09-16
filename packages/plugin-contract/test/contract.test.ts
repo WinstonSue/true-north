@@ -5,14 +5,13 @@ import {
   definePluginManifest,
   parsePluginManifest,
   validateManifests,
-  mergeTodaySections,
   namespacedId,
   pluginPath,
   ipcRoute,
   mcpName,
   pluginResourceUri,
   parsePluginResourceUri,
-  ACTIVITY_TODAY_INVALIDATE_EVENT,
+  commandResultSchema,
 } from '../src/index.ts';
 
 test('round-trips a serializable manifest and defaults apiVersion to 0', () => {
@@ -22,11 +21,18 @@ test('round-trips a serializable manifest and defaults apiVersion to 0', () => {
     catalog: { nameKey: 'menu.expense' },
     contributions: {
       ipc: { expense: {} },
-      views: { transaction: { nameKey: 'menu.expense.transaction', order: 10 } },
-      activity: {
-        captureTypes: { transaction: {} },
-        today: { spent: { kind: 'metric', titleKey: 'plugins.hub.spent' } },
+      views: { transaction: { nameKey: 'menu.expense.transaction' } },
+      workbench: { newTabs: { transaction: { order: 10 } } },
+      workflow: {
+        events: { booked: { payloadSchema: { type: 'object' } } },
+        commands: {
+          createTransaction: {
+            inputSchema: { type: 'object' },
+            idempotent: true,
+          },
+        },
       },
+      hub: {},
     },
   });
   const json = JSON.parse(JSON.stringify(manifest));
@@ -38,6 +44,65 @@ test('round-trips a serializable manifest and defaults apiVersion to 0', () => {
   assert.equal(namespacedId('expense', 'transaction'), 'expense.transaction');
   assert.equal(ipcRoute('expense', 'expense'), '/expense/expense');
   assert.equal(parsed.contributions.views?.transaction?.nameKey, 'menu.expense.transaction');
+  assert.equal('order' in (parsed.contributions.views?.transaction || {}), false);
+  assert.deepEqual(parsed.contributions.workbench?.newTabs?.transaction, { order: 10 });
+  assert.equal(parsed.contributions.workflow?.commands?.createTransaction?.idempotent, true);
+  assert.deepEqual(parsed.contributions.hub, {});
+});
+
+test('newTab may omit nameKey and inherit it at materialize time', () => {
+  const parsed = parsePluginManifest(
+    definePluginManifest({
+      pluginId: 'growth',
+      version: '1',
+      catalog: { nameKey: 'growth' },
+      contributions: {
+        views: { todo: { nameKey: 'menu.todo' } },
+        workbench: { newTabs: { todo: {} } },
+      },
+    }),
+  );
+  assert.deepEqual(parsed.contributions.workbench?.newTabs?.todo, {});
+  assert.equal(parsed.contributions.workbench?.newTabs?.todo?.nameKey, undefined);
+});
+
+test('rejects unknown interaction command and compensate targets', () => {
+  const issues = validateManifests([
+    definePluginManifest({
+      pluginId: 'demo',
+      version: '1',
+      catalog: { nameKey: 'demo' },
+      contributions: {
+        workflow: {
+          commands: { create: { inputSchema: { type: 'object' } } },
+          interactions: { confirm: { producesCommand: 'missing' } },
+        },
+      },
+    }),
+  ]);
+  assert.equal(
+    issues.some((issue) => issue.message.includes('produces unknown command')),
+    true,
+  );
+
+  const compensate = validateManifests([
+    definePluginManifest({
+      pluginId: 'expense',
+      version: '1',
+      catalog: { nameKey: 'expense' },
+      contributions: {
+        workflow: {
+          commands: {
+            book: { inputSchema: { type: 'object' }, compensate: 'undo' },
+          },
+        },
+      },
+    }),
+  ]);
+  assert.equal(
+    compensate.some((issue) => issue.message.includes('compensate "undo" is not declared')),
+    true,
+  );
 });
 
 test('rejects duplicate views across plugins', () => {
@@ -100,17 +165,19 @@ test('rejects duplicate ipc routes and mcp tools', () => {
   assert.equal(mcpName('a', 'shared') !== mcpName('b', 'shared'), true);
 });
 
-test('merges today sections by order', () => {
-  const merged = mergeTodaySections([
-    [{ id: 'growth.focus', kind: 'metric', titleKey: 'focus', order: 20, value: 10 }],
-    [{ id: 'expense.spent', kind: 'metric', titleKey: 'spent', order: 10, value: 5 }],
-  ]);
-  assert.equal(merged[0]?.id, 'expense.spent');
-  assert.equal(merged[1]?.value, 10);
-});
-
-test('today invalidate event is a stable activity channel', () => {
-  assert.equal(ACTIVITY_TODAY_INVALIDATE_EVENT, 'activity.today.invalidate');
+test('command result union is JSON-safe', () => {
+  const applied = commandResultSchema.parse({
+    status: 'applied',
+    resource: { uri: 'tn://growth/todos/1', revision: '2' },
+  });
+  assert.equal(applied.status, 'applied');
+  const conflict = commandResultSchema.parse({
+    status: 'conflict',
+    expectedRevision: '1',
+    actualRevision: '3',
+    reason: 'revision mismatch',
+  });
+  assert.equal(conflict.status, 'conflict');
 });
 
 test('resource URIs stay opaque and round-trip local ids', () => {
@@ -148,14 +215,14 @@ test('mcp resource mention metadata is optional and parsed', () => {
   assert.equal(parsed.contributions.ai?.mcp?.resources?.archive?.mention, undefined);
 });
 
-test('optional empty page capability is accepted without layout fields', () => {
+test('optional empty hub capability is accepted without layout fields', () => {
   const parsed = parsePluginManifest(
     definePluginManifest({
       pluginId: 'growth',
       version: '1',
       catalog: { nameKey: 'growth' },
-      contributions: { page: {} },
+      contributions: { hub: {} },
     }),
   );
-  assert.deepEqual(parsed.contributions.page, {});
+  assert.deepEqual(parsed.contributions.hub, {});
 });

@@ -18,6 +18,7 @@ export type TodoWithoutRelationsVo = {
   relatedType: TodoRelatedType;
   /** 主人 id；relatedType=repeat 时为 repeat_todo.id */
   relatedId?: string;
+  revision?: number;
   /** 派生兼容字段：relatedType=task 时等于 relatedId */
   taskId?: string;
   /** 派生兼容字段：relatedType=repeat 时等于 relatedId（repeat_todo.id） */

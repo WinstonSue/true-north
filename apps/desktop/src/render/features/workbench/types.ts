@@ -1,18 +1,27 @@
 import type { ComponentType } from 'react';
+import type { CommandResult } from '@true-north/plugin-contract';
 import type {
   AiWorkspacePayloadVo,
   BrowserExtractResultVo,
   MessageVo,
 } from '@true-north/vo';
 
+export type WorkbenchAdoptInput = {
+  pluginId: string;
+  localId: string;
+  input?: unknown;
+};
+
 export type WorkbenchHostActions = {
   updatePayload: (payload: AiWorkspacePayloadVo) => Promise<boolean>;
   requestFollowUp: (text: string) => void;
+  adopt: (input: WorkbenchAdoptInput) => Promise<CommandResult>;
 };
 
 export type WorkbenchToolProps<TPayload = AiWorkspacePayloadVo> = {
   payload: TPayload;
   messageId: string;
+  workspaceId?: string;
   conversationId: string;
   actions: WorkbenchHostActions;
 };
@@ -29,13 +38,15 @@ export type WorkbenchToolDefinition<TPayload = AiWorkspacePayloadVo> = {
 export type WorkbenchWorkspaceHost = {
   load(
     conversationId: string,
-    messageId: string
-  ): Promise<{ workspaceKey: string; payload: AiWorkspacePayloadVo }>;
+    messageId: string,
+    workspaceId: string,
+  ): Promise<{ workspaceKey: string; payload: AiWorkspacePayloadVo; workspaceId: string }>;
   subscribe(
     messageId: string,
-    onUpdate: (next: { workspaceKey: string; payload: AiWorkspacePayloadVo }) => void
+    workspaceId: string,
+    onUpdate: (next: { workspaceKey: string; payload: AiWorkspacePayloadVo; workspaceId: string }) => void
   ): () => void;
-  patch(messageId: string, payload: AiWorkspacePayloadVo): Promise<AiWorkspacePayloadVo>;
+  patch(messageId: string, workspaceId: string, payload: AiWorkspacePayloadVo): Promise<AiWorkspacePayloadVo>;
 };
 
 export type WorkbenchExtractHandler = (input: {

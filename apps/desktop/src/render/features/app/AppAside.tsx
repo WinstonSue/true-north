@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar, Dropdown, Flex } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import { Bell, Loader2, Power, Settings, User } from 'lucide-react';
+import { Loader2, Power, Settings, User } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import Logo from '@/assets/logo.svg';
-import MessageBox from '@/components/MessageBox';
 import { useRendererPlatformOptional } from '@true-north/plugin-sdk/renderer';
 import { generatePermission } from '@/router/routes';
 import { GlobalState } from '@/store';
@@ -94,11 +93,6 @@ export function AppAside() {
             <Logo />
             <span className={styles.brandName}>{t['title']}</span>
           </Flex>
-          <MessageBox>
-            <button type="button" className={styles.actionBtn} aria-label={t['today.title']}>
-              <Bell size={16} />
-            </button>
-          </MessageBox>
         </Flex>
 
         <ProductSurface id={productRef('app-shell.view.nav')}>

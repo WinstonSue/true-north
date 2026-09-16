@@ -7,8 +7,8 @@ import spec_packages_plugins_growth_wiki_growth from '../../plugins/growth/wiki/
 import spec_packages_plugins_growth_wiki_growth_task from '../../plugins/growth/wiki/growth/task/spec.json';
 import spec_packages_plugins_growth_wiki_growth_todo from '../../plugins/growth/wiki/growth/todo/spec.json';
 import spec_packages_plugins_growth_wiki_growth_track_time from '../../plugins/growth/wiki/growth/track-time/spec.json';
+import spec_packages_plugins_inventory_wiki_inventory from '../../plugins/inventory/wiki/inventory/spec.json';
 import spec_packages_plugins_library_wiki_library from '../../plugins/library/wiki/library/spec.json';
-import spec_packages_plugins_purchase_wiki_purchase from '../../plugins/purchase/wiki/purchase/spec.json';
 import spec_packages_product_wiki_wiki_activity from '../wiki/activity/spec.json';
 import spec_packages_product_wiki_wiki_ai_session from '../wiki/ai/session/spec.json';
 import spec_packages_product_wiki_wiki_ai from '../wiki/ai/spec.json';
@@ -30,8 +30,8 @@ export const productWikis = [
   spec_packages_plugins_growth_wiki_growth_task,
   spec_packages_plugins_growth_wiki_growth_todo,
   spec_packages_plugins_growth_wiki_growth_track_time,
+  spec_packages_plugins_inventory_wiki_inventory,
   spec_packages_plugins_library_wiki_library,
-  spec_packages_plugins_purchase_wiki_purchase,
   spec_packages_product_wiki_wiki_activity,
   spec_packages_product_wiki_wiki_ai_session,
   spec_packages_product_wiki_wiki_ai,

@@ -16,8 +16,9 @@ export type CatalogIssue = {
     | 'duplicate-workspace'
     | 'duplicate-action'
     | 'duplicate-view'
-    | 'duplicate-capture'
-    | 'duplicate-today'
+    | 'duplicate-command'
+    | 'duplicate-event'
+    | 'duplicate-interaction'
     | 'duplicate-slot'
     | 'duplicate-skill'
     | 'duplicate-resource'
@@ -105,8 +106,9 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
   const workspaces = new Map<string, string>();
   const actions = new Map<string, string>();
   const views = new Map<string, string>();
-  const captures = new Map<string, string>();
-  const today = new Map<string, string>();
+  const commands = new Map<string, string>();
+  const events = new Map<string, string>();
+  const interactions = new Map<string, string>();
   const slots = new Map<string, string>();
   const skills = new Map<string, string>();
   const resources = new Map<string, string>();
@@ -160,11 +162,36 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
     for (const id of Object.keys(contrib.views || {})) {
       claim(views, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-view', 'view');
     }
-    for (const id of Object.keys(contrib.activity?.captureTypes || {})) {
-      claim(captures, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-capture', 'capture type');
+    for (const id of Object.keys(contrib.workflow?.commands || {})) {
+      claim(commands, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-command', 'workflow command');
     }
-    for (const id of Object.keys(contrib.activity?.today || {})) {
-      claim(today, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-today', 'today section');
+    for (const id of Object.keys(contrib.workflow?.events || {})) {
+      claim(events, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-event', 'workflow event');
+    }
+    for (const [id, spec] of Object.entries(contrib.workflow?.interactions || {})) {
+      claim(
+        interactions,
+        contributionKey(manifest.pluginId, id),
+        manifest.pluginId,
+        'duplicate-interaction',
+        'workflow interaction',
+      );
+      if (!contrib.workflow?.commands?.[spec.producesCommand]) {
+        issues.push({
+          code: 'reconcile',
+          pluginId: manifest.pluginId,
+          message: `Plugin ${manifest.pluginId} interaction "${id}" produces unknown command "${spec.producesCommand}"`,
+        });
+      }
+    }
+    for (const [id, spec] of Object.entries(contrib.workflow?.commands || {})) {
+      if (spec.compensate && !contrib.workflow?.commands?.[spec.compensate]) {
+        issues.push({
+          code: 'reconcile',
+          pluginId: manifest.pluginId,
+          message: `Plugin ${manifest.pluginId} command "${id}" compensate "${spec.compensate}" is not declared`,
+        });
+      }
     }
     for (const [id, slot] of Object.entries(contrib.shell?.slots || {})) {
       claim(slots, `${slot.slot}:${id}`, manifest.pluginId, 'duplicate-slot', 'shell slot');

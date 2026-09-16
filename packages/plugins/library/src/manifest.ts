@@ -14,15 +14,34 @@ export const libraryManifest = definePluginManifest({
   contributions: {
     ipc: { library: {} },
     views: {
-      search: { nameKey: 'menu.library', order: 10 },
+      search: { nameKey: 'menu.library' },
     },
-    page: {},
+    hub: {},
     workbench: {
+      workspaces: { suggestBookmark: {} },
       actions: { extract: {} },
+      newTabs: {
+        search: { order: 10 },
+      },
     },
-    activity: {
-      captureTypes: { bookmark: {} },
-      today: { bookmarks: { kind: 'metric', titleKey: 'plugins.hub.bookmarks', order: 30 } },
+    workflow: {
+      events: {
+        bookmarkCreated: { payloadSchema: { type: 'object' } },
+        bookmarkDeleted: { payloadSchema: { type: 'object' } },
+      },
+      commands: {
+        createBookmark: { inputSchema: { type: 'object' }, idempotent: true },
+      },
+    },
+    ai: {
+      mcp: {
+        tools: {
+          suggestBookmark: {},
+        },
+        resources: {
+          bookmark: { uriTemplate: 'tn://library/bookmarks/{id}' },
+        },
+      },
     },
   },
 });

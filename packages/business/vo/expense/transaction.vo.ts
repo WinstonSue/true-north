@@ -11,6 +11,7 @@ export interface TransactionModelVo {
   category: string;
   tags: string[];
   transactionDateTime: string;
+  revision?: number;
   recurring?: {
     frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
     interval: number;

@@ -92,6 +92,19 @@ export const growthMigrations = [
     },
   },
   {
+    id: 'growth.v6.todo-revision',
+    version: 6,
+    async up(storage: PluginStorageHandle) {
+      const names = await tableNames(storage.query);
+      if (!names.has('todo')) return;
+      const columns = await columnNames(storage.query, 'todo');
+      if (!columns.has('revision')) {
+        await storage.query('ALTER TABLE todo ADD COLUMN revision integer DEFAULT 1');
+      }
+      await storage.query('UPDATE todo SET revision = 1 WHERE revision IS NULL');
+    },
+  },
+  {
     id: 'growth.v4.related-ids',
     version: 4,
     async up(storage: PluginStorageHandle) {

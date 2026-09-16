@@ -3,6 +3,7 @@ import { pluginResourceUri } from '@true-north/plugin-contract';
 import { store } from '../../storage';
 import { Goal } from '../goal/goal.entity';
 import { Task } from '../task/task.entity';
+import { Todo } from '../todo/todo.entity';
 
 function parseId(uri: string, collection: string) {
   const prefix = `tn://growth/${collection}/`;
@@ -61,6 +62,33 @@ export const growthTaskResource: PluginResourceProvider = {
       uri,
       mimeType: 'application/json',
       text: JSON.stringify({ id: row.id, name: row.name, status: row.status }),
+    };
+  },
+};
+
+export const growthTodoResource: PluginResourceProvider = {
+  list: async () => {
+    const rows = await store().getRepository(Todo).find();
+    return rows.map((row) => ({
+      uri: pluginResourceUri('growth', 'todos', row.id),
+      name: row.name,
+      mimeType: 'application/json',
+    }));
+  },
+  async read(uri) {
+    const id = parseId(uri, 'todos');
+    if (!id) return null;
+    const row = await store().getRepository(Todo).findOne({ where: { id } });
+    if (!row) return null;
+    return {
+      uri,
+      mimeType: 'application/json',
+      text: JSON.stringify({
+        id: row.id,
+        name: row.name,
+        status: row.status,
+        revision: row.revision || 1,
+      }),
     };
   },
 };

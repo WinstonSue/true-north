@@ -22,7 +22,7 @@ export function hostAiRegistrations(input: {
   if (input.agentInstructions?.trim()) {
     registrations.push({
       point: extensionPoints.agentInstruction,
-      key: 'activity',
+      key: 'workflow',
       value: input.agentInstructions.trim(),
     });
   }

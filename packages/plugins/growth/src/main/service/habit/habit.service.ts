@@ -36,8 +36,6 @@ export class HabitService {
     const habit = await this.habitRepository.create(entity);
     const withRelations = await this.habitRepository.findWithRelations(habit.id);
     await this.createCycleTodo(withRelations);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return HabitDto.importEntity(await this.habitRepository.findWithRelations(habit.id));
   }
 
@@ -51,8 +49,6 @@ export class HabitService {
         // ignore orphan cleanup failure
       }
     }
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
   }
 
   async update(updateHabitDto: UpdateHabitDto): Promise<HabitDto> {
@@ -126,8 +122,6 @@ export class HabitService {
   //  ====== 业务逻辑编排 ======
   async pause(id: string): Promise<void> {
     await this.transition(id, HabitStatus.ACTIVE, HabitStatus.PAUSED);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
   }
 
   async activate(id: string): Promise<void> {
@@ -138,8 +132,6 @@ export class HabitService {
     habit.status = HabitStatus.ACTIVE;
     await this.habitRepository.update(habit);
     await this.createCycleTodo(habit);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
   }
 
   async abandon(id: string): Promise<void> {
@@ -159,8 +151,6 @@ export class HabitService {
       habit.cycleTodoId = undefined;
     }
     await this.habitRepository.update(habit);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
   }
 
   private async transition(id: string, from: HabitStatus, to: HabitStatus): Promise<void> {

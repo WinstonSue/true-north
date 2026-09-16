@@ -30,6 +30,7 @@ export type {
   PluginCatalogMeta,
   DeclaredContribution,
   ViewContribution,
+  NewTabContribution,
   ShellSlotContribution,
   SkillContribution,
   McpToolContribution,
@@ -39,47 +40,32 @@ export type {
 
 export type { PluginSpace } from './storage.ts';
 
-export {
-  captureSuggestionSchema,
-  capturePayloadSchema,
-  adoptCaptureRequestSchema,
-  normalizeCaptureSuggestion,
-} from './capture.ts';
-export type {
-  CaptureSuggestion,
-  CapturePayload,
-  AdoptCaptureRequest,
-  CaptureAdopter,
-  CaptureAdoptedLink,
-  CaptureSuggestionStatus,
-} from './capture.ts';
-
-export {
-  activityEntityRefSchema,
-  ACTIVITY_RECORD_EVENT,
-  ACTIVITY_UNLINK_EVENT,
-  ACTIVITY_TODAY_INVALIDATE_EVENT,
-} from './activity.ts';
-export type { ActivityEntityRef, ActivityLinkRef, CreateActivityInput, ActivityPort } from './activity.ts';
-
 export { pluginResourceRefSchema } from './resource.ts';
 export type { PluginResourceRef } from './resource.ts';
 
 export {
-  todaySectionKindSchema,
-  todaySectionDescriptorSchema,
-  todaySectionSnapshotSchema,
-  mergeTodaySections,
-} from './today.ts';
+  jsonSchemaObjectSchema,
+  resourceRefSchema,
+  workflowCommandContributionSchema,
+  workflowEventContributionSchema,
+  workflowInteractionContributionSchema,
+  workflowContributionsSchema,
+  commandResultSchema,
+  CONFLICT_ACTIONS,
+} from './workflow.ts';
 export type {
-  TodaySectionKind,
-  TodaySectionDescriptor,
-  TodaySectionSnapshot,
-  TodaySectionValues,
-  TodayListItem,
-  TodayListItemAction,
-  TodayCommand,
-} from './today.ts';
+  JsonSchemaObject,
+  ResourceRef,
+  WorkflowCommandContribution,
+  WorkflowEventContribution,
+  WorkflowInteractionContribution,
+  WorkflowContributions,
+  EmittedEvent,
+  CommandResult,
+  WorkflowCommandContext,
+  DomainEvent,
+  ConflictAction,
+} from './workflow.ts';
 
 export { validateManifests, activationOrder, disposeOrder } from './validate.ts';
 export type { CatalogIssue } from './validate.ts';

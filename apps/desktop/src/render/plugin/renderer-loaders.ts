@@ -4,7 +4,7 @@ import { FIRST_PARTY_PLUGIN_IDS, firstPartyPlugins, type FirstPartyPluginId } fr
 export const firstPartyRendererLoaders = {
   growth: () => import('@true-north/plugin-growth/renderer'),
   expense: () => import('@true-north/plugin-expense/renderer'),
-  purchase: () => import('@true-north/plugin-purchase/renderer'),
+  inventory: () => import('@true-north/plugin-inventory/renderer'),
   library: () => import('@true-north/plugin-library/renderer'),
 } as const satisfies Record<FirstPartyPluginId, NonNullable<PluginDescriptor['loadRenderer']>>;
 

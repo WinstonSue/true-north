@@ -20,7 +20,7 @@ document_meta:
 
 依赖方向：插件 MCP/Skill → 宿主聚合 MCP → Agent 运行时 → 通用消息块 → Workbench 端口 → 插件工具 UI。
 
-普通会话输入自动识别记录意图，需要落库时由 Activity 的 `capture_activity` 产出 `activity.capture` workspace。目标/任务拆解由 Growth MCP tools 贡献。**生成**走插件 tool；**采纳**走领域 Service。普通聊天、追问和切换 Agent 不自动打开。
+普通会话输入自动识别记录意图，需要落库时由各插件 suggest MCP 产出独立 workspace。目标/任务拆解由 Growth MCP tools 贡献。**生成**走插件 tool；**采纳**走 Workflow command。普通聊天、追问和切换 Agent 不自动打开。冲突排查会话只能读取资源并调用 `workflow.proposeConflictResolution`。
 
 ## 文档导航
 
@@ -40,7 +40,7 @@ apps/desktop/src/render/features/ai/       # 会话壳、workspace host
 apps/desktop/src/render/features/workbench/# 通用标签宿主；不 import 业务实现
 packages/plugins/growth/src/main/service/ai/  # 拆解 service、MCP tools/resources、Skills
 packages/plugins/growth/src/renderer/contributions/ai-decomposition/
-apps/desktop/src/service/activity/ai/      # capture 工具
+apps/desktop/src/service/workflow/ai/      # compose 与冲突排查
 ```
 
 分层与 IPC 注册约定参见 [desktop-layers](../architecture/desktop-layers.md)、[plugin-platform](../plugin-platform.md)。

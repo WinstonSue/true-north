@@ -65,7 +65,7 @@
       "id": "capture-review",
       "name": "收集预览",
       "scenario": "审阅一条输入里的多种建议，逐条编辑或取消选择后一次确认采纳",
-      "productStatus": "roadmap",
+      "productStatus": "deprecated",
       "reference": "workbench.view.capture-review"
     }
   ],
@@ -113,18 +113,26 @@
     {
       "id": "session-tool-tab",
       "name": "会话打开工具标签",
-      "description": "用户点选会话中的工作台入口后，全局工作台打开或聚焦对应功能标签。同一条消息不重复开标签。切换会话不关闭已开标签。跨领域收集成功产出预览，以及目标/任务拆解在生成完成后自动打开；纯文本、追问和切换 Agent 不自动打开。",
-      "views": ["tool-stage", "tab-bar", "shell", "capture-review"],
+      "description": "用户点选会话中的工作台入口后，全局工作台打开或聚焦对应功能标签。同一条消息里的多个建议各自打开自己的标签。切换会话不关闭已开标签。插件建议和目标/任务拆解在生成完成后自动打开；纯文本、追问和切换 Agent 不自动打开。",
+      "views": ["tool-stage", "tab-bar", "shell"],
       "reference": "workbench.rule.session-tool-tab",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "workspace-once",
+      "name": "建议工作台只采纳一次",
+      "description": "同一条建议工作台重复确认、关闭再开或网络重试，都只创建一次对应记录。不同建议即使内容相同也可以分别创建。",
+      "views": ["tool-stage"],
+      "reference": "workbench.rule.workspace-once",
       "productStatus": "roadmap"
     },
     {
       "id": "adopt-all-or-nothing",
       "name": "确认采纳整笔提交",
-      "description": "收集预览一次确认后，所选建议全部成功才写入领域并生成活动卡；任一失败则全部回滚，不留下半张活动卡。",
+      "description": "中央收集预览一次确认全部写入已废弃。现在每条建议在自己的工作台确认，生成不等于采纳。",
       "views": ["capture-review"],
       "reference": "workbench.rule.adopt-all-or-nothing",
-      "productStatus": "roadmap"
+      "productStatus": "deprecated"
     },
     {
       "id": "overlay-above-stage",
@@ -169,7 +177,7 @@
     {
       "id": "workbench.view.new-tab",
       "title": "新标签选择器",
-      "body": "标签栏加号打开选择器。第一项是新网页；其下按已启用插件分组列出功能，例如成长的待办、任务、习惯、目标，记账的账单、预算、总览，以及采购清单与收藏检索。点选后在工作台打开对应标签。"
+      "body": "标签栏加号打开选择器。第一项是新网页；其下按已启用插件分组列出功能，例如成长的待办、任务、习惯、目标，记账的账单、预算、总览，以及物资、位置、出入库与收藏检索。点选后在工作台打开对应标签。"
     },
     {
       "id": "workbench.view.plugin-stage",
@@ -199,7 +207,7 @@
     {
       "id": "workbench.view.capture-review",
       "title": "收集预览",
-      "body": "跨领域收集结果在此按条预览。一条输入可包含待办、支出、采购、收藏等多种建议。用户可逐条改类型、金额、日期和关联，取消不需要的条目，最后一次确认。取消则一条都不写。"
+      "body": "跨领域收集预览已废弃。待办、账单、物资和收藏各自打开建议工作台，分别确认。同一条建议只采纳一次。"
     },
     {
       "id": "workbench.rule.extract-to-markdown",
@@ -214,12 +222,17 @@
     {
       "id": "workbench.rule.session-tool-tab",
       "title": "会话打开工具标签",
-      "body": "用户点选会话消息上的打开入口后，工作台打开并挂上对应功能标签；同一条消息再次点选只回到已有标签。切换会话或离开会话页都不关闭这些标签。跨领域收集成功产出预览，以及目标/任务拆解在生成完成后自动打开对应标签；纯文本、追问或切换编码 Agent 不会自动打开。"
+      "body": "用户点选会话消息上的打开入口后，工作台打开并挂上对应功能标签。一条消息里的多个建议各自打开自己的标签，再次点选同一建议只回到已有标签。切换会话或离开会话页都不关闭这些标签。插件建议以及目标/任务拆解在生成完成后自动打开对应标签；纯文本、追问或切换编码 Agent 不会自动打开。"
+    },
+    {
+      "id": "workbench.rule.workspace-once",
+      "title": "建议工作台只采纳一次",
+      "body": "在建议工作台点确认、关掉再打开再点，或遇到网络重试，都只留下一条对应记录。另一条建议即使内容相同，仍可再创建一份。"
     },
     {
       "id": "workbench.rule.adopt-all-or-nothing",
       "title": "确认采纳整笔提交",
-      "body": "确认采纳时，所选建议要么全部写入对应领域并生成一张活动卡，要么全部不写。失败时不留下半张活动卡，也不把建议标成已采纳。"
+      "body": "中央收集一次确认全部写入已废弃。每条建议在自己的工作台确认；生成不等于采纳。"
     },
     {
       "id": "workbench.rule.overlay-above-stage",

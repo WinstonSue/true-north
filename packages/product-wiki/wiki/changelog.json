@@ -5091,6 +5091,408 @@
         "wikiId": "growth.habit",
         "wikiTitle": "习惯管理"
       }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "跨域回看改为插件中心的事件时间线，不再使用活动卡、今日摘要或删除活动。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "activity:module:activity",
+        "scope": "module",
+        "name": "最近动态",
+        "wikiId": "activity",
+        "wikiTitle": "最近动态"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "今日摘要已废弃，花费与待购改在各自领域页查看。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "activity:view:today-summary",
+        "scope": "view",
+        "name": "今日摘要",
+        "reference": "activity.view.today-summary",
+        "wikiId": "activity",
+        "wikiTitle": "最近动态"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "活动时间线已废弃，改由插件中心事件列表回看且不可删除。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "activity:view:timeline",
+        "scope": "view",
+        "name": "活动时间线",
+        "reference": "activity.view.timeline",
+        "wikiId": "activity",
+        "wikiTitle": "最近动态"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "领域事实仍以各插件记录为准，事件不再充当父实体。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "activity:rule:card-not-parent",
+        "scope": "rule",
+        "name": "活动卡不是父实体",
+        "reference": "activity.rule.card-not-parent",
+        "wikiId": "activity",
+        "wikiTitle": "最近动态"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "事件日志不可删除，也不再要求先删事件再删领域记录。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "activity:rule:delete-no-cascade",
+        "scope": "rule",
+        "name": "删除不级联",
+        "reference": "activity.rule.delete-no-cascade",
+        "wikiId": "activity",
+        "wikiTitle": "最近动态"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "侧栏铃铛与今天清单已废弃，今天待办改在成长页查看。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "notification:module:notification",
+        "scope": "module",
+        "name": "侧栏通知",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "品牌右侧不再打开今天清单。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "notification:view:today",
+        "scope": "view",
+        "name": "今天",
+        "reference": "notification.view.today",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "侧栏不再承担今天待处理清单。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "notification:rule:action-list",
+        "scope": "rule",
+        "name": "今天是行动清单",
+        "reference": "notification.rule.action-list",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "各领域不再向侧栏登记今天事项。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "notification:rule:domain-register",
+        "scope": "rule",
+        "name": "各领域登记今天",
+        "reference": "notification.rule.domain-register",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "中央收集预览已废弃，待办、账单、采购和收藏各自打开建议工作台。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "workbench:view:capture-review",
+        "scope": "view",
+        "name": "收集预览",
+        "reference": "workbench.view.capture-review",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "一次确认全部写入已废弃；每条建议分别确认，生成不等于采纳。",
+      "productStatus": "deprecated",
+      "feature": {
+        "key": "workbench:rule:adopt-all-or-nothing",
+        "scope": "rule",
+        "name": "确认采纳整笔提交",
+        "reference": "workbench.rule.adopt-all-or-nothing",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "一条消息里的多个建议各自打开自己的工作台标签。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:session-tool-tab",
+        "scope": "rule",
+        "name": "会话打开工具标签",
+        "reference": "workbench.rule.session-tool-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "插件中心下方按事件回看已经发生的事，可筛选并打开原始记录，不能删除。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "plugins:view:event-timeline",
+        "scope": "view",
+        "name": "最近动态",
+        "reference": "plugins.view.event-timeline",
+        "wikiId": "plugins",
+        "wikiTitle": "插件"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "跨插件协作停住时展示冲突，可手动处理或问 AI，但不能跳过确认。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "plugins:view:conflicts",
+        "scope": "view",
+        "name": "协作冲突",
+        "reference": "plugins.view.conflicts",
+        "wikiId": "plugins",
+        "wikiTitle": "插件"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "记录意图分别打开各插件建议工作台；计划购买不会变成已发生的账。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:intent-capture",
+        "scope": "rule",
+        "name": "自动识别记录意图",
+        "reference": "ai.session.rule.intent-capture",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "一条消息里的多个建议各自打开工作台标签。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:workspace-dispatch",
+        "scope": "rule",
+        "name": "工作台分发",
+        "reference": "ai.session.rule.workspace-dispatch",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "会话对话按各插件建议工作台打开，不再产出中央收集预览。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:view:conversation",
+        "scope": "view",
+        "name": "会话对话",
+        "reference": "ai.session.view.conversation",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "侧栏不再放今天清单，只切换 AI 与插件。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:aside",
+        "scope": "view",
+        "name": "功能侧栏",
+        "reference": "app-shell.view.aside",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "进入插件下的成长、记账、采购或收藏时仍高亮插件。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:nav",
+        "scope": "view",
+        "name": "领域菜单",
+        "reference": "app-shell.view.nav",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "侧栏底部不再打开今天清单，只保留账户、专注与工作台。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:actions",
+        "scope": "view",
+        "name": "全局动作",
+        "reference": "app-shell.view.actions",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "领域各自保存事实；跨插件协作由确认后的事件推进，不以活动卡为父实体。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "global:rule:peer-domains",
+        "scope": "rule",
+        "name": "领域平级",
+        "reference": "global.rule.peer-domains",
+        "wikiId": "global",
+        "wikiTitle": "True North ProductWiki"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "AI 只生成建议，用户确认后写入；冲突时停下来给人处理，也可问 AI，但不能跳过确认。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "global:rule:main-loop",
+        "scope": "rule",
+        "name": "主链",
+        "reference": "global.rule.main-loop",
+        "wikiId": "global",
+        "wikiTitle": "True North ProductWiki"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "removed",
+      "summary": "家庭采购已移除，不再作为待购清单或采购结算。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "purchase:module:purchase",
+        "scope": "module",
+        "name": "家庭采购",
+        "wikiId": "purchase",
+        "wikiTitle": "家庭采购"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "提醒购买只记待办；物资只接受可储存的家庭实物，同一条建议工作台只采纳一次。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:intent-capture",
+        "scope": "rule",
+        "name": "自动识别记录意图",
+        "reference": "ai.session.rule.intent-capture",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "同一条建议工作台重复确认、重开或网络重试都只创建一次对应记录。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:workspace-once",
+        "scope": "rule",
+        "name": "建议工作台只采纳一次",
+        "reference": "workbench.rule.workspace-once",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "成长、记账、物资与本地收藏平级，从插件页进入。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "global:rule:peer-domains",
+        "scope": "rule",
+        "name": "领域平级",
+        "reference": "global.rule.peer-domains",
+        "wikiId": "global",
+        "wikiTitle": "True North ProductWiki"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "物资的物资、位置、出入库是物资页内自己的栏目。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "plugins:view:hub-nav",
+        "scope": "view",
+        "name": "领域导航",
+        "reference": "plugins.view.hub-nav",
+        "wikiId": "plugins",
+        "wikiTitle": "插件"
+      }
     }
   ]
 }

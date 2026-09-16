@@ -20,25 +20,35 @@ export const growthManifest = definePluginManifest({
       trackTime: {},
     },
     views: {
-      todo: { nameKey: 'menu.todo', order: 10 },
-      task: { nameKey: 'menu.task', order: 20 },
-      habit: { nameKey: 'menu.habit', order: 30 },
-      goal: { nameKey: 'menu.goal', order: 40 },
+      todo: { nameKey: 'menu.todo' },
+      task: { nameKey: 'menu.task' },
+      habit: { nameKey: 'menu.habit' },
+      goal: { nameKey: 'menu.goal' },
     },
-    page: {},
+    hub: {},
     workbench: {
       workspaces: {
         goalDecompose: {},
         taskDecompose: {},
+        suggestTodo: {},
+      },
+      newTabs: {
+        todo: { order: 10 },
+        task: { order: 20 },
+        habit: { order: 30 },
+        goal: { order: 40 },
       },
     },
-    activity: {
-      captureTypes: { todo: {} },
-      today: {
-        focusTimer: { kind: 'timer', titleKey: 'today.focus', order: 5 },
-        focus: { kind: 'metric', titleKey: 'today.focus', order: 10, unit: 'seconds' },
-        todos: { kind: 'list', titleKey: 'menu.todo', order: 20 },
-        habits: { kind: 'list', titleKey: 'menu.habit', order: 30 },
+    workflow: {
+      events: {
+        todoCreated: { payloadSchema: { type: 'object' } },
+        todoCompleted: { payloadSchema: { type: 'object' } },
+        todoUpdated: { payloadSchema: { type: 'object' } },
+        todoDeleted: { payloadSchema: { type: 'object' } },
+      },
+      commands: {
+        createTodo: { inputSchema: { type: 'object' }, idempotent: true },
+        completeTodo: { inputSchema: { type: 'object' }, idempotent: true },
       },
     },
     shell: {
@@ -61,10 +71,12 @@ export const growthManifest = definePluginManifest({
           getTask: { readOnly: true },
           decomposeGoal: {},
           decomposeTask: {},
+          suggestTodo: {},
         },
         resources: {
           goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } },
           task: { uriTemplate: 'tn://growth/tasks/{id}', mention: { labelKey: 'menu.task', order: 20 } },
+          todo: { uriTemplate: 'tn://growth/todos/{id}' },
         },
       },
     },

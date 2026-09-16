@@ -17,8 +17,8 @@ import { RendererPlatform } from '@true-north/plugin-sdk/renderer';
 import type { IRoute } from '@/router/routes';
 import lazyload from '@/utils/lazyload';
 import { createAiWorkspaceHost } from '@/features/ai/workspace-host';
-import { activityWorkbenchTools } from './activity/tools';
 import { pluginPaths } from './paths';
+import { conflictResolutionTool } from './workflow-tools';
 import { firstPartyRendererDescriptors } from './renderer-loaders';
 
 function unwrap<T>(res: { data: T; code: number; message: string }): T {
@@ -70,6 +70,16 @@ export async function bootRendererPlugins(lang = 'zh-CN'): Promise<RendererPlatf
         ipc: pluginIpc,
         navigate: dummyNavigate as NavigateFunction,
         hostActions,
+        workflow: {
+          runCommand: (localId, input, options) =>
+            ipc.post('/workflow/commands/run', {
+              pluginId: plugin.manifest.pluginId,
+              localId,
+              input,
+              idempotencyKey: options?.idempotencyKey,
+            }),
+          openInteraction: async () => null,
+        },
       };
       const handles: PluginRendererHandles | undefined = plugin.renderer?.activate(ctx);
       const materialized = materializeRenderer(plugin.manifest, handles);
@@ -86,10 +96,10 @@ export async function bootRendererPlugins(lang = 'zh-CN'): Promise<RendererPlatf
     throw error;
   }
 
-  for (const tool of activityWorkbenchTools) {
-    const key = tool.workspaceKey || 'activity.capture';
-    registry.register('host', extensionPoints.workspace, key, { ...tool, workspaceKey: key });
-  }
+  registry.register('host', extensionPoints.workspace, conflictResolutionTool.workspaceKey || 'workflow.conflictResolution', {
+    ...conflictResolutionTool,
+    workspaceKey: conflictResolutionTool.workspaceKey,
+  });
 
   return new RendererPlatform({
     lang,

@@ -31,4 +31,17 @@ export {
   createRepositoryQueryPort,
 } from '../host/plugin-sqlite.ts';
 export type { OpenPluginSqliteStoreOptions, PluginMigration, QuerySource } from '../host/plugin-sqlite.ts';
+export {
+  PluginCommandLedger,
+  hashCommandInput,
+  runPluginCommand,
+  nextRevision,
+  revisionOf,
+} from '../host/command-ledger.ts';
+export {
+  workspaceAdoptKey,
+  isFrozenCommandResult,
+  decideHostAttemptReplay,
+} from '../host/command-idempotency.ts';
+export type { HostAttemptReplay } from '../host/command-idempotency.ts';
 export { resolvePluginPackageRoot, resolveSkillRoots, validateSkillRoots } from '../skills.ts';

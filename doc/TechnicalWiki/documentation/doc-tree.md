@@ -26,9 +26,9 @@ doc/
 ├── TechnicalWiki/
 │   ├── plugin-platform.md              # 一等插件目录与宿主组装
 │   ├── growth/                         # Growth 域；今日待处理在侧栏通知
-│   ├── activity/                       # 活动卡索引与采纳事务
+│   ├── activity/                       # 宿主 Workflow 协调器（原 Activity 已删除）
 │   ├── expense/                        # 记账持久化
-│   ├── purchase/                       # 家庭采购
+│   ├── inventory/                      # 家庭物资库存
 │   ├── library/                        # 本地收藏索引
 │   ├── ai/                             # AI 宿主平台（注册表 / 会话 / 运行时）
 ├── {version}/

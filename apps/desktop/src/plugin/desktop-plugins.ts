@@ -1,10 +1,10 @@
-import type { PluginManifest } from '@true-north/plugin-sdk';
-import { growthManifest } from '@true-north/plugin-growth/manifest';
+import { inventoryManifest } from '@true-north/plugin-inventory/manifest';
 import { expenseManifest } from '@true-north/plugin-expense/manifest';
-import { purchaseManifest } from '@true-north/plugin-purchase/manifest';
+import { growthManifest } from '@true-north/plugin-growth/manifest';
 import { libraryManifest } from '@true-north/plugin-library/manifest';
+import type { PluginManifest } from '@true-north/plugin-sdk';
 
-export const FIRST_PARTY_PLUGIN_IDS = ['growth', 'expense', 'purchase', 'library'] as const;
+export const FIRST_PARTY_PLUGIN_IDS = ['growth', 'expense', 'inventory', 'library'] as const;
 export type FirstPartyPluginId = (typeof FIRST_PARTY_PLUGIN_IDS)[number];
 
 export type FirstPartyPluginMeta = {
@@ -24,10 +24,10 @@ export const firstPartyPlugins = {
     packageName: '@true-north/plugin-expense',
     manifest: expenseManifest,
   },
-  purchase: {
-    pluginId: 'purchase',
-    packageName: '@true-north/plugin-purchase',
-    manifest: purchaseManifest,
+  inventory: {
+    pluginId: 'inventory',
+    packageName: '@true-north/plugin-inventory',
+    manifest: inventoryManifest,
   },
   library: {
     pluginId: 'library',

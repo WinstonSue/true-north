@@ -14,14 +14,37 @@ export const expenseManifest = definePluginManifest({
   contributions: {
     ipc: { expense: {} },
     views: {
-      transaction: { nameKey: 'menu.expense.transaction', order: 10 },
-      budget: { nameKey: 'menu.expense.budget', order: 20 },
-      overview: { nameKey: 'menu.expense.overview', order: 30 },
+      transaction: { nameKey: 'menu.expense.transaction' },
+      budget: { nameKey: 'menu.expense.budget' },
+      overview: { nameKey: 'menu.expense.overview' },
     },
-    page: {},
-    activity: {
-      captureTypes: { transaction: {} },
-      today: { spent: { kind: 'metric', titleKey: 'plugins.hub.spent', order: 10 } },
+    hub: {},
+    workbench: {
+      workspaces: { suggestTransaction: {} },
+      newTabs: {
+        transaction: { order: 10 },
+        budget: { order: 20 },
+        overview: { order: 30 },
+      },
+    },
+    workflow: {
+      events: {
+        transactionBooked: { payloadSchema: { type: 'object' } },
+        transactionDeleted: { payloadSchema: { type: 'object' } },
+      },
+      commands: {
+        createTransaction: { inputSchema: { type: 'object' }, idempotent: true },
+      },
+    },
+    ai: {
+      mcp: {
+        tools: {
+          suggestTransaction: {},
+        },
+        resources: {
+          transaction: { uriTemplate: 'tn://expense/transactions/{id}' },
+        },
+      },
     },
   },
 });

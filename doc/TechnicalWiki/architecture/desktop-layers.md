@@ -28,7 +28,7 @@ sequenceDiagram
 ## render 层约定
 
 - 宿主页面：`render/features/`（AI 会话、工作台面板）与 `render/plugin/`（插件中心、PluginStage、PluginViewFrame）
-- 插件业务 UI 在 `packages/plugins/{id}/src/renderer`：`features/` 是 Workbench 可独立挂载的功能组件。插件页由 `handles.page` 根自己导航；Workbench 用 `views` + `PluginViewFrame` + `PluginViewSnapshot`
+- 插件业务 UI 在 `packages/plugins/{id}/src/renderer`：`features/` 是 Workbench 可独立挂载的功能组件。插件 Hub 由 `handles.hub` 根自己导航；Workbench 用 `views` + `PluginViewFrame` + `PluginViewSnapshot`
 - 路由：`render/router/`；插件页 URL 为 `/plugins/{pluginId}`，query 由插件自己解释
 - 模块状态：使用 `createInjectState`（`@true-north/common-web-utils`），每功能块独立 Provider + hook
 - 样式：CSS Modules（`*.module.less`）+ Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合。按单元素视觉声明条数分流：≤3 优先 Tailwind；3–5 有定制或较长用 Modules，否则 Tailwind；>5 用 Modules。计数不含 `Flex` / `Row` / `Col` 布局 props。页面壳层优先使用 `Flex`（`container="full|fixed|fill"`）。`fixed` 不自动撑满交叉轴：列父加 `w-full`，行父加 `h-full`（对齐已移除的 `FlexibleContainer.Fixed`）。UI 落地细则见项目 skill「框架规范 · React UI规范」
@@ -59,7 +59,7 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
 
 ## 插件页面模块
 
-一等插件包 `packages/plugins/{growth,expense,purchase,library}` 各自提供独立 `src/manifest.ts`、main/renderer 实现：
+一等插件包 `packages/plugins/{growth,expense,inventory,library}` 各自提供独立 `src/manifest.ts`、main/renderer 实现：
 
 - 插件页：宿主挂载 manifest `page` 对应的根组件，不按 `views` 生成 tabs
 - Workbench：`views` 登记可打开功能，snapshot 存在标签上（同 view 单标签，`revision` 递增）

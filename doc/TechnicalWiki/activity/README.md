@@ -1,32 +1,33 @@
-# Activity 技术域
+# Workflow 技术域
 
-活动卡是跨领域索引，不是万能父实体。领域事实仍保存在成长、记账、采购、收藏各自的表中；`Activity` 只记录发生时间、标题/摘要、来源和可选 capture message，`ActivityLink` 指向同一生活事件下的领域对象。
+宿主协调跨插件联动：插件 SQLite 是领域状态唯一权威，宿主只保存 Plan / Edge / Attempt / 事件日志 / 冲突工单。不实现跨库事务或 2PC。
 
-Activity 是宿主 Plugin Platform 能力，不是 `@true-north/plugin-*` 包。插件中心首页的「最近活动」展示时间线；`/plugins/activity` 与 `/activity` 兼容跳转到 `/plugins`。
+旧 Activity / Today / Capture 运行时已删除。遗留 `activity` / `activity_link` 表在启动时一次性复制为 `legacy.activity.recorded` 事件，原表保留回滚但不被运行时访问。
 
 ## 代码落点
 
 ```
-packages/business/enum/activity/            # ActivityDomain、ActivityCaptureKey 等
-packages/business/vo/activity/              # Activity VO、capture suggestion / adopt VO
-packages/business/web-service/controller/activity.ts
-packages/plugin-sdk/src/activity.ts         # ActivityPort、Today、entity ref
-apps/desktop/src/service/activity/          # Entity、Service、RouteController、AI
-apps/desktop/src/render/plugin/activity/    # 时间线与收集工作台
+packages/plugin-contract/src/workflow.ts     # 事件/命令/交互声明、CommandResult、ResourceRef
+apps/desktop/src/service/workflow/           # Plan、Runner、事件日志、冲突工单、迁移
+apps/desktop/skills/conflict-assist/         # 宿主冲突排查 Skill
+apps/desktop/src/render/plugin/EventTimeline.tsx
+apps/desktop/src/render/plugin/ConflictPanel.tsx
+packages/plugin-sdk/src/host/command-ledger.ts
 ```
 
-## 采纳事务
+## 协议
 
-AI 会话里的记录意图经 `activity.capture` 工作台确认后，走 **`POST /activity/adopt`** → `ActivityService.adoptCapture`。Adopter 由各领域插件贡献；workspace 写回通过注入的 `workspaceWriter`。
-
-插件先在自己的存储里写入领域记录，再由宿主在 AI/Activity 库事务中创建活动卡、链接，并把 workspace 建议标为已采纳。插件写入与宿主写入不再共享同一 SQLite 事务；宿主后失败时，允许留下尚未挂到活动卡上的领域行。
-
-领域页直接创建走各领域 Service，成功后经 `ActivityPort.record` 补一张单链接卡。
-
-删除活动卡不级联删除领域数据；删除领域数据时失效对应链接。
+- 插件声明 `contributions.workflow.{events,commands,interactions}`，实现 `handles.workflow.commands` / `handles.workflow.interactions`。
+- 命令结果是 `applied | noop | conflict | rejected | notFound | unavailable`，业务冲突不得伪装成异常。
+- 写命令走双层幂等：宿主 `CommandAttempt` + 插件 `PluginCommandLedger`。建议工作台使用 `workspace:{workspaceId}:{pluginId}.{localId}`。成功（applied/noop）后同一 key 配不同输入直接拒绝；校验失败或暂时不可用可修正后重试。
+- Edge：`armed → awaiting_interaction → dispatching → succeeded`，以及 `conflict` / `retryable_error` / `blocked_plugin` / `failed_terminal` / `cancelled` / `expired`。
+- 只自动重试瞬时错误和插件暂不可用。revision 冲突、校验拒绝、资源不存在停止并开冲突工单。
+- Agent 首次规划只能调用各插件 suggest MCP 与宿主 `workflow.compose`；确认后退出状态机。冲突排查走 `workflow.conflictAssist` Skill：只能读资源和调用 `workflow.proposeConflictResolution`。工单身份、允许动作和 revision 由运行时强制校验。
 
 ## 查询
 
-- `GET /activity/list`：按时间、领域、关键词列活动卡
-- `GET /activity/home-today`：侧栏「今天」清单与插件中心今日摘要
-- `POST /activity/adopt`：收集工作台采纳
+- `GET /workflow/events`：带 display snapshot 的只读事件时间线
+- `POST /workflow/commands/run`：执行已声明命令
+- `POST /workflow/compose`：连接 suggest workspace，不写领域实体
+- `GET /workflow/pending`、`POST /workflow/edges/:id/interact`：交互门
+- `GET /workflow/conflicts`、`PUT /workflow/conflicts/:id/resolve`：冲突工单

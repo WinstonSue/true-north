@@ -28,6 +28,8 @@ export type StreamSessionContext = {
   assistantId: string;
   parts: AiMessagePartVo[];
   persistParts: (parts: AiMessagePartVo[]) => Promise<MessageVo>;
+  conflictMode?: boolean;
+  conflictTicketId?: string;
 };
 
 export type RuntimeSpawnInput = {

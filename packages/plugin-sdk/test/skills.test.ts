@@ -42,3 +42,19 @@ test('resolvePluginPackageRoot finds first-party plugin from source or node_modu
     join(packageRoot, 'skills/goal-decompose'),
   );
 });
+
+test('desktop host skills resolve from the package root, not dist/main', () => {
+  const fromSource = fileURLToPath(
+    new URL('../../../apps/desktop/src/service/workflow/ai/index.ts', import.meta.url),
+  );
+  const packageRoot = resolvePluginPackageRoot('true-north-desktop', fromSource);
+  assert.match(packageRoot, /apps\/desktop$/);
+  const roots = resolveSkillRoots(packageRoot, { conflictAssist: { root: 'skills/conflict-assist' } });
+  assert.equal(roots.conflictAssist, join(packageRoot, 'skills/conflict-assist'));
+  assert.doesNotMatch(roots.conflictAssist, /dist\/main\/skill/);
+  assert.equal(validateSkillRoots('workflow', roots).length, 0);
+  assert.equal(
+    validateSkillRoots('workflow', { conflictAssist: join(packageRoot, 'dist/main/skill') }).length > 0,
+    true,
+  );
+});

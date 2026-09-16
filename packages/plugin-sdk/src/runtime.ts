@@ -1,12 +1,12 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 import type {
-  ActivityPort,
-  CaptureAdopter,
+  CommandResult,
   PluginManifest,
   PluginSpace,
+  ResourceRef,
   ShellSlotId,
-  TodaySectionValues,
+  WorkflowCommandContext,
 } from '@true-north/plugin-contract';
 
 export type AiCachePort = {
@@ -26,12 +26,17 @@ export type AiCachePort = {
   }): Promise<void>;
 };
 
+export type AgentToolContext = {
+  appendWorkspace: (part: unknown) => string;
+  conflictTicketId?: string;
+};
+
 export type AgentToolSpec = {
   description: string;
   parameters: Record<string, unknown>;
   schema: { parse(value: unknown): unknown };
   readOnly?: boolean;
-  execute: (args: Record<string, unknown>, ctx: { appendWorkspace: (part: unknown) => void }) => Promise<string>;
+  execute: (args: Record<string, unknown>, ctx: AgentToolContext) => Promise<string>;
 };
 
 export type AgentTool = AgentToolSpec & { name: string };
@@ -61,14 +66,22 @@ export type PluginPromptProvider = {
   get(args: Record<string, string>): Promise<{ messages: Array<{ role: string; content: { type: 'text'; text: string } }> }>;
 };
 
+export type WorkbenchAdoptInput = {
+  pluginId: string;
+  localId: string;
+  input?: unknown;
+};
+
 export type WorkbenchHostActions = {
   updatePayload: (payload: Record<string, unknown>) => Promise<boolean>;
   requestFollowUp: (text: string) => void;
+  adopt: (input: WorkbenchAdoptInput) => Promise<CommandResult>;
 };
 
 export type WorkbenchToolProps<TPayload = Record<string, unknown>> = {
   payload: TPayload;
   messageId: string;
+  workspaceId?: string;
   conversationId: string;
   actions: WorkbenchHostActions;
 };
@@ -88,12 +101,21 @@ export type WorkbenchExtractHandler = (input: {
 }) => Promise<void>;
 
 export type WorkbenchWorkspaceHost = {
-  load(conversationId: string, messageId: string): Promise<{ workspaceKey: string; payload: Record<string, unknown> }>;
+  load(
+    conversationId: string,
+    messageId: string,
+    workspaceId: string,
+  ): Promise<{ workspaceKey: string; payload: Record<string, unknown>; workspaceId: string }>;
   subscribe(
     messageId: string,
-    onUpdate: (next: { workspaceKey: string; payload: Record<string, unknown> }) => void,
+    workspaceId: string,
+    onUpdate: (next: { workspaceKey: string; payload: Record<string, unknown>; workspaceId: string }) => void,
   ): () => void;
-  patch(messageId: string, payload: Record<string, unknown>): Promise<Record<string, unknown>>;
+  patch(
+    messageId: string,
+    workspaceId: string,
+    payload: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
 };
 
 export type PluginViewSnapshot = {
@@ -127,7 +149,7 @@ export type PluginIpcPort = {
 };
 
 export type HostActionPort = {
-  invoke(id: string, input?: unknown): Promise<void> | void;
+  invoke(id: string, input?: unknown): Promise<void>;
   register(id: string, handler: (input?: unknown) => void | Promise<void>): () => void;
 };
 
@@ -153,20 +175,44 @@ export type PluginAiStartInput = {
   label?: string;
   skill?: string;
   message?: string;
+  /** 复用已有资源会话时也发送的固定开场。 */
+  kickoff?: string;
+};
+
+export type PluginWorkflowPort = {
+  emit(localId: string, payload?: Record<string, unknown>, source?: ResourceRef): Promise<void>;
+};
+
+export type WorkflowCommandHandler = {
+  execute(input: unknown, ctx: WorkflowCommandContext): Promise<CommandResult>;
+};
+
+export type PluginRendererWorkflowPort = {
+  runCommand(
+    localId: string,
+    input: unknown,
+    options?: { idempotencyKey?: string; planId?: string; nodeId?: string },
+  ): Promise<CommandResult>;
+  openInteraction(localId: string, draft?: Record<string, unknown>): Promise<Record<string, unknown> | null>;
+};
+
+export type WorkflowInteractionProps = {
+  draft?: Record<string, unknown>;
+  onSubmit: (input: Record<string, unknown>) => Promise<void>;
+  onCancel: () => Promise<void>;
 };
 
 export type PluginMainContext = {
   pluginId: string;
   space: PluginSpace;
-  activity: ActivityPort;
+  workflow: PluginWorkflowPort;
   cache: AiCachePort;
 };
 
 export type PluginMainHandles = {
   ipc?: Record<string, { controller: object }>;
-  activity?: {
-    capture?: Record<string, { adopt: CaptureAdopter['adopt'] }>;
-    today?: Record<string, { collect(): Promise<TodaySectionValues> }>;
+  workflow?: {
+    commands?: Record<string, WorkflowCommandHandler>;
   };
   ai?: {
     mcp?: {
@@ -189,6 +235,7 @@ export type PluginRendererContext = {
   ipc: PluginIpcPort;
   navigate: NavigateFunction;
   hostActions: HostActionPort;
+  workflow: PluginRendererWorkflowPort;
   product?: {
     Surface: ComponentType<{ id: string; children?: ReactNode }>;
     ref: (id: string) => string;
@@ -218,25 +265,32 @@ export type WorkbenchViewContribution = {
   id: string;
   pluginId: string;
   nameKey: string;
-  order?: number;
   load: () => Promise<{ default: ComponentType }>;
 };
 
-export type PluginPageProps = {
+export type WorkbenchNewTabContribution = {
+  id: string;
+  pluginId: string;
+  viewId: string;
+  nameKey: string;
+  order?: number;
+};
+
+export type PluginHubProps = {
   location: Record<string, string>;
   navigate: (next: Record<string, string>) => void;
 };
-
-/** @deprecated use {@link PluginPageProps} */
-export type PluginPageShellProps = PluginPageProps;
 
 export type PluginRendererHandles = {
   icon?: PluginIcon;
   locales?: LocaleContribution[];
   scope?: ComponentType<{ children?: ReactNode }>;
   views?: Record<string, { load: () => Promise<{ default: ComponentType }> }>;
-  page?: {
-    load: () => Promise<{ default: ComponentType<PluginPageProps> }>;
+  hub?: {
+    load: () => Promise<{ default: ComponentType<PluginHubProps> }>;
+  };
+  workflow?: {
+    interactions?: Record<string, { load: () => Promise<{ default: ComponentType<WorkflowInteractionProps> }> }>;
   };
   workbench?: {
     workspaces?: Record<string, WorkbenchToolDefinition>;
@@ -259,3 +313,4 @@ export type PluginDescriptor = {
 };
 
 export const HOST_AI_START = 'host.ai.start';
+export const HOST_WORKFLOW_OPEN_PENDING = 'host.workflow.openPending';

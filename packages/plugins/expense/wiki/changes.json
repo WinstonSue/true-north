@@ -4,6 +4,36 @@
       "version": "v0.3.0",
       "date": "2026-09-15",
       "event": "changed",
+      "summary": "记下物资入库不会自动变成支出。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "expense:rule:create-activity",
+        "scope": "rule",
+        "name": "记一笔留下事件",
+        "reference": "expense.rule.create-activity",
+        "wikiId": "expense",
+        "wikiTitle": "记账"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
+      "summary": "从记账页记一笔后，最近动态会出现对应事件；计划中的采购不会在确认前变成支出。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "expense:rule:create-activity",
+        "scope": "rule",
+        "name": "记一笔留下事件",
+        "reference": "expense.rule.create-activity",
+        "wikiId": "expense",
+        "wikiTitle": "记账"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "changed",
       "summary": "账单、预算与总览是记账页内自己的栏目；同一类能力也可从工作台加号作为功能标签打开，两者不是同一套顶栏。",
       "productStatus": "roadmap",
       "feature": {

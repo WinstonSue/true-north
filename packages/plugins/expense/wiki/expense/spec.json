@@ -39,8 +39,8 @@
     },
     {
       "id": "create-activity",
-      "name": "记一笔留下活动卡",
-      "description": "从记账页直接创建交易后，自动留下一张关联该交易的活动卡，供活动时间线回看。",
+      "name": "记一笔留下事件",
+      "description": "从记账页直接创建交易后，最近动态会出现对应事件，供回看。",
       "views": ["transaction"],
       "reference": "expense.rule.create-activity",
       "productStatus": "roadmap"
@@ -74,8 +74,8 @@
     },
     {
       "id": "expense.rule.create-activity",
-      "title": "记一笔留下活动卡",
-      "body": "在账单里直接记一笔，时间线上会出现对应活动。从 AI 会话记下并确认的支出，与采购等建议写在同一张活动卡上。"
+      "title": "记一笔留下事件",
+      "body": "在账单里直接记一笔，最近动态会出现对应事件。记下物资入库不会自动变成支出。"
     }
   ]
 }

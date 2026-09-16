@@ -36,7 +36,7 @@ export class TodoService {
   // ====== 基础 CRUD ======
   async create(
     createTodoDto: CreateTodoDto,
-    options?: { skipActivity?: boolean; manager?: EntityManager; system?: boolean },
+    options?: { manager?: EntityManager; system?: boolean },
   ): Promise<TodoDto> {
     const related = narrowTodoRelated({
       relatedType: createTodoDto.relatedType,
@@ -54,7 +54,7 @@ export class TodoService {
       : await this.todoRepository.create(entityData);
     const todoDto = new TodoDto();
     todoDto.importEntity(entity);
-    if (!options?.skipActivity) {
+    if (!options?.manager) {
       try {
         const { recordGrowthActivity } = await import('../../context');
         await recordGrowthActivity({
@@ -65,11 +65,9 @@ export class TodoService {
           label: todoDto.name,
         });
       } catch {
-        // activity card is supplementary
+        // event log is supplementary
       }
     }
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return todoDto;
   }
 
@@ -81,8 +79,6 @@ export class TodoService {
         throw new Error('习惯周期待办不能单独删除，请通过习惯操作结束周期');
       }
       await this.todoRepository.delete(id);
-      const { invalidateGrowthToday } = await import('../../context');
-      invalidateGrowthToday();
       return true;
     } catch (error) {
       throw error;
@@ -108,7 +104,9 @@ export class TodoService {
         throw new Error('系统生成待办的来源不可修改');
       }
     }
-    const entity = await this.todoRepository.update(updateTodoDto.exportUpdateEntity());
+    const data = updateTodoDto.exportUpdateEntity();
+    data.revision = (Number(current.revision) || 1) + 1;
+    const entity = await this.todoRepository.update(data);
     const todoDto = new TodoDto();
     todoDto.importEntity(entity);
     return todoDto;
@@ -200,8 +198,6 @@ export class TodoService {
     updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, true);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return result;
   }
 
@@ -250,8 +246,6 @@ export class TodoService {
     updateTodoDto.abandonedAt = new Date();
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, false);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return result;
   }
 
@@ -293,9 +287,6 @@ export class TodoService {
         completed ? TodoRepeatStatus.ENDED : TodoRepeatStatus.ABANDONED,
       );
     }
-
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return result;
   }
 
@@ -311,8 +302,6 @@ export class TodoService {
     updateTodoDto.doneAt = undefined;
     updateTodoDto.abandonedAt = undefined;
     const result = await this.update(updateTodoDto, true);
-    const { invalidateGrowthToday } = await import('../../context');
-    invalidateGrowthToday();
     return result;
   }
 

@@ -1,0 +1,123 @@
+{
+  "changes": [
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "新增物资，用来管理可储存的家庭实物、存放位置和出入库，替换已移除的家庭采购。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:module",
+        "scope": "module",
+        "name": "物资",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "物资页列出总量、下限、目标量和低库存，并可记下入库、出库或盘点。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:view:items",
+        "scope": "view",
+        "name": "物资",
+        "reference": "inventory.view.items",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "位置管理家庭存放点，可选上级位置。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:view:locations",
+        "scope": "view",
+        "name": "位置",
+        "reference": "inventory.view.locations",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "出入库按时间回看入库、出库和盘点。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:view:movements",
+        "scope": "view",
+        "name": "出入库",
+        "reference": "inventory.view.movements",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "物资只接受可储存的家庭实物；票务、服务和单纯提醒购买不进入。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:rule:household-goods",
+        "scope": "rule",
+        "name": "只记家庭实物",
+        "reference": "inventory.rule.household-goods",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "库存以变动记录为准，出库后不能小于零。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:rule:stock-truth",
+        "scope": "rule",
+        "name": "库存以变动为准",
+        "reference": "inventory.rule.stock-truth",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "低库存和建议补货量由下限和目标量算出，不建立采购单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:rule:restock-from-thresholds",
+        "scope": "rule",
+        "name": "补货由阈值派生",
+        "reference": "inventory.rule.restock-from-thresholds",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-15",
+      "event": "introduced",
+      "summary": "入库与记账是两件独立的事，只有同时说出数量和金额才分别建议。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:rule:independent-expense",
+        "scope": "rule",
+        "name": "入库与记账分开",
+        "reference": "inventory.rule.independent-expense",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    }
+  ]
+}

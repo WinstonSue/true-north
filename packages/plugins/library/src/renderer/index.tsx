@@ -5,6 +5,7 @@ import { libraryIds } from '../contract';
 import { libraryExtractHandler } from './contributions/extract';
 import { libraryLocales } from './locales';
 import { bindPluginIpc } from '../client';
+import { suggestBookmarkTool } from './contributions/suggest';
 
 export function createRenderer() {
   return defineRendererImplementation(libraryManifest, {
@@ -16,10 +17,13 @@ export function createRenderer() {
         views: {
           search: { load: () => import('./features/search') },
         },
-        page: {
+        hub: {
           load: () => import('./layout/LibraryPage'),
         },
         workbench: {
+          workspaces: {
+            suggestBookmark: suggestBookmarkTool,
+          },
           actions: {
             extract: {
               run: async (input) => {

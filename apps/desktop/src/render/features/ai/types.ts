@@ -41,7 +41,7 @@ export type SessionValue = {
   deleteConversation: (id: string) => Promise<void>;
   sendUserMessage: () => Promise<void>;
   cancelStreaming: () => Promise<void>;
-  openWorkspace: (messageId: string) => void;
+  openWorkspace: (messageId: string, workspaceId?: string) => void;
   openResource: (uri: string) => void;
   boundLabel: (conversation?: ConversationVo) => string;
 };

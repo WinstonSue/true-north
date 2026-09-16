@@ -12,6 +12,7 @@ export const growthIds = {
   workspaces: {
     goalDecompose: contributionKey(GROWTH_PLUGIN_ID, 'goalDecompose'),
     taskDecompose: contributionKey(GROWTH_PLUGIN_ID, 'taskDecompose'),
+    suggestTodo: contributionKey(GROWTH_PLUGIN_ID, 'suggestTodo'),
   },
   skills: {
     goalDecompose: contributionKey(GROWTH_PLUGIN_ID, 'goalDecompose'),
@@ -19,5 +20,8 @@ export const growthIds = {
   },
   capture: {
     todo: contributionKey(GROWTH_PLUGIN_ID, 'todo'),
+  },
+  commands: {
+    createTodo: contributionKey(GROWTH_PLUGIN_ID, 'createTodo'),
   },
 } as const;

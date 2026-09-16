@@ -15,10 +15,13 @@ import type {
   StartMessageStreamResponseVo,
 } from '@true-north/vo';
 import { bindStreamToCurrentTrace } from '@true-north/dev-lab/collector';
+import { conflictTicketIdFromAttachments, isConflictConversation } from '../../../plugin/host-ids';
+import { resolveConversationSkill } from '../skill-route.ts';
 import { AiPlatformError } from '../ai-error';
 import { agentDef } from '../runtime/registry';
 import { killChildProcess, runtimeService } from '../runtime';
 import { readRuntimeId } from '../runtime/settings-store';
+import { migrateMessageParts } from './workspace-parts';
 import { AiConversation } from './conversation.entity';
 import { AiConversationRepository } from './conversation.repository';
 import { AiMessage } from './message.entity';
@@ -68,7 +71,7 @@ function toMessageVo(entity: AiMessage): MessageVo {
     id: entity.id,
     conversationId: entity.conversationId,
     role: entity.role as MessageVo['role'],
-    parts: entity.parts || [],
+    parts: migrateMessageParts(entity.parts),
     createdAt: toIso(entity.createdAt),
   };
 }
@@ -115,7 +118,13 @@ export class ConversationService {
     }
     const entity = new AiConversation();
     entity.title = input.label ? `拆解：${input.label}` : '资源会话';
-    entity.attachments = [{ uri, label: input.label, skill: input.skill }];
+    let skill: string | undefined;
+    try {
+      skill = input.skill ? resolveConversationSkill(input.skill)?.id : undefined;
+    } catch (error) {
+      throw AiPlatformError.internal(error instanceof Error ? error.message : '未知 Skill');
+    }
+    entity.attachments = [{ uri, label: input.label, skill }];
     entity.pinned = false;
     entity.runtimeId = runtimeIdForConversation(undefined, readRuntimeId());
     const saved = await this.conversationRepository.create(entity);
@@ -240,7 +249,11 @@ export class ConversationService {
 
     const apply = async (message: AiMessage) => {
       const parts = [...(message.parts || [])];
-      const workspaceIndex = parts.findIndex((part) => part.type === 'workspace');
+      const workspaceIndex = parts.findIndex((part) => {
+        if (part.type !== 'workspace') return false;
+        if (body.workspaceId) return part.workspaceId === body.workspaceId;
+        return true;
+      });
       if (workspaceIndex < 0) {
         throw AiPlatformError.internal('消息中不存在工作台块');
       }
@@ -319,6 +332,8 @@ export class ConversationService {
         preferredRuntimeId: preferred,
         signal,
         persistParts,
+        conflictMode: isConflictConversation(conversation.attachments),
+        conflictTicketId: conflictTicketIdFromAttachments(conversation.attachments),
       });
 
       const latest = await this.conversationRepository.find(conversationId);

@@ -34,7 +34,7 @@ function ActivityToPlugins() {
     return <Navigate to={location.pathname.replace('/activity/expense', '/plugins/expense') + location.search + location.hash} replace />;
   }
   if (location.pathname.startsWith('/activity/purchase')) {
-    return <Navigate to={location.pathname.replace('/activity/purchase', '/plugins/purchase') + location.search + location.hash} replace />;
+    return <Navigate to={location.pathname.replace('/activity/purchase', '/plugins/inventory') + location.search + location.hash} replace />;
   }
   if (location.pathname.startsWith('/activity/library')) {
     return <Navigate to={location.pathname.replace('/activity/library', '/plugins/library') + location.search + location.hash} replace />;
@@ -89,6 +89,8 @@ function Router() {
             <Route index element={<Navigate to="/ai" replace />} />
             <Route path="plugins/activity" element={<Navigate to="/plugins" replace />} />
             <Route path="plugins/activity/*" element={<Navigate to="/plugins" replace />} />
+            <Route path="plugins/purchase" element={<Navigate to="/plugins/inventory" replace />} />
+            <Route path="plugins/purchase/*" element={<Navigate to="/plugins/inventory" replace />} />
             {renderRouteComponent(
               router.flattenRoutes.filter(
                 (route) => /^\//.test(route.key) && route.fullPath && route.fullPath !== '/plugins',
@@ -102,8 +104,8 @@ function Router() {
             <Route path="activity/*" element={<ActivityToPlugins />} />
             <Route path="growth/*" element={<LegacyToPlugins prefix="/growth" />} />
             <Route path="expense/*" element={<LegacyToPlugins prefix="/expense" />} />
-            <Route path="purchase" element={<LegacyToPlugins prefix="/purchase" />} />
-            <Route path="purchase/*" element={<LegacyToPlugins prefix="/purchase" />} />
+            <Route path="purchase" element={<Navigate to="/plugins/inventory" replace />} />
+            <Route path="purchase/*" element={<Navigate to="/plugins/inventory" replace />} />
             <Route path="library" element={<LegacyToPlugins prefix="/library" />} />
             <Route path="library/*" element={<LegacyToPlugins prefix="/library" />} />
             <Route path="*" element={<ForbiddenPage />} />

@@ -12,7 +12,7 @@ packages/plugins/library/src/main/service/
 apps/desktop/src/service/extract/save.ts
 packages/plugins/library/src/renderer/
 packages/plugins/library/src/renderer/contributions/extract.ts  # Workbench 抽出后收藏适配器
-packages/plugins/library/src/main/service/capture.adopter.ts           # Activity 收集采纳
+packages/plugins/library/src/main/service/workflow.commands.ts
 ```
 
-同一 URL 再次收藏时提示更新或另存。文件被移走或删除时标记 `MISSING`，不删除索引。Workbench 浏览器标签抽出正文成功后，由 Library 注入的 extract handler 写入 Bookmark，并生成活动卡。页面入口为 `/plugins/library`。
+同一 URL 再次收藏时提示更新或另存。文件被移走或删除时标记 `MISSING`，不删除索引。Workbench 浏览器标签抽出正文成功后，由 Library 注入的 extract handler 写入 Bookmark，并发出领域事件。页面入口为 `/plugins/library`。
