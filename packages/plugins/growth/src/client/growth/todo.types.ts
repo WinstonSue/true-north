@@ -14,6 +14,8 @@ export type TodoFormData = {
   repeatId?: string;
   taskId?: string;
   habitId?: string;
-  /** 周期模板已结算次数；>0 时改重复规则不重置当前计划日期 */
   settledTimes?: number;
+  notifyRule?: TodoVo['notifyRule'];
+  /** 完成时发起的已发布 Workflow；不写入待办实体 */
+  workflowDefinitionId?: string | null;
 };

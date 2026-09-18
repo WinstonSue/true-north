@@ -6,9 +6,10 @@ import { HabitController } from './service/habit/habit.route-controller';
 import { TaskController } from './service/task/task.route-controller';
 import { TodoController } from './service/todo/todo.route-controller';
 import { TrackTimeController } from './service/track-time/track-time.route-controller';
+import { NotifySettingsController } from './notify-settings.controller';
 import { growthMcpTools } from './service/ai/tools';
 import { growthGoalResource, growthTaskResource, growthTodoResource } from './service/ai/resources';
-import { bindGrowthContext } from './context';
+import { bindGrowthContext, startGrowthDueWatch, stopGrowthDueWatch } from './context';
 import { activateStorage, disposeStorage } from './storage';
 import { completeTodoCommand, createTodoCommand } from './service/todo/workflow.commands';
 
@@ -22,6 +23,7 @@ export function createGrowthMain() {
     async activate(ctx: PluginMainContext) {
       await activateStorage(ctx.space);
       bindGrowthContext(ctx);
+      startGrowthDueWatch();
       return {
         ipc: {
           goal: { controller: new GoalController() },
@@ -29,6 +31,7 @@ export function createGrowthMain() {
           todo: { controller: new TodoController() },
           habit: { controller: new HabitController() },
           trackTime: { controller: new TrackTimeController() },
+          notify: { controller: new NotifySettingsController() },
         },
         workflow: {
           commands: {
@@ -39,17 +42,18 @@ export function createGrowthMain() {
         ai: {
           mcp: {
             tools: growthMcpTools,
-            resources: {
-              goal: growthGoalResource,
-              task: growthTaskResource,
-              todo: growthTodoResource,
-            },
           },
           skillRoots,
+        },
+        resources: {
+          goal: growthGoalResource,
+          task: growthTaskResource,
+          todo: growthTodoResource,
         },
       };
     },
     async dispose() {
+      stopGrowthDueWatch();
       await disposeStorage();
     },
   });

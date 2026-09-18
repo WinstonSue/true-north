@@ -13,21 +13,16 @@ export const inventoryManifest = definePluginManifest({
   },
   contributions: {
     ipc: { inventory: {} },
-    views: {
-      items: { nameKey: 'menu.inventory.items' },
-      locations: { nameKey: 'menu.inventory.locations' },
-      movements: { nameKey: 'menu.inventory.movements' },
-    },
     hub: {},
+    resources: {
+      item: { uriTemplate: 'tn://inventory/items/{id}' },
+      location: { uriTemplate: 'tn://inventory/locations/{id}' },
+      movement: { uriTemplate: 'tn://inventory/movements/{id}' },
+    },
     workbench: {
       workspaces: {
         suggestItem: {},
         suggestMovement: {},
-      },
-      newTabs: {
-        items: { order: 10 },
-        locations: { order: 20 },
-        movements: { order: 30 },
       },
     },
     workflow: {
@@ -50,11 +45,6 @@ export const inventoryManifest = definePluginManifest({
         tools: {
           suggestItem: {},
           suggestMovement: {},
-        },
-        resources: {
-          item: { uriTemplate: 'tn://inventory/items/{id}' },
-          location: { uriTemplate: 'tn://inventory/locations/{id}' },
-          movement: { uriTemplate: 'tn://inventory/movements/{id}' },
         },
       },
     },

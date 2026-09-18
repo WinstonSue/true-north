@@ -4,7 +4,7 @@ export const growthLocales: LocaleContribution = {
   pluginId: 'growth',
   messages: {
     'zh-CN': {
-      'menu.growth': '个人成长',
+      'menu.growth': '规划成长',
       'menu.todo': '待办事项',
       'menu.todo.today': '当前待办',
       'menu.todo.all': '全部待办',
@@ -19,6 +19,8 @@ export const growthLocales: LocaleContribution = {
       'menu.habit': '习惯',
       'menu.habit.list': '习惯列表',
       'menu.habit.detail': '习惯详情',
+      'menu.notify': '通知',
+      'menu.notify.settings': '通知规则',
       'today.overdue': '已过期',
       'today.habit': '习惯',
       'today.focus': '专注中',
@@ -43,6 +45,8 @@ export const growthLocales: LocaleContribution = {
       'menu.habit': 'Habit',
       'menu.habit.list': 'Habit List',
       'menu.habit.detail': 'Habit Detail',
+      'menu.notify': 'Notifications',
+      'menu.notify.settings': 'Notify rules',
       'today.overdue': 'Overdue',
       'today.habit': 'Habit',
       'today.focus': 'Focusing',

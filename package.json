@@ -20,6 +20,7 @@
     "skills:sync": "skills-manager install"
   },
   "devDependencies": {
+    "@sue/design-web-react": "0.0.5",
     "@ylib/product-server": "0.0.7",
     "@ylib/skills-manager": "1.0.5",
     "@types/lodash-es": "^4.17.12",

@@ -24,7 +24,7 @@ doc/{version}/
 ```
 doc/
 ├── TechnicalWiki/
-│   ├── plugin-platform.md              # 一等插件目录与宿主组装
+│   ├── plugin-platform.md              # 插件贡献分层（hub / resources / newTabs / workspaces）与宿主组装
 │   ├── growth/                         # Growth 域；今日待处理在侧栏通知
 │   ├── activity/                       # 宿主 Workflow 协调器（原 Activity 已删除）
 │   ├── expense/                        # 记账持久化

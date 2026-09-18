@@ -28,11 +28,11 @@ sequenceDiagram
 ## render 层约定
 
 - 宿主页面：`render/features/`（AI 会话、工作台面板）与 `render/plugin/`（插件中心、PluginStage、PluginViewFrame）
-- 插件业务 UI 在 `packages/plugins/{id}/src/renderer`：`features/` 是 Workbench 可独立挂载的功能组件。插件 Hub 由 `handles.hub` 根自己导航；Workbench 用 `views` + `PluginViewFrame` + `PluginViewSnapshot`
+- 插件业务 UI 在 `packages/plugins/{id}/src/renderer`。插件 Hub 由 `handles.hub` 根自己导航。Workbench 加号挂 `newTabs.load`；会话建议挂 `workspaces`。点资源走 Hub，不经 views 目录。
 - 路由：`render/router/`；插件页 URL 为 `/plugins/{pluginId}`，query 由插件自己解释
 - 模块状态：使用 `createInjectState`（`@true-north/common-web-utils`），每功能块独立 Provider + hook
-- 样式：CSS Modules（`*.module.less`）+ Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合。按单元素视觉声明条数分流：≤3 优先 Tailwind；3–5 有定制或较长用 Modules，否则 Tailwind；>5 用 Modules。计数不含 `Flex` / `Row` / `Col` 布局 props。页面壳层优先使用 `Flex`（`container="full|fixed|fill"`）。`fixed` 不自动撑满交叉轴：列父加 `w-full`，行父加 `h-full`（对齐已移除的 `FlexibleContainer.Fixed`）。UI 落地细则见项目 skill「框架规范 · React UI规范」
-- UI 组件：布局/表单/反馈直接用 `@sue/design-web-react` 公开 API；图标用 `lucide-react`。业务一等能力（`RepeatSelector`、`ContextMenu`）放在 `@true-north/components-repeat` 与 `@true-north/plugin-ui`；HTTP 错误提示直接用 design-web 的 `message`
+- 样式：CSS Modules（`*.module.less`）+ Tailwind，与 `@sue/design-web-react`（前缀 `sue`）配合。按单元素视觉声明条数分流：≤3 优先 Tailwind；3–5 有定制或较长用 Modules，否则 Tailwind；>5 用 Modules。计数不含 `Flex` / `Row` / `Col` 布局 props。页面壳层优先使用 `Flex`（`container="full|fixed|fill"`）。`fixed` 不自动撑满交叉轴：列父加 `w-full`，行父加 `h-full`（对齐已移除的 `FlexibleContainer.Fixed`）。组件选型、Token 与通用企业场景（固定区 + fill、筛选列表、表单）见项目 skill `design-web-skill` / `design-web-components` / `design-web-scenarios`。True North 应用组合（插件壳、Tabs 去重、ProductSurface、主题映射、视觉验收）见项目 skill `true-north-react-ui`
+- UI 组件：布局/表单/反馈直接用 `@sue/design-web-react` 公开 API；右键命令用设计包的 `ContextMenu`（不要 `Dropdown trigger={['contextMenu']}`，也不要本地再包一层）。图标用 `lucide-react`。业务一等能力（`RepeatSelector`）与应用级页面壳（`TabsPage`、`PageHeader`、`FilterBar`、`Surface`）放在 `@true-north/components-repeat` 与 `@true-north/plugin-ui`；HTTP 错误提示直接用 design-web 的 `message`
 - 数据调用：优先 `@true-north/web-service`（Service + Controller + request）→ preload REST
 - Electron 桥类型：`@true-north/web-service/electron-types`（preload `import type`；render side-effect import 激活 `Window.electronAPI`）
 
@@ -61,9 +61,9 @@ export const [GoalDetailProvider, useGoalDetailContext] = createInjectState<{
 
 一等插件包 `packages/plugins/{growth,expense,inventory,library}` 各自提供独立 `src/manifest.ts`、main/renderer 实现：
 
-- 插件页：宿主挂载 manifest `page` 对应的根组件，不按 `views` 生成 tabs
-- Workbench：`views` 登记可打开功能，snapshot 存在标签上（同 view 单标签，`revision` 递增）
-- 会话工具：仍由 `workbench.workspaces` 贡献（如目标/任务拆解）
+- 插件页：宿主挂载 `handles.hub` 根组件，不按表生成栏目
+- Workbench：`newTabs` 自愿登记工作台页；`workspaces` 登记会话工具
+- 资源：顶层 `resources` + `openResource` → Hub query
 
 业务规则与模块产品说明见 [ProductWiki · Growth](../../../packages/plugins/growth/wiki/growth/spec.json)。
 

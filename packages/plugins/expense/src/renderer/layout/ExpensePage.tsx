@@ -2,9 +2,9 @@ import type { PluginHubProps } from '@true-north/plugin-sdk';
 import { usePluginRuntime } from '@true-north/plugin-sdk/renderer';
 import { TabsPage } from '@true-north/plugin-ui';
 import { ExpensesProvider } from '../pages/context';
-import TransactionFeature from '../features/transaction';
-import BudgetFeature from '../features/budget';
-import OverviewFeature from '../features/overview';
+import TransactionFeature from '../pages/transaction';
+import BudgetFeature from '../pages/budget';
+import OverviewFeature from '../pages/overview';
 
 const TABS = [
   { key: 'transaction', nameKey: 'menu.expense.transaction' },

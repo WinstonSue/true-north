@@ -23,6 +23,10 @@ function Workspace(props: WorkbenchToolProps<Record<string, unknown>>) {
         onClick={async () => {
           setBusy(true);
           try {
+            if (!(Number(draft.amount) > 0)) {
+              message.error('请填写大于零的金额');
+              return;
+            }
             const result = await props.actions.adopt({
               pluginId: 'expense',
               localId: 'createTransaction',

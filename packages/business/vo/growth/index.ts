@@ -10,6 +10,7 @@ export { TrackTimeModule as TrackTime };
 export { GoalModule as Goal };
 export { HabitModule as Habit };
 
+export * from './notify-rule';
 export * from './todo';
 export * from './task';
 export * from './track-time';

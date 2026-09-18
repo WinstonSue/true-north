@@ -5,4 +5,5 @@ export { default as TaskController } from './task';
 export { default as GoalController } from './goal';
 export { default as HabitController } from './habit';
 export { default as TrackTimeController } from './track-time';
+export { default as NotifyController } from './notify';
 export * from './growth';

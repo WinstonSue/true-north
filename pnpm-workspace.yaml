@@ -10,7 +10,9 @@ nodeOptions: "--no-warnings --no-deprecation"
 storeDir: .pnpm-store
 
 minimumReleaseAgeExclude:
-  - '@sue/design-web-react@0.0.3-beta'
+  - '@sue/design-web-react@0.0.5'
+  - '@sue/design-web-skill@0.0.5'
+  - '@sue/design-web-scenarios@0.0.5'
   - baseline-browser-mapping@2.11.12
   - electron-to-chromium@1.5.400
   - node-releases@2.0.52
@@ -20,6 +22,7 @@ minimumReleaseAgeExclude:
   - '@ylib/product-surface-react@0.0.2'
   - '@ylib/product-skills@0.0.7'
   - '@ylib/skills-manager@1.0.5'
+  - lucide-react@1.47.0
 
 overrides:
   typescript: ^6.0.0
@@ -29,6 +32,7 @@ overrides:
   '@sue/design-web-react>dayjs': ^1.11.13
   '@sue/design-web-react>@ant-design/colors': ^8.0.1
   '@sue/design-web-react>@ant-design/fast-color': ^3.0.1
+  '@sue/design-web-react>lucide-react': ^1.47.0
 
 allowBuilds:
   '@swc/core': true

@@ -5,12 +5,11 @@ import { defineRendererImplementation, parsePluginResourceUri } from '@true-nort
 import { useHostActions } from '@true-north/plugin-sdk/renderer';
 import { useEffect } from 'react';
 import { growthManifest } from '../manifest';
-import { growthIds } from '../contract';
 import { growthLocales } from './locales';
 import { goalDecomposeTool, taskDecomposeTool } from './contributions/ai-decomposition/tools';
 import { suggestTodoTool } from './contributions/suggest/tool';
-import { FocusTimerProvider, useFocusTimer } from './pages/focus-timer';
-import { TaskDrawerHost } from './pages/task/detail/TaskDrawer';
+import { FocusTimerProvider, useFocusTimer } from './runtime/focus-timer';
+import { GrowthDrawerHost } from './runtime/drawer';
 import { bindPluginIpc } from '../client';
 
 function FocusTimerSlot({ children }: { children?: ReactNode }) {
@@ -18,7 +17,7 @@ function FocusTimerSlot({ children }: { children?: ReactNode }) {
 }
 
 function TaskDrawerSlot() {
-  return <TaskDrawerHost />;
+  return <GrowthDrawerHost />;
 }
 
 function FocusActionSlot() {
@@ -41,12 +40,6 @@ export function createRenderer() {
       return {
         icon: Sprout,
         locales: [growthLocales],
-        views: {
-          todo: { load: () => import('./features/todo') },
-          task: { load: () => import('./features/task') },
-          habit: { load: () => import('./features/habit') },
-          goal: { load: () => import('./features/goal') },
-        },
         hub: {
           load: () => import('./layout/GrowthPageShell'),
         },
@@ -68,16 +61,13 @@ export function createRenderer() {
           const parsed = parsePluginResourceUri(uri);
           if (!parsed || parsed.pluginId !== 'growth' || !parsed.id) return null;
           if (parsed.collection === 'goals') {
-            return { viewId: growthIds.views.goal, params: { view: 'goal', tab: 'tree', id: parsed.id } };
+            return { pluginId: 'growth', location: { view: 'goal', tab: 'tree', id: parsed.id } };
           }
           if (parsed.collection === 'tasks') {
-            return { viewId: growthIds.views.task, params: { view: 'task', id: parsed.id } };
-          }
-          if (parsed.collection === 'habits') {
-            return { viewId: growthIds.views.habit, params: { view: 'habit', tab: 'detail', id: parsed.id } };
+            return { pluginId: 'growth', location: { view: 'task', id: parsed.id } };
           }
           if (parsed.collection === 'todos') {
-            return { viewId: growthIds.views.todo, params: { view: 'todo' } };
+            return { pluginId: 'growth', location: { view: 'todo' } };
           }
           return null;
         },

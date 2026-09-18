@@ -16,17 +16,14 @@ const FIRST_PARTY_PLUGIN_IDS = ['growth', 'expense', 'inventory', 'library'] as 
 const GoalDecomposeKey = 'growth.goalDecompose';
 const TaskDecomposeKey = 'growth.taskDecompose';
 const LIBRARY_EXTRACT_ACTION = 'library.extract';
-const GROWTH_VIEW_TODO = 'growth.todo';
-const GROWTH_VIEW_TASK = 'growth.task';
-const GROWTH_VIEW_HABIT = 'growth.habit';
-const GROWTH_VIEW_GOAL = 'growth.goal';
-const EXPENSE_VIEW_TRANSACTION = 'expense.transaction';
-const EXPENSE_VIEW_BUDGET = 'expense.budget';
-const EXPENSE_VIEW_OVERVIEW = 'expense.overview';
-const INVENTORY_VIEW_ITEMS = 'inventory.items';
-const INVENTORY_VIEW_LOCATIONS = 'inventory.locations';
-const INVENTORY_VIEW_MOVEMENTS = 'inventory.movements';
-const LIBRARY_VIEW_SEARCH = 'library.search';
+const GROWTH_RESOURCE_GOAL = 'growth.goal';
+const GROWTH_RESOURCE_TASK = 'growth.task';
+const GROWTH_RESOURCE_TODO = 'growth.todo';
+const EXPENSE_RESOURCE_TRANSACTION = 'expense.transaction';
+const INVENTORY_RESOURCE_ITEM = 'inventory.item';
+const INVENTORY_RESOURCE_LOCATION = 'inventory.location';
+const INVENTORY_RESOURCE_MOVEMENT = 'inventory.movement';
+const LIBRARY_RESOURCE_BOOKMARK = 'library.bookmark';
 const growthPaths = { root: '/plugins/growth' };
 const expensePaths = { root: '/plugins/expense' };
 const inventoryPaths = { root: '/plugins/inventory' };
@@ -75,7 +72,7 @@ test('workflow is a host platform, not a catalog plugin', async () => {
         contributions: {
           ipc: { todo: {} },
           ai: { mcp: { tools: { searchGoals: { readOnly: true } } } },
-          views: { todo: { nameKey: 'menu.todo' } },
+          resources: { todo: { uriTemplate: 'tn://growth/todos/{id}' } },
         },
       }),
     ].map((manifest) => ({ manifest })),
@@ -102,8 +99,8 @@ test('first-party renderer binds local-key maps instead of repeating catalog met
     const src = rendererSource(pluginId);
     assert.match(src, /defineRendererImplementation/);
     assert.match(src, /icon:/);
-    assert.match(src, /views:/);
     assert.match(src, /hub:/);
+    assert.doesNotMatch(src, /views:/);
     assert.doesNotMatch(src, /workbenchViews:/);
     assert.doesNotMatch(src, /entitySources:/);
     assert.doesNotMatch(src, /entityPresenters:/);
@@ -120,40 +117,44 @@ test('derived contribution ids stay namespaced', () => {
   assert.equal(expensePaths.root, '/plugins/expense');
   assert.equal(inventoryPaths.root, '/plugins/inventory');
   assert.equal(libraryPaths.root, '/plugins/library');
-  assert.equal(GROWTH_VIEW_TODO, 'growth.todo');
-  assert.equal(GROWTH_VIEW_TASK, 'growth.task');
-  assert.equal(GROWTH_VIEW_HABIT, 'growth.habit');
-  assert.equal(GROWTH_VIEW_GOAL, 'growth.goal');
-  assert.equal(EXPENSE_VIEW_TRANSACTION, 'expense.transaction');
-  assert.equal(EXPENSE_VIEW_BUDGET, 'expense.budget');
-  assert.equal(EXPENSE_VIEW_OVERVIEW, 'expense.overview');
-  assert.equal(INVENTORY_VIEW_ITEMS, 'inventory.items');
-  assert.equal(INVENTORY_VIEW_LOCATIONS, 'inventory.locations');
-  assert.equal(INVENTORY_VIEW_MOVEMENTS, 'inventory.movements');
-  assert.equal(LIBRARY_VIEW_SEARCH, 'library.search');
+  assert.equal(GROWTH_RESOURCE_GOAL, 'growth.goal');
+  assert.equal(GROWTH_RESOURCE_TASK, 'growth.task');
+  assert.equal(GROWTH_RESOURCE_TODO, 'growth.todo');
+  assert.equal(EXPENSE_RESOURCE_TRANSACTION, 'expense.transaction');
+  assert.equal(INVENTORY_RESOURCE_ITEM, 'inventory.item');
+  assert.equal(INVENTORY_RESOURCE_LOCATION, 'inventory.location');
+  assert.equal(INVENTORY_RESOURCE_MOVEMENT, 'inventory.movement');
+  assert.equal(LIBRARY_RESOURCE_BOOKMARK, 'library.bookmark');
 });
 
-test('first-party workbench views stay independently loadable', () => {
+test('first-party resources are declared and opened to Hub', () => {
   const expected = {
-    growth: [GROWTH_VIEW_TODO, GROWTH_VIEW_TASK, GROWTH_VIEW_HABIT, GROWTH_VIEW_GOAL],
-    expense: [EXPENSE_VIEW_TRANSACTION, EXPENSE_VIEW_BUDGET, EXPENSE_VIEW_OVERVIEW],
-    inventory: [INVENTORY_VIEW_ITEMS, INVENTORY_VIEW_LOCATIONS, INVENTORY_VIEW_MOVEMENTS],
-    library: [LIBRARY_VIEW_SEARCH],
+    growth: [GROWTH_RESOURCE_GOAL, GROWTH_RESOURCE_TASK, GROWTH_RESOURCE_TODO],
+    expense: [EXPENSE_RESOURCE_TRANSACTION],
+    inventory: [INVENTORY_RESOURCE_ITEM, INVENTORY_RESOURCE_LOCATION, INVENTORY_RESOURCE_MOVEMENT],
+    library: [LIBRARY_RESOURCE_BOOKMARK],
   } as const;
 
   for (const pluginId of FIRST_PARTY_PLUGIN_IDS) {
     const src = manifestSource(pluginId);
     const renderer = rendererSource(pluginId);
-    assert.match(src, /views:\s*\{/);
-    assert.match(src, /newTabs:\s*\{/);
+    const contribution = readFileSync(
+      join(repoRoot, `packages/plugins/${pluginId}/src/main/contribution.ts`),
+      'utf8',
+    );
+    assert.match(src, /resources:\s*\{/);
     assert.match(src, /hub:\s*\{\s*\}/);
+    assert.doesNotMatch(src, /views:\s*\{/);
+    assert.doesNotMatch(src, /newTabs:\s*\{/);
+    assert.match(renderer, /openResource\(/);
+    assert.match(renderer, /pluginId:/);
+    assert.match(renderer, /location:/);
+    assert.doesNotMatch(renderer, /views:\s*\{/);
+    assert.doesNotMatch(renderer, /viewId:/);
     for (const id of expected[pluginId]) {
       const localId = id.slice(pluginId.length + 1);
-      assert.match(src, new RegExp(`${localId}: \\{ nameKey:`));
-      assert.match(src, new RegExp(`${localId}: \\{ order:`));
-      assert.doesNotMatch(src, new RegExp(`${localId}: \\{ nameKey: '[^']+', order:`));
-      assert.match(renderer, new RegExp(`import\\('\\./features/${localId}'\\)`));
-      assert.equal(existsSync(join(repoRoot, `packages/plugins/${pluginId}/src/renderer/features/${localId}.tsx`)), true);
+      assert.match(src, new RegExp(`${localId}: \\{ uriTemplate:`));
+      assert.match(contribution, new RegExp(`${localId}:`));
     }
   }
 });

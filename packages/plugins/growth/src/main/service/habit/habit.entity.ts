@@ -4,6 +4,7 @@ import { Difficulty, HabitStatus, Importance } from '@true-north/enum';
 import { BaseEntity } from '@true-north/plugin-sdk/main';
 import { Goal } from '../goal/goal.entity';
 import { Repeat } from '../repeat/repeat.entity';
+import type { HabitNotifyRule } from '@true-north/vo';
 
 export class HabitWithoutRelations extends BaseEntity {
   /** 习惯名称 */
@@ -68,6 +69,9 @@ export class HabitWithoutRelations extends BaseEntity {
 
   @Column('datetime', { nullable: true })
   abandonedAt?: Date;
+
+  @Column('simple-json', { nullable: true })
+  notifyRule?: HabitNotifyRule | null;
 }
 
 @Entity('habit')

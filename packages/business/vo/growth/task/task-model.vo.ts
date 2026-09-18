@@ -3,6 +3,7 @@ import { TrackTimeVo } from '../track-time/track-time.vo';
 import { GoalVo } from '../goal/goal-model.vo';
 import { TodoVo } from '../todo/todo-model.vo';
 import { TaskStatus, Difficulty } from '@true-north/enum';
+import type { TaskNotifyRule } from '../notify-rule';
 
 export type TaskWithoutRelationsVo = {
   name: string;
@@ -20,6 +21,7 @@ export type TaskWithoutRelationsVo = {
   endAt?: string;
   parentId?: string;
   goalId?: string;
+  notifyRule?: TaskNotifyRule | null;
 } & BaseEntityVo;
 
 export type TaskVo = TaskWithoutRelationsVo & {

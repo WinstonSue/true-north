@@ -22,6 +22,7 @@ export default class TodoMapping {
       repeatConfig: todoVo.repeatConfig,
       relatedType: todoVo.relatedType,
       settledTimes: todoVo.settledTimes,
+      notifyRule: todoVo.notifyRule ?? null,
     };
   }
 
@@ -44,6 +45,7 @@ export default class TodoMapping {
       planEndTime: formData.planTimeRange?.[1],
       repeatConfig,
       status: formData.status,
+      notifyRule: formData.notifyRule ?? null,
     };
   }
 }

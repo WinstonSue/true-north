@@ -18,6 +18,7 @@ export class CreateTaskDto extends PickType(TaskDto, [
   'startAt',
   'endAt',
   'parentId',
+  'notifyRule',
 ] as const) {
   /** 跟踪时间ID列表 */
   @IsArray()
@@ -38,6 +39,7 @@ export class CreateTaskDto extends PickType(TaskDto, [
     if (vo.startAt !== undefined) this.startAt = new Date(vo.startAt);
     if (vo.endAt !== undefined) this.endAt = new Date(vo.endAt);
     if (vo.parentId !== undefined) this.parentId = vo.parentId as any;
+    if (vo.notifyRule !== undefined) this.notifyRule = vo.notifyRule;
   }
 
   exportCreateEntity(entity: Task) {
@@ -52,6 +54,7 @@ export class CreateTaskDto extends PickType(TaskDto, [
     if (this.startAt !== undefined) entity.startAt = this.startAt;
     if (this.endAt !== undefined) entity.endAt = this.endAt;
     if (this.trackTimeIds !== undefined) entity.trackTimeIds = this.trackTimeIds;
+    if (this.notifyRule !== undefined) entity.notifyRule = this.notifyRule;
   }
 }
 
@@ -73,6 +76,7 @@ export class UpdateTaskDto extends IntersectionType(
     if (vo.startAt !== undefined) this.startAt = new Date(vo.startAt);
     if (vo.endAt !== undefined) this.endAt = new Date(vo.endAt);
     if (vo.parentId !== undefined) this.parentId = vo.parentId;
+    if (vo.notifyRule !== undefined) this.notifyRule = vo.notifyRule;
   }
 
   exportUpdateEntity(entity: Task) {
@@ -91,5 +95,6 @@ export class UpdateTaskDto extends IntersectionType(
     if (this.status !== undefined) entity.status = this.status;
     if (this.doneAt !== undefined) entity.doneAt = this.doneAt;
     if (this.abandonedAt !== undefined) entity.abandonedAt = this.abandonedAt;
+    if (this.notifyRule !== undefined) entity.notifyRule = this.notifyRule;
   }
 }

@@ -9,7 +9,7 @@ const manifest = readFileSync(
   'utf8',
 );
 
-test('goal and task MCP resources opt into composer mentions', () => {
+test('goal and task resources opt into composer mentions', () => {
   assert.match(
     manifest,
     /goal: \{ uriTemplate: 'tn:\/\/growth\/goals\/\{id\}', mention: \{ labelKey: 'menu.goal', order: 10 \} \}/,

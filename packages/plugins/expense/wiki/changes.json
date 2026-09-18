@@ -2,6 +2,20 @@
   "changes": [
     {
       "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "工作台加号不再列出账单、预算与总览；点会话里的账单名称进入记账页里的那一条。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "expense:module",
+        "scope": "module",
+        "name": "记账",
+        "wikiId": "expense",
+        "wikiTitle": "记账"
+      }
+    },
+    {
+      "version": "v0.3.0",
       "date": "2026-09-15",
       "event": "changed",
       "summary": "记下物资入库不会自动变成支出。",

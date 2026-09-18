@@ -1,6 +1,6 @@
 import type { WorkbenchToolDefinition } from '@true-north/plugin-sdk';
 import { growthIds } from '../../../contract';
-import { SuggestConfirmWorkspace } from './SuggestConfirmWorkspace';
+import { SuggestTodoWorkspace } from './SuggestTodoWorkspace';
 
 export const suggestTodoTool: WorkbenchToolDefinition = {
   workspaceKey: growthIds.workspaces.suggestTodo,
@@ -12,16 +12,5 @@ export const suggestTodoTool: WorkbenchToolDefinition = {
     return parts.some((part) => part.type === 'tool' && String(part.toolName || '').endsWith('suggestTodo') && part.status === 'done');
   },
   parsePayload: (payload) => payload,
-  Component: (props) => (
-    <SuggestConfirmWorkspace
-      {...props}
-      pluginId="growth"
-      command="createTodo"
-      fields={[
-        { key: 'title', label: '标题' },
-        { key: 'planned', label: '计划日期' },
-        { key: 'note', label: '备注' },
-      ]}
-    />
-  ),
+  Component: SuggestTodoWorkspace,
 };

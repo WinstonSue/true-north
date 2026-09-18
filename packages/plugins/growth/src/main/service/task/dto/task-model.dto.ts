@@ -36,6 +36,7 @@ export class TaskDto extends IntersectionType(BaseModelDto, TaskWithoutRelations
     this.urgency = entity.urgency;
     this.parentId = entity.parentId;
     this.goalId = entity.goalId;
+    this.notifyRule = entity.notifyRule ?? null;
 
     // 关联对象映射（浅拷贝，避免循环引用）
     if (entity.parent) {
@@ -103,6 +104,7 @@ export class TaskDto extends IntersectionType(BaseModelDto, TaskWithoutRelations
       trackTimeIds: this.trackTimeIds,
       parentId: this.parentId,
       goalId: this.goalId,
+      notifyRule: this.notifyRule ?? null,
     };
   }
 

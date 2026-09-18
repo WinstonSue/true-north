@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sue Web 实现策略"
+  short_description: "生成和评审 Vue3 TSX 或 React 页面"
+  default_prompt: "使用 $design-web-skill 将设计稿组件树映射为基于宿主框架的 Vue3 TSX 或 React 实现。"

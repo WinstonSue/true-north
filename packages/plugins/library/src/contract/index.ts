@@ -4,8 +4,8 @@ import { libraryManifest } from '../manifest';
 const LIBRARY_PLUGIN_ID = libraryManifest.pluginId;
 
 export const libraryIds = {
-  views: {
-    search: contributionKey(LIBRARY_PLUGIN_ID, 'search'),
+  resources: {
+    bookmark: contributionKey(LIBRARY_PLUGIN_ID, 'bookmark'),
   },
   actions: {
     extract: contributionKey(LIBRARY_PLUGIN_ID, 'extract'),

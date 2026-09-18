@@ -13,10 +13,8 @@ import type {
   PluginIpcPort,
   PluginRendererContext,
   PluginRuntimeEntry,
-  PluginViewOpenRequest,
   ShellSlotContribution,
   WorkbenchToolDefinition,
-  WorkbenchViewContribution,
   WorkbenchNewTabContribution,
   WorkbenchWorkspaceHost,
 } from '../runtime.ts';
@@ -51,10 +49,6 @@ export class RendererPlatform {
 
   get workbenchActions() {
     return this.state.registry.list(extensionPoints.workbenchAction);
-  }
-
-  get workbenchViews(): WorkbenchViewContribution[] {
-    return this.state.registry.list(extensionPoints.view);
   }
 
   get workbenchNewTabs(): WorkbenchNewTabContribution[] {

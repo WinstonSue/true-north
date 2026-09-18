@@ -10,6 +10,8 @@ const i18n = {
     'setting.appearance.theme.system': 'System',
     'setting.appearance.theme.light': 'Light',
     'setting.appearance.theme.dark': 'Dark',
+    'setting.appearance.lead':
+      'Language and theme apply to the whole app. Follow the system appearance unless you pick a fixed light or dark theme.',
     'setting.agents': 'Local agents',
     'setting.agents.lead':
       'Enable local coding agents, review install and login status, optionally override the executable path, and choose the default agent for new conversations.',
@@ -37,6 +39,7 @@ const i18n = {
     'setting.appearance.theme.system': '跟随系统',
     'setting.appearance.theme.light': '浅色',
     'setting.appearance.theme.dark': '深色',
+    'setting.appearance.lead': '语言与主题对整个应用生效。未单独指定时跟随系统外观。',
     'setting.agents': '本地 Agent',
     'setting.agents.lead':
       '在此启用本机编码 Agent、查看安装与登录状态、覆盖可执行文件路径，并选择之后新建对话使用的默认 Agent。',

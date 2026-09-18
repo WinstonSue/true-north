@@ -10,7 +10,7 @@ export function createLibraryMain() {
   return defineMainImplementation(libraryManifest, {
     async activate(ctx: PluginMainContext) {
       await activateStorage(ctx.space);
-      bindLibraryContext(ctx.workflow);
+      bindLibraryContext(ctx);
       return {
         ipc: { library: { controller: new LibraryController() } },
         workflow: {
@@ -21,9 +21,9 @@ export function createLibraryMain() {
         ai: {
           mcp: {
             tools: { suggestBookmark: suggestBookmarkTool },
-            resources: { bookmark: bookmarkResource },
           },
         },
+        resources: { bookmark: bookmarkResource },
       };
     },
     async dispose() {

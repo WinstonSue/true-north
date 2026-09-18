@@ -36,6 +36,19 @@ test('keyboard cycling wraps and locale keys map to plugin copy', () => {
   assert.equal(mentionOptionId('tn://growth/goals/g1'), 'mention-tn-growth-goals-g1');
 });
 
+test('decompose kickoff keeps the @label token linked to the resource', () => {
+  const text = '请帮我拆解 @完成产品化';
+  const links = resourceLinksInText(text, [{ uri: 'tn://growth/goals/g1', label: '完成产品化' }]);
+  assert.deepEqual(links, [{ uri: 'tn://growth/goals/g1', label: '完成产品化' }]);
+  const split = splitTextByMentions(text, links);
+  assert.deepEqual(
+    split.segments.map((segment) =>
+      segment.type === 'text' ? segment.value : `${segment.type}:${segment.label}`,
+    ),
+    ['请帮我拆解 ', 'resource:完成产品化'],
+  );
+});
+
 test('message text linkifies an in-place mention once', () => {
   const split = splitTextByMentions(
     '基于 @年底弹跳恢复能扣篮 目前的安排',

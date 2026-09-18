@@ -3,6 +3,7 @@ export { HOST_WORKBENCH_OPEN, HOST_BROWSER_OPEN } from '@true-north/plugin-sdk';
 
 export const HOST_AI_STORE_ID = 'host:ai' as const;
 export const HOST_WORKFLOW_STORE_ID = 'host:workflow' as const;
+export const HOST_NOTIFICATION_STORE_ID = 'host:notification' as const;
 export const GROWTH_OPEN_FOCUS = 'growth.open-focus' as const;
 
 export const WORKFLOW_PLUGIN_ID = 'workflow';

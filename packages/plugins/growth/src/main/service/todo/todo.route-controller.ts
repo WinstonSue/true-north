@@ -47,7 +47,10 @@ export class TodoController {
       }
       const createTodoDto = new CreateTodoDto();
       createTodoDto.importCreateVo(body);
-      const todoDto = await this.todoService.create(createTodoDto);
+      const system =
+        body.relatedType === TodoRelatedType.TASK ||
+        body.relatedType === TodoRelatedType.HABIT;
+      const todoDto = await this.todoService.create(createTodoDto, { system });
       return todoDto.exportVo();
     } catch (error) {
       console.error('创建待办失败:', error);

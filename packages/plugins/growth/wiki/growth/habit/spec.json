@@ -55,6 +55,22 @@
       ],
       "reference": "growth.habit.rule.today-checkin",
       "productStatus": "roadmap"
+    },
+    {
+      "id": "notify-override",
+      "name": "可覆盖通知时刻",
+      "description": "新建或编辑习惯时可跟随成长默认通知规则，也可单独改提醒时刻。过期周期不补推。",
+      "views": ["list", "detail"],
+      "reference": "growth.habit.rule.notify-override",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "create-entry",
+      "name": "页头创建入口",
+      "description": "列表页头可手动新增习惯，或从下拉选择用 AI 创建。AI 创建进入空白会话并预填提示词，用户发送后才写入消息。",
+      "views": ["list"],
+      "reference": "growth.habit.rule.create-entry",
+      "productStatus": "roadmap"
     }
   ],
   "references": [
@@ -71,7 +87,7 @@
     {
       "id": "growth.habit.view.list",
       "title": "习惯列表",
-      "body": "习惯列表以卡片网格展示连续天数、执行规则与目标归属。主路径为列表就地打卡（完成 / 未完成），不必先进入详情。工作台习惯区同样支持就地打卡。当天到期且未打卡的习惯同时出现在侧栏今天，可就地打卡。"
+      "body": "习惯列表以卡片网格展示连续天数、执行规则与目标归属。页头可手动新增，或从下拉用 AI 创建（进入空白会话并预填提示词，用户发送）。主路径为列表就地打卡（完成 / 未完成），不必先进入详情。工作台习惯区同样支持就地打卡。当天到期且未打卡的习惯同时出现在侧栏今天，可就地打卡。"
     },
     {
       "id": "growth.habit.view.detail",
@@ -107,6 +123,16 @@
       "id": "growth.habit.rule.today-checkin",
       "title": "今天可打卡进侧栏",
       "body": "活跃习惯的当前周期若已到期且尚未确认，会出现在侧栏今天。用户打卡后该项从清单消失，下一周期未到当天前不再出现。"
+    },
+    {
+      "id": "growth.habit.rule.notify-override",
+      "title": "可覆盖通知时刻",
+      "body": "习惯默认跟随成长通知规则，通常只在当天晚上提醒打卡。新建或编辑时可以关掉跟随，改成这条习惯自己的时刻。过了当天的周期不再补推。"
+    },
+    {
+      "id": "growth.habit.rule.create-entry",
+      "title": "页头创建入口",
+      "body": "习惯列表页头可以手动新增习惯，也可以从按钮旁下拉选择用 AI 创建。AI 创建进入空白会话并预填「请帮我创建一个习惯」，用户点发送后才写入消息。"
     },
     {
       "id": "growth.habit.metrics",

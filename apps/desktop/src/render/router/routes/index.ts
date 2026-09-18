@@ -8,6 +8,7 @@ export type RouteIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number 
 
 export type IRouteMeta = {
   icon?: RouteIcon;
+  selectable?: boolean;
 };
 
 export type IRoute = AuthParams & {

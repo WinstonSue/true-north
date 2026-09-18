@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sue Web 组件参考"
+  short_description: "查询 Vue 或 React 组件 API 和示例"
+  default_prompt: "使用 $design-web-components 查询当前宿主框架的组件 API、示例、slots 或 children、事件、方法和 Token。"

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   PluginRuntimeProvider,
   PluginViewRuntimeProvider,
-  hrefFromSnapshot,
+  hrefFromOpenRequest,
   useRendererPlatform,
   type PluginRendererContext,
   type PluginViewMode,
@@ -179,7 +179,6 @@ export function navigatePluginResource(
   if (!uri) return false;
   const request = platform.openResource(uri);
   if (!request) return false;
-  const pluginId = request.viewId.split('.')[0] || '';
-  navigate(hrefFromSnapshot(pluginId, request));
+  navigate(hrefFromOpenRequest(request));
   return true;
 }

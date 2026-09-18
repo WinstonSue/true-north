@@ -1,0 +1,156 @@
+{
+  "id": "workflow",
+  "kind": "page",
+  "title": "Workflow",
+  "parentId": "global",
+  "route": "/workflow",
+  "productStatus": "roadmap",
+  "views": [
+    {
+      "id": "page",
+      "name": "流程管理",
+      "scenario": "在侧栏 Workflow 进入定义、关联、运行与问题",
+      "productStatus": "roadmap",
+      "reference": "workflow.view.page"
+    },
+    {
+      "id": "definitions",
+      "name": "流程定义",
+      "scenario": "浏览、新建或从插件模板复制流程定义",
+      "productStatus": "roadmap",
+      "reference": "workflow.view.definitions"
+    },
+    {
+      "id": "associations",
+      "name": "关联",
+      "scenario": "查看待办等对象绑定了哪份已发布流程",
+      "productStatus": "roadmap",
+      "reference": "workflow.view.associations"
+    },
+    {
+      "id": "runs",
+      "name": "运行",
+      "scenario": "查看每次完成后生成的独立实例，并确认后回滚",
+      "productStatus": "roadmap",
+      "reference": "workflow.view.runs"
+    },
+    {
+      "id": "events",
+      "name": "事件",
+      "scenario": "按日期和插件回看已经发生的领域事件",
+      "productStatus": "roadmap",
+      "reference": "workflow.view.events"
+    },
+    {
+      "id": "conflicts",
+      "name": "问题",
+      "scenario": "处理卡住的确认步骤与写入冲突，不能跳过确认",
+      "productStatus": "roadmap",
+      "reference": "workflow.view.conflicts"
+    }
+  ],
+  "rules": [
+    {
+      "id": "template-not-editable",
+      "name": "模板只读可复制",
+      "description": "插件提供的流程模板不能在本页直接改写；用户只能复制为定义后再编辑、发布。",
+      "views": ["definitions"],
+      "reference": "workflow.rule.template-not-editable",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "publish-immutable",
+      "name": "发布后版本冻结",
+      "description": "发布后的版本不可改。之后改草稿再发布会生成新版本；已在跑的实例仍按开始时的那一版执行和回滚。",
+      "views": ["definitions", "runs"],
+      "reference": "workflow.rule.publish-immutable",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "one-instance-per-complete",
+      "name": "每次完成一份新实例",
+      "description": "待办每完成一次都启动一份新的流程实例。撤回后再完成、或周期待办每一次结算，都是新实例，不会覆盖旧的。",
+      "views": ["runs", "associations"],
+      "reference": "workflow.rule.one-instance-per-complete",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "rollback-confirm",
+      "name": "回滚必须确认",
+      "description": "撤回已完成待办、删除已完成待办或在运行列表回滚时，必须先确认。确认后按发布时记下的补偿顺序撤销，例如已入账账单会从列表消失但仍可在冲突中处理。",
+      "views": ["runs", "conflicts"],
+      "reference": "workflow.rule.rollback-confirm",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "events-undeletable",
+      "name": "事件不可删除",
+      "description": "领域事件只陈述已经发生的事。事件页可以筛选和回看，但不能删除或改写。",
+      "views": ["events"],
+      "reference": "workflow.rule.events-undeletable",
+      "productStatus": "roadmap"
+    }
+  ],
+  "references": [
+    {
+      "id": "workflow.overview",
+      "title": "目标与价值",
+      "body": "Workflow 是侧栏里 AI 与插件之下的流程配置与管理页。用户把插件提供的能力连成可发布的流程，把已发布流程关联到待办，在待办完成时自动打开确认工作台。每次完成都留下一份可回看、可回滚的实例。插件模板不能在这里改写，只能复制。"
+    },
+    {
+      "id": "workflow.view.page",
+      "title": "流程管理",
+      "body": "页面用栏目切换定义、关联、运行、问题和事件。定义用来画流程或用向导填写；关联列出哪些待办会在完成时启动哪份流程；运行列出已经发生的实例；问题里处理待确认步骤和写入冲突；事件只回看已经发生的事。"
+    },
+    {
+      "id": "workflow.view.definitions",
+      "title": "流程定义",
+      "body": "列出草稿与已发布定义。可空白新建，或从「待办完成后确认入账」这类插件模板复制。画布和向导改的是同一份流程：先选启动事件，再接确认工作台和写入命令。未通过校验的不能发布。"
+    },
+    {
+      "id": "workflow.view.associations",
+      "title": "关联",
+      "body": "关联只记录「完成时启动哪份已发布流程」，不把记账金额等字段写进待办。待办表单和 AI 建议待办里也能选同一份流程。"
+    },
+    {
+      "id": "workflow.view.runs",
+      "title": "运行",
+      "body": "每次待办完成都会出现一条新实例，带开始时间和当前状态。可打开详情，或在确认后回滚。回滚不会复用这次实例；之后再完成会再开一条新的。"
+    },
+    {
+      "id": "workflow.view.events",
+      "title": "事件",
+      "body": "按发生时间列出领域事件，可按日期、插件和关键词筛选，点开回到原始待办或账单。事件只陈述已经发生的事，不能删除。"
+    },
+    {
+      "id": "workflow.view.conflicts",
+      "title": "问题",
+      "body": "流程若发现目标已经变了，会停在这里。用户可接受现状、跳过、取消剩余步骤、刷新后重试，或把情况交给 AI 分析。AI 只给建议，确认后才继续原来的安全写入。"
+    },
+    {
+      "id": "workflow.rule.template-not-editable",
+      "title": "模板只读可复制",
+      "body": "插件带来的流程模板是密封的。本页不能改模板本身，只能复制成用户自己的定义后再改、再发布。"
+    },
+    {
+      "id": "workflow.rule.publish-immutable",
+      "title": "发布后版本冻结",
+      "body": "点发布会冻结当时的流程和所用能力。之后再改只影响新版本。已经开始的实例，执行和回滚都按开始那一版，不跟最新草稿走。"
+    },
+    {
+      "id": "workflow.rule.one-instance-per-complete",
+      "title": "每次完成一份新实例",
+      "body": "完成、撤回后再完成、周期待办每一次结算，都会新开一份实例。同一份关联不会把两次完成写进同一个运行记录。"
+    },
+    {
+      "id": "workflow.rule.rollback-confirm",
+      "title": "回滚必须确认",
+      "body": "回滚不能在后台默默发生。撤回或删除已完成待办、以及在运行列表点回滚，都要先问一句。确认后按当时发布的补偿顺序撤销已执行步骤；若现况已变，停下来给人处理。"
+    },
+    {
+      "id": "workflow.rule.events-undeletable",
+      "title": "事件不可删除",
+      "body": "事件页只用来回看已经发生的领域事件。可以按日期、插件或关键词筛选，点开回到来源，但不能删除或改写。"
+    }
+  ]
+}

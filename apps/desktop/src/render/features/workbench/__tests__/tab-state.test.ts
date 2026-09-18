@@ -3,7 +3,6 @@ import test from 'node:test';
 import {
   appendTabOrder,
   isWebTabId,
-  needsFallbackWebTab,
   neighborId,
   pluginViewTabId,
   upsertPluginViewTab,
@@ -56,12 +55,9 @@ test('plugin views coexist with web and tool tabs and close to a neighbor', () =
   assert.equal(isWebTabId(toolId, toolIds, pluginViewIds), false);
   assert.equal(isWebTabId(pluginId, toolIds, pluginViewIds), false);
   assert.equal(neighborId(order, pluginId), toolId);
-  assert.equal(needsFallbackWebTab(1, 1, 1), false);
 });
 
-test('closing the last plugin view with no other tabs needs a fallback web tab', () => {
+test('closing the last plugin view with no other tabs leaves the workbench empty', () => {
   const pluginId = pluginViewTabId('library.search');
   assert.equal(neighborId([pluginId], pluginId), null);
-  assert.equal(needsFallbackWebTab(0, 0, 0), true);
-  assert.equal(needsFallbackWebTab(0, 1, 0), false);
 });

@@ -24,26 +24,16 @@ export const shellSlotContributionSchema = z.object({
   order: z.number().optional(),
 });
 
-export type ViewContribution = {
-  /** Workbench 标签文案 i18n key。 */
-  nameKey: string;
-};
-
-export const viewContributionSchema = z.object({
-  /** Workbench 标签文案 i18n key。 */
-  nameKey: z.string().min(1),
-});
-
 export type NewTabContribution = {
-  /** 加号菜单文案 i18n key；缺省用目标 view 的 nameKey。 */
-  nameKey?: string;
+  /** 加号菜单文案 i18n key。 */
+  nameKey: string;
   /** 同插件内加号菜单排序，越小越靠前。 */
   order?: number;
 };
 
 export const newTabContributionSchema = z.object({
-  /** 加号菜单文案 i18n key；缺省用目标 view 的 nameKey。 */
-  nameKey: z.string().min(1).optional(),
+  /** 加号菜单文案 i18n key。 */
+  nameKey: z.string().min(1),
   /** 同插件内加号菜单排序，越小越靠前。 */
   order: z.number().optional(),
 });
@@ -74,36 +64,37 @@ export const mcpToolContributionSchema = z.object({
   readOnly: z.boolean().optional(),
 });
 
-export type McpResourceMention = {
+export type ResourceMention = {
   /** 作曲器 `@` 菜单分组标签 i18n key。 */
   labelKey: string;
   /** 提及分组排序，越小越靠前。 */
   order?: number;
 };
 
-export const mcpResourceMentionSchema = z.object({
+export const resourceMentionSchema = z.object({
   /** 作曲器 `@` 菜单分组标签 i18n key。 */
   labelKey: z.string().min(1),
   /** 提及分组排序，越小越靠前。 */
   order: z.number().optional(),
 });
 
-export type McpResourceContribution = {
+export type ResourceContribution = {
   /**
-   * MCP 资源 URI 模板，如 `tn://growth/goals/{id}`。
+   * 资源 URI 模板，如 `tn://growth/goals/{id}`。
    * 跨插件必须唯一。宿主按 URI 转发，不解析 goal/task 等业务含义。
+   * 不是页面目录：禁止 nameKey / load；点开走 Hub 路由。
    */
   uriTemplate: string;
   /**
    * 出现则同时注册作曲器 `@` 提及。
    * materializer 用同一 resource provider 做搜索，不另写领域查询。
    */
-  mention?: McpResourceMention;
+  mention?: ResourceMention;
 };
 
-export const mcpResourceContributionSchema = z.object({
+export const resourceContributionSchema = z.object({
   /**
-   * MCP 资源 URI 模板，如 `tn://growth/goals/{id}`。
+   * 资源 URI 模板，如 `tn://growth/goals/{id}`。
    * 跨插件必须唯一。宿主按 URI 转发，不解析 goal/task 等业务含义。
    */
   uriTemplate: z.string().min(1),
@@ -111,8 +102,15 @@ export const mcpResourceContributionSchema = z.object({
    * 出现则同时注册作曲器 `@` 提及。
    * materializer 用同一 resource provider 做搜索，不另写领域查询。
    */
-  mention: mcpResourceMentionSchema.optional(),
+  mention: resourceMentionSchema.optional(),
 });
+
+/** @deprecated 使用 {@link ResourceMention}。 */
+export type McpResourceMention = ResourceMention;
+/** @deprecated 使用 {@link ResourceContribution}。 */
+export type McpResourceContribution = ResourceContribution;
+export const mcpResourceMentionSchema = resourceMentionSchema;
+export const mcpResourceContributionSchema = resourceContributionSchema;
 
 export type PluginContributions = {
   /**
@@ -121,16 +119,17 @@ export type PluginContributions = {
    */
   ipc?: Record<string, DeclaredContribution>;
   /**
-   * Workbench 可打开的功能。全局 id 为 `{pluginId}.{localId}`。
-   * 只给功能标签与 `openPluginView` 用；加号菜单见 `workbench.newTabs`。
-   * 插件 Hub 栏目由 `hub` 自己导航。实现必须提供同名 `handles.views`。
+   * 可寻址对象。全局 id 为 `{pluginId}.{localId}`。
+   * 只声明 URI / 可选 `@`；不是页面目录，禁止 nameKey 与 load。
+   * 点开由 renderer `openResource` 返回 Hub location；宿主投影进 MCP 给模型读。
+   * 实现必须提供同名 `handles.resources` provider。
    */
-  views?: Record<string, ViewContribution>;
+  resources?: Record<string, ResourceContribution>;
   /**
    * Workbench：会话内工作区、一次性动作与加号菜单。
-   * - `workspaces`：AI 消息可打开的工具面板（如目标拆解）
+   * - `workspaces`：AI 消息可打开的工具面板（如目标拆解）；实现 `handles.workbench.workspaces`
    * - `actions`：工作台触发的副作用（如从网页抽取书签）
-   * - `newTabs`：加号菜单条目；key 必须是已声明 view 的 local id，无独立 handle
+   * - `newTabs`：加号自愿页，自带 `handles.workbench.newTabs[id].load`，禁止镜像 Hub 栏目
    */
   workbench?: {
     workspaces?: Record<string, DeclaredContribution>;
@@ -152,19 +151,19 @@ export type PluginContributions = {
   /**
    * AI 贡献。宿主只有一个 Agent 会话和一个聚合 MCP `true_north`。
    * - `skills`：Skill 目录；实现用 `handles.ai.skillRoots`
-   * - `mcp.tools` / `resources` / `prompts`：并入宿主 MCP，对外名 `{pluginId}.{localId}`
+   * - `mcp.tools` / `prompts`：并入宿主 MCP，对外名 `{pluginId}.{localId}`
+   * 资源不在这里声明，见最外层 `resources`。
    */
   ai?: {
     skills?: Record<string, SkillContribution>;
     mcp?: {
       tools?: Record<string, McpToolContribution>;
-      resources?: Record<string, McpResourceContribution>;
       prompts?: Record<string, DeclaredContribution>;
     };
   };
   /**
-   * 插件 Hub 根。声明 `{}` 即要求实现 `handles.hub.load`。
-   * 宿主只挂这个根，不按 views 拼页内栏目。
+   * 插件 Hub 根。人用功能页的默认入口。
+   * 声明 `{}` 即要求实现 `handles.hub.load`。宿主只挂这个根，不按表拼页内栏目。
    */
   hub?: DeclaredContribution;
 };
@@ -176,16 +175,15 @@ export const pluginContributionsSchema = z.object({
    */
   ipc: z.record(z.string().min(1), emptyContributionSchema).optional(),
   /**
-   * Workbench 可打开的功能。全局 id 为 `{pluginId}.{localId}`。
-   * 只给功能标签与 `openPluginView` 用；加号菜单见 `workbench.newTabs`。
-   * 插件 Hub 栏目由 `hub` 自己导航。实现必须提供同名 `handles.views`。
+   * 可寻址对象。只声明 URI / 可选 `@`，不是页面目录。
+   * 实现必须提供同名 `handles.resources`。
    */
-  views: z.record(z.string().min(1), viewContributionSchema).optional(),
+  resources: z.record(z.string().min(1), resourceContributionSchema).optional(),
   /**
    * Workbench：会话内工作区、一次性动作与加号菜单。
    * - `workspaces`：AI 消息可打开的工具面板
    * - `actions`：工作台触发的副作用
-   * - `newTabs`：加号菜单条目；key 必须是已声明 view 的 local id
+   * - `newTabs`：加号自愿页；实现必须提供同名 `handles.workbench.newTabs`
    */
   workbench: z
     .object({
@@ -210,7 +208,7 @@ export const pluginContributionsSchema = z.object({
   /**
    * AI 贡献。宿主只有一个 Agent 会话和一个聚合 MCP `true_north`。
    * - `skills`：Skill 目录；实现用 `handles.ai.skillRoots`
-   * - `mcp.tools` / `resources` / `prompts`：并入宿主 MCP
+   * - `mcp.tools` / `prompts`：并入宿主 MCP
    */
   ai: z
     .object({
@@ -218,15 +216,14 @@ export const pluginContributionsSchema = z.object({
       mcp: z
         .object({
           tools: z.record(z.string().min(1), mcpToolContributionSchema).optional(),
-          resources: z.record(z.string().min(1), mcpResourceContributionSchema).optional(),
           prompts: z.record(z.string().min(1), emptyContributionSchema).optional(),
         })
         .optional(),
     })
     .optional(),
   /**
-   * 插件 Hub 根。声明 `{}` 即要求实现 `handles.hub.load`。
-   * 宿主只挂这个根，不按 views 拼页内栏目。
+   * 插件 Hub 根。人用功能页的默认入口。
+   * 声明 `{}` 即要求实现 `handles.hub.load`。宿主只挂这个根，不按表拼页内栏目。
    */
   hub: emptyContributionSchema.optional(),
 });

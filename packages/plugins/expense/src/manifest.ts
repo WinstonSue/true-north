@@ -13,19 +13,12 @@ export const expenseManifest = definePluginManifest({
   },
   contributions: {
     ipc: { expense: {} },
-    views: {
-      transaction: { nameKey: 'menu.expense.transaction' },
-      budget: { nameKey: 'menu.expense.budget' },
-      overview: { nameKey: 'menu.expense.overview' },
-    },
     hub: {},
+    resources: {
+      transaction: { uriTemplate: 'tn://expense/transactions/{id}' },
+    },
     workbench: {
       workspaces: { suggestTransaction: {} },
-      newTabs: {
-        transaction: { order: 10 },
-        budget: { order: 20 },
-        overview: { order: 30 },
-      },
     },
     workflow: {
       events: {
@@ -33,16 +26,42 @@ export const expenseManifest = definePluginManifest({
         transactionDeleted: { payloadSchema: { type: 'object' } },
       },
       commands: {
-        createTransaction: { inputSchema: { type: 'object' }, idempotent: true },
+        createTransaction: {
+          inputSchema: { type: 'object' },
+          idempotent: true,
+          compensate: 'deleteTransaction',
+        },
+        deleteTransaction: { inputSchema: { type: 'object' }, idempotent: true },
+      },
+      templates: {
+        todoCompleteExpenseConfirm: {
+          nameKey: 'workflow.template.todoCompleteExpense',
+          descriptionKey: 'workflow.template.todoCompleteExpense.description',
+          graph: {
+            schemaVersion: 1,
+            start: { eventContributionId: 'growth.todoCompleted' },
+            nodes: [
+              { key: 'confirm', kind: 'workspace', contributionId: 'expense.suggestTransaction' },
+              { key: 'create', kind: 'command', contributionId: 'expense.createTransaction' },
+            ],
+            edges: [
+              { key: 'e1', from: 'start', to: 'confirm' },
+              { key: 'e2', from: 'confirm', to: 'create' },
+            ],
+            bindings: [
+              { from: 'event.payload.title', to: 'confirm.input.title' },
+              { from: 'event.payload.occurredAt', to: 'confirm.input.occurredAt' },
+              { from: 'confirm.output', to: 'create.input' },
+            ],
+            rollbackPolicy: 'confirmThenCompensate',
+          },
+        },
       },
     },
     ai: {
       mcp: {
         tools: {
           suggestTransaction: {},
-        },
-        resources: {
-          transaction: { uriTemplate: 'tn://expense/transactions/{id}' },
         },
       },
     },

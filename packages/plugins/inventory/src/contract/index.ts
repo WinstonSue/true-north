@@ -4,10 +4,10 @@ import { inventoryManifest } from '../manifest';
 const PLUGIN_ID = inventoryManifest.pluginId;
 
 export const inventoryIds = {
-  views: {
-    items: contributionKey(PLUGIN_ID, 'items'),
-    locations: contributionKey(PLUGIN_ID, 'locations'),
-    movements: contributionKey(PLUGIN_ID, 'movements'),
+  resources: {
+    item: contributionKey(PLUGIN_ID, 'item'),
+    location: contributionKey(PLUGIN_ID, 'location'),
+    movement: contributionKey(PLUGIN_ID, 'movement'),
   },
   workspaces: {
     suggestItem: contributionKey(PLUGIN_ID, 'suggestItem'),

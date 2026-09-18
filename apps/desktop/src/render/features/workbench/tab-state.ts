@@ -12,10 +12,6 @@ export function isWebTabId(id: string, toolIds: Set<string>, pluginViewIds: Set<
   return !toolIds.has(id) && !pluginViewIds.has(id);
 }
 
-export function needsFallbackWebTab(toolCount: number, pluginViewCount: number, webCount: number): boolean {
-  return toolCount === 0 && pluginViewCount === 0 && webCount === 0;
-}
-
 export function upsertPluginViewTab<T extends { id: string }>(tabs: T[], next: T): T[] {
   const existing = tabs.find((tab) => tab.id === next.id);
   if (existing) {

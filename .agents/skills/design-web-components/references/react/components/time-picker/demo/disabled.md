@@ -1,0 +1,16 @@
+# disabled
+
+## Source
+
+```tsx
+import React from 'react';
+import { TimePicker } from '@sue/design-web-react';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
+
+const App: React.FC = () => <TimePicker defaultValue={dayjs('12:08:23', 'HH:mm:ss')} disabled />;
+
+export default App;
+```

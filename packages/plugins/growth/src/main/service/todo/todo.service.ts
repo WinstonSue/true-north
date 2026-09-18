@@ -12,6 +12,9 @@ import { HabitStatus } from '@true-north/enum';
 import { RepeatEndMode } from '@true-north/components-repeat/types';
 import { RepeatService, repeatService as defaultRepeatService } from '../repeat/repeat.service';
 import { narrowTodoRelated } from './todo-related';
+import { emitGrowthEvent, queueGrowthDueSync, untrackGrowthResource } from '../../context';
+import { todoUri } from './workflow-cas';
+import { revisionOf } from '@true-north/plugin-sdk';
 
 export class TodoService {
   protected todoRepository: TodoRepository;
@@ -68,6 +71,7 @@ export class TodoService {
         // event log is supplementary
       }
     }
+    if (!options?.manager) queueGrowthDueSync();
     return todoDto;
   }
 
@@ -79,6 +83,8 @@ export class TodoService {
         throw new Error('习惯周期待办不能单独删除，请通过习惯操作结束周期');
       }
       await this.todoRepository.delete(id);
+      await untrackGrowthResource('todo', id);
+      queueGrowthDueSync();
       return true;
     } catch (error) {
       throw error;
@@ -109,6 +115,7 @@ export class TodoService {
     const entity = await this.todoRepository.update(data);
     const todoDto = new TodoDto();
     todoDto.importEntity(entity);
+    queueGrowthDueSync();
     return todoDto;
   }
 
@@ -198,6 +205,8 @@ export class TodoService {
     updateTodoDto.doneAt = doneAt ? dayjs(doneAt).toDate() : new Date();
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, true);
+    await this.emitCompleted(result);
+    await untrackGrowthResource('todo', id);
     return result;
   }
 
@@ -246,6 +255,7 @@ export class TodoService {
     updateTodoDto.abandonedAt = new Date();
     const result = await this.update(updateTodoDto, true);
     await this.advanceHabitCycle(current, false);
+    await untrackGrowthResource('todo', id);
     return result;
   }
 
@@ -287,7 +297,23 @@ export class TodoService {
         completed ? TodoRepeatStatus.ENDED : TodoRepeatStatus.ABANDONED,
       );
     }
+    if (completed) await this.emitCompleted(result, { templateId: id });
     return result;
+  }
+
+  private async emitCompleted(todo: TodoDto, extra: Record<string, unknown> = {}) {
+    const revision = revisionOf((todo as { revision?: number }).revision);
+    await emitGrowthEvent(
+      'todoCompleted',
+      {
+        todoId: todo.id,
+        title: todo.name,
+        occurredAt: todo.doneAt ? dayjs(todo.doneAt).toISOString() : new Date().toISOString(),
+        ...extra,
+      },
+      { uri: todoUri(todo.id), revision },
+      { eventId: `growth.todoCompleted:${todo.id}:${revision}` },
+    );
   }
 
   async restore(id: string): Promise<any> {

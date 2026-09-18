@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   hrefFromLocation,
+  hrefFromOpenRequest,
   hrefFromSnapshot,
   locationFromSearchParams,
   parsePluginResourceUri,
@@ -30,9 +31,10 @@ test('plugin page adapter keeps opaque query keys', () => {
   assert.equal(hrefFromLocation('expense', { view: 'overview' }), '/plugins/expense?view=overview');
 });
 
-test('resource URIs map to a workbench view request and a page location', () => {
+test('resource URIs map to a Hub location', () => {
   const parsed = parsePluginResourceUri('tn://growth/goals/g1');
   assert.deepEqual(parsed, { pluginId: 'growth', collection: 'goals', id: 'g1' });
-  const request = { viewId: 'growth.goal', params: { view: 'goal', tab: 'tree', id: parsed?.id || '' } };
-  assert.equal(hrefFromSnapshot('growth', request), '/plugins/growth?view=goal&tab=tree&id=g1');
+  const request = { pluginId: 'growth', location: { view: 'goal', tab: 'tree', id: parsed?.id || '' } };
+  assert.equal(hrefFromOpenRequest(request), '/plugins/growth?view=goal&tab=tree&id=g1');
+  assert.equal(hrefFromLocation(request.pluginId, request.location), '/plugins/growth?view=goal&tab=tree&id=g1');
 });

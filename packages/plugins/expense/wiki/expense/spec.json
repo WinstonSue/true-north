@@ -44,13 +44,21 @@
       "views": ["transaction"],
       "reference": "expense.rule.create-activity",
       "productStatus": "roadmap"
+    },
+    {
+      "id": "workflow-soft-delete",
+      "name": "流程回滚软删除账单",
+      "description": "由流程确认写入的账单，在用户确认回滚后从账单列表消失，而不是当作从未存在；若期间已被改过，停下来让人处理。",
+      "views": ["transaction"],
+      "reference": "expense.rule.workflow-soft-delete",
+      "productStatus": "roadmap"
     }
   ],
   "references": [
     {
       "id": "expense.overview",
       "title": "目标与价值",
-      "body": "记账从插件页进入，数据上与成长平级。用户记录收入与支出、设定分类预算，并在总览里看执行情况。账单、预算与总览是记账页内自己的栏目；同一类能力也可从工作台加号作为功能标签打开，两者不是同一套顶栏。金额以交易记录为真源。"
+      "body": "记账从插件页进入，数据上与成长平级。用户记录收入与支出、设定分类预算，并在总览里看执行情况。账单、预算与总览是记账页内自己的栏目。工作台加号不再列出这些栏目；点会话里的账单名称进入记账页里的那一条。金额以交易记录为真源。"
     },
     {
       "id": "expense.view.transaction",
@@ -76,6 +84,11 @@
       "id": "expense.rule.create-activity",
       "title": "记一笔留下事件",
       "body": "在账单里直接记一笔，最近动态会出现对应事件。记下物资入库不会自动变成支出。"
+    },
+    {
+      "id": "expense.rule.workflow-soft-delete",
+      "title": "流程回滚软删除账单",
+      "body": "待办完成并确认入账后，若用户确认回滚该流程，这笔账单从列表拿掉，而不是假装从没记过。若后来改过金额或分类，回滚会停住，让人决定怎么处理。"
     }
   ]
 }

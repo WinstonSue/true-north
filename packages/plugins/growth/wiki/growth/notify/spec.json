@@ -1,0 +1,43 @@
+{
+  "id": "growth.notify",
+  "kind": "dom",
+  "title": "成长通知",
+  "parentId": "growth",
+  "productStatus": "roadmap",
+  "views": [
+    {
+      "id": "settings",
+      "name": "通知规则",
+      "scenario": "设置待办、任务与习惯的默认提醒时刻",
+      "productStatus": "roadmap",
+      "reference": "growth.notify.view.settings"
+    }
+  ],
+  "rules": [
+    {
+      "id": "default-slots",
+      "name": "默认提醒时刻",
+      "description": "过期待办每天早上 8 点和晚上 9 点提醒。当天待办在计划开始时间和晚上 9 点提醒；没有开始时间则按全天，用早上 8 点和晚上 9 点。过期任务同过期待办。当前任务只在计划开始时间提醒；结束之后才按过期时刻提醒。习惯只在晚上 9 点提醒当天打卡，过期周期不再补推。",
+      "views": ["settings"],
+      "reference": "growth.notify.rule.default-slots",
+      "productStatus": "roadmap"
+    }
+  ],
+  "references": [
+    {
+      "id": "growth.notify.overview",
+      "title": "目标与价值",
+      "body": "成长通知按时刻提醒该处理的待办、任务和当天习惯打卡，而不是把今天清单搬进铃铛。这里改的是所有未单独设置的默认规则。"
+    },
+    {
+      "id": "growth.notify.view.settings",
+      "title": "通知规则",
+      "body": "分别设置待办、任务与习惯的默认提醒时刻并保存。之后新建的事项默认跟随这里；已单独改过的事项不受影响。"
+    },
+    {
+      "id": "growth.notify.rule.default-slots",
+      "title": "默认提醒时刻",
+      "body": "过期待办每天早上 8 点和晚上 9 点提醒。当天待办在计划开始时间和晚上 9 点提醒；没有开始时间则早上 8 点和晚上 9 点。过期任务同样每天两次。当前任务只在计划开始时间提醒；任务结束后才按过期时刻提醒。习惯只在晚上 9 点提醒当天要打的卡，过了当天不再补推。"
+    }
+  ]
+}

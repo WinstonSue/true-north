@@ -18,25 +18,19 @@ export const growthManifest = definePluginManifest({
       todo: {},
       habit: {},
       trackTime: {},
-    },
-    views: {
-      todo: { nameKey: 'menu.todo' },
-      task: { nameKey: 'menu.task' },
-      habit: { nameKey: 'menu.habit' },
-      goal: { nameKey: 'menu.goal' },
+      notify: {},
     },
     hub: {},
+    resources: {
+      goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } },
+      task: { uriTemplate: 'tn://growth/tasks/{id}', mention: { labelKey: 'menu.task', order: 20 } },
+      todo: { uriTemplate: 'tn://growth/todos/{id}' },
+    },
     workbench: {
       workspaces: {
         goalDecompose: {},
         taskDecompose: {},
         suggestTodo: {},
-      },
-      newTabs: {
-        todo: { order: 10 },
-        task: { order: 20 },
-        habit: { order: 30 },
-        goal: { order: 40 },
       },
     },
     workflow: {
@@ -72,11 +66,6 @@ export const growthManifest = definePluginManifest({
           decomposeGoal: {},
           decomposeTask: {},
           suggestTodo: {},
-        },
-        resources: {
-          goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } },
-          task: { uriTemplate: 'tn://growth/tasks/{id}', mention: { labelKey: 'menu.task', order: 20 } },
-          todo: { uriTemplate: 'tn://growth/todos/{id}' },
         },
       },
     },

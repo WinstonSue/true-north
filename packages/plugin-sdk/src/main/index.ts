@@ -45,3 +45,5 @@ export {
 } from '../host/command-idempotency.ts';
 export type { HostAttemptReplay } from '../host/command-idempotency.ts';
 export { resolvePluginPackageRoot, resolveSkillRoots, validateSkillRoots } from '../skills.ts';
+export { drainOutbox } from '../host/event-outbox.ts';
+export type { OutboxRecord, OutboxStore, OutboxStatus, HostEventInbox } from '../host/event-outbox.ts';

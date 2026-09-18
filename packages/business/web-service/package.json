@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "@sue/design-web-react": "0.0.3-beta.1",
+    "@sue/design-web-react": "0.0.5",
     "@true-north/enum": "workspace:*",
     "@true-north/vo": "workspace:*",
     "axios": "^0.24.0",

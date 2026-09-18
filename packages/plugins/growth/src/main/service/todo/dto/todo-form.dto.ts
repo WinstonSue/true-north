@@ -21,6 +21,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
   'taskId',
   'repeatId',
   'habitId',
+  'notifyRule',
 ] as const) {
   importCreateVo(vo: TodoVO.CreateTodoVo) {
     this.name = vo.name;
@@ -36,6 +37,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
     this.relatedId = vo.relatedId;
     this.relatedType = vo.relatedType;
     this.status = vo.status;
+    this.notifyRule = vo.notifyRule;
   }
 
   exportCreateEntity(): Todo {
@@ -58,6 +60,7 @@ export class CreateTodoDto extends PickType(TodoDto, [
     todo.planEndTime = this.planEndTime;
     todo.relatedType = related.relatedType ?? TodoRelatedType.NONE;
     todo.relatedId = related.relatedId;
+    todo.notifyRule = this.notifyRule ?? null;
 
     return todo;
   }
@@ -82,6 +85,7 @@ export class UpdateTodoDto extends IntersectionType(
     this.planStartTime = vo.planStartTime;
     this.planEndTime = vo.planEndTime;
     this.status = vo.status;
+    this.notifyRule = vo.notifyRule;
   }
 
   importUpdateEntity(todo: Todo) {
@@ -102,6 +106,7 @@ export class UpdateTodoDto extends IntersectionType(
     if (this.abandonedAt === undefined) this.abandonedAt = todo.abandonedAt;
     if (this.relatedType === undefined) this.relatedType = todo.relatedType;
     if (this.relatedId === undefined) this.relatedId = todo.relatedId;
+    if (this.notifyRule === undefined) this.notifyRule = todo.notifyRule;
   }
 
   exportUpdateEntity() {
@@ -117,6 +122,7 @@ export class UpdateTodoDto extends IntersectionType(
     if (this.urgency !== undefined) todo.urgency = this.urgency;
     if (this.doneAt !== undefined) todo.doneAt = this.doneAt;
     if (this.abandonedAt !== undefined) todo.abandonedAt = this.abandonedAt;
+    if (this.notifyRule !== undefined) todo.notifyRule = this.notifyRule;
     if (this.relatedType !== undefined || this.relatedId !== undefined || this.taskId !== undefined) {
       const related = mapRelatedIds({
         relatedType: this.relatedType,

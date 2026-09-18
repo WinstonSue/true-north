@@ -4,6 +4,7 @@ import { TodoStatus, TodoRelatedType } from '@true-north/enum';
 import { Entity, Column } from 'typeorm';
 import { IsString, IsOptional, IsEnum, IsNumber, IsISO8601 } from 'class-validator';
 import { Type } from 'class-transformer';
+import type { TodoNotifyRule } from '@true-north/vo';
 
 export class TodoWithoutRelations extends BaseEntity {
   /** 待办名称 */
@@ -85,6 +86,9 @@ export class TodoWithoutRelations extends BaseEntity {
   @IsOptional()
   @Type(() => Number)
   revision?: number;
+
+  @Column('simple-json', { nullable: true })
+  notifyRule?: TodoNotifyRule | null;
 }
 
 @Entity('todo')

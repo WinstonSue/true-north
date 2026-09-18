@@ -1,0 +1,34 @@
+# Customize preview file
+
+## Source
+
+```tsx
+import { Upload as UploadIcon } from 'lucide-react'
+import React from 'react';
+;
+import type { UploadProps } from '@sue/design-web-react';
+import { Button, Upload } from '@sue/design-web-react';
+
+const props: UploadProps = {
+  action: '//jsonplaceholder.typicode.com/posts/',
+  listType: 'picture',
+  previewFile(file) {
+    console.log('Your upload file:', file);
+    // Your process logic. Here we just mock to the same file
+    return fetch('https://next.json-generator.com/api/json/get/4ytyBoLK8', {
+      method: 'POST',
+      body: file,
+    })
+      .then((res) => res.json())
+      .then(({ thumbnail }) => thumbnail);
+  },
+};
+
+const App: React.FC = () => (
+  <Upload {...props}>
+    <Button icon={<UploadIcon  />}>Upload</Button>
+  </Upload>
+);
+
+export default App;
+```

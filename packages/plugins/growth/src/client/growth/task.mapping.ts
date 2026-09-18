@@ -31,6 +31,7 @@ export default class TaskMapping {
       children: taskVo.children || [],
       todoList: taskVo.todoList || [],
       trackTimeList: taskVo.trackTimeList,
+      notifyRule: taskVo.notifyRule ?? null,
     };
   }
 
@@ -47,6 +48,7 @@ export default class TaskMapping {
       startAt: formatDateTime(formData.planTimeRange[0]),
       endAt: formatDateTime(formData.planTimeRange[1]),
       estimateTime: formData.estimateTime ?? undefined,
+      notifyRule: formData.notifyRule ?? null,
     };
   }
 
@@ -64,6 +66,7 @@ export default class TaskMapping {
       startAt: formatDateTime(formData.planTimeRange[0]),
       endAt: formatDateTime(formData.planTimeRange[1]),
       estimateTime: formData.estimateTime ?? undefined,
+      notifyRule: formData.notifyRule ?? null,
     };
   }
 }

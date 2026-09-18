@@ -1,0 +1,17 @@
+# Status
+
+## Source
+
+```tsx
+import React from 'react';
+import { Cascader, Space } from '@sue/design-web-react';
+
+const App: React.FC = () => (
+  <Space vertical>
+    <Cascader status="error" placeholder="Error" />
+    <Cascader status="warning" multiple placeholder="Warning multiple" />
+  </Space>
+);
+
+export default App;
+```

@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   isStandaloneTodayTodo,
   isTodayHabit,
+  isDueTask,
 } from '../../plugins/growth/src/main/today-filter.ts';
 
 const today = '2026-09-14';
@@ -43,4 +44,24 @@ test('today todos exclude habit cycle items', () => {
   assert.equal(isStandaloneTodayTodo(standalone, today), true);
   assert.equal(isStandaloneTodayTodo(habitCycle, today), false);
   assert.equal(isStandaloneTodayTodo(done, today), false);
+});
+
+test('due tasks include today and overdue open work, skip future or settled', () => {
+  assert.equal(
+    isDueTask({ id: 't1', status: 'todo', startAt: '2026-09-14', endAt: '2026-09-16' }, today),
+    true,
+  );
+  assert.equal(
+    isDueTask({ id: 't2', status: 'doing', startAt: '2026-09-01', endAt: '2026-09-13' }, today),
+    true,
+  );
+  assert.equal(
+    isDueTask({ id: 't3', status: 'todo', startAt: '2026-09-15', endAt: '2026-09-20' }, today),
+    false,
+  );
+  assert.equal(
+    isDueTask({ id: 't4', status: 'done', startAt: '2026-09-01', endAt: '2026-09-13' }, today),
+    false,
+  );
+  assert.equal(isDueTask({ id: 't5', status: 'todo' }, today), false);
 });

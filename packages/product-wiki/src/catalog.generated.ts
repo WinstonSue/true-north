@@ -2,6 +2,7 @@
 import spec_packages_plugins_expense_wiki_expense from '../../plugins/expense/wiki/expense/spec.json';
 import spec_packages_plugins_growth_wiki_growth_goal from '../../plugins/growth/wiki/growth/goal/spec.json';
 import spec_packages_plugins_growth_wiki_growth_habit from '../../plugins/growth/wiki/growth/habit/spec.json';
+import spec_packages_plugins_growth_wiki_growth_notify from '../../plugins/growth/wiki/growth/notify/spec.json';
 import spec_packages_plugins_growth_wiki_growth_repeat from '../../plugins/growth/wiki/growth/repeat/spec.json';
 import spec_packages_plugins_growth_wiki_growth from '../../plugins/growth/wiki/growth/spec.json';
 import spec_packages_plugins_growth_wiki_growth_task from '../../plugins/growth/wiki/growth/task/spec.json';
@@ -19,12 +20,15 @@ import spec_packages_product_wiki_wiki_plugins from '../wiki/plugins/spec.json';
 import spec_packages_product_wiki_wiki_setting from '../wiki/setting/spec.json';
 import spec_packages_product_wiki_wiki_user from '../wiki/user/spec.json';
 import spec_packages_product_wiki_wiki_workbench from '../wiki/workbench/spec.json';
+import spec_packages_product_wiki_wiki_workflow_editor from '../wiki/workflow/editor/spec.json';
+import spec_packages_product_wiki_wiki_workflow from '../wiki/workflow/spec.json';
 import productHistory from '../wiki/changelog.json';
 
 export const productWikis = [
   spec_packages_plugins_expense_wiki_expense,
   spec_packages_plugins_growth_wiki_growth_goal,
   spec_packages_plugins_growth_wiki_growth_habit,
+  spec_packages_plugins_growth_wiki_growth_notify,
   spec_packages_plugins_growth_wiki_growth_repeat,
   spec_packages_plugins_growth_wiki_growth,
   spec_packages_plugins_growth_wiki_growth_task,
@@ -42,6 +46,8 @@ export const productWikis = [
   spec_packages_product_wiki_wiki_setting,
   spec_packages_product_wiki_wiki_user,
   spec_packages_product_wiki_wiki_workbench,
+  spec_packages_product_wiki_wiki_workflow_editor,
+  spec_packages_product_wiki_wiki_workflow,
 ];
 
 export { productHistory };

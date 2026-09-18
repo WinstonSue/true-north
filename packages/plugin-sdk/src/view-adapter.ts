@@ -1,5 +1,5 @@
 import { pluginPath } from '@true-north/plugin-contract';
-import type { PluginViewSnapshot } from './runtime.ts';
+import type { PluginViewSnapshot, ResourceOpenRequest } from './runtime.ts';
 
 export function localViewId(pluginId: string, viewId: string): string {
   const prefix = `${pluginId}.`;
@@ -27,7 +27,11 @@ export function hrefFromLocation(pluginId: string, location: Record<string, stri
   return query ? `${pluginPath(pluginId)}?${query}` : pluginPath(pluginId);
 }
 
-/** Flatten a workbench open request into a plugin-page href. `params.view` wins; otherwise local id of `viewId`. */
+export function hrefFromOpenRequest(request: ResourceOpenRequest): string {
+  return hrefFromLocation(request.pluginId, request.location);
+}
+
+/** Flatten a workbench snapshot into a plugin-page href. `params.view` wins; otherwise local id of `viewId`. */
 export function hrefFromSnapshot(pluginId: string, snapshot: PluginViewSnapshot): string {
   const location: Record<string, string> = {};
   const view = snapshot.params.view || (snapshot.viewId ? localViewId(pluginId, snapshot.viewId) : '');

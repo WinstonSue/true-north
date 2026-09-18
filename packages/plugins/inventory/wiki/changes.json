@@ -2,6 +2,20 @@
   "changes": [
     {
       "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "工作台加号不再列出物资栏目；点会话里的物资名称进入物资页里的那一条。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "inventory:module",
+        "scope": "module",
+        "name": "物资",
+        "wikiId": "inventory",
+        "wikiTitle": "物资"
+      }
+    },
+    {
+      "version": "v0.3.0",
       "date": "2026-09-15",
       "event": "introduced",
       "summary": "新增物资，用来管理可储存的家庭实物、存放位置和出入库，替换已移除的家庭采购。",

@@ -15,6 +15,7 @@ function Appearance() {
     <ProductSurface id={productRef('setting.view.appearance')}>
       <Flex vertical className={styles.content} gap={24}>
         <h1 className={styles.title}>{t['setting.appearance']}</h1>
+        <div className={styles.lead}>{t['setting.appearance.lead']}</div>
         <Flex vertical className={styles.group}>
           <Flex className={styles.row} align="center" justify="space-between" gap={16}>
             <div className={styles.rowLabel}>{t['setting.appearance.language']}</div>

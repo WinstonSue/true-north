@@ -1,7 +1,6 @@
 import { Package } from 'lucide-react';
 import { defineRendererImplementation, parsePluginResourceUri } from '@true-north/plugin-sdk';
 import { inventoryManifest } from '../manifest';
-import { inventoryIds } from '../contract';
 import { inventoryLocales } from './locales';
 import { bindPluginIpc } from '../client';
 import { suggestItemTool, suggestMovementTool } from './contributions/suggest';
@@ -13,11 +12,6 @@ export function createRenderer() {
       return {
         icon: Package,
         locales: [inventoryLocales],
-        views: {
-          items: { load: () => import('./features/items') },
-          locations: { load: () => import('./features/locations') },
-          movements: { load: () => import('./features/movements') },
-        },
         hub: {
           load: () => import('./layout/InventoryPage'),
         },
@@ -37,8 +31,8 @@ export function createRenderer() {
                 ? 'movements'
                 : 'items';
           return {
-            viewId: inventoryIds.views[view],
-            params: parsed.id ? { view, id: parsed.id } : { view },
+            pluginId: 'inventory',
+            location: parsed.id ? { view, id: parsed.id } : { view },
           };
         },
       };

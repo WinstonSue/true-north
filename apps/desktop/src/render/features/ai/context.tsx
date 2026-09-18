@@ -8,6 +8,8 @@ import {
 } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { message } from '@sue/design-web-react';
+import type { PluginAiStartInput } from '@true-north/plugin-sdk';
+import { hrefFromOpenRequest } from '@true-north/plugin-sdk';
 import type {
   AiChatStreamEventVo,
   AiWorkspacePartVo,
@@ -20,6 +22,7 @@ import { useWorkbench } from '../workbench';
 import { sharedReactContext, useRendererPlatform } from '@true-north/plugin-sdk/renderer';
 import type { WorkbenchToolRegistry } from '../workbench/types';
 import { resolveAgentId } from './agent-selection';
+import { resolveRequestedConversation } from './session-route';
 import {
   applyDeltaToMessages,
   applyFetchedMessages,
@@ -39,6 +42,18 @@ import { resourceLinksInText } from './mention';
 import type { AiDraft, SessionValue, ComposerInputRef } from './types';
 
 const EMPTY_DRAFT: AiDraft = { text: '', links: [] };
+
+type PendingHostDraft = {
+  conversationId: string | null;
+  draft: AiDraft;
+};
+
+function hostStartDraft(input: PluginAiStartInput): AiDraft {
+  return {
+    text: (input.message || input.kickoff || '').trim(),
+    links: input.resourceLinks || [],
+  };
+}
 
 function isAiPath(pathname: string) {
   return pathname === '/ai' || pathname.startsWith('/ai/');
@@ -118,7 +133,7 @@ export function AiSessionProvider({
   const navigate = useNavigate();
   const location = useLocation();
   const onAiPage = isAiPath(location.pathname);
-  const { openToolTab, openPluginView, pendingFollowUp, clearFollowUp, tools } = useWorkbench();
+  const { openToolTab, pendingFollowUp, clearFollowUp, tools } = useWorkbench();
   const platform = useRendererPlatform();
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<ConversationVo[]>([]);
@@ -130,6 +145,7 @@ export function AiSessionProvider({
   const [streamRegistry, setStreamRegistry] = useState<StreamRegistry>({});
   const [streamError, setStreamError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [conversationsLoaded, setConversationsLoaded] = useState(false);
   const [codingAgents, setCodingAgents] = useState<RuntimeAgentVo[]>([]);
   const [defaultAgentId, setDefaultAgentId] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState('');
@@ -145,8 +161,13 @@ export function AiSessionProvider({
   streamRegistryRef.current = streamRegistry;
   const messagesCacheRef = useRef(messagesByConversation);
   messagesCacheRef.current = messagesByConversation;
+  const conversationsRef = useRef(conversations);
+  conversationsRef.current = conversations;
+  const conversationsLoadedRef = useRef(conversationsLoaded);
+  conversationsLoadedRef.current = conversationsLoaded;
   const pendingStreamEventsRef = useRef<PendingStreamBuffers>({});
   conversationIdRef.current = activeConversationId;
+  const [pendingHostDraft, setPendingHostDraft] = useState<PendingHostDraft | null>(null);
 
   const commitStreamRegistry = useCallback(
     (updater: (registry: StreamRegistry) => StreamRegistry) => {
@@ -196,6 +217,18 @@ export function AiSessionProvider({
     composerInputRef.current?.focus({ preventScroll: true });
   }, []);
 
+  const openBlankConversation = useCallback(
+    (focus = true) => {
+      creatingConversationRef.current = false;
+      setActiveConversationId(null);
+      setStreamError(null);
+      if (!onAiPage) return;
+      setSearchParams(conversationSearch(null), { replace: true });
+      if (focus) requestAnimationFrame(() => focusComposer());
+    },
+    [focusComposer, onAiPage, setSearchParams]
+  );
+
   useEffect(() => {
     if (!pendingFollowUp) return;
     if (!onAiPage) return;
@@ -219,6 +252,15 @@ export function AiSessionProvider({
     setSearchParams,
   ]);
 
+  useEffect(() => {
+    if (!pendingHostDraft) return;
+    if (!onAiPage) return;
+    if (pendingHostDraft.conversationId !== activeConversationId) return;
+    setDraft(pendingHostDraft.draft);
+    requestAnimationFrame(() => focusComposer());
+    setPendingHostDraft(null);
+  }, [activeConversationId, focusComposer, onAiPage, pendingHostDraft, setDraft]);
+
   const refreshConversations = useCallback(async (preferId?: string | null) => {
     const result = await AiService.listConversations();
     if (result.ok === false) {
@@ -226,6 +268,7 @@ export function AiSessionProvider({
       return [] as ConversationVo[];
     }
     setConversations(result.data);
+    setConversationsLoaded(true);
     if (preferId && result.data.some((item) => item.id === preferId)) {
       setActiveConversationId(preferId);
     }
@@ -235,9 +278,19 @@ export function AiSessionProvider({
   const loadMessages = useCallback(async (conversationId: string) => {
     const result = await AiService.listMessages(conversationId);
     if (result.ok === false) {
+      if (conversationIdRef.current !== conversationId) return;
+      if (
+        conversationsLoadedRef.current &&
+        !conversationsRef.current.some((item) => item.id === conversationId)
+      ) {
+        openBlankConversation(false);
+        return;
+      }
       message.error(result.message);
       return;
     }
+    if (conversationIdRef.current !== conversationId) return;
+    if (!conversationsRef.current.some((item) => item.id === conversationId)) return;
     commitMessages((cache) =>
       applyFetchedMessages(
         cache,
@@ -246,7 +299,7 @@ export function AiSessionProvider({
         Boolean(findStreamByConversation(streamRegistryRef.current, conversationId))
       )
     );
-  }, [commitMessages]);
+  }, [commitMessages, openBlankConversation]);
 
   const beginStream = useCallback(
     (input: {
@@ -331,8 +384,9 @@ export function AiSessionProvider({
     if (!activeConversationId) return;
     if (creatingConversationRef.current) return;
     if (findStreamByConversation(streamRegistryRef.current, activeConversationId)) return;
+    if (!conversations.some((item) => item.id === activeConversationId)) return;
     void loadMessages(activeConversationId);
-  }, [activeConversationId, loadMessages]);
+  }, [activeConversationId, conversations, loadMessages]);
 
   useEffect(() => {
     if (creatingConversationRef.current) return;
@@ -352,19 +406,26 @@ export function AiSessionProvider({
 
   useEffect(() => {
     if (!onAiPage) return;
-    const conversationId = searchParams.get('conversationId');
-    if (conversationId) {
-      creatingConversationRef.current = false;
-      if (conversationId !== activeConversationId) {
-        setActiveConversationId(conversationId);
+    const requestedId = searchParams.get('conversationId');
+    const resolved = resolveRequestedConversation({
+      requestedId,
+      conversationIds: conversations.map((item) => item.id),
+      loaded: conversationsLoaded,
+    });
+    if (resolved.action === 'blank') {
+      if (requestedId) {
+        openBlankConversation(false);
+        return;
       }
+      if (creatingConversationRef.current) return;
+      if (activeConversationId) setActiveConversationId(null);
       return;
     }
-    if (creatingConversationRef.current) return;
-    if (activeConversationId) {
-      setActiveConversationId(null);
+    creatingConversationRef.current = false;
+    if (resolved.id !== activeConversationId) {
+      setActiveConversationId(resolved.id);
     }
-  }, [onAiPage, searchParams, activeConversationId]);
+  }, [activeConversationId, conversations, conversationsLoaded, onAiPage, openBlankConversation, searchParams]);
 
   useEffect(() => {
     const unsubscribe = AiService.subscribeChatStream((event: AiChatStreamEventVo) => {
@@ -452,15 +513,50 @@ export function AiSessionProvider({
   );
 
   const createBlankConversation = useCallback(async () => {
-    setActiveConversationId(null);
-    setStreamError(null);
     if (!onAiPage) {
+      creatingConversationRef.current = false;
+      setActiveConversationId(null);
+      setStreamError(null);
       navigate('/ai');
       return;
     }
-    setSearchParams(conversationSearch(null), { replace: true });
-    requestAnimationFrame(() => focusComposer());
-  }, [focusComposer, navigate, onAiPage, setSearchParams]);
+    openBlankConversation();
+  }, [navigate, onAiPage, openBlankConversation]);
+
+  const startFromHost = useCallback(
+    async (input: PluginAiStartInput) => {
+      const draft = hostStartDraft(input);
+      if (!input.uri) {
+        setPendingHostDraft({ conversationId: null, draft });
+        await createBlankConversation();
+        return;
+      }
+      const bound = await AiService.ensureResourceConversation({
+        uri: input.uri,
+        label: input.label,
+        skill: input.skill,
+      });
+      if (bound.ok === false) {
+        message.error(bound.message);
+        return;
+      }
+      const conversation = bound.data.conversation;
+      setConversations((items) => [
+        conversation,
+        ...items.filter((item) => item.id !== conversation.id),
+      ]);
+      setStreamError(null);
+      setPendingHostDraft({ conversationId: conversation.id, draft });
+      setActiveConversationId(conversation.id);
+      void refreshConversations(conversation.id);
+      if (!onAiPage) {
+        navigate(`/ai?conversationId=${encodeURIComponent(conversation.id)}`);
+        return;
+      }
+      setSearchParams(conversationSearch(conversation.id), { replace: true });
+    },
+    [createBlankConversation, navigate, onAiPage, refreshConversations, setSearchParams],
+  );
 
   const renameConversation = useCallback(async (id: string, title: string) => {
     const result = await AiService.renameConversation(id, { title });
@@ -515,14 +611,9 @@ export function AiSessionProvider({
       const remaining = conversations.filter((item) => item.id !== id);
       setConversations(remaining);
       if (conversationIdRef.current !== id) return;
-      setActiveConversationId(null);
-      setStreamError(null);
-      if (onAiPage) {
-        setSearchParams(conversationSearch(null), { replace: true });
-        requestAnimationFrame(() => focusComposer());
-      }
+      openBlankConversation();
     },
-    [commitMessages, commitStreamRegistry, conversations, focusComposer, onAiPage, setSearchParams]
+    [commitMessages, commitStreamRegistry, conversations, openBlankConversation]
   );
 
   const selectCodingAgent = useCallback(
@@ -638,9 +729,9 @@ export function AiSessionProvider({
         message.warning('无法打开该资源');
         return;
       }
-      void openPluginView(request);
+      navigate(hrefFromOpenRequest(request));
     },
-    [openPluginView, platform],
+    [navigate, platform],
   );
 
   const boundLabel = useCallback((conversation?: ConversationVo) => {
@@ -670,6 +761,7 @@ export function AiSessionProvider({
     threadWillReset,
     selectConversation,
     createBlankConversation,
+    startFromHost,
     renameConversation,
     pinConversation,
     deleteConversation,

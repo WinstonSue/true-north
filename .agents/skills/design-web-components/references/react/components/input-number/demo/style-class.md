@@ -1,0 +1,53 @@
+# Custom semantic dom styling
+
+## Source
+
+```tsx
+import React from 'react';
+import { Flex, InputNumber } from '@sue/design-web-react';
+import type { GetProp, InputNumberProps } from '@sue/design-web-react';
+import { createStyles } from 'antd-style';
+
+const useStyle = createStyles(({ token }) => ({
+  root: {
+    border: `${token.lineWidth}px ${token.lineType} ${token.colorPrimary}`,
+    borderRadius: token.borderRadiusLG,
+    width: 200,
+  },
+}));
+
+const stylesObject: InputNumberProps['styles'] = {
+  input: {
+    fontSize: 14,
+  },
+};
+
+const stylesFn: InputNumberProps['styles'] = ({
+  props,
+}): GetProp<InputNumberProps, 'styles', 'Return'> => {
+  if (props.size === 'large') {
+    return {
+      root: {
+        backgroundColor: 'rgba(250,250,250, 0.5)',
+        borderColor: '#722ed1',
+      },
+    };
+  }
+  return {};
+};
+
+const App: React.FC = () => {
+  const { styles: classNames } = useStyle();
+  const sharedProps: InputNumberProps = {
+    classNames,
+  };
+  return (
+    <Flex vertical gap="medium">
+      <InputNumber {...sharedProps} styles={stylesObject} placeholder="Object" />
+      <InputNumber {...sharedProps} styles={stylesFn} placeholder="Function" size="large" />
+    </Flex>
+  );
+};
+
+export default App;
+```

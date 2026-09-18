@@ -16,6 +16,30 @@
         "name": "@ylib/product-server",
         "version": "0.0.7"
       }
+    },
+    "design-web-skill": {
+      "revision": "0.0.5",
+      "contentHash": "c6f2fa48a445932b694b7ca631f8604bc43ab16beb237f501975b420166429c5",
+      "resolvedPeer": {
+        "name": "@sue/design-web-react",
+        "version": "0.0.5"
+      }
+    },
+    "design-web-components": {
+      "revision": "0.0.5",
+      "contentHash": "d53456c2c8267a703b0dd02d8d5b93968e551f1d4f759bb76e5aa43e9a42a38e",
+      "resolvedPeer": {
+        "name": "@sue/design-web-react",
+        "version": "0.0.5"
+      }
+    },
+    "design-web-scenarios": {
+      "revision": "0.0.5",
+      "contentHash": "89ea9a8a68e37c3de14c5b84f3d95dec0c24ff8165f3ded5549a9df2a7684e78",
+      "resolvedPeer": {
+        "name": "@sue/design-web-react",
+        "version": "0.0.5"
+      }
     }
   },
   "agents": [
@@ -24,8 +48,21 @@
       "link": ".cursor",
       "skills": [
         "setup-product-app",
-        "write-product-wiki"
+        "write-product-wiki",
+        "design-web-skill",
+        "design-web-components",
+        "design-web-scenarios"
       ]
+    },
+    {
+      "name": "desktop",
+      "link": "apps/desktop",
+      "skills": []
+    },
+    {
+      "name": "growth",
+      "link": "packages/plugins/growth",
+      "skills": []
     }
   ]
 }

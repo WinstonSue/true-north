@@ -1,0 +1,90 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { FilterBar } from '@true-north/plugin-ui';
+import { TodoFilters } from './TodoFilters';
+import { Button, Flex, message } from '@sue/design-web-react';
+import { ProductSurface } from '@ylib/product-surface-react';
+import { productRef } from '@ylib/product-server';
+import { TodoService } from '../../../../client';
+import { TodoStatus } from '@true-north/enum';
+import { TodoAllProvider } from './context';
+import TodoTable from './TodoTable';
+import { useTodoAllContext } from './context';
+import styles from './style.module.less';
+import { emitTodoChanged, onTodoChanged } from '../../../shared/events';
+import { useOpenPendingWorkflows } from '../../../integrations/workflow-association';
+
+function TodoAll() {
+  const { getTodoPage, todoList } = useTodoAllContext();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
+  const [batchLoading, setBatchLoading] = useState(false);
+  const openPending = useOpenPendingWorkflows();
+  useEffect(() => {
+    void getTodoPage();
+    return onTodoChanged(() => { void getTodoPage(); });
+  }, []);
+
+  useEffect(() => {
+    setSelectedRowKeys((keys) => keys.filter((key) =>
+      todoList.some((todo) =>
+        todo.id === key &&
+        todo.status === TodoStatus.TODO,
+      ),
+    ));
+  }, [todoList]);
+
+  const handleBatchDone = async () => {
+    const selectedTodos = todoList.filter((todo) => selectedRowKeys.includes(todo.id));
+    if (!selectedTodos.length) return;
+    if (selectedTodos.length > 50) {
+      message.error('单次最多完成 50 条待办');
+      return;
+    }
+    try {
+      setBatchLoading(true);
+      await TodoService.doneBatch({
+        todoWithRepeatList: selectedTodos.map((todo) => ({
+          id: todo.id,
+          relatedType: todo.relatedType,
+        })),
+      });
+      setSelectedRowKeys([]);
+      emitTodoChanged();
+      await openPending();
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
+  return (
+    <ProductSurface id={productRef('growth.todo.view.all')}>
+    <Flex vertical container="full" className={styles.page}>
+      <FilterBar extra={
+        selectedRowKeys.length > 0 ? (
+          <Button type="primary" loading={batchLoading} onClick={handleBatchDone}>
+            批量完成 ({selectedRowKeys.length})
+          </Button>
+        ) : null
+      }>
+        <TodoFilters />
+      </FilterBar>
+
+      <Flex container="fill" className={styles.table}>
+        <TodoTable
+          selectedRowKeys={selectedRowKeys}
+          onSelectionChange={setSelectedRowKeys}
+        />
+      </Flex>
+    </Flex>
+    </ProductSurface>
+  );
+}
+
+export default function TodoAllLayout() {
+  return (
+    <TodoAllProvider>
+      <TodoAll></TodoAll>
+    </TodoAllProvider>
+  );
+}

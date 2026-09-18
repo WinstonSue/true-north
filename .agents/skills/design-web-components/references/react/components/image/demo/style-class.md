@@ -1,0 +1,60 @@
+# Custom semantic dom styling
+
+## Source
+
+```tsx
+import React from 'react';
+import { Flex, Image } from '@sue/design-web-react';
+import type { GetProp, ImageProps } from '@sue/design-web-react';
+import { createStaticStyles } from 'antd-style';
+
+const classNames = createStaticStyles(({ css }) => ({
+  root: css`
+    padding: 4px;
+    border-radius: 8px;
+    overflow: hidden;
+  `,
+}));
+
+const styles: ImageProps['styles'] = {
+  image: {
+    borderRadius: '4px',
+  },
+};
+
+const stylesFn: ImageProps['styles'] = (info): GetProp<ImageProps, 'styles', 'Return'> => {
+  if (info.props.preview) {
+    return {
+      root: {
+        border: '2px solid #A594F9',
+        borderRadius: 8,
+        padding: 4,
+        transition: 'all 0.3s ease',
+      },
+      image: {
+        borderRadius: 4,
+        filter: 'grayscale(50%)',
+      },
+    };
+  }
+  return {};
+};
+
+const App: React.FC = () => {
+  const sharedProps: ImageProps = {
+    src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    width: 160,
+    alt: 'Example image',
+    classNames,
+  };
+
+  return (
+    <Flex gap="medium">
+      <Image {...sharedProps} styles={styles} />
+      <Image {...sharedProps} styles={stylesFn} preview={{ open: false }} />
+    </Flex>
+  );
+};
+
+export default App;
+```

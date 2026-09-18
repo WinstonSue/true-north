@@ -1,0 +1,93 @@
+# Custom Render
+
+## Source
+
+```tsx
+import { User } from 'lucide-react'
+import React from 'react';
+;
+import { Avatar, Flex, Segmented } from '@sue/design-web-react';
+
+const App: React.FC = () => (
+  <Flex gap="small" align="flex-start" vertical>
+    <Segmented
+      options={[
+        {
+          label: (
+            <div style={{ padding: 4 }}>
+              <Avatar src="https://api.dicebear.com/10.x/lorelei/svg?seed=8" alt="User 1" />
+              <div>User 1</div>
+            </div>
+          ),
+          value: 'user1',
+          tooltip: { title: 'hello user1', color: 'gold' },
+        },
+        {
+          label: (
+            <div style={{ padding: 4 }}>
+              <Avatar style={{ backgroundColor: '#f56a00' }} alt="User 2">
+                K
+              </Avatar>
+              <div>User 2</div>
+            </div>
+          ),
+          value: 'user2',
+          tooltip: { title: 'hello user2', color: 'pink' },
+        },
+        {
+          label: (
+            <div style={{ padding: 4 }}>
+              <Avatar style={{ backgroundColor: '#87d068' }} icon={<User  />} alt="User 3" />
+              <div>User 3</div>
+            </div>
+          ),
+          value: 'user3',
+          tooltip: { title: 'hello user3', color: 'geekblue' },
+        },
+      ]}
+    />
+    <Segmented
+      options={[
+        {
+          label: (
+            <div style={{ padding: 4 }}>
+              <div>Spring</div>
+              <div>Jan-Mar</div>
+            </div>
+          ),
+          value: 'spring',
+        },
+        {
+          label: (
+            <div style={{ padding: 4 }}>
+              <div>Summer</div>
+              <div>Apr-Jun</div>
+            </div>
+          ),
+          value: 'summer',
+        },
+        {
+          label: (
+            <div style={{ padding: 4 }}>
+              <div>Autumn</div>
+              <div>Jul-Sept</div>
+            </div>
+          ),
+          value: 'autumn',
+        },
+        {
+          label: (
+            <div style={{ padding: 4 }}>
+              <div>Winter</div>
+              <div>Oct-Dec</div>
+            </div>
+          ),
+          value: 'winter',
+        },
+      ]}
+    />
+  </Flex>
+);
+
+export default App;
+```

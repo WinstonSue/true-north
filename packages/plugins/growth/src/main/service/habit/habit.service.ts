@@ -7,6 +7,7 @@ import { assertHabitHasActiveGoal } from '../../../shared/entity-bounds';
 import { GoalRepository } from '../goal/goal.repository';
 import { Todo } from '../todo/todo.entity';
 import { RepeatService, repeatService as defaultRepeatService } from '../repeat/repeat.service';
+import { queueGrowthDueSync, untrackGrowthResource } from '../../context';
 
 export class HabitService {
   habitRepository: HabitRepository;
@@ -36,12 +37,14 @@ export class HabitService {
     const habit = await this.habitRepository.create(entity);
     const withRelations = await this.habitRepository.findWithRelations(habit.id);
     await this.createCycleTodo(withRelations);
+    queueGrowthDueSync();
     return HabitDto.importEntity(await this.habitRepository.findWithRelations(habit.id));
   }
 
   async delete(id: string): Promise<void> {
     const habit = await this.habitRepository.find(id);
     await this.habitRepository.delete(id);
+    await untrackGrowthResource('habit', id);
     if (habit.repeatId) {
       try {
         await this.repeatService.repeatRepository.delete(habit.repeatId);
@@ -49,6 +52,7 @@ export class HabitService {
         // ignore orphan cleanup failure
       }
     }
+    queueGrowthDueSync();
   }
 
   async update(updateHabitDto: UpdateHabitDto): Promise<HabitDto> {
@@ -76,7 +80,9 @@ export class HabitService {
       entity.goals = await this.resolveActiveGoals(updateHabitDto.goalIds);
     }
     await this.habitRepository.update(entity);
-    return HabitDto.importEntity(await this.habitRepository.findWithRelations(updateHabitDto.id));
+    const result = HabitDto.importEntity(await this.habitRepository.findWithRelations(updateHabitDto.id));
+    queueGrowthDueSync();
+    return result;
   }
 
   async find(id: string): Promise<HabitDto> {
@@ -132,6 +138,7 @@ export class HabitService {
     habit.status = HabitStatus.ACTIVE;
     await this.habitRepository.update(habit);
     await this.createCycleTodo(habit);
+    queueGrowthDueSync();
   }
 
   async abandon(id: string): Promise<void> {
@@ -151,6 +158,8 @@ export class HabitService {
       habit.cycleTodoId = undefined;
     }
     await this.habitRepository.update(habit);
+    await untrackGrowthResource('habit', id);
+    queueGrowthDueSync();
   }
 
   private async transition(id: string, from: HabitStatus, to: HabitStatus): Promise<void> {
@@ -158,6 +167,8 @@ export class HabitService {
     if (habit.status !== from) throw new Error('当前状态不允许该操作');
     habit.status = to;
     await this.habitRepository.update(habit);
+    if (to !== HabitStatus.ACTIVE) await untrackGrowthResource('habit', id);
+    queueGrowthDueSync();
   }
 
   private async resolveActiveGoals(goalIds?: string[]) {

@@ -8,6 +8,7 @@ import {
   materializeMain,
   materializeRenderer,
   hrefFromLocation,
+  hrefFromOpenRequest,
   hrefFromSnapshot,
   locationFromSearchParams,
   extensionPoints,
@@ -21,13 +22,12 @@ function growthManifest() {
     catalog: { nameKey: 'menu.growth' },
     contributions: {
       ipc: { todo: {}, trackTime: {} },
-      views: { todo: { nameKey: 'menu.todo' } },
-      workbench: { newTabs: { todo: { order: 10 } } },
+      resources: { goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } } },
+      workbench: { newTabs: { capture: { nameKey: 'menu.todo', order: 10 } } },
       ai: {
         skills: { goalDecompose: { root: 'skills/goal-decompose' } },
         mcp: {
           tools: { searchGoals: { readOnly: true } },
-          resources: { goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } } },
         },
       },
       workflow: {
@@ -76,10 +76,10 @@ test('materializeMain namespaces ipc routes and mcp names', () => {
             execute: async () => '',
           },
         },
-        resources: { goal: { list: async () => [], read: async () => null } },
       },
       skillRoots: { goalDecompose: '/tmp/skills/goal-decompose' },
     },
+    resources: { goal: { list: async () => [], read: async () => null } },
   });
   assert.deepEqual(materialized.issues, []);
   const ipc = valuesOf(materialized.registrations, extensionPoints.ipc);
@@ -95,40 +95,45 @@ test('materializeMain namespaces ipc routes and mcp names', () => {
   assert.equal(mentions.length, 1);
 });
 
-test('materializeRenderer reports missing views', () => {
+test('materializeRenderer reports missing newTabs', () => {
   const issues = materializeRenderer(growthManifest(), { icon: undefined }).issues;
-  assert.equal(issues.some((issue) => issue.message.includes('todo')), true);
+  assert.equal(issues.some((issue) => issue.message.includes('capture')), true);
 });
 
-test('materializeRenderer publishes plugin, views, locales, scopes and resource openers', () => {
+test('materializeRenderer publishes plugin, locales, scopes and resource openers', () => {
   const Dummy = () => null;
+  const load = async () => ({ default: Dummy });
   const materialized = materializeRenderer(growthManifest(), {
     icon: Dummy,
     locales: [{ pluginId: 'growth', messages: { zh_CN: { 'menu.goal': '目标' } } }],
     scope: Dummy,
-    views: { todo: { load: async () => ({ default: Dummy }) } },
-    openResource: (uri) => (uri.startsWith('tn://growth/') ? { viewId: 'growth.todo', params: {} } : null),
+    workbench: { newTabs: { capture: { load } } },
+    openResource: (uri) =>
+      uri.startsWith('tn://growth/') ? { pluginId: 'growth', location: { view: 'todo' } } : null,
   });
   assert.deepEqual(materialized.issues, []);
-  const views = valuesOf(materialized.registrations, extensionPoints.view);
   const locales = valuesOf(materialized.registrations, extensionPoints.locale);
   const scopes = valuesOf(materialized.registrations, extensionPoints.scope);
   const openers = valuesOf(materialized.registrations, extensionPoints.resourceOpener);
   const plugins = valuesOf(materialized.registrations, extensionPoints.plugin);
   assert.equal(plugins[0]?.pluginId, 'growth');
-  assert.equal(views[0]?.id, 'growth.todo');
   assert.equal(locales[0]?.pluginId, 'growth');
   assert.equal(scopes[0]?.pluginId, 'growth');
-  assert.deepEqual(openers[0]?.open('tn://growth/goals/g1'), { viewId: 'growth.todo', params: {} });
+  assert.deepEqual(openers[0]?.open('tn://growth/goals/g1'), { pluginId: 'growth', location: { view: 'todo' } });
   const newTabs = valuesOf(materialized.registrations, extensionPoints.newTab);
-  assert.equal(newTabs[0]?.viewId, 'growth.todo');
+  assert.equal(newTabs[0]?.id, 'growth.capture');
   assert.equal(newTabs[0]?.nameKey, 'menu.todo');
+  assert.equal(newTabs[0]?.load, load);
 });
 
 test('page location adapter round-trips opaque query params', () => {
   const location = locationFromSearchParams(new URLSearchParams('view=todo&tab=all'));
   assert.deepEqual(location, { view: 'todo', tab: 'all' });
   assert.equal(hrefFromLocation('growth', location), '/plugins/growth?view=todo&tab=all');
+  assert.equal(
+    hrefFromOpenRequest({ pluginId: 'growth', location: { view: 'todo', tab: 'all' } }),
+    '/plugins/growth?view=todo&tab=all',
+  );
   assert.equal(
     hrefFromSnapshot('growth', { viewId: 'growth.todo', params: { tab: 'all' } }),
     '/plugins/growth?view=todo&tab=all',
@@ -143,12 +148,10 @@ test('materializeRenderer registers a hub root when hub is declared and implemen
     version: '0.1.0',
     catalog: { nameKey: 'menu.growth' },
     contributions: {
-      views: { todo: { nameKey: 'menu.todo' } },
       hub: {},
     },
   });
   const materialized = materializeRenderer(declared, {
-    views: { todo: { load } },
     hub: { load },
   });
   assert.deepEqual(materialized.issues, []);
@@ -165,9 +168,9 @@ test('materializeRenderer reports missing and undeclared hub implementations', (
       pluginId: 'growth',
       version: '1',
       catalog: { nameKey: 'growth' },
-      contributions: { hub: {}, views: { todo: { nameKey: 'todo' } } },
+      contributions: { hub: {} },
     }),
-    { views: { todo: { load } } },
+    { },
   ).issues;
   assert.equal(missing.some((issue) => issue.message.includes('declared hub')), true);
 
@@ -176,9 +179,9 @@ test('materializeRenderer reports missing and undeclared hub implementations', (
       pluginId: 'expense',
       version: '1',
       catalog: { nameKey: 'expense' },
-      contributions: { views: { ledger: { nameKey: 'ledger' } } },
+      contributions: {},
     }),
-    { views: { ledger: { load } }, hub: { load } },
+    { hub: { load } },
   ).issues;
   assert.equal(extra.some((issue) => issue.message.includes('undeclared hub')), true);
 });
@@ -190,15 +193,15 @@ test('plugins without a hub capability do not register a hub root', () => {
       pluginId: 'expense',
       version: '1',
       catalog: { nameKey: 'expense' },
-      contributions: { views: { ledger: { nameKey: 'ledger' } } },
+      contributions: {},
     }),
-    { views: { ledger: { load: async () => ({ default: Dummy }) } } },
+    {},
   );
   assert.deepEqual(materialized.issues, []);
   assert.equal(valuesOf(materialized.registrations, extensionPoints.hub).length, 0);
 });
 
-test('materializeRenderer registers only declared newTabs and inherits view nameKey', () => {
+test('materializeRenderer registers only declared newTabs with their own load', () => {
   const Dummy = () => null;
   const load = async () => ({ default: Dummy });
   const materialized = materializeRenderer(
@@ -207,40 +210,32 @@ test('materializeRenderer registers only declared newTabs and inherits view name
       version: '1',
       catalog: { nameKey: 'growth' },
       contributions: {
-        views: {
-          todo: { nameKey: 'menu.todo' },
-          goal: { nameKey: 'menu.goal' },
-        },
-        workbench: { newTabs: { todo: { order: 10 } } },
+        workbench: { newTabs: { capture: { nameKey: 'menu.todo', order: 10 } } },
       },
     }),
-    { views: { todo: { load }, goal: { load } } },
+    { workbench: { newTabs: { capture: { load } } } },
   );
   assert.deepEqual(materialized.issues, []);
-  const views = valuesOf(materialized.registrations, extensionPoints.view);
   const newTabs = valuesOf(materialized.registrations, extensionPoints.newTab);
-  assert.equal(views.length, 2);
   assert.equal(newTabs.length, 1);
-  assert.equal(newTabs[0]?.viewId, 'growth.todo');
+  assert.equal(newTabs[0]?.id, 'growth.capture');
   assert.equal(newTabs[0]?.nameKey, 'menu.todo');
+  assert.equal(newTabs[0]?.load, load);
 });
 
-test('materializeRenderer reports newTab keys that are not declared views', () => {
-  const Dummy = () => null;
-  const load = async () => ({ default: Dummy });
+test('materializeRenderer reports newTab keys that are not implemented', () => {
   const issues = materializeRenderer(
     definePluginManifest({
       pluginId: 'growth',
       version: '1',
       catalog: { nameKey: 'growth' },
       contributions: {
-        views: { todo: { nameKey: 'menu.todo' } },
-        workbench: { newTabs: { missing: { order: 10 } } },
+        workbench: { newTabs: { missing: { nameKey: 'missing', order: 10 } } },
       },
     }),
-    { views: { todo: { load } } },
+    {},
   ).issues;
-  assert.equal(issues.some((issue) => issue.message.includes('newTab "missing"')), true);
+  assert.equal(issues.some((issue) => issue.message.includes('missing')), true);
 });
 
 test('materializeMain reports missing workflow commands', () => {

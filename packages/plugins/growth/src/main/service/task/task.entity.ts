@@ -5,6 +5,7 @@ import { Goal } from '../goal/goal.entity';
 import { Entity, Column, TreeChildren, TreeParent, Tree, ManyToOne } from 'typeorm';
 import { IsEnum, IsOptional, IsString, IsNumber, IsArray } from 'class-validator';
 import type { Todo } from '../todo/todo.entity';
+import type { TaskNotifyRule } from '@true-north/vo';
 
 export class TaskWithoutRelations extends BaseEntity {
   /** 任务名称 */
@@ -100,6 +101,9 @@ export class TaskWithoutRelations extends BaseEntity {
   @IsString()
   @IsOptional()
   goalId?: string;
+
+  @Column('simple-json', { nullable: true })
+  notifyRule?: TaskNotifyRule | null;
 }
 
 @Entity('task')

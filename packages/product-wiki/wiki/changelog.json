@@ -2,6 +2,974 @@
   "changes": [
     {
       "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "待办建议确认后展示创建成功与该条详情，不再回到可编辑表单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:tool-stage",
+        "scope": "view",
+        "name": "会话工具舞台",
+        "reference": "workbench.view.tool-stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "加号与缺省页只列出新网页和插件自愿放进工作台的页，不再列出成长待办、记账账单这类插件栏目。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:new-tab",
+        "scope": "view",
+        "name": "新标签选择器",
+        "reference": "workbench.view.new-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "会话中的目标或任务名称进入对应插件页并定位到那一条，不在工作台挂功能整页。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:plugin-view-tab",
+        "scope": "rule",
+        "name": "工作台打开插件功能",
+        "reference": "workbench.rule.plugin-view-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "工作台加号不再列出插件栏目；点会话里的资源名称进入插件页里的那一条。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "plugins:view:hub-nav",
+        "scope": "view",
+        "name": "领域导航",
+        "reference": "plugins.view.hub-nav",
+        "wikiId": "plugins",
+        "wikiTitle": "插件"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "点选消息中的资源名称进入对应插件页并定位到那一条，不再在工作台打开功能整页。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:resource-mention",
+        "scope": "rule",
+        "name": "引用插件资源",
+        "reference": "ai.session.rule.resource-mention",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "品牌行在通知左侧提供工作台开关。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:aside",
+        "scope": "view",
+        "name": "功能侧栏",
+        "reference": "app-shell.view.aside",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "侧栏底部右侧只保留专注计时，工作台开关移到品牌行。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:actions",
+        "scope": "view",
+        "name": "全局动作",
+        "reference": "app-shell.view.actions",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "从品牌行、通知左侧打开右侧工作台。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:shell",
+        "scope": "view",
+        "name": "工作台面板",
+        "reference": "workbench.view.shell",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "introduced",
+      "summary": "没有标签时显示缺省页，可从这里打开新网页或已启用插件的功能。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:home",
+        "scope": "view",
+        "name": "缺省页",
+        "reference": "workbench.view.home",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "introduced",
+      "summary": "打开工作台时如果没有标签，显示缺省页，不自动打开网页；关掉最后一个标签后回到缺省页。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:default-home",
+        "scope": "rule",
+        "name": "无标签进缺省页",
+        "reference": "workbench.rule.default-home",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "关掉最后一个标签后回到缺省页，不再留下新网页标签。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:tab-bar",
+        "scope": "view",
+        "name": "标签栏",
+        "reference": "workbench.view.tab-bar",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "关掉最后一个插件功能标签后回到缺省页，不再留下新网页标签。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:plugin-view-tab",
+        "scope": "rule",
+        "name": "工作台打开插件功能",
+        "reference": "workbench.rule.plugin-view-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "品牌行开关打开或关闭工作台；没有标签时再次打开进入缺省页。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:rule:panel-persist",
+        "scope": "rule",
+        "name": "关面板保留标签",
+        "reference": "workbench.rule.panel-persist",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "没有标签时的缺省页也列出与加号选择器相同的入口。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:new-tab",
+        "scope": "view",
+        "name": "新标签选择器",
+        "reference": "workbench.view.new-tab",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "introduced",
+      "summary": "AI 建议待办在工作台打开与手动新建同一套表单；计划时间可见并随建议预填。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:suggest-form",
+        "scope": "rule",
+        "name": "建议工作台套用新建待办",
+        "reference": "growth.todo.rule.suggest-form",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "用户说的时刻写入计划时间；名称已覆盖事项时不预填描述。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:suggest-form",
+        "scope": "rule",
+        "name": "建议工作台套用新建待办",
+        "reference": "growth.todo.rule.suggest-form",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "没说年份时按当前日期取最近一次尚未过去的该月日，不用过期年份。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:suggest-form",
+        "scope": "rule",
+        "name": "建议工作台套用新建待办",
+        "reference": "growth.todo.rule.suggest-form",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "AI 建议工作台默认选中已发布的「待办完成后确认入账」，可改或清空；手动新建不预选。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:workflow-on-complete",
+        "scope": "rule",
+        "name": "完成时发起已关联流程",
+        "reference": "growth.todo.rule.workflow-on-complete",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "用 AI 创建待办后，建议工作台确认时使用与手动新建同一套表单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:create-entry",
+        "scope": "rule",
+        "name": "页头创建入口",
+        "reference": "growth.todo.rule.create-entry",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "目标拆解「编辑」打开对应新建表单，确认即创建。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.goal:view:ai-decomposition",
+        "scope": "view",
+        "name": "AI 拆解",
+        "reference": "growth.goal.view.ai-decomposition",
+        "wikiId": "growth.goal",
+        "wikiTitle": "目标管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "目标拆解「编辑」套用新建表单并确认创建；列表采纳仍按预览直接创建。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.goal:rule:ai-decompose-adopt",
+        "scope": "rule",
+        "name": "AI 建议采纳",
+        "reference": "growth.goal.rule.ai-decompose-adopt",
+        "wikiId": "growth.goal",
+        "wikiTitle": "目标管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "任务拆解「编辑」打开对应新建表单，确认即创建。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.task:view:ai-decomposition",
+        "scope": "view",
+        "name": "AI 拆解",
+        "reference": "growth.task.view.ai-decomposition",
+        "wikiId": "growth.task",
+        "wikiTitle": "任务管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "任务拆解「编辑」套用新建表单并确认创建；列表采纳仍按预览直接创建。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.task:rule:ai-decompose-adopt",
+        "scope": "rule",
+        "name": "AI 建议采纳",
+        "reference": "growth.task.rule.ai-decompose-adopt",
+        "wikiId": "growth.task",
+        "wikiTitle": "任务管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "会话工具舞台中的待办建议使用与手动新建待办同一套表单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workbench:view:tool-stage",
+        "scope": "view",
+        "name": "会话工具舞台",
+        "reference": "workbench.view.tool-stage",
+        "wikiId": "workbench",
+        "wikiTitle": "工作台"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "待办建议工作台使用与手动新建待办同一套表单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:workspace-dispatch",
+        "scope": "rule",
+        "name": "工作台分发",
+        "reference": "ai.session.rule.workspace-dispatch",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "侧栏上方入口改为「新会话」动作，没有当前页高亮；点它仍进入空白新对话。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:nav",
+        "scope": "view",
+        "name": "领域菜单",
+        "reference": "app-shell.view.nav",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "侧栏品牌下方改为新会话、插件与 Workflow。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:aside",
+        "scope": "view",
+        "name": "功能侧栏",
+        "reference": "app-shell.view.aside",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "点侧栏「新会话」进入空白新对话，会话历史仍不提供单独的新建按钮。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:sessions",
+        "scope": "view",
+        "name": "会话历史",
+        "reference": "app-shell.view.sessions",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "点侧栏「新会话」或再次进入本页回到空白态。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:draft-composer",
+        "scope": "rule",
+        "name": "空白新对话",
+        "reference": "ai.session.rule.draft-composer",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "侧栏上方提供新会话动作，并切换插件与 Workflow。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "global",
+        "scope": "module",
+        "name": "True North ProductWiki",
+        "wikiId": "global",
+        "wikiTitle": "True North ProductWiki"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "待办页头可手动创建，也可从下拉用 AI 创建并预填提示词。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:create-entry",
+        "scope": "rule",
+        "name": "页头创建入口",
+        "reference": "growth.todo.rule.create-entry",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "任务页头可手动创建，也可从下拉用 AI 创建并预填提示词。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.task:rule:create-entry",
+        "scope": "rule",
+        "name": "页头创建入口",
+        "reference": "growth.task.rule.create-entry",
+        "wikiId": "growth.task",
+        "wikiTitle": "任务管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "习惯列表页头可手动新增，也可从下拉用 AI 创建并预填提示词。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.habit:rule:create-entry",
+        "scope": "rule",
+        "name": "页头创建入口",
+        "reference": "growth.habit.rule.create-entry",
+        "wikiId": "growth.habit",
+        "wikiTitle": "习惯管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "从目标发起拆解时侧栏立刻出现该会话，输入框预填 @资源名，用户发送后才写入消息。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:goal-bound-start",
+        "scope": "rule",
+        "name": "目标资源发起",
+        "reference": "ai.session.rule.goal-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "从任务发起拆解时侧栏立刻出现该会话，输入框预填 @资源名，用户发送后才写入消息。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "ai.session:rule:task-bound-start",
+        "scope": "rule",
+        "name": "任务资源发起",
+        "reference": "ai.session.rule.task-bound-start",
+        "wikiId": "ai.session",
+        "wikiTitle": "AI 会话"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "成长通知改成按默认或单条规则到点提醒，同一来源有未读不叠，收件箱可忽略来源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:module:notification",
+        "scope": "module",
+        "name": "侧栏通知",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "成长按规则到点提醒待办、任务和当天习惯；有未读不另发。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:domain-post",
+        "scope": "rule",
+        "name": "各领域投递事后消息",
+        "reference": "notification.rule.domain-post",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "收件箱可忽略一条通知，之后该来源不再提醒。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:ignore-source",
+        "scope": "rule",
+        "name": "可忽略来源",
+        "reference": "notification.rule.ignore-source",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "收件箱每条可忽略来源，未读在前，点开仍会到来源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:view:inbox",
+        "scope": "view",
+        "name": "收件箱",
+        "reference": "notification.view.inbox",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "成长增加通知规则，作为待办、任务和习惯提醒的默认来源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.notify:module:growth.notify",
+        "scope": "module",
+        "name": "成长通知",
+        "wikiId": "growth.notify",
+        "wikiTitle": "成长通知",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "成长通知规则页可改待办、任务与习惯的默认提醒时刻。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.notify:view:settings",
+        "scope": "view",
+        "name": "通知规则",
+        "reference": "growth.notify.view.settings",
+        "wikiId": "growth.notify",
+        "wikiTitle": "成长通知",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "过期待办早晚两次，当天待办开始时间与晚上，习惯只在当晚打卡。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.notify:rule:default-slots",
+        "scope": "rule",
+        "name": "默认提醒时刻",
+        "reference": "growth.notify.rule.default-slots",
+        "wikiId": "growth.notify",
+        "wikiTitle": "成长通知",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "新建或编辑待办、任务、习惯时可跟随默认通知规则，也可单独改时刻。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:notify-override",
+        "scope": "rule",
+        "name": "可覆盖通知时刻",
+        "reference": "growth.todo.rule.notify-override",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "新建或编辑任务时可跟随默认通知规则，也可单独改时刻。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.task:rule:notify-override",
+        "scope": "rule",
+        "name": "可覆盖通知时刻",
+        "reference": "growth.task.rule.notify-override",
+        "wikiId": "growth.task",
+        "wikiTitle": "任务管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "新建或编辑习惯时可跟随默认通知规则，过期周期不补推。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.habit:rule:notify-override",
+        "scope": "rule",
+        "name": "可覆盖通知时刻",
+        "reference": "growth.habit.rule.notify-override",
+        "wikiId": "growth.habit",
+        "wikiTitle": "习惯管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "成长左侧导航增加通知规则；铃铛按时刻提醒，而不是把今天清单搬进去。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth:module:growth",
+        "scope": "module",
+        "name": "规划成长系统",
+        "wikiId": "growth",
+        "wikiTitle": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "铃铛跟踪今日或过期未完成的待办与任务、当天习惯打卡、月底账单和流程待确认，而不是把成长今天清单搬进来。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:module:notification",
+        "scope": "module",
+        "name": "侧栏通知",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "成长页仍有今天清单；铃铛里是跟那一条待办、任务或习惯走的消息。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:not-today",
+        "scope": "rule",
+        "name": "通知不是今天",
+        "reference": "notification.rule.not-today",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "成长投今日或过期待办与任务、当天习惯打卡；记账月底投当月账单；新建记一笔或收藏不再另发。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:domain-post",
+        "scope": "rule",
+        "name": "各领域投递事后消息",
+        "reference": "notification.rule.domain-post",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "铃铛收成长、记账、物资、收藏和流程已经发生的消息，不只是流程待确认和冲突。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:module:notification",
+        "scope": "module",
+        "name": "侧栏通知",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "成长、记账、物资与收藏可以把已经发生的消息投进铃铛，点开打开来源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:domain-post",
+        "scope": "rule",
+        "name": "各领域投递事后消息",
+        "reference": "notification.rule.domain-post",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "品牌右侧铃铛改回消息收件箱，不再承担今天待办清单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:module:notification",
+        "scope": "module",
+        "name": "侧栏通知",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "打开铃铛后列出未读与已读通知，可点开来源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:view:inbox",
+        "scope": "view",
+        "name": "收件箱",
+        "reference": "notification.view.inbox",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "未读通知在铃铛上显示数量，点开或全部已读后更新。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:unread",
+        "scope": "rule",
+        "name": "未读标记",
+        "reference": "notification.rule.unread",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "点一条通知会标为已读并打开它指向的来源。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:open-source",
+        "scope": "rule",
+        "name": "点开到来源",
+        "reference": "notification.rule.open-source",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "通知是事后消息，不是今天还要处理的待办清单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "notification:rule:not-today",
+        "scope": "rule",
+        "name": "通知不是今天",
+        "reference": "notification.rule.not-today",
+        "wikiId": "notification",
+        "wikiTitle": "侧栏通知"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "侧栏品牌右侧重新放上通知铃铛。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:view:aside",
+        "scope": "view",
+        "name": "功能侧栏",
+        "reference": "app-shell.view.aside",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "应用壳层在品牌旁展示通知铃铛。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "app-shell:module",
+        "scope": "module",
+        "name": "应用壳层",
+        "wikiId": "app-shell",
+        "wikiTitle": "应用壳层"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "changed",
+      "summary": "今天还要处理的待办、习惯与专注只在成长页查看，不进入侧栏通知。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth:module",
+        "scope": "module",
+        "name": "规划成长系统",
+        "wikiId": "growth",
+        "wikiTitle": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "侧栏在插件下增加 Workflow，用来配置、管理并回滚跨领域流程。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workflow:module",
+        "scope": "module",
+        "name": "Workflow",
+        "wikiId": "workflow",
+        "wikiTitle": "Workflow"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "领域事件只能回看，不能删除。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workflow:rule:events-undeletable",
+        "scope": "rule",
+        "name": "事件不可删除",
+        "reference": "workflow.rule.events-undeletable",
+        "wikiId": "workflow",
+        "wikiTitle": "Workflow"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "流程定义可用向导或画布编辑同一份图，发布后版本冻结。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "workflow.editor:view:editor",
+        "scope": "view",
+        "name": "双编辑器",
+        "reference": "workflow.editor.view.editor",
+        "wikiId": "workflow.editor",
+        "wikiTitle": "编辑流程"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "待办可关联已发布流程；每次完成都新开实例，撤回或删除已完成待办需确认回滚。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:workflow-on-complete",
+        "scope": "rule",
+        "name": "完成时发起已关联流程",
+        "reference": "growth.todo.rule.workflow-on-complete",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-16",
+      "event": "introduced",
+      "summary": "由流程确认写入的账单，在确认回滚后从列表消失；中途改过则停下来处理。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "expense:rule:workflow-soft-delete",
+        "scope": "rule",
+        "name": "流程回滚软删除账单",
+        "reference": "expense.rule.workflow-soft-delete",
+        "wikiId": "expense",
+        "wikiTitle": "记账"
+      }
+    },
+    {
+      "version": "v0.3.0",
       "date": "2026-09-15",
       "event": "changed",
       "summary": "网页为宿主浮层让出画面时，舞台保持原来的亮度，不另外压暗。",
@@ -68,9 +1036,9 @@
       "feature": {
         "key": "growth:module",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     },
     {
@@ -680,7 +1648,7 @@
         "name": "待办管理",
         "wikiId": "growth.todo",
         "wikiTitle": "待办管理",
-        "parentName": "个人成长系统"
+        "parentName": "规划成长系统"
       }
     },
     {
@@ -695,7 +1663,7 @@
         "name": "任务管理",
         "wikiId": "growth.task",
         "wikiTitle": "任务管理",
-        "parentName": "个人成长系统"
+        "parentName": "规划成长系统"
       }
     },
     {
@@ -710,7 +1678,7 @@
         "name": "习惯管理",
         "wikiId": "growth.habit",
         "wikiTitle": "习惯管理",
-        "parentName": "个人成长系统"
+        "parentName": "规划成长系统"
       }
     },
     {
@@ -725,7 +1693,7 @@
         "name": "目标管理",
         "wikiId": "growth.goal",
         "wikiTitle": "目标管理",
-        "parentName": "个人成长系统"
+        "parentName": "规划成长系统"
       }
     },
     {
@@ -3182,9 +4150,9 @@
       "feature": {
         "key": "growth:module:growth",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     },
     {
@@ -3804,9 +4772,9 @@
       "feature": {
         "key": "growth",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     },
     {
@@ -4157,9 +5125,9 @@
       "feature": {
         "key": "growth",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     },
     {
@@ -4522,15 +5490,15 @@
       "version": "v0.3.0",
       "date": "2026-09-11",
       "event": "changed",
-      "summary": "个人成长改为活动下的领域页，不再出现在侧栏。",
+      "summary": "规划成长改为活动下的领域页，不再出现在侧栏。",
       "productStatus": "roadmap",
       "feature": {
         "key": "growth",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "parentName": "活动",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     },
     {
@@ -4543,7 +5511,7 @@
         "key": "growth.todo",
         "scope": "module",
         "name": "待办管理",
-        "parentName": "个人成长系统",
+        "parentName": "规划成长系统",
         "wikiId": "growth.todo",
         "wikiTitle": "待办管理"
       }
@@ -4558,7 +5526,7 @@
         "key": "growth.task",
         "scope": "module",
         "name": "任务管理",
-        "parentName": "个人成长系统",
+        "parentName": "规划成长系统",
         "wikiId": "growth.task",
         "wikiTitle": "任务管理"
       }
@@ -4573,7 +5541,7 @@
         "key": "growth.habit",
         "scope": "module",
         "name": "习惯管理",
-        "parentName": "个人成长系统",
+        "parentName": "规划成长系统",
         "wikiId": "growth.habit",
         "wikiTitle": "习惯管理"
       }
@@ -4588,7 +5556,7 @@
         "key": "growth.goal",
         "scope": "module",
         "name": "目标管理",
-        "parentName": "个人成长系统",
+        "parentName": "规划成长系统",
         "wikiId": "growth.goal",
         "wikiTitle": "目标管理"
       }
@@ -4773,14 +5741,14 @@
       "version": "v0.3.0",
       "date": "2026-09-11",
       "event": "changed",
-      "summary": "个人成长改为插件页下的领域，不再出现在侧栏。",
+      "summary": "规划成长改为插件页下的领域，不再出现在侧栏。",
       "productStatus": "roadmap",
       "feature": {
         "key": "growth",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     },
     {
@@ -4953,9 +5921,9 @@
       "feature": {
         "key": "growth",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     },
     {
@@ -5070,7 +6038,7 @@
         "key": "growth.habit:rule:today-checkin",
         "scope": "rule",
         "name": "今天可打卡进侧栏",
-        "parentName": "个人成长系统",
+        "parentName": "规划成长系统",
         "reference": "growth.habit.rule.today-checkin",
         "wikiId": "growth.habit",
         "wikiTitle": "习惯管理"
@@ -5086,7 +6054,7 @@
         "key": "growth.habit:view:list",
         "scope": "view",
         "name": "习惯列表",
-        "parentName": "个人成长系统",
+        "parentName": "规划成长系统",
         "reference": "growth.habit.view.list",
         "wikiId": "growth.habit",
         "wikiTitle": "习惯管理"

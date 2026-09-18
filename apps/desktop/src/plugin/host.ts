@@ -30,13 +30,19 @@ import { User } from '../service/users/user.entity';
 import { aiEntities } from '../service/ai/entities';
 import { aiMigrations } from '../service/ai/migrations';
 import { workflowEntities, WorkflowController, workflowAiContribution, workflowEventService, migrateLegacyActivity, workflowMigrations } from '../service/workflow';
+import {
+  notificationEntities,
+  NotificationController,
+  notificationService,
+  namespacePluginDedupeKey,
+} from '../service/notification';
 import { cacheService, fingerprintPromptContext } from '../service/ai/cache/ai-suggestion-cache.service';
 import { attachAiRegistries, hostAiRegistrations } from '../service/ai/contribution';
 import { attachMainExtensions } from './extensions';
 import { runtimeService } from '../service/ai/runtime';
 import { AiController, conversationService, startMcpServer, stopMcpServer } from '../service/ai';
 import { firstPartyMainDescriptors } from './main-loaders';
-import { HOST_AI_STORE_ID, HOST_WORKFLOW_STORE_ID } from './host-ids';
+import { HOST_AI_STORE_ID, HOST_WORKFLOW_STORE_ID, HOST_NOTIFICATION_STORE_ID } from './host-ids';
 import { getPluginHost, getPluginHostOptional, setActiveHost } from './active-host';
 
 type ActivatedPlugin = {
@@ -95,18 +101,31 @@ export class DesktopPluginHost {
       pluginId,
       space: this.resolvePluginSpace(pluginId),
       workflow: {
-        emit: async (localId, payload, source) => {
+        emit: async (localId, payload, source, options) => {
           const declared = this.catalog?.plugins
             .find((plugin) => plugin.manifest.pluginId === pluginId)
             ?.manifest.contributions.workflow?.events?.[localId];
           if (this.catalog && !declared) return;
-          await workflowEventService.emit({ pluginId, localId, payload, source });
+          await workflowEventService.emit({ pluginId, localId, payload, source, eventId: options?.eventId });
         },
       },
       cache: {
         fingerprintPromptContext,
         findMatching: (input) => cacheService.findMatching(input),
         upsert: (input) => cacheService.upsert(input),
+      },
+      notify: {
+        post: async (input) => {
+          await notificationService.post({
+            ...input,
+            pluginId,
+            dedupeKey: namespacePluginDedupeKey(pluginId, input.dedupeKey),
+          });
+        },
+        dismiss: async (dedupeKey) => {
+          const key = namespacePluginDedupeKey(pluginId, dedupeKey);
+          if (key) await notificationService.markReadByDedupeKey(key);
+        },
       },
     };
   }
@@ -121,7 +140,7 @@ export class DesktopPluginHost {
       logging: isDev ? ['query', 'error'] : undefined,
       logger: createSqlLogger(),
       maxQueryExecutionTime: isDev ? -1 : undefined,
-      entities: [User, PluginSchemaLedger, ...aiEntities, ...workflowEntities],
+      entities: [User, PluginSchemaLedger, ...aiEntities, ...workflowEntities, ...notificationEntities],
       migrations: [],
       subscribers: [],
       namingStrategy: new SnakeNamingStrategy(),
@@ -132,6 +151,7 @@ export class DesktopPluginHost {
     this.hostRuntime = createHostStorageRuntime(dataSource, undefined, { registry: this.storage });
     this.storage.bind(HOST_AI_STORE_ID, this.hostRuntime);
     this.storage.bind(HOST_WORKFLOW_STORE_ID, this.hostRuntime);
+    this.storage.bind(HOST_NOTIFICATION_STORE_ID, this.hostRuntime);
     await applyPluginMigrations(this.hostRuntime, HOST_AI_STORE_ID, aiMigrations);
     await applyPluginMigrations(this.hostRuntime, HOST_WORKFLOW_STORE_ID, workflowMigrations);
     await migrateLegacyActivity();
@@ -203,6 +223,8 @@ export class DesktopPluginHost {
     this.activated = pending;
     this.catalog = assembled;
     this.publish();
+    const { processWorkflowOutbox } = await import('../service/workflow/outbox.service');
+    void processWorkflowOutbox();
     return assembled;
   }
 
@@ -244,6 +266,7 @@ export class DesktopPluginHost {
     return [
       { id: 'ai', routePrefix: '/ai', controller: new AiController(conversationService, runtimeService) },
       { id: 'workflow', routePrefix: '/workflow', controller: new WorkflowController() },
+      { id: 'notifications', routePrefix: '/notifications', controller: new NotificationController() },
       ...this.extensions.list(extensionPoints.ipc),
     ];
   }

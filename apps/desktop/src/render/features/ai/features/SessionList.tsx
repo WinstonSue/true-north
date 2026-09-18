@@ -1,18 +1,19 @@
 import { useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
+  ContextMenu,
   Dropdown,
   Flex,
   Input,
   Modal,
   Popover,
+  type MenuProps,
 } from '@sue/design-web-react';
 import { Ellipsis, Pencil, Pin, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import type { ProductSurfaceHostProps } from '@ylib/product-surface-react';
 import type { ConversationVo } from '@true-north/vo';
-import { ContextMenu, type ContextMenuItem } from '@true-north/plugin-ui';
 import { useAiSessionContext } from '../context';
 import styles from '../style.module.less';
 
@@ -149,7 +150,7 @@ function SessionItem({
     void onPin(!pinned);
   };
 
-  const actionItems: ContextMenuItem[] = [
+  const actionItems: MenuProps['items'] = [
     {
       key: 'pin',
       label: pinned ? '取消置顶' : '置顶',
@@ -258,35 +259,40 @@ function SessionItem({
   );
 
   return (
-    <ContextMenu style={{ width: '100%' }} items={actionItems} onVisibleChange={setContextOpen}>
-      {renaming ? (
-        row
-      ) : (
-        <Popover
-          trigger="hover"
-          placement="rightTop"
-          mouseEnterDelay={0.35}
-          mouseLeaveDelay={0.1}
-          open={previewOpen}
-          onOpenChange={(open) => {
-            if (renaming || moreOpen || contextOpen) {
-              setHoverOpen(false);
-              return;
+    <ContextMenu
+      menu={{ items: actionItems }}
+      onOpenChange={(open) => setContextOpen(open)}
+    >
+      <div style={{ width: '100%' }}>
+        {renaming ? (
+          row
+        ) : (
+          <Popover
+            trigger="hover"
+            placement="rightTop"
+            mouseEnterDelay={0.35}
+            mouseLeaveDelay={0.1}
+            open={previewOpen}
+            onOpenChange={(open) => {
+              if (renaming || moreOpen || contextOpen) {
+                setHoverOpen(false);
+                return;
+              }
+              setHoverOpen(open);
+            }}
+            content={
+              <SessionPreview
+                title={conversation.title}
+                boundLabel={boundLabel}
+                createdAt={conversation.createdAt}
+                updatedAt={conversation.updatedAt}
+              />
             }
-            setHoverOpen(open);
-          }}
-          content={
-            <SessionPreview
-              title={conversation.title}
-              boundLabel={boundLabel}
-              createdAt={conversation.createdAt}
-              updatedAt={conversation.updatedAt}
-            />
-          }
-        >
-          {row}
-        </Popover>
-      )}
+          >
+            {row}
+          </Popover>
+        )}
+      </div>
     </ContextMenu>
   );
 }

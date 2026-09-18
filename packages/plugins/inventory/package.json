@@ -26,7 +26,7 @@
     "@true-north/plugin-ui": "workspace:*",
     "@true-north/enum": "workspace:*",
     "@true-north/vo": "workspace:*",
-    "@sue/design-web-react": "0.0.3-beta.1",
+    "@sue/design-web-react": "0.0.5",
     "lucide-react": "^0.460.0",
     "@ylib/product-surface-react": "0.0.2",
     "@ylib/product-server": "0.0.7",

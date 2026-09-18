@@ -9,7 +9,7 @@ import styles from './style.module.less';
 
 function commandInputOf(raw: unknown) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { input: raw };
-  const { adopted, resource, adoptedAt, planId, nodeId, ...input } = raw as Record<string, unknown>;
+  const { adopted, resource, adoptedAt, planId, nodeId, workflowWorkspaceId, nodeKey, ...input } = raw as Record<string, unknown>;
   return {
     input,
     planId: typeof planId === 'string' ? planId : undefined,

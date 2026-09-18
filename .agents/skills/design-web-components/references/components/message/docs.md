@@ -1,0 +1,111 @@
+---
+title: Message
+description: Display global messages as feedback in response to user operations.
+---
+
+## When To Use
+
+- Use Message for lightweight transient feedback after an action. See `demo/info.md` and `demo/other.md`.
+- Use loading, duration, update, thenable, or custom style demos for async and timed feedback. See `demo/loading.md`, `demo/duration.md`, `demo/update.md`, `demo/thenable.md`, and `demo/custom-style.md`.
+- Use hooks when messages need ConfigProvider or app context. See `demo/hooks.md`.
+- Prefer Alert for persistent inline messages and Notification for richer out-of-flow notices.
+
+## Demos
+
+| Demo | Path |
+| --- | --- |
+| Hooks usage (recommended) | demo/hooks.md |
+| Other types of message | demo/other.md |
+| Customize duration | demo/duration.md |
+| Message with loading indicator | demo/loading.md |
+| Promise interface | demo/thenable.md |
+| Customized style | demo/custom-style.md |
+| Custom semantic dom styling | demo/style-class.md |
+| Update Message Content | demo/update.md |
+| Static method | demo/info.md |
+
+## API
+
+Common props ref：[Common props](../../docs/vue/common-props.md)
+
+### Static Methods 
+- `message.success(content, [duration], onClose)`
+- `message.error(content, [duration], onClose)`
+- `message.info(content, [duration], onClose)`
+- `message.warning(content, [duration], onClose)`
+- `message.loading(content, [duration], onClose)`
+- `message.open(config)`
+- `message.destroy(key?: Key)`
+- `message.config(options)`
+- `message.useMessage(config)`
+
+### Arguments 
+| Argument | Description | Type | Default |
+| --- | --- | --- | --- |
+| content | The content of the message | VueNode \| ArgsProps | - |
+| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 3 |
+| onClose | Specify a function that will be called when the message is closed | () =&gt; void | - |
+
+`afterClose` can be called in thenable interface:
+
+- `message[level](content, [duration]).then(afterClose)`
+- `message[level](content, [duration], onClose).then(afterClose)`
+
+where `level` refers one static methods of `message`. The result of `then` method will be a Promise.
+
+### Config 
+The properties of `config` are as follows:
+
+| Property | Description | Type | Default | Version |
+| --- | --- | --- | --- | --- |
+| class | Customized CSS class | string | - | - |
+| classes | Customize class for each semantic structure inside the component. Supports object or function. | ArgsClassNamesType | - | - |
+| content | The content of the message | VueNode | - | - |
+| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 3 | - |
+| icon | Customized Icon | VueNode | - | - |
+| pauseOnHover | Keep the timer running or not on hover | boolean | true | - |
+| key | The unique identifier of the Message | Key | - | - |
+| style | Customized inline style | CSSProperties | - | - |
+| styles | Customize inline style for each semantic structure inside the component. Supports object or function. | ArgsStylesType | - | - |
+| type | Notice type | NoticeType | - | - |
+| onClick | Specify a function that will be called when the message is clicked | (e: MouseEvent) =&gt; void | - | - |
+| onClose | Specify a function that will be called when the message is closed | () =&gt; void | - | - |
+
+### Global configuration 
+`message.config(options)`
+
+```js
+message.config({
+  top: 100,
+  duration: 2,
+  maxCount: 3,
+  rtl: true,
+  prefixCls: 'my-message',
+})
+```
+
+| Argument | Description | Type | Default | Version |
+| --- | --- | --- | --- | --- |
+| duration | Time before auto-dismiss, in seconds | number | 3 | - |
+| getContainer | Return the mount node for Message, but still display at fullScreen | () =&gt; HTMLElement \| ShadowRoot | () =&gt; document.body | - |
+| maxCount | Max message show, drop oldest if exceed limit | number | - | - |
+| prefixCls | The prefix class name of message node | string | `sue-message` | - |
+| rtl | Whether to enable RTL mode | boolean | false | - |
+| top | Distance from top | string \| number | 8 | - |
+| transitionName | Animation name | string | - | - |
+| pauseOnHover | Keep the timer running or not on hover | boolean | true | - |
+| classes | Customize class for each semantic structure inside the component. Supports object or function. | ArgsClassNamesType | - | - |
+| styles | Customize inline style for each semantic structure inside the component. Supports object or function. | ArgsStylesType | - | - |
+
+## Semantic DOM
+
+| _semantic | demo/_semantic.md |
+
+## FAQ
+
+### Why I can not access context, ConfigProvider `locale/prefixCls/theme` in message? 
+Calling `message` static methods renders a new instance that does not inherit current context. Use `message.useMessage`, App, or ConfigProvider `holderRender` when locale, prefixCls, theme, or other context is required. See `demo/hooks.md` and App docs.
+
+
+### How to set static methods prefixCls? 
+You can config with [`ConfigProvider.config`](../config-provider/docs.md#configproviderconfig-4130).

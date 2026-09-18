@@ -1,15 +1,17 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Flex, Input } from '@sue/design-web-react';
-import { ChevronLeft, ChevronRight, Compass, Download, Loader2, RefreshCw, X } from 'lucide-react';
+import { Blocks, ChevronLeft, ChevronRight, Download, Globe, Loader2, RefreshCw, X } from 'lucide-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import type { ProductSurfaceHostProps } from '@ylib/product-surface-react';
+import { useRendererPlatform } from '@true-north/plugin-sdk/renderer';
 import { useWorkbench } from './context';
 import { ToolStage } from './ToolStage';
 import { PluginViewStage } from './PluginViewStage';
 import { NewTabPicker } from './NewTabPicker';
 import { useBrowserOverlay } from './use-browser-overlay';
 import { snapNativeBrowserBounds } from '../../../service/browser/browser-visibility';
+import useLocale from '@/utils/useLocale';
 import styles from './style.module.less';
 
 const EMPTY_BOUNDS = { x: 0, y: 0, width: 0, height: 0 };
@@ -186,7 +188,7 @@ function Stage({
         className={styles.empty}
         data-product-ref={productRefAttr}
       >
-        <Compass size={64} className={styles.emptyIcon} />
+        <Globe size={64} className={styles.emptyIcon} />
         <p className={styles.emptyTitle}>开始浏览</p>
         <p className={styles.emptyHint}>输入 URL 以打开页面</p>
       </Flex>
@@ -213,8 +215,63 @@ function Stage({
   );
 }
 
+function newTabShortcut() {
+  const mac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+  return mac ? '⌘T' : 'Ctrl+T';
+}
+
+function HomeStage({ 'data-product-ref': productRefAttr }: ProductSurfaceHostProps) {
+  const t = useLocale();
+  const { createTab, openPluginView } = useWorkbench();
+  const platform = useRendererPlatform();
+  const pluginIcons = useMemo(() => {
+    const map = new Map<string, NonNullable<(typeof platform.plugins)[number]['icon']>>();
+    for (const plugin of platform.plugins) {
+      if (plugin.icon) map.set(plugin.pluginId, plugin.icon);
+    }
+    return map;
+  }, [platform.plugins]);
+  const pluginTabs = useMemo(
+    () => [...(platform.workbenchNewTabs || [])].sort((a, b) => (a.order || 0) - (b.order || 0)),
+    [platform.workbenchNewTabs],
+  );
+
+  return (
+    <Flex
+      vertical
+      container="full"
+      align="center"
+      justify="center"
+      className={styles.home}
+      data-product-ref={productRefAttr}
+    >
+      <div className={styles.homeCard}>
+        <button type="button" className={styles.homeRow} onClick={() => void createTab()}>
+          <Globe size={16} className={styles.homeRowIcon} />
+          <span className={styles.homeRowLabel}>{t['workbench.new-tab.web']}</span>
+          <kbd className={styles.homeRowKbd}>{newTabShortcut()}</kbd>
+        </button>
+        {pluginTabs.map((tab) => {
+          const Icon = pluginIcons.get(tab.pluginId) || Blocks;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              className={styles.homeRow}
+              onClick={() => void openPluginView({ viewId: tab.id, params: {} })}
+            >
+              <Icon size={16} className={styles.homeRowIcon} />
+              <span className={styles.homeRowLabel}>{t[tab.nameKey] || tab.nameKey}</span>
+            </button>
+          );
+        })}
+      </div>
+    </Flex>
+  );
+}
+
 export function WorkbenchPanel() {
-  const { open, width, setWidth, reportBounds, activeTab, activeWebTab } = useWorkbench();
+  const { open, width, setWidth, reportBounds, tabs, activeTab, activeWebTab } = useWorkbench();
   const [dragging, setDragging] = useState(false);
   const [holeNode, setHoleNode] = useState<HTMLDivElement | null>(null);
   const showingWeb = activeTab?.kind === 'web';
@@ -288,7 +345,11 @@ export function WorkbenchPanel() {
           </ProductSurface>
         ) : null}
         <div ref={setHoleNode} className={styles.stageWrap}>
-          {activeTab?.kind === 'tool' ? (
+          {tabs.length === 0 ? (
+            <ProductSurface id={productRef('workbench.view.home')}>
+              <HomeStage />
+            </ProductSurface>
+          ) : activeTab?.kind === 'tool' ? (
             <ProductSurface id={productRef('workbench.view.tool-stage')}>
               <ToolStage tab={activeTab} />
             </ProductSurface>

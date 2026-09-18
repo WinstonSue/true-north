@@ -4,6 +4,7 @@ import { HabitStatus, Difficulty, Importance } from '@true-north/enum';
 import { TodoVo } from '../todo/todo-model.vo';
 import type { RepeatConfigPayload } from '@true-north/components-repeat/types';
 import { RepeatEndMode, RepeatMode } from '@true-north/components-repeat/types';
+import type { HabitNotifyRule } from '../notify-rule';
 
 export type HabitWithoutRelationsVo = {
   name: string;
@@ -27,6 +28,7 @@ export type HabitWithoutRelationsVo = {
   completedCount: number;
   doneAt?: string;
   abandonedAt?: string;
+  notifyRule?: HabitNotifyRule | null;
 } & BaseEntityVo;
 
 export type HabitVo = HabitWithoutRelationsVo & {

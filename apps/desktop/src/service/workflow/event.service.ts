@@ -69,6 +69,14 @@ export class WorkflowEventService {
       );
     }
     delivered.add(id);
+    const { enqueueWorkflowEvent, processWorkflowOutbox } = await import('./outbox.service');
+    await enqueueWorkflowEvent({
+      id: saved.id,
+      type: saved.type,
+      payload: saved.payload,
+      sourceUri: saved.sourceUri,
+    });
+    void processWorkflowOutbox();
     return saved;
   }
 

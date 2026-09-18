@@ -21,8 +21,8 @@ test('round-trips a serializable manifest and defaults apiVersion to 0', () => {
     catalog: { nameKey: 'menu.expense' },
     contributions: {
       ipc: { expense: {} },
-      views: { transaction: { nameKey: 'menu.expense.transaction' } },
-      workbench: { newTabs: { transaction: { order: 10 } } },
+      resources: { transaction: { uriTemplate: 'tn://expense/transactions/{id}' } },
+      workbench: { newTabs: { capture: { nameKey: 'menu.expense.transaction', order: 10 } } },
       workflow: {
         events: { booked: { payloadSchema: { type: 'object' } } },
         commands: {
@@ -43,27 +43,27 @@ test('round-trips a serializable manifest and defaults apiVersion to 0', () => {
   assert.equal(pluginPath('expense'), '/plugins/expense');
   assert.equal(namespacedId('expense', 'transaction'), 'expense.transaction');
   assert.equal(ipcRoute('expense', 'expense'), '/expense/expense');
-  assert.equal(parsed.contributions.views?.transaction?.nameKey, 'menu.expense.transaction');
-  assert.equal('order' in (parsed.contributions.views?.transaction || {}), false);
-  assert.deepEqual(parsed.contributions.workbench?.newTabs?.transaction, { order: 10 });
+  assert.equal(parsed.contributions.resources?.transaction?.uriTemplate, 'tn://expense/transactions/{id}');
+  assert.deepEqual(parsed.contributions.workbench?.newTabs?.capture, {
+    nameKey: 'menu.expense.transaction',
+    order: 10,
+  });
   assert.equal(parsed.contributions.workflow?.commands?.createTransaction?.idempotent, true);
   assert.deepEqual(parsed.contributions.hub, {});
 });
 
-test('newTab may omit nameKey and inherit it at materialize time', () => {
+test('newTab requires nameKey', () => {
   const parsed = parsePluginManifest(
     definePluginManifest({
       pluginId: 'growth',
       version: '1',
       catalog: { nameKey: 'growth' },
       contributions: {
-        views: { todo: { nameKey: 'menu.todo' } },
-        workbench: { newTabs: { todo: {} } },
+        workbench: { newTabs: { capture: { nameKey: 'menu.todo' } } },
       },
     }),
   );
-  assert.deepEqual(parsed.contributions.workbench?.newTabs?.todo, {});
-  assert.equal(parsed.contributions.workbench?.newTabs?.todo?.nameKey, undefined);
+  assert.equal(parsed.contributions.workbench?.newTabs?.capture?.nameKey, 'menu.todo');
 });
 
 test('rejects unknown interaction command and compensate targets', () => {
@@ -105,37 +105,22 @@ test('rejects unknown interaction command and compensate targets', () => {
   );
 });
 
-test('rejects duplicate views across plugins', () => {
+test('rejects duplicate resource URIs across plugins', () => {
   const issues = validateManifests([
     definePluginManifest({
       pluginId: 'a',
       version: '1',
       catalog: { nameKey: 'a' },
-      contributions: { views: { shared: { nameKey: 'shared' } } },
+      contributions: { resources: { shared: { uriTemplate: 'tn://a/items/{id}' } } },
     }),
     definePluginManifest({
       pluginId: 'b',
       version: '1',
       catalog: { nameKey: 'b' },
-      contributions: { views: { shared: { nameKey: 'other' } } },
+      contributions: { resources: { other: { uriTemplate: 'tn://a/items/{id}' } } },
     }),
   ]);
-  assert.equal(issues.some((issue) => issue.code === 'duplicate-view'), false);
-  const clash = validateManifests([
-    definePluginManifest({
-      pluginId: 'growth',
-      version: '1',
-      catalog: { nameKey: 'a' },
-      contributions: { views: { todo: { nameKey: 'todo' } } },
-    }),
-    definePluginManifest({
-      pluginId: 'growth-extra',
-      version: '1',
-      catalog: { nameKey: 'b' },
-      contributions: { views: { todo: { nameKey: 'todo' } } },
-    }),
-  ]);
-  assert.equal(clash.some((issue) => issue.code === 'duplicate-view'), false);
+  assert.equal(issues.some((issue) => issue.code === 'duplicate-resource'), true);
 });
 
 test('rejects duplicate ipc routes and mcp tools', () => {
@@ -197,22 +182,59 @@ test('mcp resource mention metadata is optional and parsed', () => {
       version: '1',
       catalog: { nameKey: 'growth' },
       contributions: {
-        ai: {
-          mcp: {
-            resources: {
-              goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } },
-              archive: { uriTemplate: 'tn://growth/archives/{id}' },
+        resources: {
+          goal: { uriTemplate: 'tn://growth/goals/{id}', mention: { labelKey: 'menu.goal', order: 10 } },
+          archive: { uriTemplate: 'tn://growth/archives/{id}' },
+        },
+      },
+    }),
+  );
+  assert.deepEqual(parsed.contributions.resources?.goal?.mention, {
+    labelKey: 'menu.goal',
+    order: 10,
+  });
+  assert.equal(parsed.contributions.resources?.archive?.mention, undefined);
+});
+
+test('rejects cyclic workflow templates and unknown local compensate', () => {
+  const issues = validateManifests([
+    definePluginManifest({
+      pluginId: 'expense',
+      version: '1',
+      catalog: { nameKey: 'expense' },
+      contributions: {
+        workflow: {
+          commands: {
+            createTransaction: { inputSchema: { type: 'object' }, compensate: 'deleteTransaction' },
+            deleteTransaction: { inputSchema: { type: 'object' } },
+          },
+          templates: {
+            loop: {
+              nameKey: 'loop',
+              graph: {
+                schemaVersion: 1,
+                start: { eventContributionId: 'growth.todoCompleted' },
+                nodes: [
+                  { key: 'a', kind: 'command', contributionId: 'expense.createTransaction' },
+                  { key: 'b', kind: 'command', contributionId: 'expense.deleteTransaction' },
+                ],
+                edges: [
+                  { key: 'e1', from: 'a', to: 'b' },
+                  { key: 'e2', from: 'b', to: 'a' },
+                ],
+                bindings: [],
+                rollbackPolicy: 'confirmThenCompensate',
+              },
             },
           },
         },
       },
     }),
+  ]);
+  assert.equal(
+    issues.some((issue) => issue.message.includes('cycle')),
+    true,
   );
-  assert.deepEqual(parsed.contributions.ai?.mcp?.resources?.goal?.mention, {
-    labelKey: 'menu.goal',
-    order: 10,
-  });
-  assert.equal(parsed.contributions.ai?.mcp?.resources?.archive?.mention, undefined);
 });
 
 test('optional empty hub capability is accepted without layout fields', () => {

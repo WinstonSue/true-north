@@ -13,16 +13,13 @@ export const libraryManifest = definePluginManifest({
   },
   contributions: {
     ipc: { library: {} },
-    views: {
-      search: { nameKey: 'menu.library' },
-    },
     hub: {},
+    resources: {
+      bookmark: { uriTemplate: 'tn://library/bookmarks/{id}' },
+    },
     workbench: {
       workspaces: { suggestBookmark: {} },
       actions: { extract: {} },
-      newTabs: {
-        search: { order: 10 },
-      },
     },
     workflow: {
       events: {
@@ -37,9 +34,6 @@ export const libraryManifest = definePluginManifest({
       mcp: {
         tools: {
           suggestBookmark: {},
-        },
-        resources: {
-          bookmark: { uriTemplate: 'tn://library/bookmarks/{id}' },
         },
       },
     },

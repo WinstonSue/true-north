@@ -39,6 +39,7 @@ export class HabitDto extends HabitWithoutRelationsDto {
     this.completedCount = entity.completedCount;
     this.doneAt = entity.doneAt;
     this.abandonedAt = entity.abandonedAt;
+    this.notifyRule = entity.notifyRule ?? null;
 
     if (entity.repeat) {
       this.repeatStartDate = entity.repeat.repeatStartDate;
@@ -88,6 +89,7 @@ export class HabitDto extends HabitWithoutRelationsDto {
       completedCount: this.completedCount,
       doneAt: this.doneAt ? dayjs(this.doneAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
       abandonedAt: this.abandonedAt ? dayjs(this.abandonedAt).format('YYYY-MM-DD HH:mm:ss') : undefined,
+      notifyRule: this.notifyRule ?? null,
     };
   }
 

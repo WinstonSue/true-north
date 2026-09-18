@@ -14,6 +14,7 @@ export type CreateTaskVo = Pick<TaskVo,
   | 'parentId'
 > & {
   trackTimeIds?: string[];
+  notifyRule?: TaskVo['notifyRule'];
 };
 
 export type UpdateTaskVo = Partial<CreateTaskVo> & {

@@ -28,11 +28,16 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale, 'data-product-re
   const pathname = location.pathname;
   const { fullPathRoutes, to, defaultRoute } = useRouter();
 
+  const selectableMenuKey = (route: IRoute | undefined) => {
+    if (!route?.fullPath || route.ignore || route.meta?.selectable === false) {
+      return '';
+    }
+    return route.fullPath;
+  };
+
   // 根据当前路径找到匹配的菜单项；ignore 子路由高亮最近的可见祖先
   const matchMenuKey = (pathname: string) => {
-    if (pathname === '/') {
-      return defaultRoute || '/ai';
-    }
+    const path = pathname === '/' ? defaultRoute || '/ai' : pathname;
 
     const findMatch = (
       routes: IRoute[],
@@ -46,7 +51,7 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale, 'data-product-re
         if (!routePath) continue;
 
         const matches =
-          pathname === routePath || pathname.startsWith(`${routePath}/`);
+          path === routePath || path.startsWith(`${routePath}/`);
         if (!matches) continue;
 
         const nextAncestors = [...ancestors, route];
@@ -65,20 +70,18 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale, 'data-product-re
     };
 
     const found = findMatch(fullPathRoutes);
-    if (!found) return defaultRoute;
+    if (!found) return '';
 
     for (let i = found.ancestors.length - 1; i >= 0; i -= 1) {
-      const candidate = found.ancestors[i];
-      if (!candidate.ignore && candidate.fullPath) {
-        return candidate.fullPath;
-      }
+      const key = selectableMenuKey(found.ancestors[i]);
+      if (key) return key;
     }
 
-    return found.route.fullPath || defaultRoute;
+    return selectableMenuKey(found.route);
   };
 
   const matchingKey = matchMenuKey(pathname);
-  const defaultSelectedKeys = [matchingKey];
+  const defaultSelectedKeys = matchingKey ? [matchingKey] : [];
 
   // 构建默认展开的父级菜单
   const toOpenKeys = (key: string) => {
@@ -178,7 +181,7 @@ const Navigate: React.FC<NavigateProps> = ({ collapsed, locale, 'data-product-re
 
   function updateMenuStatus() {
     const matchingKey = matchMenuKey(pathname);
-    const newSelectedKeys = [matchingKey];
+    const newSelectedKeys = matchingKey ? [matchingKey] : [];
 
     setSelectedKeys(newSelectedKeys);
     if (!collapsed) {

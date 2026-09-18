@@ -9,7 +9,7 @@
 .tabBar {
   width: 100%;
   min-width: 0;
-  min-height: 56px;
+  min-height: 48px;
   padding: 0 20px;
   overflow: hidden;
   border-bottom: 1px solid var(--sue-color-border-secondary);
@@ -18,13 +18,13 @@
 
 .tabs {
   min-width: 0;
-  height: 56px;
+  height: 48px;
   overflow-x: auto;
 }
 
 .tab {
   position: relative;
-  height: 56px;
+  height: 48px;
   padding: 0 10px;
   color: var(--sue-color-text-secondary);
   cursor: pointer;
@@ -53,5 +53,14 @@
 }
 
 .content {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   background: var(--sue-color-bg-container);
+}
+
+.content > :global(*) {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
 }

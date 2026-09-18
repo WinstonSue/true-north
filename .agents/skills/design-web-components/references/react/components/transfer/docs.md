@@ -1,0 +1,108 @@
+---
+title: "Transfer"
+description: "Double column transfer choice box."
+---
+
+## When To Use
+
+- It is a select control essentially which can be used for selecting multiple items.
+- Transfer can display more information for items and take up more space.
+
+Transfer the elements between two columns in an intuitive and efficient way.
+
+One or more elements can be selected from either column, one click on the proper `direction` button, and the transfer is done. The left column is considered the `source` and the right column is considered the `target`. As you can see, these names are reflected in the API.
+
+> notice: Transfer is a controlled component, uncontrolled mode is not supported.
+
+## Demos
+
+| Demo | Path |
+| --- | --- |
+| Basic | demo/basic.md |
+| One Way | demo/oneWay.md |
+| Search | demo/search.md |
+| Advanced | demo/advanced.md |
+| Custom datasource | demo/custom-item.md |
+| Custom Actions | demo/actions.md |
+| Pagination | demo/large-data.md |
+| Table Transfer | demo/table-transfer.md |
+| Tree Transfer | demo/tree-transfer.md |
+| Status | demo/status.md |
+| Custom semantic dom styling | demo/style-class.md |
+|  semantic | demo/_semantic.md |
+
+## API
+
+Common props ref：[Common props](../../docs/react/common-props.md)
+
+### Transfer
+
+| Property | Description | Type | Default | Version | [Global Config](../config-provider/docs.md#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| actions | A set of operations that are sorted from top to bottom. When an array of strings is provided, default buttons will be used; when an array of ReactNode is provided, custom elements will be used | ReactNode\[] | \[`>`, `<`] | 6.0.0 | × |
+| classNames | Customize class for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - | 6.0.0 | 6.0.0 |
+| dataSource | Used for setting the source data. The elements that are part of this array will be present the left column. Except the elements whose keys are included in `targetKeys` prop | [RecordType extends TransferItem = TransferItem](https://github.com/yuce-design/yuce-design/blob/1bf0bab2a7bc0a774119f501806e3e0e3a6ba283/components/transfer/index.tsx#L12)\[] | \[] |  | × |
+| disabled | Whether disabled transfer | boolean | false |  | × |
+| selectionsIcon | custom dropdown icon | React.ReactNode |  | 5.8.0 | 5.14.0 |
+| filterOption | A function to determine whether an item should show in search result list, only works when searching, (add `direction` support since 5.9.0+) | (inputValue, option, direction: `left` \| `right`): boolean | - |  | × |
+| footer | A function used for rendering the footer | (props, { direction }) => ReactNode | - | direction: 4.17.0 | × |
+| locale | The i18n text including filter, empty text, item unit, etc | { itemUnit: string; itemsUnit: string; searchPlaceholder: string; notFoundContent: ReactNode \| ReactNode[]; } | { itemUnit: `item`, itemsUnit: `items`, notFoundContent: `The list is empty`, searchPlaceholder: `Search here` } |  | × |
+| oneWay | Display as single direction style | boolean | false | 4.3.0 | × |
+| pagination | Use pagination. Not work in render props | boolean \| { pageSize: number, simple: boolean, showSizeChanger?: boolean, showLessItems?: boolean } | false | 4.3.0 | × |
+| render | The function to generate the item shown on a column. Based on an record (element of the dataSource array), this function should return a React element which is generated from that record. Also, it can return a plain object with `value` and `label`, `label` is a React element and `value` is for title | (record) => ReactNode | - |  | × |
+| selectAllLabels | A set of customized labels for select all checkboxes on the header | (ReactNode \| (info: { selectedCount: number, totalCount: number }) => ReactNode)\[] | - |  | × |
+| selectedKeys | A set of keys of selected items | string\[] \| number\[] | \[] |  | × |
+| showSearch | If included, a search box is shown on each column | boolean \| { placeholder:string,defaultValue:string } | false |  | × |
+| showSelectAll | Show select all checkbox on the header | boolean | true |  | × |
+| status | Set validation status | 'error' \| 'warning' | - | 4.19.0 | × |
+| styles | Customize inline style for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - | 6.0.0 | 6.0.0 |
+| targetKeys | A set of keys of elements that are listed on the right column | string\[] \| number\[] | \[] |  | × |
+| titles | A set of titles that are sorted from left to right | ReactNode\[] | - |  | × |
+| onChange | A callback function that is executed when the transfer between columns is complete | (targetKeys, direction, moveKeys): void | - |  | × |
+| onScroll | A callback function which is executed when scroll options list | (direction, event): void | - |  | × |
+| onSearch | A callback function which is executed when search field are changed | (direction: `left` \| `right`, value: string): void | - |  | × |
+| onSelectChange | A callback function which is executed when selected items are changed | (sourceSelectedKeys, targetSelectedKeys): void | - |  | × |
+
+### Render Props
+
+Transfer accept `children` to customize render list, using follow props:
+
+| Property | Description | Type | Version |
+| --- | --- | --- | --- |
+| direction | List render direction | `left` \| `right` |  |
+| disabled | Disable list or not | boolean |  |
+| filteredItems | Filtered items | RecordType\[] |  |
+| selectedKeys | Selected items | string\[] \| number\[] |  |
+| onItemSelect | Select item | (key: string \| number, selected: boolean) |  |
+| onItemSelectAll | Select a group of items | (keys: string\[] \| number\[], selected: boolean) |  |
+
+#### example
+
+```jsx
+<Transfer {...props}>{(listProps) => <YourComponent {...listProps} />}</Transfer>
+```
+
+## Warning
+
+According to the [standard](https://react.dev/learn/rendering-lists#why-does-react-need-keys) of React, the key should always be supplied directly to the elements in the array. In Transfer, the keys should be set on the elements included in `dataSource` array. By default, `key` property is used as a unique identifier.
+
+If there's no `key` in your data, you should use `rowKey` to specify the key that will be used to uniquely identify each element.
+
+```jsx
+// eg. your primary key is `uid`
+return <Transfer rowKey={(record) => record.uid} />;
+```
+
+## Semantic DOM
+
+See `demo/_semantic.md`.
+
+## Design Token
+
+See `token.md` for component token definitions.</ComponentTokenTable>
+
+## FAQ
+
+### How to support fetch and present data from a remote server in Transfer column. {#faq-async-data-loading}
+
+In order to keep the page number synchronized, you can disable columns you checked without removing the option: <https://codesandbox.io/s/objective-wing-6iqbx>

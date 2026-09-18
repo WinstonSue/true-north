@@ -1,5 +1,6 @@
 import { PLUGIN_API_VERSION, contributionKey, ipcRoute, mcpName } from './ids.ts';
 import type { PluginManifest } from './manifest.ts';
+import { validateDefinitionGraph, type WorkflowDefinitionGraph } from './workflow.ts';
 
 /**
  * 清单目录级问题。`reconcile` 表示声明的贡献 key 与 main/renderer 实现不一致。
@@ -15,10 +16,11 @@ export type CatalogIssue = {
     | 'duplicate-tool'
     | 'duplicate-workspace'
     | 'duplicate-action'
-    | 'duplicate-view'
+    | 'duplicate-new-tab'
     | 'duplicate-command'
     | 'duplicate-event'
     | 'duplicate-interaction'
+    | 'duplicate-template'
     | 'duplicate-slot'
     | 'duplicate-skill'
     | 'duplicate-resource'
@@ -105,10 +107,11 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
   const tools = new Map<string, string>();
   const workspaces = new Map<string, string>();
   const actions = new Map<string, string>();
-  const views = new Map<string, string>();
+  const newTabs = new Map<string, string>();
   const commands = new Map<string, string>();
   const events = new Map<string, string>();
   const interactions = new Map<string, string>();
+  const templates = new Map<string, string>();
   const slots = new Map<string, string>();
   const skills = new Map<string, string>();
   const resources = new Map<string, string>();
@@ -143,7 +146,7 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
     for (const id of Object.keys(contrib.ai?.mcp?.tools || {})) {
       claim(tools, mcpName(manifest.pluginId, id), manifest.pluginId, 'duplicate-tool', 'tool');
     }
-    for (const [id, resource] of Object.entries(contrib.ai?.mcp?.resources || {})) {
+    for (const [id, resource] of Object.entries(contrib.resources || {})) {
       claim(resources, resource.uriTemplate, manifest.pluginId, 'duplicate-resource', 'resource');
       void id;
     }
@@ -159,8 +162,8 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
     for (const id of Object.keys(contrib.workbench?.actions || {})) {
       claim(actions, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-action', 'workbench action');
     }
-    for (const id of Object.keys(contrib.views || {})) {
-      claim(views, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-view', 'view');
+    for (const id of Object.keys(contrib.workbench?.newTabs || {})) {
+      claim(newTabs, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-new-tab', 'newTab');
     }
     for (const id of Object.keys(contrib.workflow?.commands || {})) {
       claim(commands, contributionKey(manifest.pluginId, id), manifest.pluginId, 'duplicate-command', 'workflow command');
@@ -181,6 +184,22 @@ export function validateManifests(manifests: PluginManifest[]): CatalogIssue[] {
           code: 'reconcile',
           pluginId: manifest.pluginId,
           message: `Plugin ${manifest.pluginId} interaction "${id}" produces unknown command "${spec.producesCommand}"`,
+        });
+      }
+    }
+    for (const [id, spec] of Object.entries(contrib.workflow?.templates || {})) {
+      claim(
+        templates,
+        contributionKey(manifest.pluginId, id),
+        manifest.pluginId,
+        'duplicate-template',
+        'workflow template',
+      );
+      for (const issue of validateDefinitionGraph(spec.graph as WorkflowDefinitionGraph)) {
+        issues.push({
+          code: 'reconcile',
+          pluginId: manifest.pluginId,
+          message: `Plugin ${manifest.pluginId} template "${id}": ${issue.message}`,
         });
       }
     }

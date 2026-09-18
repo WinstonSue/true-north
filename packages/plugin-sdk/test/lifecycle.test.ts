@@ -40,6 +40,7 @@ test('activate rollback disposes earlier plugins in reverse order', async () => 
         space: { pluginId: 'x', rootDir: '/tmp' },
         workflow: { emit: async () => {} },
         cache: { fingerprintPromptContext: () => '', findMatching: async () => null, upsert: async () => {} },
+        notify: { post: async () => {}, dismiss: async () => {} },
       } as PluginMainContext);
       activated.push(plugin);
     }

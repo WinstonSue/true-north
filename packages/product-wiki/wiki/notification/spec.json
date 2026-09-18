@@ -3,8 +3,15 @@
   "kind": "dom",
   "title": "侧栏通知",
   "parentId": "global",
-  "productStatus": "deprecated",
+  "productStatus": "roadmap",
   "views": [
+    {
+      "id": "inbox",
+      "name": "收件箱",
+      "scenario": "在品牌右侧打开消息收件箱，查看未读与已读通知并点开来源",
+      "productStatus": "roadmap",
+      "reference": "notification.view.inbox"
+    },
     {
       "id": "today",
       "name": "今天",
@@ -14,6 +21,46 @@
     }
   ],
   "rules": [
+    {
+      "id": "unread",
+      "name": "未读标记",
+      "description": "未读通知在铃铛上显示数量。打开一条即标为已读；也可一次把当前全部标为已读。已读仍留在收件箱里，直到被更新的消息顶出。",
+      "views": ["inbox"],
+      "reference": "notification.rule.unread",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "open-source",
+      "name": "点开到来源",
+      "description": "点一条通知会标为已读，并打开它指向的页面、工作台或资源。没有来源的通知只标已读。",
+      "views": ["inbox"],
+      "reference": "notification.rule.open-source",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "not-today",
+      "name": "通知不是今天",
+      "description": "成长页仍有今天清单。铃铛里是按时刻发出的那一条提醒：有未读就不叠新的；完成、忽略或不再到期后不再需要处理。",
+      "views": ["inbox"],
+      "reference": "notification.rule.not-today",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "domain-post",
+      "name": "各领域投递事后消息",
+      "description": "成长按通知规则在到点时提醒待办、任务和当天习惯打卡；记账在月底投当月账单。同一来源已有未读则不另发。点一条打开对应来源。新建待办、记一笔、出入库或收藏不另外发通知。",
+      "views": ["inbox"],
+      "reference": "notification.rule.domain-post",
+      "productStatus": "roadmap"
+    },
+    {
+      "id": "ignore-source",
+      "name": "可忽略来源",
+      "description": "收件箱里可以忽略一条通知。忽略后标为已读，并且这条待办、任务或习惯不再发出新的提醒。",
+      "views": ["inbox"],
+      "reference": "notification.rule.ignore-source",
+      "productStatus": "roadmap"
+    },
     {
       "id": "action-list",
       "name": "今天是行动清单",
@@ -35,12 +82,42 @@
     {
       "id": "notification.overview",
       "title": "目标与价值",
-      "body": "侧栏铃铛与今天清单已废弃。今天还要处理的待办改在成长页查看。"
+      "body": "品牌右侧的铃铛按时刻提醒需要处理的事项：过期或当天的待办与任务、当天习惯打卡、月底账单，以及流程待确认和冲突。同一来源已有未读就不叠新的；可以忽略来源让它不再提醒。成长页仍有自己的今天清单。"
+    },
+    {
+      "id": "notification.view.inbox",
+      "title": "收件箱",
+      "body": "打开铃铛后列出通知，未读在前。每条有标题、说明和时间，并可忽略这条来源。点一条会标为已读并打开来源；也可把当前全部标为已读。没有通知时说明收件箱是空的。"
     },
     {
       "id": "notification.view.today",
       "title": "今天",
       "body": "品牌右侧不再打开今天清单。待办与习惯在成长里处理，库存在物资里处理。"
+    },
+    {
+      "id": "notification.rule.unread",
+      "title": "未读标记",
+      "body": "铃铛上的数字是未读条数。点开一条后该条变为已读，数字减少。全部已读后数字消失。已读消息仍可在收件箱里看到。"
+    },
+    {
+      "id": "notification.rule.open-source",
+      "title": "点开到来源",
+      "body": "通知指向某个页面、工作台或资源时，点它就会打开那个来源。没有指向时只标记已读，不跳转。"
+    },
+    {
+      "id": "notification.rule.not-today",
+      "title": "通知不是今天",
+      "body": "成长页仍有今天的待办、任务与习惯清单。铃铛里出现的是按时刻发出的那一条提醒。同一来源若还有未读，不会再叠一条。完成、忽略或不再该提醒后，这条就不再需要处理。"
+    },
+    {
+      "id": "notification.rule.domain-post",
+      "title": "各领域投递事后消息",
+      "body": "成长按规则到点提醒过期或当天的待办与任务、当天要打卡的习惯；同一来源已有未读则不另发。月底投当月账单。新建待办、记一笔、物资出入库或保存收藏不会另发一条。"
+    },
+    {
+      "id": "notification.rule.ignore-source",
+      "title": "可忽略来源",
+      "body": "在收件箱忽略一条通知后，该条标为已读，并且它指向的待办、任务或习惯不再发出新的提醒。"
     },
     {
       "id": "notification.rule.action-list",

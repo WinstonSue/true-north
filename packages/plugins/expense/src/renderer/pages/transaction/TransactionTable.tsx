@@ -1,36 +1,38 @@
 import type { TableColumnProps } from '@sue/design-web-react';
 'use client';
 
-import { format } from 'date-fns';
 import { Table, Tag } from '@sue/design-web-react';
-
+import { usePluginRuntime } from '@true-north/plugin-sdk/renderer';
 import { useExpenses } from '../context';
 import { DEFAULT_CATEGORIES } from '../constants';
 import type { TransactionVo } from '@true-north/vo';
 
 export default function TransactionTable() {
+  const { locale } = usePluginRuntime();
   const { transactionList } = useExpenses();
 
   const columns: TableColumnProps<TransactionVo>[] = [
     {
-      title: '日期',
+      title: locale.t('expense.column.date'),
       dataIndex: 'transactionDateTime',
       render: (date: string) => date,
     },
     {
-      title: '交易类型',
+      title: locale.t('expense.column.type'),
       dataIndex: 'type',
       render: (type: 'income' | 'expense') => (
-        <Tag color={type === 'income' ? 'green' : 'red'}>{type}</Tag>
+        <Tag color={type === 'income' ? 'success' : 'error'}>
+          {locale.t(`expense.type.${type}`)}
+        </Tag>
       ),
     },
     {
-      title: '金额',
+      title: locale.t('expense.column.amount'),
       dataIndex: 'amount',
       render: (amount: number, record: TransactionVo) => (
         <span
           style={{
-            color: record.type === 'income' ? '#52c41a' : '#f5222d',
+            color: record.type === 'income' ? 'var(--sue-color-success)' : 'var(--sue-color-error)',
           }}
         >
           {record.type === 'income' ? '+' : '-'}${amount.toFixed(2)}
@@ -38,21 +40,21 @@ export default function TransactionTable() {
       ),
     },
     {
-      title: '类别',
+      title: locale.t('expense.column.category'),
       dataIndex: 'category',
       render: (category: string) =>
         DEFAULT_CATEGORIES[category]?.name || category,
     },
     {
-      title: '描述',
+      title: locale.t('expense.column.description'),
       dataIndex: 'description',
     },
     {
-      title: '标签',
+      title: locale.t('expense.column.tags'),
       dataIndex: 'tags',
       render: (tags: string[]) => (
         <div className="flex flex-wrap gap-1">
-          {tags.map((tag, index) => (
+          {(tags || []).map((tag, index) => (
             <Tag key={index} variant="outlined">
               {tag}
             </Tag>
@@ -62,5 +64,14 @@ export default function TransactionTable() {
     },
   ];
 
-  return <Table columns={columns} dataSource={transactionList} rowKey="id" />;
+  return (
+    <Table
+      className="w-full"
+      columns={columns}
+      dataSource={transactionList}
+      rowKey="id"
+      pagination={false}
+      locale={{ emptyText: locale.t('expense.transaction.empty') }}
+    />
+  );
 }

@@ -11,6 +11,8 @@ test('ticket reminders stay on todo and never enter inventory', () => {
   assert.match(instructions, /只生成待办/);
   assert.match(instructions, /高铁票、机票、酒店、服务、预约、缴费、订阅和数字权益永不进入物资/);
   assert.match(instructions, /growth\.suggestTodo/);
+  assert.match(instructions, /plannedTime 填 10:00/);
+  assert.match(instructions, /当前时间取最近一次尚未过去的该月日/);
   assert.doesNotMatch(instructions, /purchase\.suggestPurchase/);
 });
 

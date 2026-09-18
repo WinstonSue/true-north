@@ -4,6 +4,7 @@ import os from 'os';
 import path from 'path';
 import { app } from 'electron';
 import { listAgentTools } from '../agent/tools';
+import { agentClockBlock } from '../agent-now';
 import { allSkillRoots, getAgentInstructions } from '../extension-queries';
 import { buildCodexSessionConfig } from './codex-config';
 
@@ -17,7 +18,9 @@ export function buildAgentsMd(): string {
       Object.keys(roots).map((localId) => `- ${pluginId}/${localId} → skills/${pluginId}/${localId}/SKILL.md`),
     )
     .join('\n');
-  return `你是 True North 个人规划助手。${names ? `通过 MCP 工具完成领域读写：${names}。` : ''}
+  return `${agentClockBlock()}
+
+你是 True North 个人规划助手。${names ? `通过 MCP 工具完成领域读写：${names}。` : ''}
 
 ${domain}
 

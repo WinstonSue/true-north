@@ -6,5 +6,17 @@ import { TodoRepeat } from './service/todo/todo-repeat.entity';
 import { Repeat } from './service/repeat/repeat.entity';
 import { Habit } from './service/habit/habit.entity';
 import { TrackTime } from './service/track-time/entity';
+import { GrowthNotifyFire, GrowthNotifySettingsEntity } from './notify-settings.entity';
 
-export const growthEntities = [Goal, Task, Todo, TodoRepeat, Repeat, Habit, TrackTime, PluginCommandLedger];
+export const growthEntities = [
+  Goal,
+  Task,
+  Todo,
+  TodoRepeat,
+  Repeat,
+  Habit,
+  TrackTime,
+  PluginCommandLedger,
+  GrowthNotifySettingsEntity,
+  GrowthNotifyFire,
+];

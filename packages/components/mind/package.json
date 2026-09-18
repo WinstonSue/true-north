@@ -24,7 +24,7 @@
     "@antv/x6-plugin-snapline": "^2.1.7",
     "@antv/x6-plugin-transform": "^2.1.8",
     "@antv/x6-react-shape": "^2.2.3",
-    "@sue/design-web-react": "0.0.3-beta.1",
+    "@sue/design-web-react": "0.0.5",
     "@true-north/common-web-utils": "workspace:*",
     "mitt": "^3.0.1",
     "react": "^18.2.0",

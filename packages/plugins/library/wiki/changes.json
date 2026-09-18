@@ -2,6 +2,20 @@
   "changes": [
     {
       "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "点会话里的收藏名称进入收藏页里的那一条；检索页不再作为工作台功能标签单独打开。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "library:module",
+        "scope": "module",
+        "name": "收藏",
+        "wikiId": "library",
+        "wikiTitle": "收藏"
+      }
+    },
+    {
+      "version": "v0.3.0",
       "date": "2026-09-15",
       "event": "changed",
       "summary": "收藏建议在会话工作台确认后才写入索引，不再挂到活动卡。",

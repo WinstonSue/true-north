@@ -3,11 +3,10 @@ import { contributionKey } from '@true-north/plugin-contract';
 export const GROWTH_PLUGIN_ID = 'growth';
 
 export const growthIds = {
-  views: {
-    todo: contributionKey(GROWTH_PLUGIN_ID, 'todo'),
-    task: contributionKey(GROWTH_PLUGIN_ID, 'task'),
-    habit: contributionKey(GROWTH_PLUGIN_ID, 'habit'),
+  resources: {
     goal: contributionKey(GROWTH_PLUGIN_ID, 'goal'),
+    task: contributionKey(GROWTH_PLUGIN_ID, 'task'),
+    todo: contributionKey(GROWTH_PLUGIN_ID, 'todo'),
   },
   workspaces: {
     goalDecompose: contributionKey(GROWTH_PLUGIN_ID, 'goalDecompose'),

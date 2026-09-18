@@ -6,9 +6,114 @@ import { getConflictTicket, toTicketEvidence } from './conflict';
 import { workflowStore } from './storage';
 import { WorkflowConflictTicket, WorkflowEdge, WorkflowPlan } from './entities';
 import type { ConflictAction } from '@true-north/plugin-contract';
+import { workflowDefinitionService } from './definition.service';
+import { workflowAssociationService } from './association.service';
+import { workflowInstanceService } from './instance.service';
+import { workflowRollbackService } from './rollback.service';
 
 @Controller('/workflow')
 export class WorkflowController {
+  @Get('/catalog', { description: '原语与密封模板目录' })
+  async catalog() {
+    await workflowDefinitionService.importPluginTemplates();
+    return workflowDefinitionService.catalog();
+  }
+
+  @Get('/definitions', { description: 'Workflow 定义列表' })
+  async definitions() {
+    await workflowDefinitionService.importPluginTemplates();
+    return { list: await workflowDefinitionService.list() };
+  }
+
+  @Post('/definitions', { description: '创建 Workflow 定义草稿' })
+  async createDefinition(
+    @Body() body: { title: string; description?: string; graph?: unknown; sourceTemplateKey?: string },
+  ) {
+    return workflowDefinitionService.create(body);
+  }
+
+  @Get('/definitions/:id', { description: '读取 Workflow 定义' })
+  async definition(@Param('id') id: string) {
+    const item = await workflowDefinitionService.get(id);
+    if (!item) throw new Error('definition not found');
+    return item;
+  }
+
+  @Put('/definitions/:id', { description: '保存 Workflow 定义草稿' })
+  async updateDefinition(
+    @Param('id') id: string,
+    @Body() body: { title?: string; description?: string; graph?: unknown },
+  ) {
+    return workflowDefinitionService.update(id, body);
+  }
+
+  @Post('/definitions/:id/publish', { description: '发布不可变版本' })
+  async publishDefinition(@Param('id') id: string) {
+    return workflowDefinitionService.publish(id);
+  }
+
+  @Get('/associations', { description: '资源与已发布定义的关联' })
+  async associations(
+    @Query() query?: { ownerPluginId?: string; ownerKind?: string; ownerId?: string; definitionId?: string },
+  ) {
+    return { list: await workflowAssociationService.list(query) };
+  }
+
+  @Put('/associations', { description: '写入或清除关联' })
+  async upsertAssociation(
+    @Body()
+    body: {
+      ownerPluginId: string;
+      ownerKind: string;
+      ownerId: string;
+      definitionId: string | null;
+      versionPolicy?: 'latest_published' | 'pinned';
+      pinnedVersion?: number;
+      enabled?: boolean;
+    },
+  ) {
+    return workflowAssociationService.upsert(body);
+  }
+
+  @Get('/plans', { description: 'Workflow 实例列表' })
+  async planList(@Query() query?: { status?: string; associationId?: string; definitionId?: string }) {
+    return { list: await workflowInstanceService.list(query) };
+  }
+
+  @Get('/workspaces', { description: '待确认的持久工作区' })
+  async workspaces() {
+    return { list: await workflowInstanceService.listPendingWorkspaces() };
+  }
+
+  @Get('/workspaces/:id', { description: '读取持久工作区' })
+  async workspace(@Param('id') id: string) {
+    const item = await workflowInstanceService.getWorkspace(id);
+    if (!item) throw new Error('workspace not found');
+    return item;
+  }
+
+  @Put('/workspaces/:id', { description: '保存持久工作区草稿' })
+  async patchWorkspace(@Param('id') id: string, @Body() body: Record<string, unknown>) {
+    return { state: await workflowInstanceService.patchWorkspace(id, body || {}) };
+  }
+
+  @Get('/rollback/preview', { description: '回滚确认预览' })
+  async rollbackPreview(
+    @Query() query: { ownerPluginId: string; ownerKind: string; ownerId: string },
+  ) {
+    return workflowRollbackService.preview(query);
+  }
+
+  @Post('/plans/:id/rollback', { description: '确认后逆序补偿' })
+  async rollbackPlan(@Param('id') id: string, @Body() body?: { confirmed?: boolean }) {
+    return workflowRollbackService.rollback(id, body?.confirmed === true);
+  }
+
+  @Post('/plans/:id/detach', { description: '保留流程结果并与来源待办分离' })
+  async detachPlan(@Param('id') id: string) {
+    return workflowRollbackService.detach(id);
+  }
+
   @Get('/events', { description: '领域事件时间线' })
   async events(
     @Query() query?: { pluginId?: string; keyword?: string; from?: string; to?: string; uri?: string },
@@ -49,6 +154,8 @@ export class WorkflowController {
 
   @Get('/plans/:id', { description: '读取工作流计划' })
   async plan(@Param('id') id: string) {
+    const detail = await workflowInstanceService.get(id);
+    if (detail) return detail;
     const plan = await workflowStore().getRepository(WorkflowPlan).findOneBy({ id });
     if (!plan) throw new Error('plan not found');
     const edges = await workflowStore().getRepository(WorkflowEdge).findBy({ planId: id });

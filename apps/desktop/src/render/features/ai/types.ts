@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { Input, type GetRef } from '@sue/design-web-react';
+import type { PluginAiStartInput } from '@true-north/plugin-sdk';
 import type {
   AiResourceLinkVo,
   ConversationVo,
@@ -36,6 +37,7 @@ export type SessionValue = {
   threadWillReset: boolean;
   selectConversation: (id: string) => void;
   createBlankConversation: () => Promise<void>;
+  startFromHost: (input: PluginAiStartInput) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<boolean>;
   pinConversation: (id: string, pinned: boolean) => Promise<boolean>;
   deleteConversation: (id: string) => Promise<void>;

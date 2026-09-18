@@ -32,6 +32,7 @@ import {
   shouldResumeRuntimeThread,
 } from './conversation-runtime';
 import { claimConversationStream } from './conversation-stream';
+import { withAgentClockPrefix } from '../agent-now';
 import {
   buildRuntimePrompt,
   formatAttachments,
@@ -320,9 +321,11 @@ export class ConversationService {
       );
       const attachmentNote = formatAttachments(conversation.attachments);
       const historyPrompt = buildRuntimePrompt(withoutPlaceholder, resume, latestUserText);
-      const prompt = resume
-        ? latestUserText
-        : [attachmentNote ? `当前会话附件:\n${attachmentNote}` : '', historyPrompt].filter(Boolean).join('\n\n');
+      const prompt = withAgentClockPrefix(
+        resume
+          ? latestUserText
+          : [attachmentNote ? `当前会话附件:\n${attachmentNote}` : '', historyPrompt].filter(Boolean).join('\n\n'),
+      );
       const result = await runtimeService.runChat({
         streamId,
         conversationId,

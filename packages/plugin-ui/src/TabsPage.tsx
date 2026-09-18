@@ -55,7 +55,7 @@ export default function TabsPage(props: {
         )}
       </Flex>
 
-      <Flex container="fill" className={styles.content}>
+      <Flex vertical container="fill" className={styles.content}>
         {props.children}
       </Flex>
     </Flex>

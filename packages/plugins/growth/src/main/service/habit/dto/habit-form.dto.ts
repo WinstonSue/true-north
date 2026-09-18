@@ -18,6 +18,7 @@ export class CreateHabitDto extends PickType(HabitDto, [
   'repeatMode',
   'repeatConfig',
   'repeatEndMode',
+  'notifyRule',
 ] as const) {
   /** 目标ID列表 */
   @IsArray()
@@ -40,6 +41,7 @@ export class CreateHabitDto extends PickType(HabitDto, [
     this.repeatConfig = vo.repeatConfig;
     this.repeatEndMode = vo.repeatEndMode;
     this.goalIds = vo.goalIds;
+    this.notifyRule = vo.notifyRule;
   }
 
   toRepeatRuleInput(): RepeatRuleInput {
@@ -62,6 +64,7 @@ export class CreateHabitDto extends PickType(HabitDto, [
     if (this.importance !== undefined) entity.importance = this.importance;
     if (this.tags !== undefined) entity.tags = this.tags;
     if (this.difficulty !== undefined) entity.difficulty = this.difficulty;
+    if (this.notifyRule !== undefined) entity.notifyRule = this.notifyRule;
     entity.repeatId = repeatId;
 
     return entity;
@@ -98,6 +101,7 @@ export class UpdateHabitDto extends IntersectionType(
     if (vo.repeatConfig !== undefined) this.repeatConfig = vo.repeatConfig;
     if (vo.repeatEndMode !== undefined) this.repeatEndMode = vo.repeatEndMode;
     if (vo.goalIds !== undefined) this.goalIds = vo.goalIds;
+    if (vo.notifyRule !== undefined) this.notifyRule = vo.notifyRule;
   }
 
   hasRepeatRuleUpdate(): boolean {
@@ -136,6 +140,7 @@ export class UpdateHabitDto extends IntersectionType(
     if (this.tags !== undefined) entity.tags = this.tags;
     if (this.difficulty !== undefined) entity.difficulty = this.difficulty;
     if (this.status !== undefined) entity.status = this.status;
+    if (this.notifyRule !== undefined) entity.notifyRule = this.notifyRule;
 
     return entity;
   }

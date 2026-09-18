@@ -49,7 +49,10 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
   const issues: CatalogIssue[] = [];
   if (!handles) {
     const declared =
-      manifest.contributions.ipc || manifest.contributions.ai || manifest.contributions.workflow;
+      manifest.contributions.ipc ||
+      manifest.contributions.ai ||
+      manifest.contributions.workflow ||
+      manifest.contributions.resources;
     return {
       issues: declared
         ? [{ code: 'reconcile', pluginId, message: `Plugin ${pluginId} has no main implementation` }]
@@ -84,10 +87,10 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
   );
   issues.push(
     ...equalSets(
-      asSet(Object.keys(manifest.contributions.ai?.mcp?.resources || {})),
-      asSet(Object.keys(handles.ai?.mcp?.resources || {})),
+      asSet(Object.keys(manifest.contributions.resources || {})),
+      asSet(Object.keys(handles.resources || {})),
       pluginId,
-      'mcp resource',
+      'resource',
     ),
   );
   issues.push(
@@ -147,8 +150,8 @@ export function materializeMain(manifest: PluginManifest, handles: PluginMainHan
     });
   }
 
-  for (const [localId, provider] of Object.entries(handles.ai?.mcp?.resources || {})) {
-    const resource = manifest.contributions.ai?.mcp?.resources?.[localId];
+  for (const [localId, provider] of Object.entries(handles.resources || {})) {
+    const resource = manifest.contributions.resources?.[localId];
     const key = contributionKey(pluginId, localId);
     registrations.push({
       point: extensionPoints.mcpResource,
@@ -223,10 +226,10 @@ export function materializeRenderer(
   const issues: CatalogIssue[] = [];
   issues.push(
     ...equalSets(
-      asSet(Object.keys(manifest.contributions.views || {})),
-      asSet(Object.keys(handles.views || {})),
+      asSet(Object.keys(manifest.contributions.workbench?.newTabs || {})),
+      asSet(Object.keys(handles.workbench?.newTabs || {})),
       pluginId,
-      'view',
+      'newTab',
     ),
   );
   issues.push(
@@ -285,31 +288,9 @@ export function materializeRenderer(
     },
   ];
 
-  for (const [localId, spec] of Object.entries(manifest.contributions.views || {})) {
-    const load = handles.views?.[localId]?.load;
-    if (!load) continue;
-    registrations.push({
-      point: extensionPoints.view,
-      key: contributionKey(pluginId, localId),
-      value: {
-        id: contributionKey(pluginId, localId),
-        pluginId,
-        nameKey: spec.nameKey,
-        load,
-      },
-    });
-  }
-
   for (const [localId, spec] of Object.entries(manifest.contributions.workbench?.newTabs || {})) {
-    const view = manifest.contributions.views?.[localId];
-    if (!view) {
-      issues.push({
-        code: 'reconcile',
-        pluginId,
-        message: `Plugin ${pluginId} declared newTab "${localId}" but did not declare matching view`,
-      });
-      continue;
-    }
+    const load = handles.workbench?.newTabs?.[localId]?.load;
+    if (!load) continue;
     registrations.push({
       point: extensionPoints.newTab,
       key: contributionKey(pluginId, localId),
@@ -317,9 +298,9 @@ export function materializeRenderer(
       value: {
         id: contributionKey(pluginId, localId),
         pluginId,
-        viewId: contributionKey(pluginId, localId),
-        nameKey: spec.nameKey || view.nameKey,
+        nameKey: spec.nameKey,
         order: spec.order,
+        load,
       },
     });
   }

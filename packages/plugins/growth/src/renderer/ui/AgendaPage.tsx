@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Flex } from '@sue/design-web-react';
-import { PageHeader } from './PageHeader';
+import { PageHeader } from '@true-north/plugin-ui';
 import { SplitPane } from './SplitPane';
 import styles from './AgendaPage.module.less';
 

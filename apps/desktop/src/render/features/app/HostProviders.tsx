@@ -1,39 +1,40 @@
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { HOST_AI_START, HOST_WORKFLOW_OPEN_PENDING, type PluginAiStartInput } from '@true-north/plugin-sdk';
 import { useRendererPlatform } from '@true-north/plugin-sdk/renderer';
-import { AiService } from '@true-north/web-service';
-import { AiSessionProvider } from '@/features/ai/context';
-import { createAiWorkspaceHost } from '@/features/ai/workspace-host';
+import { AiSessionProvider, useAiSessionContext } from '@/features/ai/context';
+import { createHostWorkspaceHost } from '@/features/ai/workspace-host';
 import { WorkbenchProvider } from '@/features/workbench';
 import { WorkflowInteractionProvider, useOpenWorkflowInteraction } from '@/plugin/WorkflowInteractionHost';
+import { useWorkbench } from '@/features/workbench';
 
 function HostActionBindings({ children }: { children: ReactNode }) {
   const platform = useRendererPlatform();
-  const navigate = useNavigate();
   const openInteraction = useOpenWorkflowInteraction();
+  const { openToolTab } = useWorkbench();
+  const { startFromHost } = useAiSessionContext();
 
   useEffect(() => {
     return platform.hostActions.register(HOST_AI_START, async (raw) => {
-      const input = (raw || {}) as PluginAiStartInput;
-      if (!input.uri) return;
-      const bound = await AiService.ensureResourceConversation({
-        uri: input.uri,
-        label: input.label,
-        skill: input.skill,
-      });
-      if (bound.ok === false) return;
-      const conversationId = bound.data.conversation.id;
-      if ((input.message || input.kickoff) && (bound.data.created || input.kickoff)) {
-        await AiService.startMessageStream(conversationId, { text: input.kickoff || input.message || '' });
-      }
-      navigate(`/ai?conversationId=${encodeURIComponent(conversationId)}`);
+      await startFromHost((raw || {}) as PluginAiStartInput);
     });
-  }, [navigate, platform.hostActions]);
+  }, [platform.hostActions, startFromHost]);
 
   useEffect(() => {
     return platform.hostActions.register(HOST_WORKFLOW_OPEN_PENDING, async () => {
+      const workspaces = (await platform.ipc.get('/workflow/workspaces')) as {
+        list?: Array<{ id: string; planId: string; contributionId: string; state?: Record<string, unknown> }>;
+      };
+      for (const item of workspaces?.list || []) {
+        await openToolTab({
+          conversationId: 'workflow',
+          messageId: `workflow:${item.planId}`,
+          workspaceId: item.id,
+          workspaceKey: item.contributionId,
+          title: String(item.state?.title || '确认工作台'),
+          payload: item.state || {},
+        });
+      }
       const pending = (await platform.ipc.get('/workflow/pending')) as {
         list?: Array<{ edgeId: string; interactionId?: string; draft?: Record<string, unknown> }>;
       };
@@ -46,7 +47,7 @@ function HostActionBindings({ children }: { children: ReactNode }) {
         }
       }
     });
-  }, [openInteraction, platform.hostActions, platform.ipc]);
+  }, [openInteraction, openToolTab, platform.hostActions, platform.ipc]);
 
   return <>{children}</>;
 }
@@ -79,8 +80,7 @@ export function HostProviders({ children }: { children: ReactNode }) {
     <WorkflowInteractionProvider>
       <WorkbenchProvider
         tools={(platform.workbenchTools || []) as never}
-        views={platform.workbenchViews || []}
-        workspaceHost={platform.state.workspaceHost || createAiWorkspaceHost()}
+        workspaceHost={platform.state.workspaceHost || createHostWorkspaceHost(platform.ipc)}
         extractHandler={
           extract
             ? async (input) => {

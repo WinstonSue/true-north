@@ -18,6 +18,7 @@ export type CreateTodoVo = Pick<
 > & {
   relatedType?: TodoVo['relatedType'];
   relatedId?: string;
+  notifyRule?: TodoVo['notifyRule'];
 };
 
 export type UpdateTodoVo = Partial<CreateTodoVo>;

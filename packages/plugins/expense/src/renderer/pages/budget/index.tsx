@@ -1,11 +1,11 @@
-import { Flex } from '@sue/design-web-react';
+import { Button, Flex } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
+import { Plus } from 'lucide-react';
 import { useCreateBudget } from './CreateBudget';
 import { useExpenses } from '../context';
 import BudgetTable from './BudgetTable';
 import BudgetFilters from './BudgetFilters';
-import { CreateButton } from '@true-north/plugin-ui';
 
 export default function Budgets() {
   const { addBudget } = useExpenses();
@@ -35,7 +35,7 @@ export default function Budgets() {
       </Flex>
 
       <Flex container="fixed" className="w-full px-5 py-2">
-        <CreateButton onClick={openCreateModal}>添加预算</CreateButton>
+        <Button type="primary" icon={<Plus size={14} />} onClick={openCreateModal}>添加预算</Button>
       </Flex>
 
       <Flex container="fill" className="px-5 w-full h-full">

@@ -12,13 +12,47 @@
       "source": "npm:@ylib/product-skills",
       "subpath": "skills/write-product-wiki",
       "peer": "@ylib/product-server"
+    },
+    {
+      "name": "design-web-skill",
+      "source": "npm:@sue/design-web-skill",
+      "subpath": "dist/design-web-skill",
+      "peer": "@sue/design-web-react"
+    },
+    {
+      "name": "design-web-components",
+      "source": "npm:@sue/design-web-skill",
+      "subpath": "dist/design-web-components",
+      "peer": "@sue/design-web-react"
+    },
+    {
+      "name": "design-web-scenarios",
+      "source": "npm:@sue/design-web-scenarios",
+      "subpath": "dist/design-web-scenarios",
+      "peer": "@sue/design-web-react"
     }
   ],
   "agents": [
     {
       "name": "cursor",
       "link": ".cursor",
-      "skills": ["setup-product-app", "write-product-wiki"]
+      "skills": [
+        "setup-product-app",
+        "write-product-wiki",
+        "design-web-skill",
+        "design-web-components",
+        "design-web-scenarios"
+      ]
+    },
+    {
+      "name": "desktop",
+      "link": "apps/desktop",
+      "skills": []
+    },
+    {
+      "name": "growth",
+      "link": "packages/plugins/growth",
+      "skills": []
     }
   ]
 }

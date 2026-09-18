@@ -20,11 +20,16 @@ export {
   workflowEventContributionSchema,
   workflowInteractionContributionSchema,
   workflowContributionsSchema,
+  workflowDefinitionGraphSchema,
   commandResultSchema,
   CONFLICT_ACTIONS,
   validateManifests,
   activationOrder,
   disposeOrder,
+  emptyWorkflowGraph,
+  validateDefinitionGraph,
+  validatePublishedGraph,
+  topologicalNodeKeys,
 } from '@true-north/plugin-contract';
 export type {
   PluginApiVersion,
@@ -38,6 +43,10 @@ export type {
   WorkflowEventContribution,
   WorkflowInteractionContribution,
   WorkflowContributions,
+  WorkflowTemplateContribution,
+  WorkflowDefinitionGraph,
+  WorkflowBinding,
+  WorkflowPrimitiveCatalog,
   EmittedEvent,
   CommandResult,
   WorkflowCommandContext,
@@ -85,12 +94,18 @@ export {
   searchParamsFromLocation,
   hrefFromLocation,
   hrefFromSnapshot,
+  hrefFromOpenRequest,
 } from './view-adapter.ts';
 
 export { defineMainImplementation, defineRendererImplementation } from './define.ts';
 export type { TypedMainHandles } from './define.ts';
 
-export { HostActionRegistry, HOST_AI_START, HOST_WORKFLOW_OPEN_PENDING } from './runtime.ts';
+export {
+  HostActionRegistry,
+  HOST_AI_START,
+  HOST_WORKFLOW_OPEN_PENDING,
+  HOST_NOTIFICATION_INVALIDATE_EVENT,
+} from './runtime.ts';
 export { HOST_WORKBENCH_OPEN, HOST_BROWSER_OPEN } from './host-commands.ts';
 export type {
   AiCachePort,
@@ -108,7 +123,7 @@ export type {
   WorkbenchExtractHandler,
   WorkbenchWorkspaceHost,
   PluginViewSnapshot,
-  PluginViewOpenRequest,
+  ResourceOpenRequest,
   ViewStateCodec,
   PluginIcon,
   LocaleContribution,
@@ -121,7 +136,6 @@ export type {
   PluginRendererContext,
   ShellSlotContribution,
   PluginRuntimeEntry,
-  WorkbenchViewContribution,
   WorkbenchNewTabContribution,
   PluginHubProps,
   PluginRendererHandles,
@@ -129,6 +143,8 @@ export type {
   PluginDescriptor,
   PluginWorkflowPort,
   PluginRendererWorkflowPort,
+  PluginNotifyInput,
+  PluginNotifyPort,
   WorkflowCommandHandler,
   WorkflowInteractionProps,
 } from './runtime.ts';

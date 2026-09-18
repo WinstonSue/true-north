@@ -20,4 +20,5 @@ export type TaskFormData = {
   children: TaskVo[];
   todoList?: TodoVo[];
   trackTimeList?: TrackTimeWithoutRelationsVo[];
+  notifyRule?: TaskVo['notifyRule'];
 };

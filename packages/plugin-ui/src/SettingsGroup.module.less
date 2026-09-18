@@ -1,0 +1,43 @@
+.wrap {
+  width: 100%;
+  max-width: 720px;
+}
+
+.title {
+  margin: 0;
+  color: var(--sue-color-text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.description {
+  margin: 0;
+  color: var(--sue-color-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.group {
+  overflow: hidden;
+  border: 1px solid var(--sue-color-border-secondary);
+  border-radius: var(--sue-border-radius, 8px);
+  background: var(--sue-color-bg-container);
+}
+
+.row {
+  min-height: 56px;
+  padding: 12px 16px;
+}
+
+.row + .row {
+  border-top: 1px solid var(--sue-color-border-secondary);
+}
+
+.rowLabel {
+  font-weight: 500;
+  color: var(--sue-color-text);
+}
+
+.rowControl {
+  min-width: 0;
+}

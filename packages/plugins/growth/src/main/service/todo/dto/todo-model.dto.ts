@@ -54,6 +54,7 @@ export class TodoDto extends TodoWithoutRelationsDto {
     this.planEndTime = entity.planEndTime
       ? entity.planEndTime.slice(0, 5)
       : entity.planEndTime;
+    this.notifyRule = entity.notifyRule ?? null;
   }
 
   exportWithoutRelationsVo(): TodoVO.TodoWithoutRelationsVo {
@@ -78,6 +79,7 @@ export class TodoDto extends TodoWithoutRelationsDto {
       taskId: compat.taskId ?? this.taskId,
       habitId: compat.habitId ?? this.habitId,
       repeatId: compat.repeatId ?? this.repeatId,
+      notifyRule: this.notifyRule ?? null,
     };
   }
 

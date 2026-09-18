@@ -1,0 +1,25 @@
+# Customize
+
+## Source
+
+```tsx
+import React from 'react';
+import { Button, Empty } from '@sue/design-web-react';
+import Typography from '@/components/docs-typography';
+
+const App: React.FC = () => (
+  <Empty
+    image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+    styles={{ image: { height: 60 } }}
+    description={
+      <Typography.Text>
+        Customize <a href="#API">Description</a>
+      </Typography.Text>
+    }
+  >
+    <Button type="primary">Create Now</Button>
+  </Empty>
+);
+
+export default App;
+```

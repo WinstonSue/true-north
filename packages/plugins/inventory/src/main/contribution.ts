@@ -21,7 +21,7 @@ export function createInventoryMain() {
   return defineMainImplementation(inventoryManifest, {
     async activate(ctx: PluginMainContext) {
       await activateStorage(ctx.space);
-      bindInventoryContext(ctx.workflow);
+      bindInventoryContext(ctx);
       return {
         ipc: { inventory: { controller: new InventoryController() } },
         workflow: {
@@ -38,12 +38,12 @@ export function createInventoryMain() {
               suggestItem: suggestItemTool,
               suggestMovement: suggestMovementTool,
             },
-            resources: {
-              item: itemResource,
-              location: locationResource,
-              movement: movementResource,
-            },
           },
+        },
+        resources: {
+          item: itemResource,
+          location: locationResource,
+          movement: movementResource,
         },
       };
     },

@@ -77,7 +77,7 @@ function PageLayout() {
                     isAiPath(location.pathname) && styles['layout-content-bleed'],
                   )}
                 >
-                  <Flex container="fill" className="overflow-y-auto">
+                  <Flex vertical container="fill" className="overflow-y-auto">
                     <Outlet />
                   </Flex>
                 </Flex>

@@ -108,7 +108,8 @@
 }
 
 .stageFill,
-.empty {
+.empty,
+.home {
   position: relative;
   height: 100%;
 }
@@ -142,6 +143,67 @@
 .emptyHint {
   margin: 8px 0 0;
   font-size: 13px;
+}
+
+.home {
+  background: var(--sue-color-bg-layout, #1f1f1f);
+}
+
+.homeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 280px;
+  max-width: 360px;
+  max-height: ~'min(70%, 420px)';
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--sue-color-border-secondary);
+  border-radius: var(--sue-border-radius-lg, 12px);
+  background: var(--sue-color-bg-container);
+}
+
+.homeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--sue-border-radius-sm);
+  background: transparent;
+  color: var(--sue-color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.homeRow:hover {
+  background: var(--sue-color-fill-tertiary);
+}
+
+.homeRowIcon {
+  flex-shrink: 0;
+  color: var(--sue-color-text-secondary);
+}
+
+.homeRowLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.homeRowKbd {
+  flex-shrink: 0;
+  padding: 0 6px;
+  border: 1px solid var(--sue-color-border-secondary);
+  border-radius: 999px;
+  color: var(--sue-color-text-tertiary);
+  font-size: 11px;
+  line-height: 18px;
+  font-family: inherit;
 }
 
 .pluginStage {

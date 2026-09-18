@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { message } from '@sue/design-web-react';
 import { BrowserService } from '@true-north/web-service';
 import { HOST_BROWSER_OPEN, HOST_WORKBENCH_OPEN } from '@true-north/plugin-sdk';
-import type { PluginViewOpenRequest } from '@true-north/plugin-sdk';
 import {
   useHostActions,
   useLocale,
@@ -35,11 +34,9 @@ import type {
   WorkbenchWorkspaceHost,
 } from './types';
 import { createWorkbenchToolRegistry } from './types';
-import type { WorkbenchViewContribution } from '@true-north/plugin-sdk';
 import {
   appendTabOrder,
   isWebTabId,
-  needsFallbackWebTab,
   neighborId,
   pluginViewTabId,
   upsertPluginViewTab,
@@ -90,7 +87,7 @@ export type WorkbenchPluginViewTab = {
 
 export type WorkbenchTab = WorkbenchWebTab | WorkbenchToolTab | WorkbenchPluginViewTab;
 
-export type PluginViewInput = PluginViewOpenRequest;
+export type PluginViewInput = { viewId: string; params?: Record<string, string> };
 
 export type TabInput = {
   conversationId: string;
@@ -186,7 +183,6 @@ export function WorkbenchProvider({
 }: {
   children: ReactNode;
   tools: WorkbenchToolDefinition[];
-  views?: WorkbenchViewContribution[];
   workspaceHost: WorkbenchWorkspaceHost;
   extractHandler?: WorkbenchExtractHandler;
 }) {
@@ -277,16 +273,7 @@ export function WorkbenchProvider({
       close();
       return;
     }
-    void (async () => {
-      await withState(() => BrowserService.setVisible(true), applyState);
-      if (
-        toolTabsRef.current.length === 0 &&
-        pluginViewTabsRef.current.length === 0 &&
-        prevWebIdsRef.current.size === 0
-      ) {
-        await withState(() => BrowserService.createTab(), applyState);
-      }
-    })();
+    void withState(() => BrowserService.setVisible(true), applyState);
   }, [applyState, close, open]);
 
   const activateTab = useCallback(
@@ -325,13 +312,6 @@ export function WorkbenchProvider({
         }
       };
 
-      const maybeFallbackWeb = async (nextTools: number, nextViews: number) => {
-        if (needsFallbackWebTab(nextTools, nextViews, prevWebIdsRef.current.size)) {
-          await ensureOpen();
-          await withState(() => BrowserService.createTab(), applyState);
-        }
-      };
-
       if (isTool || isPluginView) {
         const nextTools = isTool ? toolTabsRef.current.filter((tab) => tab.id !== id) : toolTabsRef.current;
         const nextViews = isPluginView
@@ -341,15 +321,13 @@ export function WorkbenchProvider({
         if (isPluginView) setPluginViewTabs(nextViews);
         setTabOrder((prev) => prev.filter((item) => item !== id));
         await activateNeighbor();
-        await maybeFallbackWeb(nextTools.length, nextViews.length);
         return;
       }
 
       await activateNeighbor();
       await withState(() => BrowserService.closeTab(id), applyState);
-      await maybeFallbackWeb(toolTabsRef.current.length, pluginViewTabsRef.current.length);
     },
-    [applyState, ensureOpen, nonWebIds],
+    [applyState, nonWebIds],
   );
 
   const openToolTab = useCallback(
@@ -391,23 +369,46 @@ export function WorkbenchProvider({
     [ensureOpen],
   );
 
+  useEffect(() => {
+    let cancelled = false;
+    void platform.ipc
+      .get('/workflow/workspaces')
+      .then((result: { list?: Array<{ id: string; planId: string; contributionId: string; state?: Record<string, unknown> }> }) => {
+        if (cancelled) return;
+        for (const item of result?.list || []) {
+          void openToolTab({
+            conversationId: 'workflow',
+            messageId: `workflow:${item.planId}`,
+            workspaceId: item.id,
+            workspaceKey: item.contributionId,
+            title: String(item.state?.title || '确认工作台'),
+            payload: item.state || {},
+          });
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [openToolTab, platform.ipc]);
+
   const openPluginView = useCallback(
     async (input: PluginViewInput) => {
-      const view = (platform.workbenchViews || []).find((item) => item.id === input.viewId);
-      if (!view) {
-        message.warning(`未知插件功能：${input.viewId}`);
+      const tab = (platform.workbenchNewTabs || []).find((item) => item.id === input.viewId);
+      if (!tab) {
+        message.warning(`未知工作台页：${input.viewId}`);
         return;
       }
-      const id = pluginViewTabId(view.id);
-      const existing = pluginViewTabsRef.current.find((tab) => tab.id === id);
+      const id = pluginViewTabId(tab.id);
+      const existing = pluginViewTabsRef.current.find((item) => item.id === id);
       const nextTab = withPluginViewSnapshot(
         existing,
         {
           kind: 'plugin-view' as const,
           id,
-          viewId: view.id,
-          pluginId: view.pluginId,
-          title: t[view.nameKey] || view.nameKey,
+          viewId: tab.id,
+          pluginId: tab.pluginId,
+          title: t[tab.nameKey] || tab.nameKey,
         },
         input.params || {},
       );
@@ -416,7 +417,7 @@ export function WorkbenchProvider({
       setActiveId(id);
       await ensureOpen();
     },
-    [ensureOpen, platform.workbenchViews, t],
+    [ensureOpen, platform.workbenchNewTabs, t],
   );
 
   const updatePluginViewParams = useCallback((viewId: string, params: Record<string, string>) => {

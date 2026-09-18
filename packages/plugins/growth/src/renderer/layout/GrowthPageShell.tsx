@@ -3,10 +3,11 @@ import type { PluginHubProps } from '@true-north/plugin-sdk';
 import { PluginViewRuntimeProvider } from '@true-north/plugin-sdk/renderer';
 import { Flex } from '@sue/design-web-react';
 import { PanelLeft } from 'lucide-react';
-import TodoFeature from '../features/todo';
-import TaskFeature from '../features/task';
-import HabitFeature from '../features/habit';
-import GoalFeature from '../features/goal';
+import TodoFeature from '../domains/todo/feature';
+import TaskFeature from '../domains/task/feature';
+import HabitFeature from '../domains/habit/feature';
+import GoalFeature from '../domains/goal/feature';
+import NotifyFeature from '../domains/notify/feature';
 import { GrowthNavigation } from './GrowthNavigation';
 import { viewIdForLocal } from './nav';
 import styles from './GrowthPageShell.module.less';
@@ -17,6 +18,7 @@ const FEATURES = {
   task: TaskFeature,
   habit: HabitFeature,
   goal: GoalFeature,
+  notify: NotifyFeature,
 } as const;
 
 function featureFor(view: string) {

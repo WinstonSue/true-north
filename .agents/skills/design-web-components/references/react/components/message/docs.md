@@ -1,0 +1,146 @@
+---
+title: "Message"
+description: "Display global messages as feedback in response to user operations."
+---
+
+## When To Use
+
+- To provide feedback such as success, warning, error etc.
+- A message is displayed at top and center and will be dismissed automatically, as a non-interrupting light-weighted prompt.
+
+## Demos
+
+| Demo | Path |
+| --- | --- |
+| Hooks usage (recommended) | demo/hooks.md |
+| Other types of message | demo/other.md |
+| Customize duration | demo/duration.md |
+| Message with loading indicator | demo/loading.md |
+| Promise interface | demo/thenable.md |
+| Custom semantic styles | demo/style-class.md |
+| Update Message Content | demo/update.md |
+| Static method (deprecated) | demo/info.md |
+|  semantic | demo/_semantic.md |
+
+## API
+
+Common props ref：[Common props](../../docs/react/common-props.md)
+
+This component provides some static methods, with usage and arguments as following:
+
+- `message.success(content, [duration], onClose)`
+- `message.error(content, [duration], onClose)`
+- `message.info(content, [duration], onClose)`
+- `message.warning(content, [duration], onClose)`
+- `message.loading(content, [duration], onClose)`
+
+| Property | Description | Type | Default |
+| --- | --- | --- | --- |
+| content | The content of the message | ReactNode \| config | - |
+| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 3 |
+| onClose | Specify a function that will be called when the message is closed | function | - |
+
+`afterClose` can be called in thenable interface:
+
+- `message[level](content, [duration]).then(afterClose)`
+- `message[level](content, [duration], onClose).then(afterClose)`
+
+where `level` refers one static methods of `message`. The result of `then` method will be a Promise.
+
+Supports passing parameters wrapped in an object:
+
+- `message.open(config)`
+- `message.success(config)`
+- `message.error(config)`
+- `message.info(config)`
+- `message.warning(config)`
+- `message.loading(config)`
+
+The properties of config are as follows:
+
+| Property | Description | Type | Default | Version | [Global Config](../config-provider/docs.md#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| className | Customized CSS class | string | - | - | 5.7.0 |
+| classNames | Customize class for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), string> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), string> | - | 6.0.0 | 6.0.0 |
+| content | The content of the message | ReactNode | - | - | × |
+| duration | Time(seconds) before auto-dismiss, don't dismiss if set to 0 | number | 3 | - | × |
+| icon | Customized Icon | ReactNode | - | - | × |
+| pauseOnHover | keep the timer running or not on hover | boolean | true | - | × |
+| key | The unique identifier of the Message | string \| number | - | - | × |
+| style | Customized inline style | [CSSProperties](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e434515761b36830c3e58a970abf5186f005adac/types/react/index.d.ts#L794) | - | - | 5.7.0 |
+| styles | Customize inline style for each semantic structure inside the component. Supports object or function. | Record<[SemanticDOM](#semantic-dom), CSSProperties> \| (info: { props })=> Record<[SemanticDOM](#semantic-dom), CSSProperties> | - | 6.0.0 | 6.0.0 |
+| onClick | Specify a function that will be called when the message is clicked | function | - | - | × |
+| onClose | Specify a function that will be called when the message is closed | function | - | - | × |
+
+### Global static methods
+
+Methods for global configuration and destruction are also provided:
+
+- `message.config(options)`
+- `message.destroy()`
+
+> use `message.destroy(key)` to remove a message.
+
+#### message.config
+
+> When you use `ConfigProvider` for global configuration, the system will automatically start RTL mode by default.(4.3.0+)
+>
+> When you want to use it alone, you can start the RTL mode through the following settings.
+
+```js
+message.config({
+  top: 100,
+  duration: 2,
+  maxCount: 3,
+  rtl: true,
+  prefixCls: 'my-message',
+});
+```
+
+| Property | Description | Type | Default | Version | [Global Config](../config-provider/docs.md#component-config) |
+| --- | --- | --- | --- | --- | --- |
+| duration | Time before auto-dismiss, in seconds | number | 3 |  | × |
+| getContainer | Return the mount node for Message, but still display at fullScreen | () => HTMLElement | () => document.body |  | × |
+| maxCount | Max message show, drop oldest if exceed limit | number | - |  | × |
+| prefixCls | The prefix className of message node | string | `ant-message` | 4.5.0 | × |
+| rtl | Whether to enable RTL mode | boolean | false |  | × |
+| stack | Messages will be stacked when amount is over threshold. Only the latest message is shown in the collapsed stack | boolean \| `{ threshold: number }` | false | 6.4.0 | × |
+| top | Distance from top | string \| number | 8 |  | × |
+
+## Semantic DOM
+
+See `demo/_semantic.md`.
+
+## Design Token
+
+See `token.md` for component token definitions.</ComponentTokenTable>
+
+## FAQ
+
+### Why I can not access context, redux, ConfigProvider `locale/prefixCls/theme` in message? {#faq-context-redux}
+
+antd will dynamic create React instance by `ReactDOM.render` when call message methods. Whose context is different with origin code located context.
+
+When you need context info (like ConfigProvider context), you can use `message.useMessage` to get `api` instance and `contextHolder` node. And put it in your children:
+
+```tsx
+const [api, contextHolder] = message.useMessage();
+
+return (
+  <Context1.Provider value="Ant">
+    {/* contextHolder is inside Context1 which means api will get value of Context1 */}
+    {contextHolder}
+    <Context2.Provider value="Design">
+      {/* contextHolder is outside Context2 which means api will **not** get value of Context2 */}
+    </Context2.Provider>
+  </Context1.Provider>
+);
+```
+
+**Note:** You must insert `contextHolder` into your children with hooks. You can use origin method if you do not need context connection.
+
+> [App Package Component](../app/docs.md) can be used to simplify the problem of `useMessage` and other methods that need to manually implant contextHolder.
+
+### How to set static methods prefixCls ？ {#faq-set-prefix-cls}
+
+You can config with [`ConfigProvider.config`](../config-provider/docs.md#configproviderconfig-4130)

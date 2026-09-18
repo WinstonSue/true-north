@@ -15,6 +15,7 @@ export type CreateHabitVo = Pick<
   | 'repeatEndMode'
 > & {
   goalIds?: string[];
+  notifyRule?: HabitVo['notifyRule'];
 };
 
 export type UpdateHabitVo = Partial<CreateHabitVo>;

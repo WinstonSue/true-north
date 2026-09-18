@@ -1,6 +1,6 @@
 import type { AiWorkspacePartVo, AiWorkspacePayloadVo } from '@true-north/vo';
 import { AiService } from '@true-north/web-service';
-import type { WorkbenchWorkspaceHost } from '@true-north/plugin-sdk';
+import type { PluginIpcPort, WorkbenchWorkspaceHost } from '@true-north/plugin-sdk';
 
 function readWorkspacePart(
   parts: Array<{ type: string; workspaceId?: string; workspaceKey?: string; payload?: AiWorkspacePayloadVo }>,
@@ -38,6 +38,36 @@ export function createAiWorkspaceHost(): WorkbenchWorkspaceHost {
       const part = readWorkspacePart(result.data.parts, workspaceId);
       if (!part) throw new Error('未找到对应的工作台内容');
       return part.payload;
+    },
+  };
+}
+
+export function createHostWorkspaceHost(ipc: PluginIpcPort): WorkbenchWorkspaceHost {
+  const ai = createAiWorkspaceHost();
+  const isWorkflow = (conversationId: string, messageId: string) =>
+    conversationId === 'workflow' || messageId.startsWith('workflow:');
+  return {
+    async load(conversationId, messageId, workspaceId) {
+      if (isWorkflow(conversationId, messageId)) {
+        const row = (await ipc.get(`/workflow/workspaces/${workspaceId}`)) as {
+          id: string;
+          contributionId: string;
+          state: Record<string, unknown>;
+        };
+        return { workspaceId: row.id || workspaceId, workspaceKey: row.contributionId, payload: row.state };
+      }
+      return ai.load(conversationId, messageId, workspaceId);
+    },
+    subscribe(messageId, workspaceId, onUpdate) {
+      if (messageId.startsWith('workflow:')) return () => undefined;
+      return ai.subscribe(messageId, workspaceId, onUpdate);
+    },
+    async patch(messageId, workspaceId, payload: AiWorkspacePayloadVo) {
+      if (messageId.startsWith('workflow:')) {
+        const row = (await ipc.put(`/workflow/workspaces/${workspaceId}`, payload)) as { state: Record<string, unknown> };
+        return row.state;
+      }
+      return ai.patch(messageId, workspaceId, payload);
     },
   };
 }

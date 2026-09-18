@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar, Dropdown, Flex } from '@sue/design-web-react';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
-import { Loader2, Power, Settings, User } from 'lucide-react';
+import { Bell, Loader2, Power, Settings, User } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import Logo from '@/assets/logo.svg';
 import { useRendererPlatformOptional } from '@true-north/plugin-sdk/renderer';
@@ -15,6 +15,7 @@ import { SessionList } from '@/features/ai/features/SessionList';
 import { WorkbenchToggle } from '@/features/workbench';
 import styles from './AppAside.module.less';
 import Navigate from './navigate';
+import { NotificationInbox } from './NotificationInbox';
 
 export function AppAside() {
   const t = useLocale();
@@ -93,6 +94,16 @@ export function AppAside() {
             <Logo />
             <span className={styles.brandName}>{t['title']}</span>
           </Flex>
+          <Flex align="center" gap={4}>
+            <WorkbenchToggle className={styles.actionBtn} />
+            {runtime ? (
+              <NotificationInbox>
+                <button type="button" className={styles.actionBtn} aria-label={t['notification.title']}>
+                  <Bell size={16} />
+                </button>
+              </NotificationInbox>
+            ) : null}
+          </Flex>
         </Flex>
 
         <ProductSurface id={productRef('app-shell.view.nav')}>
@@ -131,9 +142,6 @@ export function AppAside() {
                   </span>
                 );
               })}
-              <span className={styles.actionBtn}>
-                <WorkbenchToggle />
-              </span>
             </Flex>
           </Flex>
         </ProductSurface>

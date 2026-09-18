@@ -1,0 +1,44 @@
+{
+  "id": "workflow.editor",
+  "kind": "page",
+  "title": "编辑流程",
+  "parentId": "global",
+  "route": "/workflow/definitions/:id",
+  "productStatus": "roadmap",
+  "views": [
+    {
+      "id": "editor",
+      "name": "双编辑器",
+      "scenario": "用向导或画布编辑同一份流程并保存、发布",
+      "productStatus": "roadmap",
+      "reference": "workflow.editor.view.editor"
+    }
+  ],
+  "rules": [
+    {
+      "id": "shared-graph",
+      "name": "画布与向导同一份流程",
+      "description": "切换向导和画布时看到的是同一份节点、连线和映射，不会各改各的。",
+      "views": ["editor"],
+      "reference": "workflow.editor.rule.shared-graph",
+      "productStatus": "roadmap"
+    }
+  ],
+  "references": [
+    {
+      "id": "workflow.editor.overview",
+      "title": "目标与价值",
+      "body": "编辑页用来改一份流程定义。向导适合逐步挑选启动事件和工作台、命令；画布适合看节点怎么连。两种方式改的是同一份流程，保存为草稿，通过校验后才能发布。"
+    },
+    {
+      "id": "workflow.editor.view.editor",
+      "title": "双编辑器",
+      "body": "顶部可在向导与画布之间切换，并保存草稿或发布。向导填写标题、启动事件、步骤和字段映射；画布拖动节点、连线。发布失败时留下原因，不生成新版本。"
+    },
+    {
+      "id": "workflow.editor.rule.shared-graph",
+      "title": "画布与向导同一份流程",
+      "body": "在向导里加一步，回到画布也能看见；在画布里连一条线，向导里的步骤关系一起变。不会出现两套互相覆盖的草稿。"
+    }
+  ]
+}

@@ -36,7 +36,7 @@ export function NewTabPicker({ 'data-product-ref': productRefAttr }: { 'data-pro
         key: `plugin:${group.pluginId}`,
         label: t[group.nameKey] || group.nameKey,
         children: (group.tabs || []).map((tab) => ({
-          key: tab.viewId,
+            key: tab.id,
           label: t[tab.nameKey] || tab.nameKey,
         })),
       }));
@@ -61,9 +61,9 @@ export function NewTabPicker({ 'data-product-ref': productRefAttr }: { 'data-pro
               void createTab();
               return;
             }
-            const tab = (platform.workbenchNewTabs || []).find((item) => item.viewId === key);
+            const tab = (platform.workbenchNewTabs || []).find((item) => item.id === key);
             if (!tab) return;
-            void openPluginView({ viewId: tab.viewId, params: {} });
+            void openPluginView({ viewId: tab.id, params: {} });
           },
         }}
       >

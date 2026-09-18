@@ -3,6 +3,7 @@ import { TaskVo } from '../task/task-model.vo';
 import { TodoRepeatVo } from './todo-repeat-model.vo';
 import { TodoRelatedType, TodoStatus } from '@true-north/enum';
 import { HabitVo } from '../habit/habit-model.vo';
+import type { TodoNotifyRule } from '../notify-rule';
 
 export type TodoWithoutRelationsVo = {
   name: string;
@@ -19,6 +20,7 @@ export type TodoWithoutRelationsVo = {
   /** 主人 id；relatedType=repeat 时为 repeat_todo.id */
   relatedId?: string;
   revision?: number;
+  notifyRule?: TodoNotifyRule | null;
   /** 派生兼容字段：relatedType=task 时等于 relatedId */
   taskId?: string;
   /** 派生兼容字段：relatedType=repeat 时等于 relatedId（repeat_todo.id） */

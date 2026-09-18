@@ -28,13 +28,19 @@ export {
 } from './view-runtime.tsx';
 export type { PluginViewRuntimeValue, PluginViewMode, WorkbenchViewRuntimeValue } from './view-runtime.tsx';
 
-export { HostActionRegistry, HOST_AI_START, HOST_WORKFLOW_OPEN_PENDING } from '../runtime.ts';
+export {
+  HostActionRegistry,
+  HOST_AI_START,
+  HOST_WORKFLOW_OPEN_PENDING,
+  HOST_NOTIFICATION_INVALIDATE_EVENT,
+} from '../runtime.ts';
 export {
   localViewId,
   locationFromSearchParams,
   searchParamsFromLocation,
   hrefFromLocation,
   hrefFromSnapshot,
+  hrefFromOpenRequest,
 } from '../view-adapter.ts';
 export type {
   PluginIpcPort,
@@ -43,10 +49,9 @@ export type {
   PluginRendererHandles,
   PluginRendererModule,
   PluginRuntimeEntry,
-  WorkbenchViewContribution,
   WorkbenchNewTabContribution,
   PluginViewSnapshot,
-  PluginViewOpenRequest,
+  ResourceOpenRequest,
   PluginHubProps,
   ViewStateCodec,
   ShellSlotContribution,

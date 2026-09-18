@@ -2,6 +2,132 @@
   "changes": [
     {
       "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "待办建议确认后展示创建成功与该条详情，不再回到可编辑表单。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:suggest-form",
+        "scope": "rule",
+        "name": "建议工作台套用新建待办",
+        "reference": "growth.todo.rule.suggest-form",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "工作台加号不再列出成长栏目；点会话里的目标、任务或待办名称进入成长页里的那一条。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth:module",
+        "scope": "module",
+        "name": "规划成长系统",
+        "wikiId": "growth",
+        "wikiTitle": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "introduced",
+      "summary": "AI 建议待办在工作台打开与手动新建同一套表单；计划时间可见并随建议预填。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:suggest-form",
+        "scope": "rule",
+        "name": "建议工作台套用新建待办",
+        "reference": "growth.todo.rule.suggest-form",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "用户说的时刻写入计划时间；名称已覆盖事项时不预填描述。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:suggest-form",
+        "scope": "rule",
+        "name": "建议工作台套用新建待办",
+        "reference": "growth.todo.rule.suggest-form",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "没说年份时按当前日期取最近一次尚未过去的该月日，不用过期年份。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:suggest-form",
+        "scope": "rule",
+        "name": "建议工作台套用新建待办",
+        "reference": "growth.todo.rule.suggest-form",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "AI 建议工作台默认选中已发布的「待办完成后确认入账」，可改或清空；手动新建不预选。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.todo:rule:workflow-on-complete",
+        "scope": "rule",
+        "name": "完成时发起已关联流程",
+        "reference": "growth.todo.rule.workflow-on-complete",
+        "wikiId": "growth.todo",
+        "wikiTitle": "待办管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "目标拆解「编辑」打开对应新建表单，确认即创建。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.goal:view:ai-decomposition",
+        "scope": "view",
+        "name": "AI 拆解",
+        "reference": "growth.goal.view.ai-decomposition",
+        "wikiId": "growth.goal",
+        "wikiTitle": "目标管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
+      "date": "2026-09-17",
+      "event": "changed",
+      "summary": "任务拆解「编辑」打开对应新建表单，确认即创建。",
+      "productStatus": "roadmap",
+      "feature": {
+        "key": "growth.task:view:ai-decomposition",
+        "scope": "view",
+        "name": "AI 拆解",
+        "reference": "growth.task.view.ai-decomposition",
+        "wikiId": "growth.task",
+        "wikiTitle": "任务管理",
+        "parentName": "规划成长系统"
+      }
+    },
+    {
+      "version": "v0.3.0",
       "date": "2026-09-15",
       "event": "changed",
       "summary": "成长页内导航由成长自己切换；同一类能力也可从工作台加号作为功能标签打开，两者不是同一套顶栏。",
@@ -9,9 +135,9 @@
       "feature": {
         "key": "growth:module",
         "scope": "module",
-        "name": "个人成长系统",
+        "name": "规划成长系统",
         "wikiId": "growth",
-        "wikiTitle": "个人成长系统"
+        "wikiTitle": "规划成长系统"
       }
     }
   ]

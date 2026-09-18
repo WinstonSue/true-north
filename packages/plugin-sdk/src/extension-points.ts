@@ -18,10 +18,9 @@ import type {
   PluginPromptProvider,
   PluginResourceProvider,
   PluginRuntimeEntry,
-  PluginViewOpenRequest,
+  ResourceOpenRequest,
   ShellSlotContribution,
   WorkbenchToolDefinition,
-  WorkbenchViewContribution,
   WorkbenchNewTabContribution,
   WorkflowInteractionProps,
 } from './runtime.ts';
@@ -85,7 +84,7 @@ export type PluginScopeExtension = {
 };
 
 export type ResourceOpenerExtension = {
-  open: (uri: string) => PluginViewOpenRequest | null;
+  open: (uri: string) => ResourceOpenRequest | null;
 };
 
 export type PluginHubExtension = {
@@ -106,7 +105,6 @@ export const extensionPoints = {
   agentInstruction: defineExtensionPoint<string>('ai.instruction'),
   mention: defineExtensionPoint<MentionExtension>('ai.composer.mention'),
   plugin: defineExtensionPoint<PluginRuntimeEntry>('renderer.plugin'),
-  view: defineExtensionPoint<WorkbenchViewContribution>('renderer.view'),
   newTab: defineExtensionPoint<WorkbenchNewTabContribution>('renderer.newTab'),
   workspace: defineExtensionPoint<WorkbenchToolDefinition>('renderer.workspace'),
   workbenchAction: defineExtensionPoint<WorkbenchActionExtension>('renderer.action'),
@@ -131,7 +129,7 @@ export function createHostActionPort(registry: ExtensionRegistry, owner = 'runti
   };
 }
 
-export function openRegisteredResource(registry: ExtensionRegistry, uri: string): PluginViewOpenRequest | null {
+export function openRegisteredResource(registry: ExtensionRegistry, uri: string): ResourceOpenRequest | null {
   for (const opener of registry.list(extensionPoints.resourceOpener)) {
     const request = opener.open(uri);
     if (request) return request;

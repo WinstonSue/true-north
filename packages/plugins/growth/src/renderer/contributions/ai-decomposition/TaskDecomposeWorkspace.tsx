@@ -3,46 +3,22 @@ import {
   Alert,
   Button,
   Checkbox,
-  DatePicker,
-  Drawer,
   Flex,
-  Form,
-  Input,
-  InputNumber,
   Modal,
   Space,
   Tag,
   message,
 } from '@sue/design-web-react';
-import dayjs from 'dayjs';
 import type { AiDecomposePayloadVo, AiWorkspacePayloadVo, AiWorkspaceSuggestionVo } from '@true-north/vo';
 import { TaskController, TaskService } from '../../../client';
-import { drawerShellStyles, Surface } from '../../ui';
+import { Surface } from '@true-north/plugin-ui';
 import { ProductSurface } from '@ylib/product-surface-react';
 import { productRef } from '@ylib/product-server';
 import type { WorkbenchToolProps } from '@true-north/plugin-sdk';
-import { boundsFromParent } from '../../../shared/entity-bounds';
+import { DecomposeEditDrawer } from './DecomposeEditDrawer';
 import styles from './style.module.less';
 
 const KIND_LABEL = { task: '子任务', todo: '待办' } as const;
-
-function normalizeTitle(title: string): string {
-  return title.trim().toLowerCase().replace(/\s+/g, ' ');
-}
-
-function recalculateConflict(suggestion: AiWorkspaceSuggestionVo, childTitles: string[]): string | undefined {
-  if (suggestion.kind !== 'task') return undefined;
-  const normalized = normalizeTitle(suggestion.title);
-  if (!normalized) return undefined;
-  for (const child of childTitles) {
-    const childNorm = normalizeTitle(child);
-    if (!childNorm) continue;
-    if (normalized === childNorm || normalized.includes(childNorm) || childNorm.includes(normalized)) {
-      return '已存在相近子任务';
-    }
-  }
-  return undefined;
-}
 
 type Props = WorkbenchToolProps<AiDecomposePayloadVo>;
 
@@ -55,14 +31,12 @@ export function TaskDecomposeWorkspace({
   const [selected, setSelected] = useState<string[]>([]);
   const [batchOpen, setBatchOpen] = useState(false);
   const [editing, setEditing] = useState<AiWorkspaceSuggestionVo | null>(null);
-  const [editDraft, setEditDraft] = useState<AiWorkspaceSuggestionVo | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setSuggestions(payload.suggestions);
     setSelected([]);
     setEditing(null);
-    setEditDraft(null);
   }, [payload]);
 
   useEffect(() => {
@@ -88,8 +62,6 @@ export function TaskDecomposeWorkspace({
     return <Alert type="warning" showIcon title="未找到任务，无法审阅拆解建议。" />;
   }
 
-  const bounds = boundsFromParent(task, 'task');
-
   const persist = async (next: AiWorkspaceSuggestionVo[]) => {
     setSuggestions(next);
     await actions.updatePayload({ ...payload, suggestions: next } as unknown as AiWorkspacePayloadVo);
@@ -97,24 +69,15 @@ export function TaskDecomposeWorkspace({
 
   const openEdit = (suggestion: AiWorkspaceSuggestionVo) => {
     setEditing(suggestion);
-    setEditDraft({ ...suggestion });
   };
 
-  const saveEdit = async () => {
-    if (!editDraft || !editing) return;
-    if (!editDraft.title.trim()) {
-      message.warning('请输入名称');
-      return;
-    }
-    const nextItem: AiWorkspaceSuggestionVo = {
-      ...editDraft,
-      conflict: recalculateConflict(editDraft, []),
-    };
-    const next = suggestions.map((item) => (item.id === nextItem.id ? nextItem : item));
+  const markCreated = async (suggestion: AiWorkspaceSuggestionVo) => {
+    const next = suggestions.map((item) =>
+      item.id === suggestion.id ? { ...item, accepted: true } : item,
+    );
     await persist(next);
+    setSelected((items) => items.filter((id) => id !== suggestion.id));
     setEditing(null);
-    setEditDraft(null);
-    message.success('已更新建议预览');
   };
 
   const adopt = async (suggestion: AiWorkspaceSuggestionVo) => {
@@ -259,84 +222,13 @@ export function TaskDecomposeWorkspace({
         </Modal>
       </Flex>
 
-      {editing && editDraft ? (
-        <Drawer
-          open
-          title={`编辑${editDraft.kind === 'todo' ? KIND_LABEL.todo : KIND_LABEL.task}建议`}
-          onClose={() => {
-            setEditing(null);
-            setEditDraft(null);
-          }}
-          size="large"
-          destroyOnHidden
-          styles={drawerShellStyles}
-          extra={
-            <Button type="primary" onClick={() => void saveEdit()}>
-              保存
-            </Button>
-          }
-        >
-          <Form layout="vertical">
-            <Form.Item label="名称" required>
-              <Input
-                value={editDraft.title}
-                onChange={(event) => setEditDraft({ ...editDraft, title: event.target.value })}
-              />
-            </Form.Item>
-            <Form.Item label="理由">
-              <Input.TextArea
-                rows={3}
-                value={editDraft.reason}
-                onChange={(event) => setEditDraft({ ...editDraft, reason: event.target.value })}
-              />
-            </Form.Item>
-            <Form.Item label="影响">
-              <Input.TextArea
-                rows={2}
-                value={editDraft.impact}
-                onChange={(event) => setEditDraft({ ...editDraft, impact: event.target.value })}
-              />
-            </Form.Item>
-            <Form.Item label="计划日期">
-              <DatePicker
-                style={{ width: '100%' }}
-                value={editDraft.planned ? dayjs(editDraft.planned) : null}
-                disabledDate={(current) => {
-                  if (!current) return false;
-                  if (bounds.startAt && current.isBefore(dayjs(bounds.startAt), 'day')) return true;
-                  if (bounds.endAt && current.isAfter(dayjs(bounds.endAt), 'day')) return true;
-                  return false;
-                }}
-                onChange={(value) =>
-                  setEditDraft({
-                    ...editDraft,
-                    planned: value ? value.format('YYYY-MM-DD') : editDraft.planned,
-                  })
-                }
-              />
-            </Form.Item>
-            <Form.Item label="重要度">
-              <InputNumber
-                min={1}
-                max={bounds.maxImportance ?? 5}
-                style={{ width: '100%' }}
-                value={editDraft.importance}
-                onChange={(value) => setEditDraft({ ...editDraft, importance: Number(value) || 1 })}
-              />
-            </Form.Item>
-            <Form.Item label="难度">
-              <InputNumber
-                min={1}
-                max={bounds.maxDifficulty ?? 5}
-                style={{ width: '100%' }}
-                value={editDraft.difficulty}
-                onChange={(value) => setEditDraft({ ...editDraft, difficulty: Number(value) || 1 })}
-              />
-            </Form.Item>
-            <Alert type="info" showIcon title="保存仅更新工作台预览，不会创建实体；采纳时使用当前预览。" />
-          </Form>
-        </Drawer>
-      ) : null}
+      <DecomposeEditDrawer
+        suggestion={editing}
+        source="task"
+        parent={task}
+        onClose={() => setEditing(null)}
+        onCreated={() => (editing ? markCreated(editing) : Promise.resolve())}
+      />
     </div>
     </ProductSurface>
   );

@@ -19,6 +19,8 @@ import {
 } from './entities';
 import { workflowEventService } from './event.service';
 import { edgeStatusFor, nextEdgeAfterSuccess, planStatusFor } from './edge-policy';
+import { notificationService } from '../notification';
+import { conflictResourceUri } from '../../plugin/host-ids';
 
 const RETRYABLE = new Set(['unavailable']);
 
@@ -169,6 +171,10 @@ export class WorkflowRunner {
     }
     if ((result.status === 'applied' || result.status === 'noop') && result.resource) {
       await this.bindProposalNode(attempt, result);
+    }
+    if (attempt.workspaceId && (result.status === 'applied' || result.status === 'noop')) {
+      const { workflowInstanceService } = await import('./instance.service');
+      await workflowInstanceService.onWorkspaceCommand(attempt.workspaceId, result, attempt.input);
     }
     if (attempt.edgeId) {
       await this.advanceEdge(attempt.edgeId, result, attempt);
@@ -350,7 +356,16 @@ export class WorkflowRunner {
       diagnostic: redact(result.status === 'conflict' ? result.current : result) as Record<string, unknown>,
       status: 'open',
     });
-    return repo.save(ticket);
+    const saved = await repo.save(ticket);
+    await notificationService.post({
+      pluginId: 'workflow',
+      title: '流程冲突',
+      body: saved.reason || '有流程停下来需要处理。',
+      href: '/workflow?tab=issues',
+      uri: conflictResourceUri(saved.id),
+      dedupeKey: `workflow.conflict:${saved.id}`,
+    });
+    return saved;
   }
 
   async resolveTicket(input: {
@@ -384,6 +399,7 @@ export class WorkflowRunner {
       ticket.status = 'resolved';
       ticket.ticketRevision += 1;
       await repo.save(ticket);
+      await notificationService.markReadByDedupeKey(`workflow.conflict:${ticket.id}`);
       return { ok: true, status: 'cancelled' };
     }
     if (input.action === 'skipEdge' && edge) {
@@ -392,6 +408,7 @@ export class WorkflowRunner {
       ticket.status = 'resolved';
       ticket.ticketRevision += 1;
       await repo.save(ticket);
+      await notificationService.markReadByDedupeKey(`workflow.conflict:${ticket.id}`);
       await this.maybeCompletePlan(edge.planId);
       return { ok: true, status: 'skipped' };
     }
@@ -399,6 +416,7 @@ export class WorkflowRunner {
       ticket.status = 'resolved';
       ticket.ticketRevision += 1;
       await repo.save(ticket);
+      await notificationService.markReadByDedupeKey(`workflow.conflict:${ticket.id}`);
       if (edge) {
         edge.status = 'succeeded';
         await workflowStore().getRepository(WorkflowEdge).save(edge);
@@ -414,6 +432,7 @@ export class WorkflowRunner {
       ticket.status = 'resolved';
       ticket.ticketRevision += 1;
       await repo.save(ticket);
+      await notificationService.markReadByDedupeKey(`workflow.conflict:${ticket.id}`);
       const commandInput = {
         ...(input.interactionInput || {}),
         ...(input.expectedRevision ? { expectedRevision: input.expectedRevision } : {}),

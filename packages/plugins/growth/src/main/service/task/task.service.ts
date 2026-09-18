@@ -14,6 +14,7 @@ import {
   assertPriorityWithinParent,
   assertSingleTaskParent,
 } from '../../../shared/entity-bounds';
+import { queueGrowthDueSync, untrackGrowthResource } from '../../context';
 
 export class TaskService {
   protected taskRepository: TaskRepository;
@@ -65,7 +66,9 @@ export class TaskService {
     }
 
     const entity = await this.taskRepository.create(task);
-    return TaskDto.importEntity(entity);
+    const result = TaskDto.importEntity(entity);
+    queueGrowthDueSync();
+    return result;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -81,6 +84,8 @@ export class TaskService {
       throw new Error(`无法删除任务，仍有关联内容：${impacts.join('、')}`);
     }
     await this.taskRepository.delete(task.id);
+    await untrackGrowthResource('task', id);
+    queueGrowthDueSync();
     return true;
   }
 
@@ -126,7 +131,9 @@ export class TaskService {
       current.goalId = updateTaskDto.goalId || (null as any);
     }
     const entity = await this.taskRepository.updateWithParent(current);
-    return TaskDto.importEntity(entity);
+    const result = TaskDto.importEntity(entity);
+    queueGrowthDueSync();
+    return result;
   }
 
   async findByFilter(filter: TaskFilterDto): Promise<TaskDto[]> {
@@ -174,6 +181,8 @@ export class TaskService {
     task.doneAt = new Date();
     task.abandonedAt = null as any;
     await this.taskRepository.updateWithParent(task);
+    await untrackGrowthResource('task', id);
+    queueGrowthDueSync();
     return true;
   }
 
@@ -182,6 +191,7 @@ export class TaskService {
     if (task.status !== TaskStatus.TODO) throw new Error('当前状态不允许开始任务');
     task.status = TaskStatus.DOING;
     await this.taskRepository.updateWithParent(task);
+    queueGrowthDueSync();
     return true;
   }
 
@@ -190,6 +200,7 @@ export class TaskService {
     if (task.status !== TaskStatus.DOING) throw new Error('当前状态不允许暂停任务');
     task.status = TaskStatus.TODO;
     await this.taskRepository.updateWithParent(task);
+    queueGrowthDueSync();
     return true;
   }
 
@@ -202,6 +213,8 @@ export class TaskService {
     task.abandonedAt = new Date();
     task.doneAt = null as any;
     await this.taskRepository.updateWithParent(task);
+    await untrackGrowthResource('task', id);
+    queueGrowthDueSync();
     return true;
   }
 
@@ -214,6 +227,7 @@ export class TaskService {
     task.doneAt = null as any;
     task.abandonedAt = null as any;
     await this.taskRepository.updateWithParent(task);
+    queueGrowthDueSync();
     return true;
   }
 

@@ -9,7 +9,7 @@ import type {
   CreateTransactionVo,
   TransactionVo,
 } from '@true-north/vo';
-import { recordExpenseActivity, unlinkExpenseEntity } from '../context';
+import { recordExpenseActivity, unlinkExpenseEntity, queueExpenseMonthSync } from '../context';
 
 function toIso(value: Date | string | undefined): string {
   if (!value) return new Date().toISOString();
@@ -108,7 +108,9 @@ export class ExpenseService {
     if (body.tags) current.tags = body.tags;
     if (body.transactionDateTime) current.transactionDateTime = new Date(body.transactionDateTime);
     current.revision = (current.revision || 1) + 1;
-    return toTransactionVo(await this.transactions().save(current));
+    const vo = toTransactionVo(await this.transactions().save(current));
+    queueExpenseMonthSync();
+    return vo;
   }
 
   async deleteTransaction(id: string): Promise<boolean> {

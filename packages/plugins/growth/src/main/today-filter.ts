@@ -14,6 +14,13 @@ export type TodayTodoSource = {
   relatedType?: string;
 };
 
+export type DueTaskSource = {
+  id: string;
+  status: string;
+  startAt?: Date | string | null;
+  endAt?: Date | string | null;
+};
+
 export function todayDate(now = new Date()): string {
   return dayjs(now).format('YYYY-MM-DD');
 }
@@ -36,4 +43,15 @@ export function isTodayHabit(
   if (habit.status !== 'active' || !habit.cycleTodoId) return false;
   if (!cycleTodo || cycleTodo.id !== habit.cycleTodoId) return false;
   return isOpenDueTodo(cycleTodo, today);
+}
+
+export function isDueTask(task: DueTaskSource, today: string): boolean {
+  if (task.status !== 'todo' && task.status !== 'doing') return false;
+  const start = task.startAt ? dayjs(task.startAt).format('YYYY-MM-DD') : undefined;
+  const end = task.endAt ? dayjs(task.endAt).format('YYYY-MM-DD') : undefined;
+  if (end && end < today) return true;
+  if (start && end) return start <= today && today <= end;
+  if (start) return start <= today;
+  if (end) return today <= end;
+  return false;
 }

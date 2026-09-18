@@ -7,8 +7,6 @@ import { ChevronRight, Search } from 'lucide-react';
 import { useRendererPlatform } from '@true-north/plugin-sdk/renderer';
 import type { PluginRuntimeEntry } from '@true-north/plugin-sdk';
 import useLocale from '@/utils/useLocale';
-import { EventTimeline } from './EventTimeline';
-import { ConflictPanel } from './ConflictPanel';
 import styles from './PluginsHome.module.less';
 
 function entryLabel(t: Record<string, string>, entry: PluginRuntimeEntry) {
@@ -121,8 +119,6 @@ export default function PluginsHome() {
           {!filtered.length ? <p className={styles.empty}>{t['plugins.hub.empty']}</p> : null}
         </Flex>
       </ProductSurface>
-      <ConflictPanel />
-      <EventTimeline />
     </Flex>
   );
 }

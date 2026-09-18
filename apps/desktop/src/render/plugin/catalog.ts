@@ -1,22 +1,22 @@
-import { Sparkles, Blocks } from 'lucide-react';
+import { MessageSquarePlus, Blocks, Workflow } from 'lucide-react';
 import type { NavigateFunction } from 'react-router-dom';
 import {
   assemblePluginCatalog,
   ExtensionRegistry,
   createHostActionPort,
   extensionPoints,
-  hrefFromSnapshot,
+  hrefFromOpenRequest,
   materializeRenderer,
   prefixPluginIpc,
   type PluginIpcPort,
   type PluginRendererContext,
   type PluginRendererHandles,
-  type PluginViewOpenRequest,
+  type ResourceOpenRequest,
 } from '@true-north/plugin-sdk';
 import { RendererPlatform } from '@true-north/plugin-sdk/renderer';
 import type { IRoute } from '@/router/routes';
 import lazyload from '@/utils/lazyload';
-import { createAiWorkspaceHost } from '@/features/ai/workspace-host';
+import { createHostWorkspaceHost } from '@/features/ai/workspace-host';
 import { pluginPaths } from './paths';
 import { conflictResolutionTool } from './workflow-tools';
 import { firstPartyRendererDescriptors } from './renderer-loaders';
@@ -105,13 +105,12 @@ export async function bootRendererPlugins(lang = 'zh-CN'): Promise<RendererPlatf
     lang,
     registry,
     ipc,
-    workspaceHost: createAiWorkspaceHost(),
+    workspaceHost: createHostWorkspaceHost(ipc),
   });
 }
 
-export function pluginViewPageHref(request: PluginViewOpenRequest) {
-  const pluginId = request.viewId.split('.')[0] || '';
-  return hrefFromSnapshot(pluginId, request);
+export function pluginViewPageHref(request: ResourceOpenRequest) {
+  return hrefFromOpenRequest(request);
 }
 
 export function pluginRoutes(): IRoute[] {
@@ -119,7 +118,7 @@ export function pluginRoutes(): IRoute[] {
     {
       name: 'menu.ai',
       key: '/ai',
-      meta: { icon: Sparkles },
+      meta: { icon: MessageSquarePlus, selectable: false },
       loader: () => import('@/features/ai'),
     } as IRoute,
     {
@@ -127,6 +126,20 @@ export function pluginRoutes(): IRoute[] {
       key: pluginPaths.root,
       meta: { icon: Blocks },
       loader: () => import('@/plugin/PluginsHome'),
+    },
+    {
+      name: 'menu.workflow',
+      key: '/workflow',
+      meta: { icon: Workflow },
+      loader: () => import('@/features/workflow'),
+      children: [
+        {
+          name: 'menu.workflow.editor',
+          key: 'definitions/:id',
+          ignore: true,
+          loader: () => import('@/features/workflow'),
+        },
+      ],
     },
   ];
 }

@@ -123,7 +123,11 @@ export type PluginViewSnapshot = {
   params: Record<string, string>;
 };
 
-export type PluginViewOpenRequest = PluginViewSnapshot;
+/** Hub 定位：点资源打开插件页，不是可挂载 view。 */
+export type ResourceOpenRequest = {
+  pluginId: string;
+  location: Record<string, string>;
+};
 
 export type ViewStateCodec<T> = {
   decode(params: Record<string, string>): T;
@@ -175,12 +179,18 @@ export type PluginAiStartInput = {
   label?: string;
   skill?: string;
   message?: string;
-  /** 复用已有资源会话时也发送的固定开场。 */
+  /** 复用已有资源会话时预填的固定开场。 */
   kickoff?: string;
+  resourceLinks?: Array<{ uri: string; label: string }>;
 };
 
 export type PluginWorkflowPort = {
-  emit(localId: string, payload?: Record<string, unknown>, source?: ResourceRef): Promise<void>;
+  emit(
+    localId: string,
+    payload?: Record<string, unknown>,
+    source?: ResourceRef,
+    options?: { eventId?: string },
+  ): Promise<void>;
 };
 
 export type WorkflowCommandHandler = {
@@ -202,11 +212,27 @@ export type WorkflowInteractionProps = {
   onCancel: () => Promise<void>;
 };
 
+export type PluginNotifyInput = {
+  title: string;
+  body?: string;
+  href?: string;
+  uri?: string;
+  dedupeKey?: string;
+  /** upsert 更新已有行（含已读）；remind 有未读则跳过，否则新建未读 */
+  mode?: 'upsert' | 'remind';
+};
+
+export type PluginNotifyPort = {
+  post(input: PluginNotifyInput): Promise<void>;
+  dismiss(dedupeKey: string): Promise<void>;
+};
+
 export type PluginMainContext = {
   pluginId: string;
   space: PluginSpace;
   workflow: PluginWorkflowPort;
   cache: AiCachePort;
+  notify: PluginNotifyPort;
 };
 
 export type PluginMainHandles = {
@@ -214,10 +240,10 @@ export type PluginMainHandles = {
   workflow?: {
     commands?: Record<string, WorkflowCommandHandler>;
   };
+  resources?: Record<string, PluginResourceProvider>;
   ai?: {
     mcp?: {
       tools?: Record<string, AgentToolSpec>;
-      resources?: Record<string, PluginResourceProvider>;
       prompts?: Record<string, PluginPromptProvider>;
     };
     skillRoots?: Record<string, string>;
@@ -261,19 +287,12 @@ export type PluginRuntimeEntry = {
   keywords?: string[];
 };
 
-export type WorkbenchViewContribution = {
-  id: string;
-  pluginId: string;
-  nameKey: string;
-  load: () => Promise<{ default: ComponentType }>;
-};
-
 export type WorkbenchNewTabContribution = {
   id: string;
   pluginId: string;
-  viewId: string;
   nameKey: string;
   order?: number;
+  load: () => Promise<{ default: ComponentType }>;
 };
 
 export type PluginHubProps = {
@@ -285,7 +304,6 @@ export type PluginRendererHandles = {
   icon?: PluginIcon;
   locales?: LocaleContribution[];
   scope?: ComponentType<{ children?: ReactNode }>;
-  views?: Record<string, { load: () => Promise<{ default: ComponentType }> }>;
   hub?: {
     load: () => Promise<{ default: ComponentType<PluginHubProps> }>;
   };
@@ -295,11 +313,12 @@ export type PluginRendererHandles = {
   workbench?: {
     workspaces?: Record<string, WorkbenchToolDefinition>;
     actions?: Record<string, { run: (input: Record<string, unknown>) => Promise<void> }>;
+    newTabs?: Record<string, { load: () => Promise<{ default: ComponentType }> }>;
   };
   shell?: {
     slots?: Record<string, { render: ComponentType<{ children?: ReactNode }> }>;
   };
-  openResource?: (uri: string) => PluginViewOpenRequest | null;
+  openResource?: (uri: string) => ResourceOpenRequest | null;
 };
 
 export type PluginRendererModule = {
@@ -314,3 +333,4 @@ export type PluginDescriptor = {
 
 export const HOST_AI_START = 'host.ai.start';
 export const HOST_WORKFLOW_OPEN_PENDING = 'host.workflow.openPending';
+export const HOST_NOTIFICATION_INVALIDATE_EVENT = 'host.notification.invalidate';
